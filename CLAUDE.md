@@ -662,6 +662,24 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
 - ✅ **20 Playwright E2E tests** (desktop + mobile) incl. exit modal, color carry-through,
   flag letter-hiding; **76 unit/fuzz tests**; 95%+ core coverage.
 
+## II.3c Round-3 content & features (2026-06-11)
+
+- ✅ **~2,650 questions across 10 packs** (shown on home). New packs, ordered easiest→hardest
+  in the selector via a difficulty rank: Kids → Flags Easy → General Knowledge → Science &
+  Nature → World Geography → Flags Medium → **World History (hard)** → **Space & Cosmos (hard)**
+  → Flags Hard → **Genius Mode (extreme)**. Content authored by parallel agents, then
+  **re-bucketed by answer's first letter** (a normalization that makes the core mechanic
+  bulletproof regardless of authoring) and validated by a test asserting *every* answer in
+  *every* pack starts with its letter.
+- ✅ Fixed the **"No —" question bug**: 49 self-contradicting misdirection clues rewritten to
+  clean, accurate one-line questions (answers unchanged).
+- ✅ **Team name follows the chosen colour** (Teal, Amber, Violet, …) and is no longer
+  typable — the colour and name are one.
+- ✅ **Steal timer**: when the picking team's clock runs out, the other team automatically
+  gets **half the time** to steal (two-phase advisory countdown; host still adjudicates).
+- ✅ Re-verified: **89 unit tests**, **20 Playwright E2E**, and the no-scroll checker ALL CLEAR
+  in default, xlarge-text, and the new extreme/history/flag packs.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily

@@ -14,7 +14,7 @@ export const kidsPack: RawPack = {
     A: [
       { q: 'A red fruit that keeps the doctor away.', a: 'Apple' },
       { q: 'A small insect that lives in a colony and loves picnics.', a: 'Ant' },
-      { q: 'An animal with a long neck? No — a baby that says "goo goo"? No — the first letter you learn.', a: 'Alphabet' },
+      { q: 'All the letters from A to Z together make up this.', a: 'Alphabet' },
       { q: 'A reptile in swamps, like a crocodile.', a: 'Alligator' },
     ],
     B: [
@@ -49,7 +49,7 @@ export const kidsPack: RawPack = {
     ],
     G: [
       { q: 'A tall animal with a very long neck.', a: 'Giraffe' },
-      { q: 'A green vegetable? No — green is a colour, and so is the grass. Name the colour of grass.', a: 'Green' },
+      { q: 'The colour of grass and leaves.', a: 'Green' },
       { q: 'A musical instrument you strum with six strings.', a: 'Guitar' },
       { q: 'A farm bird that says "honk".', a: 'Goose' },
     ],
@@ -87,7 +87,7 @@ export const kidsPack: RawPack = {
       { q: 'A small animal that squeaks, chased by cats.', a: 'Mouse' },
       { q: 'The round thing that lights up the night sky.', a: 'Moon' },
       { q: 'A white drink that comes from cows.', a: 'Milk' },
-      { q: 'A monkey-like animal? No — a tall thing to climb, like a hill.', a: 'Mountain' },
+      { q: 'A very tall hill made of rock that you can climb.', a: 'Mountain' },
     ],
     N: [
       { q: 'The part of your face you smell with.', a: 'Nose' },

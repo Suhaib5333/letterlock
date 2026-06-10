@@ -23,12 +23,15 @@ test('home → setup → board renders with both teams', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByTestId('pack-grid')).toBeVisible();
   await page.getByTestId('play-button').click();
-  await page.getByTestId('team-a-name').fill('Falcons');
-  await page.getByTestId('team-b-name').fill('Wolves');
+  await page.getByTestId('swatch-a-teal').click();
+  await page.getByTestId('swatch-b-rose').click();
+  // team name follows the chosen colour (not typable)
+  await expect(page.getByTestId('team-a-name')).toHaveText('Teal');
+  await expect(page.getByTestId('team-b-name')).toHaveText('Rose');
   await page.getByTestId('start-match').click();
   await expect(page.getByTestId('game-screen')).toBeVisible();
-  await expect(page.getByTestId('team-panel-A')).toContainText('Falcons');
-  await expect(page.getByTestId('team-panel-B')).toContainText('Wolves');
+  await expect(page.getByTestId('team-panel-A')).toContainText('Teal');
+  await expect(page.getByTestId('team-panel-B')).toContainText('Rose');
   await expect(page.locator('.ll-board')).toBeVisible();
 });
 

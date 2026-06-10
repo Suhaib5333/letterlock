@@ -373,18 +373,18 @@
 .team-field.team-b {
   border-color: color-mix(in srgb, var(--tb) 55%, transparent);
 }
-.team-name-input {
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--line);
+.team-name {
   color: var(--text);
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 800;
   font-family: var(--font-display);
   text-align: center;
-  padding: 2px 0 6px;
-  outline: none;
-  width: 100%;
+}
+.team-field.team-a .team-name {
+  color: var(--ta-glow);
+}
+.team-field.team-b .team-name {
+  color: var(--tb-glow);
 }
 .swatches {
   display: flex;
@@ -1002,10 +1002,26 @@
 .timer-num {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  min-width: 48px;
+  min-width: 40px;
   text-align: right;
 }
-.timer.done .timer-num {
+.timer-label {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--text-dim);
+  white-space: nowrap;
+  max-width: 11ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.timer.steal .timer-label {
+  color: var(--amber-glow);
+}
+.timer.steal .timer-fill {
+  background: linear-gradient(90deg, var(--amber-glow), var(--amber));
+}
+.timer.done .timer-num,
+.timer.done .timer-label {
   color: var(--amber-glow);
 }
 
@@ -1728,7 +1744,7 @@
   .swatches {
     gap: 6px;
   }
-  .team-name-input {
+  .team-name {
     font-size: 0.95rem;
     padding-bottom: 3px;
   }

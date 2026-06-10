@@ -15,7 +15,7 @@ export interface QuestionPack {
   name: string;
   description?: string;
   locale: string;
-  difficulty: 'easy' | 'medium' | 'hard' | 'expert' | 'kids';
+  difficulty: 'kids' | 'easy' | 'medium' | 'hard' | 'expert' | 'extreme';
   contentRating?: string;
   emoji?: string;
   accent?: string; // optional theme accent for the pack card
@@ -30,6 +30,16 @@ export type RawPack = Omit<QuestionPack, 'letters'> & {
 };
 
 export const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+/** Ordering used to sort packs easiest → hardest in the selector. */
+export const DIFFICULTY_RANK: Record<QuestionPack['difficulty'], number> = {
+  kids: 0,
+  easy: 1,
+  medium: 2,
+  hard: 3,
+  expert: 4,
+  extreme: 5,
+};
 /** Hardest starting letters — biased OUT of small boards so games stay answerable (plan §2.5). */
 export const HARD_LETTERS = new Set(['X', 'Z', 'Q', 'J', 'K']);
 

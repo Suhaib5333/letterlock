@@ -1,7 +1,7 @@
 import { packById } from '../content';
 import type { BoardSize, MatchMode } from '../core/models';
 import { play } from '../services/audio';
-import { TEAM_COLORS } from '../state/palette';
+import { colorById, TEAM_COLORS } from '../state/palette';
 import { useStore } from '../state/store';
 import type { SetupForm } from '../state/types';
 
@@ -78,15 +78,9 @@ export function Setup() {
       <div className="setup-body">
         <div className="teams-setup">
           <div className="team-field team-a">
-            <input
-              className="team-name-input"
-              data-testid="team-a-name"
-              value={f.teamA}
-              maxLength={16}
-              onChange={(e) => set({ teamA: e.target.value })}
-              placeholder="Team 1"
-              aria-label="Team 1 name (optional)"
-            />
+            <div className="team-name" data-testid="team-a-name">
+              {colorById(f.colorA).name}
+            </div>
             <div className="swatches" data-testid="swatches-a">
               {TEAM_COLORS.map((c) => (
                 <button
@@ -103,15 +97,9 @@ export function Setup() {
           </div>
           <div className="vs">VS</div>
           <div className="team-field team-b">
-            <input
-              className="team-name-input"
-              data-testid="team-b-name"
-              value={f.teamB}
-              maxLength={16}
-              onChange={(e) => set({ teamB: e.target.value })}
-              placeholder="Team 2"
-              aria-label="Team 2 name (optional)"
-            />
+            <div className="team-name" data-testid="team-b-name">
+              {colorById(f.colorB).name}
+            </div>
             <div className="swatches" data-testid="swatches-b">
               {TEAM_COLORS.map((c) => (
                 <button

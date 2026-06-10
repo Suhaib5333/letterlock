@@ -59,6 +59,7 @@ export function Game() {
   if (!opts) return null;
 
   const picker = game.turn;
+  const other: TeamId = picker === 'A' ? 'B' : 'A';
   const canUndo = state.log.length > 1;
   const inQuestion = ui.phase === 'question' && ui.served;
   const hideLetters = !!opts.pack.hideBoardLetters;
@@ -152,7 +153,13 @@ export function Game() {
             {inQuestion ? (
               <div className="question-zone" key="q">
                 {timer > 0 && (
-                  <Timer seconds={timer} resetKey={ui.served!.question.id + ui.pulse} active />
+                  <Timer
+                    seconds={timer}
+                    resetKey={ui.served!.question.id + ui.pulse}
+                    active
+                    pickerName={teams[picker].name}
+                    otherName={teams[other].name}
+                  />
                 )}
                 <QuestionCard
                   served={ui.served!}

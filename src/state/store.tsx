@@ -13,6 +13,7 @@ import { serveQuestion, type QuestionPack } from '../core/packs';
 import { mulberry32 } from '../core/rng';
 import { newMatch, startGameEvent, type NewMatchOptions } from '../core/match';
 import { DEFAULT_PACK_ID, packById } from '../content';
+import { colorById } from './palette';
 import {
   DEFAULT_SETTINGS,
   type Screen,
@@ -55,8 +56,6 @@ const EMPTY_UI: UiState = {
 };
 
 const DEFAULT_SETUP: SetupForm = {
-  teamA: 'Blue',
-  teamB: 'Amber',
   colorA: 'blue',
   colorB: 'amber',
   mode: 'bo3',
@@ -98,8 +97,8 @@ type Action =
 
 function teamsFromSetup(setup: SetupForm): Record<TeamId, TeamConfig> {
   return {
-    A: { id: 'A', name: setup.teamA.trim() || 'Team 1', colorId: setup.colorA },
-    B: { id: 'B', name: setup.teamB.trim() || 'Team 2', colorId: setup.colorB },
+    A: { id: 'A', name: colorById(setup.colorA).name, colorId: setup.colorA },
+    B: { id: 'B', name: colorById(setup.colorB).name, colorId: setup.colorB },
   };
 }
 

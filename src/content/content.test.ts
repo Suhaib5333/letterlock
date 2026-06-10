@@ -58,3 +58,18 @@ describe('all registered packs are playable', () => {
     });
   }
 });
+
+describe('EVERY registered pack: every answer starts with its letter', () => {
+  for (const pack of PACKS) {
+    it(`${pack.name}`, () => {
+      const bad: string[] = [];
+      for (const [letter, qs] of Object.entries(pack.letters)) {
+        for (const q of qs) {
+          const first = q.a.trim()[0]?.toUpperCase();
+          if (first !== letter) bad.push(`[${letter}] "${q.a}" (q: ${q.q.slice(0, 40)})`);
+        }
+      }
+      expect(bad, `Mismatches in "${pack.name}":\n${bad.join('\n')}`).toEqual([]);
+    });
+  }
+});

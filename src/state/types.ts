@@ -25,9 +25,7 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 export interface SetupForm {
-  teamA: string;
-  teamB: string;
-  colorA: string; // palette color id
+  colorA: string; // palette color id (also the team's name)
   colorB: string;
   mode: MatchMode;
   size: BoardSize;

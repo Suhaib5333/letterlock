@@ -1,29 +1,48 @@
 import { useEffect, useRef, useState } from 'react';
 import { play } from '../services/audio';
 
+type Phase = 'main' | 'steal' | 'done';
+
 /**
- * Optional countdown (plan §3.1). Purely an aid — the host always decides the
- * outcome. Resets whenever `resetKey` changes (i.e. a new question is served).
+ * Two-phase countdown (plan §3.2 + steal rule). The picking team gets the full
+ * time; when it runs out the OTHER team automatically gets HALF the time to steal.
+ * Purely an advisory aid — the host always decides the outcome. Resets whenever
+ * `resetKey` changes (a new question is served).
  */
-export function Timer({ seconds, resetKey, active }: { seconds: number; resetKey: string; active: boolean }) {
+export function Timer({
+  seconds,
+  resetKey,
+  active,
+  pickerName,
+  otherName,
+}: {
+  seconds: number;
+  resetKey: string;
+  active: boolean;
+  pickerName: string;
+  otherName: string;
+}) {
+  const [phase, setPhase] = useState<Phase>('main');
   const [remaining, setRemaining] = useState(seconds);
-  const startRef = useRef<number>(0);
-  const raf = useRef<number>(0);
-  const tickedRef = useRef(false);
+  const startRef = useRef(0);
+  const raf = useRef(0);
+  const phaseRef = useRef<Phase>('main');
+  const tickRef = useRef(0);
 
   useEffect(() => {
     if (seconds === 0 || !active) return;
+    phaseRef.current = 'main';
+    setPhase('main');
     setRemaining(seconds);
-    tickedRef.current = false;
+    tickRef.current = 0;
     startRef.current = performance.now();
+
+    const durationOf = () => (phaseRef.current === 'steal' ? seconds / 2 : seconds);
     const loop = (now: number) => {
       const elapsed = (now - startRef.current) / 1000;
-      const left = Math.max(0, seconds - elapsed);
+      const left = Math.max(0, durationOf() - elapsed);
       setRemaining(left);
-      if (left <= 5 && !tickedRef.current && left > 0) {
-        // soft urgency ticks in the last 5s
-      }
-      if (left <= 5.01 && left > 0) {
+      if (left <= 5 && left > 0) {
         const whole = Math.ceil(left);
         if (whole !== tickRef.current) {
           tickRef.current = whole;
@@ -31,10 +50,19 @@ export function Timer({ seconds, resetKey, active }: { seconds: number; resetKey
         }
       }
       if (left <= 0) {
-        if (!tickedRef.current) {
-          tickedRef.current = true;
-          play('wrong');
+        if (phaseRef.current === 'main') {
+          // hand the other team half the time to steal
+          phaseRef.current = 'steal';
+          setPhase('steal');
+          startRef.current = now;
+          tickRef.current = 0;
+          play('steal');
+          raf.current = requestAnimationFrame(loop);
+          return;
         }
+        phaseRef.current = 'done';
+        setPhase('done');
+        play('wrong');
         return;
       }
       raf.current = requestAnimationFrame(loop);
@@ -44,19 +72,30 @@ export function Timer({ seconds, resetKey, active }: { seconds: number; resetKey
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey, seconds, active]);
 
-  const tickRef = useRef<number>(0);
-
   if (seconds === 0) return null;
-  const pct = Math.max(0, Math.min(1, remaining / seconds));
-  const urgent = remaining <= 5 && remaining > 0;
-  const done = remaining <= 0;
+  const total = phase === 'steal' ? seconds / 2 : seconds;
+  const pct = Math.max(0, Math.min(1, remaining / total));
+  const urgent = phase === 'steal' || (remaining <= 5 && remaining > 0);
+  const done = phase === 'done';
+
+  const label =
+    phase === 'done'
+      ? 'Time!'
+      : phase === 'steal'
+        ? `⚡ ${otherName} steal`
+        : pickerName;
 
   return (
-    <div className={`timer ${urgent ? 'urgent' : ''} ${done ? 'done' : ''}`} data-testid="timer">
+    <div
+      className={`timer ${urgent ? 'urgent' : ''} ${done ? 'done' : ''} ${phase === 'steal' ? 'steal' : ''}`}
+      data-testid="timer"
+      data-phase={phase}
+    >
+      <span className="timer-label">{label}</span>
       <div className="timer-bar">
         <div className="timer-fill" style={{ transform: `scaleX(${pct})` }} />
       </div>
-      <span className="timer-num">{done ? "Time!" : `${Math.ceil(remaining)}s`}</span>
+      <span className="timer-num">{done ? '0s' : `${Math.ceil(remaining)}s`}</span>
     </div>
   );
 }
