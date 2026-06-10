@@ -1,0 +1,13 @@
+{
+  "name": "Letterlock",
+  "short_name": "Letterlock",
+  "description": "Claim & lock letters across the board to connect your edges. A fair, gorgeous reinvention of Blockbusters.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070912",
+  "theme_color": "#0a0e1f",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

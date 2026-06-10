@@ -13,6 +13,20 @@ pubspec.lock
 .vscode/*
 !.vscode/extensions.json
 
+# Node / Vite / web app
+node_modules/
+dist/
+*.local
+*.tsbuildinfo
+
+# Test & tooling artifacts
+coverage/
+playwright-report/
+test-results/
+.playwright-mcp/
+shots/
+/*.png
+
 # OS / editor
 .DS_Store
 Thumbs.db
