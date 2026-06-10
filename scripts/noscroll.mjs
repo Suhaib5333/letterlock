@@ -31,9 +31,19 @@ async function overflow(page) {
       iw = window.innerWidth;
     let offBottom = 0;
     let offSide = 0;
+    const inScroller = (el) => {
+      let p = el.parentElement;
+      while (p) {
+        const o = getComputedStyle(p);
+        if (/(auto|scroll)/.test(o.overflowX + o.overflowY)) return true;
+        p = p.parentElement;
+      }
+      return false;
+    };
     for (const el of document.querySelectorAll('button, input, [role="gridcell"]')) {
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
+      if (inScroller(el)) continue; // reachable via an intentional internal scroll region
       offBottom = Math.max(offBottom, Math.round(r.bottom - ih), Math.round(-r.top));
       offSide = Math.max(offSide, Math.round(r.right - iw), Math.round(-r.left));
     }
@@ -42,7 +52,11 @@ async function overflow(page) {
     let regionOver = 0;
     for (const sel of ['.setup-body', '.hero', '.game-side', '.board-wrap', '.tut-body', '.victory', '.question-zone']) {
       const el = document.querySelector(sel);
-      if (el) regionOver = Math.max(regionOver, Math.round(el.scrollHeight - el.clientHeight));
+      if (!el) continue;
+      const o = getComputedStyle(el);
+      // a region that's intentionally scrollable can't "clip" — skip it
+      if (/(auto|scroll)/.test(o.overflowY)) continue;
+      regionOver = Math.max(regionOver, Math.round(el.scrollHeight - el.clientHeight));
     }
     return { v: Math.round(vScroll), h: Math.round(hScroll), offBottom, offSide, regionOver };
   });
@@ -70,6 +84,7 @@ for (const vp of VIEWPORTS) {
   await sleep(400);
   rows.push(['home', await overflow(page)]);
 
+  if (PACK) await page.getByTestId(`pack-${PACK}`).click().catch(() => {});
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-single').click().catch(() => {});
   await sleep(350);

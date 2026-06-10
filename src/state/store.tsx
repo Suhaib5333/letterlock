@@ -57,6 +57,8 @@ const EMPTY_UI: UiState = {
 const DEFAULT_SETUP: SetupForm = {
   teamA: 'Blue',
   teamB: 'Amber',
+  colorA: 'blue',
+  colorB: 'amber',
   mode: 'bo3',
   size: 5,
   topology: 'hex',
@@ -96,8 +98,8 @@ type Action =
 
 function teamsFromSetup(setup: SetupForm): Record<TeamId, TeamConfig> {
   return {
-    A: { id: 'A', name: setup.teamA.trim() || 'Blue', colorId: 'blue' },
-    B: { id: 'B', name: setup.teamB.trim() || 'Amber', colorId: 'amber' },
+    A: { id: 'A', name: setup.teamA.trim() || 'Team 1', colorId: setup.colorA },
+    B: { id: 'B', name: setup.teamB.trim() || 'Team 2', colorId: setup.colorB },
   };
 }
 

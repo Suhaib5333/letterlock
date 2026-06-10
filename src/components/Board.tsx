@@ -12,7 +12,7 @@ interface BoardProps {
 }
 
 const TEAM_FILL: Record<TeamId, string> = { A: 'url(#fillA)', B: 'url(#fillB)' };
-const TEAM_STROKE: Record<TeamId, string> = { A: '#7cc4ff', B: '#ffd27a' };
+const TEAM_STROKE: Record<TeamId, string> = { A: 'var(--ta-stroke)', B: 'var(--tb-stroke)' };
 
 function BoardInner({
   game,
@@ -32,7 +32,7 @@ function BoardInner({
   // Which edges belong to which team this game (for the colored frame).
   const topBottomTeam: TeamId = game.directions.A === 'vertical' ? 'A' : 'B';
   const leftRightTeam: TeamId = game.directions.A === 'horizontal' ? 'A' : 'B';
-  const edgeColor: Record<TeamId, string> = { A: '#0a84ff', B: '#ff9f0a' };
+  const edgeColor: Record<TeamId, string> = { A: 'var(--ta)', B: 'var(--tb)' };
 
   return (
     <svg
@@ -44,12 +44,12 @@ function BoardInner({
     >
       <defs>
         <linearGradient id="fillA" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3aa0ff" />
-          <stop offset="100%" stopColor="#0a5bbd" />
+          <stop offset="0%" stopColor="var(--ta-light)" />
+          <stop offset="100%" stopColor="var(--ta-deep)" />
         </linearGradient>
         <linearGradient id="fillB" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ffb43a" />
-          <stop offset="100%" stopColor="#d97b00" />
+          <stop offset="0%" stopColor="var(--tb-light)" />
+          <stop offset="100%" stopColor="var(--tb-deep)" />
         </linearGradient>
         <linearGradient id="fillNeutral" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#28324f" />

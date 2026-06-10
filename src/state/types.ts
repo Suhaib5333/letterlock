@@ -27,6 +27,8 @@ export const DEFAULT_SETTINGS: Settings = {
 export interface SetupForm {
   teamA: string;
   teamB: string;
+  colorA: string; // palette color id
+  colorB: string;
   mode: MatchMode;
   size: BoardSize;
   topology: TopologyKind;

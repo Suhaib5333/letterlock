@@ -29,6 +29,18 @@
 
   --gold: #ffd35c;
 
+  /* ---- Live team colors (overridden at runtime by the color picker) ---- */
+  --ta: #0a84ff;
+  --ta-light: #3aa0ff;
+  --ta-deep: #0a5bbd;
+  --ta-glow: #38bdf8;
+  --ta-stroke: #7cc4ff;
+  --tb: #ff9f0a;
+  --tb-light: #ffb43a;
+  --tb-deep: #d97b00;
+  --tb-glow: #ffcb47;
+  --tb-stroke: #ffd27a;
+
   --text: #f3f6ff;
   --text-dim: #aeb9d8;
   --text-faint: #6b769a;
@@ -85,11 +97,12 @@ html[data-font='lexend'] {
   --font-body: 'Lexend', 'Sora', system-ui, sans-serif;
 }
 
+/* Modest scaling so the no-scroll layout can absorb it without clipping. */
 html[data-textscale='large'] {
-  font-size: 18px;
+  font-size: 16.5px;
 }
 html[data-textscale='xlarge'] {
-  font-size: 20px;
+  font-size: 17.5px;
 }
 
 * {

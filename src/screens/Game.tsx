@@ -8,6 +8,7 @@ import { Scoreboard } from '../components/Scoreboard';
 import { Timer } from '../components/Timer';
 import type { TeamId } from '../core/models';
 import { haptic, play } from '../services/audio';
+import { colorById } from '../state/palette';
 import { clearSavedGame, useStore } from '../state/store';
 
 const MODE_LABEL: Record<string, string> = {
@@ -16,8 +17,10 @@ const MODE_LABEL: Record<string, string> = {
   bo5: 'Best of 5',
 };
 
-function fireConfetti(team: TeamId) {
-  const colors = team === 'A' ? ['#3aa0ff', '#7cc4ff', '#ffffff'] : ['#ffb43a', '#ffd27a', '#ffffff'];
+function fireConfetti(team: TeamId, colorId: string) {
+  const c = colorById(colorId);
+  const colors = [c.light, c.glow, '#ffffff'];
+  void team;
   confetti({ particleCount: 140, spread: 78, origin: { y: 0.4 }, colors, scalar: 1.1 });
   setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 60, origin: { x: 0 }, colors }), 180);
   setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 60, origin: { x: 1 }, colors }), 320);
@@ -31,6 +34,7 @@ export function Game() {
   const reducedMotion = state.settings.motion === 'reduced';
   const lastPulse = useRef(0);
   const [blockToast, setBlockToast] = useState(false);
+  const [confirmingExit, setConfirmingExit] = useState(false);
 
   // Hero-moment audio + haptics driven by the reducer's pulse counter.
   useEffect(() => {
@@ -39,7 +43,7 @@ export function Game() {
     if (ui.gameOver && game.winner) {
       play('win');
       haptic(40);
-      if (!reducedMotion) fireConfetti(game.winner);
+      if (!reducedMotion) fireConfetti(game.winner, teams[game.winner].colorId);
       clearSavedGame();
     } else if (ui.lastClaimCell !== null) {
       play(ui.blockHint ? 'block' : 'claim');
@@ -57,15 +61,18 @@ export function Game() {
   const picker = game.turn;
   const canUndo = state.log.length > 1;
   const inQuestion = ui.phase === 'question' && ui.served;
+  const hideLetters = !!opts.pack.hideBoardLetters;
 
   return (
     <div className="game" data-testid="game-screen">
       <header className="game-head">
         <button
           className="btn btn-ghost exit-btn"
+          data-testid="exit-btn"
           aria-label="Exit match"
           onClick={() => {
-            if (confirmExit()) dispatch({ type: 'EXIT_HOME' });
+            play('tap');
+            setConfirmingExit(true);
           }}
         >
           ‹<span className="exit-label"> Exit</span>
@@ -119,6 +126,7 @@ export function Game() {
               game={game}
               selectedCell={ui.selectedCell}
               lastClaimCell={ui.lastClaimCell}
+              hideLetters={hideLetters}
               pickable={game.status === 'playing' && ui.phase === 'pick'}
               onPick={(cell) => {
                 play('pick');
@@ -151,6 +159,7 @@ export function Game() {
                   answerRevealed={ui.answerRevealed}
                   picker={picker}
                   teams={teams}
+                  hideLetter={hideLetters}
                   tts={state.settings.tts}
                   onReveal={() => dispatch({ type: 'REVEAL_ANSWER' })}
                   onSkip={() => dispatch({ type: 'SKIP_QUESTION' })}
@@ -201,6 +210,56 @@ export function Game() {
       </div>
 
       <AnimatePresence>
+        {confirmingExit && (
+          <motion.div
+            className="modal-scrim"
+            data-testid="exit-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setConfirmingExit(false)}
+          >
+            <motion.div
+              className="modal exit-dialog"
+              role="dialog"
+              aria-label="Exit match"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.9, y: 16, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+            >
+              <h2>Exit match?</h2>
+              <p className="go-sub">Your progress is saved — you can resume from the home screen anytime.</p>
+              <div className="exit-actions">
+                <button
+                  className="btn btn-secondary"
+                  data-testid="exit-cancel"
+                  autoFocus
+                  onClick={() => {
+                    play('tap');
+                    setConfirmingExit(false);
+                  }}
+                >
+                  ‹ Keep playing
+                </button>
+                <button
+                  className="btn btn-primary"
+                  data-testid="exit-confirm"
+                  onClick={() => {
+                    play('pass');
+                    dispatch({ type: 'EXIT_HOME' });
+                  }}
+                >
+                  Exit to home
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {ui.gameOver && (
           <motion.div
             className="gameover-scrim"
@@ -247,8 +306,4 @@ export function Game() {
       </AnimatePresence>
     </div>
   );
-}
-
-function confirmExit(): boolean {
-  return window.confirm('Exit this match? Your progress is saved and you can resume from the home screen.');
 }

@@ -631,6 +631,37 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
 **Social / shareability**
 - [x] Spoiler-free share result (native share / clipboard) + final coloured board card
 
+## II.3b Round-2 polish & features (2026-06-11)
+
+- ✅ **True app-like, no-scroll layout** on every screen: the shell is locked to `100svh`
+  with `overflow:hidden`; each screen is a flex column where the **board flexes to be the
+  biggest element** and controls stay pinned. Verified zero page-scroll AND zero off-screen
+  clipping AND zero region-overflow across **15 device profiles × 4 screens** (iPhone SE →
+  4K TV, incl. landscape phones), in default text, **xlarge text**, and **flag** packs —
+  via `scripts/noscroll.mjs` (a custom checker that catches document scroll, off-viewport
+  controls, and clipped flex regions, ignoring intentional internal-scroll areas).
+- ✅ **Pack carousel**: question packs are a horizontal swipe carousel (scroll-snap), so the
+  home header + hero never get pushed off — works with any number of packs.
+- ✅ **Safe-area insets** (`env(safe-area-inset-*)`, `viewport-fit=cover`) for notches.
+- ✅ **Team color picker**: each team picks from a 6-color colorblind-safe palette; the choice
+  drives the board fills, edge frame, scoreboard, host pad, pips, confetti and victory via
+  live CSS variables. Team names optional.
+- ✅ **Flag packs** (Easy / Medium / Hard) with real flag images (flagcdn) — and the board
+  **letters are hidden** for flag packs so the first letter never gives the answer away; the
+  card prompts "Name the country".
+- ✅ **Ambient music**: original generative calm piece (pentatonic over a slow breathing
+  swell) with fade in/out, wired to the Music setting. (Actual Minecraft tracks are
+  copyrighted, so this is an original homage in that mellow style.)
+- ✅ **Accessibility fonts loaded** (Atkinson Hyperlegible, Lexend) so the font picker works;
+  **text-size** scaling no longer breaks the layout (dense regions gain an internal-scroll
+  safety net only when enlarged; default text stays scroll-free).
+- ✅ **In-UI exit confirmation** modal (no browser `confirm()`), with Keep-playing / Exit.
+- ✅ **Selected hex** reads as a clean neutral highlight (no focus box / white glare).
+- ✅ **Expanded content**: ~**925 questions** across 7 packs (shown on the home screen);
+  General Knowledge alone ~430.
+- ✅ **20 Playwright E2E tests** (desktop + mobile) incl. exit modal, color carry-through,
+  flag letter-hiding; **76 unit/fuzz tests**; 95%+ core coverage.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily

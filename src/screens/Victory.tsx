@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Board } from '../components/Board';
 import { play } from '../services/audio';
+import { colorById } from '../state/palette';
 import { clearSavedGame, useStore } from '../state/store';
 
 export function Victory() {
@@ -14,7 +15,8 @@ export function Victory() {
     clearSavedGame();
     play('win');
     if (state.settings.motion === 'reduced') return;
-    const colors = series.matchWinner === 'A' ? ['#3aa0ff', '#7cc4ff'] : ['#ffb43a', '#ffd27a'];
+    const wc = colorById(series.matchWinner === 'A' ? opts!.teams.A.colorId : opts!.teams.B.colorId);
+    const colors = [wc.light, wc.glow];
     const burst = () =>
       confetti({ particleCount: 120, spread: 100, origin: { y: 0.3 }, colors, scalar: 1.2 });
     burst();

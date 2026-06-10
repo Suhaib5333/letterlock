@@ -9,11 +9,21 @@ interface Props {
   picker: TeamId;
   teams: Record<TeamId, TeamConfig>;
   tts: boolean;
+  hideLetter?: boolean;
   onReveal: () => void;
   onSkip: () => void;
 }
 
-export function QuestionCard({ served, answerRevealed, picker, teams, tts, onReveal, onSkip }: Props) {
+export function QuestionCard({
+  served,
+  answerRevealed,
+  picker,
+  teams,
+  tts,
+  hideLetter,
+  onReveal,
+  onSkip,
+}: Props) {
   const pickerTeam = teams[picker];
   return (
     <motion.div
@@ -26,13 +36,15 @@ export function QuestionCard({ served, answerRevealed, picker, teams, tts, onRev
     >
       <div className="qcard-top">
         <div className={`letter-badge team-${picker}`} aria-hidden="true">
-          {served.letter}
+          {hideLetter ? '🚩' : served.letter}
         </div>
         <div className="qcard-meta">
           <div className="qcard-picker">
             <span className={`dot team-${picker}`} /> {pickerTeam.name} picked
           </div>
-          <div className="qcard-rule">Answer begins with “{served.letter}”</div>
+          <div className="qcard-rule">
+            {hideLetter ? 'Name the country' : `Answer begins with “${served.letter}”`}
+          </div>
         </div>
         {tts && (
           <button

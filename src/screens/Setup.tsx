@@ -1,6 +1,7 @@
 import { packById } from '../content';
 import type { BoardSize, MatchMode } from '../core/models';
 import { play } from '../services/audio';
+import { TEAM_COLORS } from '../state/palette';
 import { useStore } from '../state/store';
 import type { SetupForm } from '../state/types';
 
@@ -51,6 +52,17 @@ export function Setup() {
   const set = (patch: Partial<SetupForm>) => dispatch({ type: 'UPDATE_SETUP', patch });
   const pack = packById(f.packId);
 
+  // Pick a color for a team; if it collides with the other team, swap them so the
+  // two teams are always distinct.
+  const pickColor = (team: 'A' | 'B', id: string) => {
+    play('tap');
+    if (team === 'A') {
+      set(id === f.colorB ? { colorA: id, colorB: f.colorA } : { colorA: id });
+    } else {
+      set(id === f.colorA ? { colorB: id, colorA: f.colorB } : { colorB: id });
+    }
+  };
+
   return (
     <div className="setup">
       <header className="sub-head">
@@ -66,31 +78,53 @@ export function Setup() {
       <div className="setup-body">
         <div className="teams-setup">
           <div className="team-field team-a">
-            <span className="team-dot" />
-            <label>
-              Team 1
-              <input
-                data-testid="team-a-name"
-                value={f.teamA}
-                maxLength={16}
-                onChange={(e) => set({ teamA: e.target.value })}
-                placeholder="Blue"
-              />
-            </label>
+            <input
+              className="team-name-input"
+              data-testid="team-a-name"
+              value={f.teamA}
+              maxLength={16}
+              onChange={(e) => set({ teamA: e.target.value })}
+              placeholder="Team 1"
+              aria-label="Team 1 name (optional)"
+            />
+            <div className="swatches" data-testid="swatches-a">
+              {TEAM_COLORS.map((c) => (
+                <button
+                  key={c.id}
+                  className={`swatch ${f.colorA === c.id ? 'active' : ''}`}
+                  data-testid={`swatch-a-${c.id}`}
+                  style={{ background: c.base }}
+                  aria-label={`Team 1 color ${c.name}`}
+                  aria-pressed={f.colorA === c.id}
+                  onClick={() => pickColor('A', c.id)}
+                />
+              ))}
+            </div>
           </div>
           <div className="vs">VS</div>
           <div className="team-field team-b">
-            <span className="team-dot" />
-            <label>
-              Team 2
-              <input
-                data-testid="team-b-name"
-                value={f.teamB}
-                maxLength={16}
-                onChange={(e) => set({ teamB: e.target.value })}
-                placeholder="Amber"
-              />
-            </label>
+            <input
+              className="team-name-input"
+              data-testid="team-b-name"
+              value={f.teamB}
+              maxLength={16}
+              onChange={(e) => set({ teamB: e.target.value })}
+              placeholder="Team 2"
+              aria-label="Team 2 name (optional)"
+            />
+            <div className="swatches" data-testid="swatches-b">
+              {TEAM_COLORS.map((c) => (
+                <button
+                  key={c.id}
+                  className={`swatch ${f.colorB === c.id ? 'active' : ''}`}
+                  data-testid={`swatch-b-${c.id}`}
+                  style={{ background: c.base }}
+                  aria-label={`Team 2 color ${c.name}`}
+                  aria-pressed={f.colorB === c.id}
+                  onClick={() => pickColor('B', c.id)}
+                />
+              ))}
+            </div>
           </div>
         </div>
 

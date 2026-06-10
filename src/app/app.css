@@ -111,10 +111,10 @@
   color: transparent;
 }
 .grad-text-A {
-  color: var(--blue-glow);
+  color: var(--ta-glow);
 }
 .grad-text-B {
-  color: var(--amber-glow);
+  color: var(--tb-glow);
 }
 .muted {
   color: var(--text-faint);
@@ -161,7 +161,8 @@
 .hero {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -197,13 +198,30 @@
 .section-head h2 {
   font-size: var(--t-h2);
 }
+/* horizontal swipe carousel — always one row, scrolls internally so the rest of
+   Home (header + hero) stays fixed on every screen */
 .pack-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  display: flex;
   gap: clamp(8px, 1.4vh, 16px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  padding: 4px 2px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+.pack-grid::-webkit-scrollbar {
+  height: 8px;
+}
+.pack-grid::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 999px;
 }
 .pack-card {
   --accent: var(--blue);
+  flex: 0 0 clamp(190px, 58vw, 250px);
+  scroll-snap-align: start;
   text-align: left;
   display: flex;
   gap: 14px;
@@ -327,7 +345,11 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: clamp(8px, 2vh, 24px);
+  gap: clamp(8px, 1.5vh, 18px);
+  /* safety net: if enlarged text/tiny screens overflow, this region scrolls
+     internally instead of clipping (default text never triggers it) */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .teams-setup {
   display: grid;
@@ -337,50 +359,55 @@
 }
 .team-field {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 10px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  padding: 12px 16px;
+  padding: 12px;
 }
 .team-field.team-a {
-  border-color: rgba(10, 132, 255, 0.5);
+  border-color: color-mix(in srgb, var(--ta) 55%, transparent);
 }
 .team-field.team-b {
-  border-color: rgba(255, 159, 10, 0.5);
+  border-color: color-mix(in srgb, var(--tb) 55%, transparent);
 }
-.team-field .team-dot {
-  width: 16px;
-  height: 18px;
-  flex-shrink: 0;
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-}
-.team-a .team-dot {
-  background: var(--blue);
-}
-.team-b .team-dot {
-  background: var(--amber);
-}
-.team-field label {
-  display: flex;
-  flex-direction: column;
-  font-size: var(--t-xs);
-  color: var(--text-faint);
-  width: 100%;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.team-field input {
+.team-name-input {
   background: transparent;
   border: none;
+  border-bottom: 1px solid var(--line);
   color: var(--text);
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 700;
   font-family: var(--font-display);
-  padding: 2px 0;
+  text-align: center;
+  padding: 2px 0 6px;
   outline: none;
   width: 100%;
+}
+.swatches {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast);
+}
+.swatch:hover {
+  transform: scale(1.12);
+}
+.swatch.active {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.28);
+  transform: scale(1.12);
 }
 .vs {
   font-family: var(--font-display);
@@ -667,17 +694,17 @@
 }
 .dot.team-A,
 .turn-banner.team-A .dot {
-  background: var(--blue);
+  background: var(--ta);
 }
 .dot.team-B,
 .turn-banner.team-B .dot {
-  background: var(--amber);
+  background: var(--tb);
 }
 .turn-banner.team-A {
-  box-shadow: 0 0 0 1px var(--blue), 0 8px 24px rgba(10, 132, 255, 0.25);
+  box-shadow: 0 0 0 1px var(--ta), 0 8px 24px color-mix(in srgb, var(--ta) 25%, transparent);
 }
 .turn-banner.team-B {
-  box-shadow: 0 0 0 1px var(--amber), 0 8px 24px rgba(255, 159, 10, 0.25);
+  box-shadow: 0 0 0 1px var(--tb), 0 8px 24px color-mix(in srgb, var(--tb) 25%, transparent);
 }
 .turn-dir {
   color: var(--text-faint);
@@ -721,12 +748,12 @@
   transition: background var(--dur-mid), box-shadow var(--dur-mid);
 }
 .team-panel.team-A .pip.filled {
-  background: var(--blue-glow);
-  box-shadow: 0 0 8px var(--blue);
+  background: var(--ta-glow);
+  box-shadow: 0 0 8px var(--ta);
 }
 .team-panel.team-B .pip.filled {
-  background: var(--amber-glow);
-  box-shadow: 0 0 8px var(--amber);
+  background: var(--tb-glow);
+  box-shadow: 0 0 8px var(--tb);
 }
 
 /* ---------- Pie banner ---------- */
@@ -752,6 +779,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .question-zone {
   display: flex;
@@ -805,10 +834,10 @@
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
 }
 .letter-badge.team-A {
-  background: linear-gradient(160deg, #3aa0ff, #0a5bbd);
+  background: linear-gradient(160deg, var(--ta-light), var(--ta-deep));
 }
 .letter-badge.team-B {
-  background: linear-gradient(160deg, #ffb43a, #d97b00);
+  background: linear-gradient(160deg, var(--tb-light), var(--tb-deep));
 }
 .qcard-meta {
   flex: 1;
@@ -907,16 +936,16 @@
   opacity: 0.8;
 }
 .award.team-A {
-  background: linear-gradient(160deg, rgba(58, 160, 255, 0.9), rgba(10, 91, 189, 0.9));
-  border-color: rgba(124, 196, 255, 0.6);
+  background: linear-gradient(160deg, var(--ta-light), var(--ta-deep));
+  border-color: color-mix(in srgb, var(--ta-stroke) 60%, transparent);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 .award.team-B {
-  background: linear-gradient(160deg, rgba(255, 180, 58, 0.9), rgba(217, 123, 0, 0.9));
-  border-color: rgba(255, 210, 122, 0.6);
-  color: #2a1800;
-}
-.award.team-B .award-sub {
-  color: #2a1800;
+  background: linear-gradient(160deg, var(--tb-light), var(--tb-deep));
+  border-color: color-mix(in srgb, var(--tb-stroke) 60%, transparent);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 .award.subtle {
   filter: saturate(0.7) brightness(0.85);
@@ -1005,10 +1034,10 @@
   align-items: flex-end;
 }
 .team-panel.active.team-A {
-  background: rgba(10, 132, 255, 0.14);
+  background: color-mix(in srgb, var(--ta) 16%, transparent);
 }
 .team-panel.active.team-B {
-  background: rgba(255, 159, 10, 0.14);
+  background: color-mix(in srgb, var(--tb) 16%, transparent);
 }
 .team-panel-top {
   display: flex;
@@ -1037,10 +1066,10 @@
   line-height: 1;
 }
 .team-panel.team-A .team-score {
-  color: var(--blue-glow);
+  color: var(--ta-glow);
 }
 .team-panel.team-B .team-score {
-  color: var(--amber-glow);
+  color: var(--tb-glow);
 }
 .team-score-need {
   font-size: 0.9rem;
@@ -1104,12 +1133,12 @@
   margin-bottom: 8px;
 }
 .go-badge.team-A {
-  background: rgba(10, 132, 255, 0.2);
-  color: var(--blue-glow);
+  background: color-mix(in srgb, var(--ta) 22%, transparent);
+  color: var(--ta-glow);
 }
 .go-badge.team-B {
-  background: rgba(255, 159, 10, 0.2);
-  color: var(--amber-glow);
+  background: color-mix(in srgb, var(--tb) 22%, transparent);
+  color: var(--tb-glow);
 }
 .gameover-card h2 {
   font-size: var(--t-h2);
@@ -1148,10 +1177,10 @@
   flex: 0 0 auto;
 }
 .victory-score .team-A {
-  color: var(--blue-glow);
+  color: var(--ta-glow);
 }
 .victory-score .team-B {
-  color: var(--amber-glow);
+  color: var(--tb-glow);
 }
 .victory-score .dash {
   color: var(--text-faint);
@@ -1175,6 +1204,24 @@
   gap: 12px;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+/* ---------- Exit dialog ---------- */
+.exit-dialog {
+  width: min(400px, 92vw);
+  text-align: center;
+}
+.exit-dialog h2 {
+  font-size: var(--t-h2);
+  margin-bottom: 8px;
+}
+.exit-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: var(--s-4);
+}
+.exit-actions .btn {
+  flex: 1;
 }
 
 /* ---------- Settings modal ---------- */
@@ -1439,11 +1486,9 @@
   .team-stats {
     display: none;
   }
-  /* compact Home so 4 packs + hero fit a phone with no scroll */
-  .pack-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  /* compact Home: swipeable carousel cards */
   .pack-card {
+    flex: 0 0 clamp(150px, 46vw, 190px);
     flex-direction: column;
     align-items: center;
     text-align: center;
@@ -1629,11 +1674,9 @@
   .qcard-flag-wrap {
     margin-bottom: 5px;
   }
-  /* Home: one compact row of packs + tight hero */
-  .pack-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+  /* Home: tight hero; packs remain a swipe carousel */
   .pack-card {
+    flex: 0 0 clamp(140px, 34vw, 180px);
     flex-direction: column;
     padding: 8px;
     gap: 3px;
@@ -1651,10 +1694,10 @@
     font-size: 1.05rem;
   }
   .hero {
-    gap: 7px;
+    gap: 4px;
   }
   .hero-title {
-    font-size: clamp(1.5rem, 5.5vh, 2.6rem);
+    font-size: clamp(1.4rem, 5vh, 2.4rem);
   }
   .hero-cta .btn-lg {
     padding: 10px 22px;
@@ -1678,8 +1721,23 @@
   .setup-body {
     gap: 4px 14px;
   }
+  .swatch {
+    width: 22px;
+    height: 22px;
+  }
+  .swatches {
+    gap: 6px;
+  }
+  .team-name-input {
+    font-size: 0.95rem;
+    padding-bottom: 3px;
+  }
+  .team-field {
+    gap: 5px;
+    padding: 5px 8px;
+  }
   .choice {
-    padding: 4px 5px;
+    padding: 3px 5px;
   }
   .choice-label {
     font-size: 0.84rem;

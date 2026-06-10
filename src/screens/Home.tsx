@@ -79,7 +79,14 @@ export function Home() {
       <section className="packs">
         <div className="section-head">
           <h2>Question packs</h2>
-          <span className="muted">{PACKS.length} available</span>
+          <span className="muted">
+            {PACKS.length} packs ·{' '}
+            {PACKS.reduce(
+              (sum, p) => sum + answerableLetters(p).reduce((n, l) => n + p.letters[l].length, 0),
+              0,
+            ).toLocaleString()}{' '}
+            questions
+          </span>
         </div>
         <div className="pack-grid" data-testid="pack-grid">
           {PACKS.map((pack, i) => {

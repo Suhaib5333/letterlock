@@ -2,8 +2,8 @@ import type { RawPack, RawQuestion } from '../core/packs';
 
 /**
  * Flag packs. Each question shows a country's flag (from the free flagcdn.com CDN)
- * and the answer is the country's name — which starts with the hex's letter, so the
- * core Blockbusters mechanic still holds. Easy = well-known nations; Medium = trickier.
+ * and the answer is the country's name. The board letters are HIDDEN for these packs
+ * (hideBoardLetters) so the first letter never gives the answer away.
  */
 const flag = (code: string): string => `https://flagcdn.com/${code}.svg`;
 const PROMPT = 'Which country does this flag belong to?';
@@ -21,6 +21,7 @@ export const flagsEasyPack: RawPack = {
   contentRating: 'everyone',
   emoji: '🚩',
   accent: '#2a9d8f',
+  hideBoardLetters: true,
   letters: {
     A: [q('Argentina', 'ar'), q('Australia', 'au')],
     B: [q('Brazil', 'br'), q('Belgium', 'be')],
@@ -52,24 +53,57 @@ export const flagsMediumPack: RawPack = {
   contentRating: 'everyone',
   emoji: '🏴',
   accent: '#6a4c93',
+  hideBoardLetters: true,
   letters: {
-    A: [q('Austria', 'at'), q('Albania', 'al')],
-    B: [q('Bangladesh', 'bd'), q('Bolivia', 'bo')],
+    A: [q('Austria', 'at'), q('Albania', 'al'), q('Argentina', 'ar')],
+    B: [q('Bangladesh', 'bd'), q('Bolivia', 'bo'), q('Bulgaria', 'bg')],
     C: [q('Croatia', 'hr'), q('Colombia', 'co'), q('Chile', 'cl')],
+    D: [q('Dominican Republic', 'do')],
     E: [q('Ecuador', 'ec'), q('Estonia', 'ee')],
     F: [q('Fiji', 'fj')],
     G: [q('Ghana', 'gh'), q('Georgia', 'ge')],
     H: [q('Hungary', 'hu')],
-    I: [q('Indonesia', 'id'), q('Iceland', 'is')],
-    K: [q('Kazakhstan', 'kz'), q('Kenya', 'ke')],
+    I: [q('Indonesia', 'id'), q('Iceland', 'is'), q('Israel', 'il')],
+    J: [q('Jordan', 'jo')],
+    K: [q('Kazakhstan', 'kz'), q('Kuwait', 'kw')],
     L: [q('Lebanon', 'lb'), q('Lithuania', 'lt')],
     M: [q('Morocco', 'ma'), q('Malaysia', 'my')],
     N: [q('Nigeria', 'ng'), q('Nepal', 'np')],
-    P: [q('Peru', 'pe'), q('Portugal', 'pt')],
+    P: [q('Peru', 'pe'), q('Pakistan', 'pk')],
     Q: [q('Qatar', 'qa')],
     R: [q('Romania', 'ro')],
     S: [q('Slovakia', 'sk'), q('Slovenia', 'si'), q('Serbia', 'rs')],
     U: [q('Ukraine', 'ua'), q('Uruguay', 'uy')],
     V: [q('Venezuela', 've')],
+  },
+};
+
+export const flagsHardPack: RawPack = {
+  id: 'flags-hard',
+  name: 'World Flags · Hard',
+  description: 'For flag experts — obscure nations worldwide.',
+  locale: 'en',
+  difficulty: 'expert',
+  contentRating: 'everyone',
+  emoji: '🎌',
+  accent: '#bb3e03',
+  hideBoardLetters: true,
+  letters: {
+    A: [q('Armenia', 'am'), q('Azerbaijan', 'az'), q('Angola', 'ao')],
+    B: [q('Bhutan', 'bt'), q('Brunei', 'bn'), q('Botswana', 'bw')],
+    C: [q('Comoros', 'km'), q('Cambodia', 'kh'), q('Cape Verde', 'cv')],
+    D: [q('Djibouti', 'dj')],
+    E: [q('Eritrea', 'er'), q('Eswatini', 'sz', ['swaziland'])],
+    G: [q('Guyana', 'gy'), q('Gabon', 'ga')],
+    K: [q('Kyrgyzstan', 'kg'), q('Kiribati', 'ki')],
+    L: [q('Laos', 'la'), q('Lesotho', 'ls')],
+    M: [q('Maldives', 'mv'), q('Mauritania', 'mr'), q('Myanmar', 'mm')],
+    N: [q('Nauru', 'nr'), q('Namibia', 'na')],
+    P: [q('Palau', 'pw'), q('Papua New Guinea', 'pg')],
+    S: [q('Suriname', 'sr'), q('Seychelles', 'sc'), q('Sri Lanka', 'lk')],
+    T: [q('Tajikistan', 'tj'), q('Turkmenistan', 'tm'), q('Tonga', 'to')],
+    U: [q('Uzbekistan', 'uz')],
+    V: [q('Vanuatu', 'vu')],
+    Z: [q('Zambia', 'zm'), q('Zimbabwe', 'zw')],
   },
 };

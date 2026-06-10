@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect } from 'react';
-import { initAudio, setAudioEnabled } from '../services/audio';
+import { initAudio, setAudioEnabled, startMusic, stopMusic } from '../services/audio';
+import { applyTeamColors } from '../state/palette';
 import { useStore } from '../state/store';
 import { Home } from '../screens/Home';
 import { Setup } from '../screens/Setup';
@@ -30,12 +31,30 @@ export function App() {
     setAudioEnabled(state.settings.sound);
   }, [state.settings.sound]);
 
+  // Ambient music follows the Music setting (and starts only after audio init).
+  useEffect(() => {
+    if (state.settings.music) {
+      initAudio();
+      startMusic();
+    } else {
+      stopMusic();
+    }
+  }, [state.settings.music]);
+
   const screen = state.screen;
 
   // Reset scroll on every screen change so a screen never opens mid-scroll.
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [screen]);
+
+  // Drive the live team colors. During a match use the locked-in team colors;
+  // otherwise mirror the setup picker so home/setup preview the choice.
+  const aColor = state.opts && (screen === 'game' || screen === 'victory') ? state.opts.teams.A.colorId : state.setup.colorA;
+  const bColor = state.opts && (screen === 'game' || screen === 'victory') ? state.opts.teams.B.colorId : state.setup.colorB;
+  useEffect(() => {
+    applyTeamColors(aColor, bColor);
+  }, [aColor, bColor]);
 
   return (
     <div className="ll-app" data-screen={screen}>

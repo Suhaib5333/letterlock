@@ -1,7 +1,20 @@
 import { normalizePack, type QuestionPack, type RawPack } from '../core/packs';
 import { generalKnowledgePack } from './generalKnowledge';
+import { extraGeneralKnowledge } from './generalKnowledge2';
 import { kidsPack } from './kids';
-import { flagsEasyPack, flagsMediumPack } from './flags';
+import { flagsEasyPack, flagsMediumPack, flagsHardPack } from './flags';
+
+/** Merge an extra letter→questions map into a base pack. */
+function withExtra(base: RawPack, extra: Record<string, RawPack['letters'][string]>): RawPack {
+  const letters: RawPack['letters'] = {};
+  for (const [letter, qs] of Object.entries(base.letters)) letters[letter] = [...qs];
+  for (const [letter, qs] of Object.entries(extra)) {
+    letters[letter] = [...(letters[letter] ?? []), ...qs];
+  }
+  return { ...base, letters };
+}
+
+const fullGeneralKnowledge = withExtra(generalKnowledgePack, extraGeneralKnowledge);
 
 /** Build a themed pack by filtering the GK pack to a set of categories. */
 function themedFrom(
@@ -18,7 +31,7 @@ function themedFrom(
 }
 
 const sciencePack = themedFrom(
-  generalKnowledgePack,
+  fullGeneralKnowledge,
   {
     id: 'science-nature',
     name: 'Science & Nature',
@@ -31,7 +44,7 @@ const sciencePack = themedFrom(
 );
 
 const worldPack = themedFrom(
-  generalKnowledgePack,
+  fullGeneralKnowledge,
   {
     id: 'world-geography',
     name: 'World Geography',
@@ -44,15 +57,16 @@ const worldPack = themedFrom(
 );
 
 export const PACKS: QuestionPack[] = [
-  generalKnowledgePack,
+  fullGeneralKnowledge,
   kidsPack,
   flagsEasyPack,
   flagsMediumPack,
+  flagsHardPack,
   sciencePack,
   worldPack,
 ].map((p) => normalizePack(p));
 
-export const DEFAULT_PACK_ID = generalKnowledgePack.id;
+export const DEFAULT_PACK_ID = fullGeneralKnowledge.id;
 
 export function packById(id: string): QuestionPack {
   return PACKS.find((p) => p.id === id) ?? PACKS[0];

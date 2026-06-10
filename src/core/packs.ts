@@ -19,6 +19,7 @@ export interface QuestionPack {
   contentRating?: string;
   emoji?: string;
   accent?: string; // optional theme accent for the pack card
+  hideBoardLetters?: boolean; // hide letters on the board (e.g. flags — no first-letter hint)
   letters: Record<string, Question[]>; // 'A'..'Z' -> questions whose answer starts with the letter
 }
 
