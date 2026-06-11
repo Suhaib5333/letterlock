@@ -143,6 +143,58 @@ test('melody pack plays a real audio clip and hides board letters', async ({ pag
   await expect(audio).toHaveAttribute('src', /\/clips\/.*\.wav$/);
 });
 
+test('pie-rule prompt is an overlay that does not shrink the board, and swap works (no blank)', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await startMatch(page, { size: 5, mode: 'single' });
+  // Claim one hex for A → it becomes B's turn with the pie-rule offer.
+  await claimFor(page, 0, 'A');
+  const pop = page.getByTestId('pie-banner');
+  await expect(pop).toBeVisible();
+  // The popup overlays (position:absolute) so it is OUT OF FLOW and cannot reflow
+  // or shrink the board — this is the core fix for the "hex gets smaller" bug.
+  const overlay = await pop.evaluate((el) => getComputedStyle(el).position);
+  expect(overlay).toBe('absolute');
+  const boardH = await page.locator('.ll-board').evaluate((el) => el.getBoundingClientRect().height);
+  expect(boardH).toBeGreaterThan(120); // board stays clearly visible, never collapsed
+  // Swapping sides keeps the game on-screen (no blank) and leaves one owned hex.
+  await page.getByTestId('pie-swap').click();
+  await expect(page.getByTestId('game-screen')).toBeVisible();
+  await expect(page.locator('.ll-hex[data-owner="A"],.ll-hex[data-owner="B"]')).toHaveCount(1);
+  await expect(pop).toHaveCount(0); // prompt dismissed after swapping
+});
+
+test('manual switch-turn flips the active team', async ({ page }) => {
+  await startMatch(page, { size: 5, mode: 'single' });
+  const banner = page.getByTestId('turn-banner');
+  const first = (await banner.innerText()).includes('Blue') ? 'Blue' : 'Amber';
+  await page.getByTestId('switch-turn').click();
+  await expect(banner).not.toContainText(first);
+});
+
+test('only one skip is allowed and the skip button then disables', async ({ page }) => {
+  await startMatch(page);
+  await page.locator('.ll-hex.claimable[data-cell="0"]').click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  const skip = page.getByTestId('skip-question');
+  await expect(skip).toBeEnabled();
+  await skip.click();
+  await expect(skip).toBeDisabled(); // second skip not allowed
+});
+
+test('charades pack shows a QR secret-prompt and the /img page renders the word', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('pack-charades-easy').click();
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  await expect(page.getByTestId('charade-qr')).toBeVisible();
+  // The standalone secret-prompt deep link renders a name.
+  await page.goto('/?view=img&w=Elephant&img=&h=Act%20it%20out!');
+  await expect(page.getByTestId('imgview-name')).toHaveText('Elephant');
+});
+
 test('tutorial walkthrough is reachable and playable', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'How to play' }).click();

@@ -2,6 +2,16 @@ import { motion } from 'motion/react';
 import type { TeamConfig, TeamId } from '../core/models';
 import { duckMusic, play, speak } from '../services/audio';
 import type { Served } from '../state/types';
+import { QrCode } from './QrCode';
+
+/** URL the charade QR points to — opens the standalone secret-prompt page. */
+function charadeUrl(name: string, image?: string, hint?: string): string {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const p = new URLSearchParams({ view: 'img', w: name });
+  if (image) p.set('img', image);
+  if (hint) p.set('h', hint);
+  return `${origin}/?${p.toString()}`;
+}
 
 interface Props {
   served: Served;
@@ -10,6 +20,8 @@ interface Props {
   teams: Record<TeamId, TeamConfig>;
   tts: boolean;
   hideLetter?: boolean;
+  canSkip: boolean;
+  repeated: boolean;
   onReveal: () => void;
   onSkip: () => void;
 }
@@ -21,10 +33,13 @@ export function QuestionCard({
   teams,
   tts,
   hideLetter,
+  canSkip,
+  repeated,
   onReveal,
   onSkip,
 }: Props) {
   const pickerTeam = teams[picker];
+  const charade = served.question.category === 'charade';
   return (
     <motion.div
       className="qcard"
@@ -36,16 +51,21 @@ export function QuestionCard({
     >
       <div className="qcard-top">
         <div className={`letter-badge team-${picker}`} aria-hidden="true">
-          {hideLetter ? '🚩' : served.letter}
+          {charade ? '🎭' : hideLetter ? '🚩' : served.letter}
         </div>
         <div className="qcard-meta">
           <div className="qcard-picker">
             <span className={`dot team-${picker}`} /> {pickerTeam.name} picked
           </div>
           <div className="qcard-rule">
-            {hideLetter ? 'Name the country' : `Answer begins with “${served.letter}”`}
+            {charade ? 'Charades — act it out!' : hideLetter ? 'Name the answer' : `Answer begins with “${served.letter}”`}
           </div>
         </div>
+        {repeated && (
+          <span className="repeat-badge" data-testid="repeat-badge" title="Every question for this pack has been seen — now repeating.">
+            ↻ Repeat
+          </span>
+        )}
         {tts && (
           <button
             className="icon-btn"
@@ -57,15 +77,25 @@ export function QuestionCard({
         )}
       </div>
 
-      {served.question.image && (
-        <div className="qcard-flag-wrap">
-          <img
-            className="qcard-flag"
-            src={served.question.image}
-            alt="Image to identify"
-            draggable={false}
-          />
+      {charade ? (
+        <div className="qcard-charade" data-testid="charade-qr">
+          <QrCode value={charadeUrl(served.question.a, served.question.image, served.question.q)} size={132} />
+          <div className="qcard-charade-text">
+            <strong>📱 Scan to get your word</strong>
+            <span>Only the acting player should look. Then act it out for your team — no talking!</span>
+          </div>
         </div>
+      ) : (
+        served.question.image && (
+          <div className="qcard-flag-wrap">
+            <img
+              className="qcard-flag"
+              src={served.question.image}
+              alt="Image to identify"
+              draggable={false}
+            />
+          </div>
+        )
       )}
 
       {served.question.audio && (
@@ -110,6 +140,9 @@ export function QuestionCard({
           >
             <span className="answer-label">Answer</span>
             <span className="answer-value">{served.question.a}</span>
+            {charade && served.question.image && (
+              <img className="answer-charade-img" src={served.question.image} alt={served.question.a} draggable={false} />
+            )}
           </motion.div>
         ) : (
           <button
@@ -123,8 +156,14 @@ export function QuestionCard({
             Show answer
           </button>
         )}
-        <button className="btn btn-ghost skip" data-testid="skip-question" onClick={onSkip}>
-          ⏭ Skip question
+        <button
+          className="btn btn-ghost skip"
+          data-testid="skip-question"
+          onClick={onSkip}
+          disabled={!canSkip}
+          title={canSkip ? 'You may skip once per pick' : 'No skip left — one skip per pick'}
+        >
+          {canSkip ? '⏭ Skip question (1)' : '⏭ No skip left'}
         </button>
       </div>
     </motion.div>

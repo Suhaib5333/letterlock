@@ -147,3 +147,87 @@ describe('undo = replay equivalence', () => {
     expect(() => replay([{ type: 'TurnPassed' }])).toThrow();
   });
 });
+
+describe('undo — full end-to-end behaviour across every action type', () => {
+  it('undo of a trailing QuestionServed (no claim yet) returns to the empty pick state', () => {
+    const log: GameLog = [
+      start(5) as never,
+      { type: 'QuestionServed', cell: 6, letter: 'A', questionId: 'A-1' },
+    ];
+    const { log: trimmed, state } = undoLast(log);
+    expect(trimmed).toHaveLength(1); // serve dropped
+    expect(state.owners.every((o) => o === null)).toBe(true);
+    expect(state.turn).toBe('A');
+    expect(state.moveCount).toBe(0);
+  });
+
+  it('undo of a claim makes the hex neutral again and restores the turn to the picker', () => {
+    const log: GameLog = [
+      start(5) as never,
+      { type: 'QuestionServed', cell: 12, letter: 'A', questionId: 'A-1' },
+      { type: 'HexClaimed', cell: 12, team: 'A', stolen: false },
+    ];
+    const claimed = replay(log);
+    expect(claimed.owners[12]).toBe('A');
+    expect(claimed.turn).toBe('B'); // turn flipped after the claim
+    const { state } = undoLast(log);
+    expect(state.owners[12]).toBe(null); // hex neutral again
+    expect(state.turn).toBe('A'); // back to the picker
+    expect(state.moveCount).toBe(0);
+  });
+
+  it('undo after a skip removes the whole pick (both serves + the skip)', () => {
+    const log: GameLog = [
+      start(5) as never,
+      { type: 'QuestionServed', cell: 6, letter: 'A', questionId: 'A-1' },
+      { type: 'QuestionSkipped', letter: 'A', questionId: 'A-1' },
+      { type: 'QuestionServed', cell: 6, letter: 'A', questionId: 'A-2' },
+    ];
+    const { log: trimmed, state } = undoLast(log);
+    expect(trimmed).toHaveLength(1); // all three bookkeeping events dropped
+    expect(state.owners.every((o) => o === null)).toBe(true);
+    expect(state.turn).toBe('A');
+  });
+
+  it('undo of a pie swap restores the pre-swap board and re-opens the swap window', () => {
+    const log: GameLog = [
+      start(5, true) as never,
+      { type: 'QuestionServed', cell: 0, letter: 'A', questionId: 'A-1' },
+      { type: 'HexClaimed', cell: 0, team: 'A', stolen: false },
+      { type: 'PieSwapped' },
+    ];
+    const swapped = replay(log);
+    expect(swapped.owners[0]).toBe('B'); // B took A's opening hex
+    expect(swapped.pieSwapped).toBe(true);
+    const { state } = undoLast(log);
+    expect(state.owners[0]).toBe('A'); // restored to A
+    expect(state.pieSwapped).toBe(false);
+    expect(canPieSwap(state)).toBe(true); // swap offered again
+  });
+
+  it('undo of a manual TurnPassed (switch-turn) flips the turn back', () => {
+    const log: GameLog = [
+      start(5) as never,
+      { type: 'QuestionServed', cell: 0, letter: 'A', questionId: 'A-1' },
+      { type: 'HexClaimed', cell: 0, team: 'A', stolen: false }, // turn -> B
+      { type: 'TurnPassed' }, // manual switch -> A
+    ];
+    expect(replay(log).turn).toBe('A');
+    const { state } = undoLast(log);
+    expect(state.turn).toBe('B'); // switch undone
+    expect(state.owners[0]).toBe('A'); // claim untouched
+  });
+
+  it('repeated undo walks the whole game back to the start, never throwing', () => {
+    let log: GameLog = [
+      start(5) as never,
+      { type: 'HexClaimed', cell: 0, team: 'A', stolen: false },
+      { type: 'TurnPassed' },
+      { type: 'HexClaimed', cell: 1, team: 'B', stolen: false },
+      { type: 'TurnPassed' },
+    ];
+    for (let i = 0; i < 10; i++) log = undoLast(log).log; // more undos than events
+    expect(log).toHaveLength(1);
+    expect(() => replay(log)).not.toThrow();
+  });
+});

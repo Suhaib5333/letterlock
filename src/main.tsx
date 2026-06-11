@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App';
+import { ImgView } from './screens/ImgView';
 import { StoreProvider } from './state/store';
 import './theme.css';
 import './app/app.css';
@@ -11,10 +12,17 @@ if (splash) {
   setTimeout(() => splash.remove(), 900);
 }
 
+// Deep-link "secret prompt" page for charade QR codes — no game store needed.
+const isImgView = new URLSearchParams(window.location.search).get('view') === 'img';
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <StoreProvider>
-      <App />
-    </StoreProvider>
+    {isImgView ? (
+      <ImgView />
+    ) : (
+      <StoreProvider>
+        <App />
+      </StoreProvider>
+    )}
   </StrictMode>,
 );

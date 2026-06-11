@@ -4,15 +4,17 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
   type ReactNode,
 } from 'react';
 import { canPieSwap, replay, undoLast } from '../core/engine';
 import type { GameEvent, GameLog } from '../core/events';
 import { gamesNeededFor, type GameState, type TeamConfig, type TeamId } from '../core/models';
-import { serveQuestion, type QuestionPack } from '../core/packs';
+import { allQuestionIds, allQuestions, type Question, type QuestionPack } from '../core/packs';
 import { mulberry32 } from '../core/rng';
 import { newMatch, startGameEvent, type NewMatchOptions } from '../core/match';
 import { DEFAULT_PACK_ID, packById } from '../content';
+import { markServed, usedSet } from './progress';
 import { colorById } from './palette';
 import {
   DEFAULT_SETTINGS,
@@ -53,6 +55,8 @@ const EMPTY_UI: UiState = {
   lastClaimCell: null,
   blockHint: false,
   pulse: 0,
+  skipsUsed: 0,
+  repeated: false,
 };
 
 const DEFAULT_SETUP: SetupForm = {
@@ -89,6 +93,7 @@ type Action =
   | { type: 'SKIP_QUESTION' }
   | { type: 'ADJUDICATE'; team: TeamId | null }
   | { type: 'PIE_SWAP' }
+  | { type: 'SWITCH_TURN' }
   | { type: 'UNDO' }
   | { type: 'CONTINUE_AFTER_GAME' }
   | { type: 'REMATCH' }
@@ -115,14 +120,55 @@ function optsFromSetup(setup: SetupForm, seed: number): NewMatchOptions {
   };
 }
 
-function serveFor(opts: NewMatchOptions, game: GameState, cell: number): {
-  question: ReturnType<typeof serveQuestion>['question'];
-  letter: string;
-} {
-  const letter = game.letters[cell];
-  const rng = mulberry32((opts.seed + cell * 131 + game.moveCount * 977) >>> 0);
-  const served = serveQuestion(opts.pack as QuestionPack, letter, game.usedQuestions[letter] ?? [], rng);
-  return { question: served.question, letter: served.letter };
+/**
+ * Pick the question to serve for a cell.
+ * - Honours the cross-game no-repeat cycle (unseen-first; {@link usedSet}).
+ * - For letterless packs (`hideBoardLetters`) tiles are NOT pinned to a letter —
+ *   any tile draws from the WHOLE pack, fully randomized.
+ * - `repeated` is true when every candidate has already been served this cycle
+ *   (a forced repeat) so the UI can flag it.
+ */
+function chooseQuestion(
+  opts: NewMatchOptions,
+  game: GameState,
+  cell: number,
+): { question: Question; letter: string; repeated: boolean } {
+  const pack = opts.pack as QuestionPack;
+  const global = !!pack.hideBoardLetters;
+
+  // Candidate pool: whole pack for letterless packs, else this cell's letter.
+  let letter = game.letters[cell];
+  let pool: Question[] = global ? allQuestions(pack) : pack.letters[letter] ?? [];
+  if (pool.length === 0) pool = allQuestions(pack); // wildcard fallback
+
+  // Ids already served — this game (avoid same-game dupes) + persistent cycle.
+  const gameUsed = new Set<string>();
+  if (global) {
+    for (const ids of Object.values(game.usedQuestions)) for (const id of ids) gameUsed.add(id);
+  } else {
+    for (const id of game.usedQuestions[letter] ?? []) gameUsed.add(id);
+  }
+  const pers = usedSet(pack.id);
+
+  const seed = (opts.seed + cell * 131 + game.moveCount * 977 + gameUsed.size * 7919) >>> 0;
+  const rng = mulberry32(seed);
+
+  const unseen = pool.filter((q) => !pers.has(q.id) && !gameUsed.has(q.id));
+  let chosen: Question;
+  let repeated: boolean;
+  if (unseen.length > 0) {
+    chosen = unseen[Math.floor(rng() * unseen.length)];
+    repeated = false;
+  } else {
+    const fresh = pool.filter((q) => !gameUsed.has(q.id));
+    const fallback = fresh.length > 0 ? fresh : pool;
+    chosen = fallback[Math.floor(rng() * fallback.length)];
+    repeated = true;
+  }
+  // Event letter: for letterless packs use the answer's own first letter so the
+  // move log + usedQuestions stay consistent; otherwise the board cell's letter.
+  if (global) letter = chosen.a.trim()[0]?.toUpperCase() || 'A';
+  return { question: chosen, letter, repeated };
 }
 
 function applyAndAdvance(state: StoreState, events: GameEvent[]): StoreState {
@@ -183,7 +229,7 @@ function reducer(state: StoreState, action: Action): StoreState {
     case 'PICK_CELL': {
       if (!state.opts || state.game.status !== 'playing') return state;
       if (state.game.owners[action.cell] !== null) return state; // only neutral hexes
-      const { question, letter } = serveFor(state.opts, state.game, action.cell);
+      const { question, letter, repeated } = chooseQuestion(state.opts, state.game, action.cell);
       const ev: GameEvent = {
         type: 'QuestionServed',
         cell: action.cell,
@@ -201,6 +247,8 @@ function reducer(state: StoreState, action: Action): StoreState {
           selectedCell: action.cell,
           served: { question, letter, cell: action.cell },
           answerRevealed: false,
+          skipsUsed: 0, // a fresh pick resets the skip allowance + timer
+          repeated,
         },
       };
     }
@@ -210,6 +258,7 @@ function reducer(state: StoreState, action: Action): StoreState {
 
     case 'SKIP_QUESTION': {
       if (!state.opts || !state.ui.served) return state;
+      if (state.ui.skipsUsed >= 1) return state; // only ONE skip per pick (user request)
       const cell = state.ui.served.cell;
       const skip: GameEvent = {
         type: 'QuestionSkipped',
@@ -218,7 +267,7 @@ function reducer(state: StoreState, action: Action): StoreState {
       };
       const log1 = [...state.log, skip];
       const g1 = replay(log1);
-      const { question, letter } = serveFor(state.opts, g1, cell);
+      const { question, letter, repeated } = chooseQuestion(state.opts, g1, cell);
       const serve: GameEvent = { type: 'QuestionServed', cell, letter, questionId: question.id };
       const log2 = [...log1, serve];
       return {
@@ -226,9 +275,13 @@ function reducer(state: StoreState, action: Action): StoreState {
         log: log2,
         game: replay(log2),
         ui: {
+          // NOTE: selectedCell + pulse are unchanged, so the Timer keeps running
+          // across a skip (it does not reset — user request).
           ...state.ui,
           served: { question, letter, cell },
           answerRevealed: false,
+          skipsUsed: state.ui.skipsUsed + 1,
+          repeated,
         },
       };
     }
@@ -248,6 +301,12 @@ function reducer(state: StoreState, action: Action): StoreState {
     case 'PIE_SWAP': {
       if (!canPieSwap(state.game)) return state;
       return applyAndAdvance(state, [{ type: 'PieSwapped' }]);
+    }
+
+    case 'SWITCH_TURN': {
+      // Manual host intervention: flip whose turn it is (only between picks).
+      if (state.game.status !== 'playing' || state.ui.phase !== 'pick') return state;
+      return applyAndAdvance(state, [{ type: 'TurnPassed' }]);
     }
 
     case 'UNDO': {
@@ -334,6 +393,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     ...s,
     settings: loadSettings(),
   }));
+
+  // Record served questions into the cross-game no-repeat tracker (plan §8).
+  // We only mark NEW serves since the last commit (ref-tracked) so the cycle
+  // counter advances exactly once per question and undo/new-game shrink resets it.
+  const markRef = useRef(0);
+  useEffect(() => {
+    if (!state.opts) {
+      markRef.current = 0;
+      return;
+    }
+    const pack = state.opts.pack as QuestionPack;
+    const servedIds = state.log
+      .filter((e): e is Extract<GameEvent, { type: 'QuestionServed' }> => e.type === 'QuestionServed')
+      .map((e) => e.questionId);
+    if (servedIds.length < markRef.current) markRef.current = servedIds.length; // undo / new game
+    if (servedIds.length > markRef.current) {
+      markServed(pack.id, servedIds.slice(markRef.current), allQuestionIds(pack));
+      markRef.current = servedIds.length;
+    }
+  }, [state.log, state.opts]);
 
   // Apply accessibility settings to <html> so CSS + reduced-motion react globally.
   useEffect(() => {

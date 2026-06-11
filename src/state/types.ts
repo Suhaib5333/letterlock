@@ -50,4 +50,6 @@ export interface UiState {
   lastClaimCell: number | null; // drives the claim animation
   blockHint: boolean; // a recent claim cut the opponent's near-complete path
   pulse: number; // monotonically increasing tick to retrigger effects
+  skipsUsed: number; // skips taken on the current pick (max 1 — plan §3.2)
+  repeated: boolean; // the served question is a forced repeat (whole pack cycled)
 }

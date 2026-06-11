@@ -725,6 +725,39 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
   per-frame rAF updates (caused the stutter / "doesn't sweep cleanly"). Verified via Playwright
   that the bar depletes monotonically and exactly one timer is ever present.
 
+## II.3f Round-6 — swap UX, host controls, no-repeat, charades, content to 200+ (2026-06-12)
+
+- ✅ **Pie-rule "swap sides" is now an OVERLAY popup** (`.pie-pop`, `position:absolute`) with an
+  ✕ to dismiss — it no longer reflows/shrinks the board (was crushing the hex to ~166px on
+  mobile; now stays full-size). Swapping leaves the game on-screen (the reported "blank screen"
+  could not be reproduced and is moot now the prompt never consumes layout).
+- ✅ **One skip per pick**, and the **timer no longer resets on skip** — the `Timer` `resetKey`
+  is now `selectedCell-pulse` (stable across a skip, changes on a new pick), so the countdown
+  *continues*. Skip button disables after one use.
+- ✅ **Manual switch-turn** (`SWITCH_TURN` → a `TurnPassed`) in the turn banner — host
+  intervention, fully undoable.
+- ✅ **Full undo audit** — 6 new unit cases (serve-only, claim, skip-sequence, pie-swap,
+  manual switch, repeated-undo-to-start) on top of the existing replay-equivalence tests.
+- ✅ **No-repeat question cycle** (`src/state/progress.ts`): questions don't repeat until the
+  whole pack is exhausted, then a fresh cycle starts; **Home shows "↻ N unique left" per pack**;
+  a **"↻ Repeat" badge** appears when a forced repeat is served. Persisted in localStorage.
+- ✅ **Letterless packs serve from the WHOLE pack** (tiles not pinned to a letter) — flags,
+  logos, songs, melodies, charades.
+- ✅ **Charades** (5 packs → all 200+: easy, animals, Movies & TV, actions, hard): the card
+  shows a **QR** to a standalone **`/?view=img` secret-prompt page** (`ImgView`) that renders the
+  thing's **image + name** privately for the acting player. Images auto-attached via loremflickr.
+- ✅ **Content expansion to 200+**: Movies & TV (227) + Hard (208), Music (214) + Hard (216),
+  Sports easy (217) + medium (226), World Geography (242). New **regional packs**: Bahrain,
+  Saudi Arabia, UAE, Gulf Culture & Geography.
+- ✅ **Music**: replaced random-note generative ambience with **original composed looping
+  melodies + a bass progression** (4 moods) — real tunes in a mellow vibe, copyright-free.
+- ✅ **`QUESTION_AUTHORING.md`** (authoring rules) + **`DEFERRED.md`** (blocked work + how to
+  unblock) added.
+- 🚩 **Deferred (see `DEFERRED.md`)**: accounts/login/OTP/Google-SSO + global leaderboard
+  (no Resend key in ral-workspace, no Supabase/OAuth creds — needs the user to provide them);
+  real movie/TV video clips (no free legal source); real licensed/Minecraft music (copyright);
+  logos/flags/melodies/songs packs stay under 200 (source-capped).
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily

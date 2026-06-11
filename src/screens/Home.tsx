@@ -1,10 +1,11 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { PACKS } from '../content';
-import { answerableLetters } from '../core/packs';
+import { answerableLetters, totalQuestions } from '../core/packs';
 import { Logo, Wordmark } from '../components/Logo';
 import { SettingsModal } from '../components/SettingsModal';
 import { play } from '../services/audio';
+import { remaining } from '../state/progress';
 import { resumeSavedGame, useStore } from '../state/store';
 
 export function Home() {
@@ -91,7 +92,9 @@ export function Home() {
         <div className="pack-grid" data-testid="pack-grid">
           {PACKS.map((pack, i) => {
             const active = pack.id === selectedPack;
-            const total = answerableLetters(pack).reduce((n, l) => n + pack.letters[l].length, 0);
+            const total = totalQuestions(pack);
+            const left = remaining(pack.id, total);
+            const seenSome = left < total;
             return (
               <motion.button
                 key={pack.id}
@@ -114,6 +117,11 @@ export function Home() {
                   <div className="pack-meta">
                     <span className="chip">{pack.difficulty}</span>
                     <span className="chip ghost">{total} questions</span>
+                    {seenSome && (
+                      <span className="chip ghost" data-testid={`pack-left-${pack.id}`} title="Unique questions left before this pack repeats">
+                        ↻ {left} unique left
+                      </span>
+                    )}
                   </div>
                 </div>
                 {active && <div className="pack-check" aria-label="Selected">✓</div>}

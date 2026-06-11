@@ -70,6 +70,23 @@ export function letterCount(pack: QuestionPack, letter: string): number {
   return pack.letters[letter]?.length ?? 0;
 }
 
+/** Every question in the pack, flattened (used for global/letterless serving). */
+export function allQuestions(pack: QuestionPack): Question[] {
+  const out: Question[] = [];
+  for (const letter of Object.keys(pack.letters)) out.push(...pack.letters[letter]);
+  return out;
+}
+
+/** Every question id in the pack (used for the no-repeat cycle tracker). */
+export function allQuestionIds(pack: QuestionPack): string[] {
+  return allQuestions(pack).map((q) => q.id);
+}
+
+/** Total number of questions in the pack. */
+export function totalQuestions(pack: QuestionPack): number {
+  return allQuestions(pack).length;
+}
+
 /** Letters that actually have at least one question. */
 export function answerableLetters(pack: QuestionPack): string[] {
   return ALPHABET.filter((l) => letterCount(pack, l) > 0);

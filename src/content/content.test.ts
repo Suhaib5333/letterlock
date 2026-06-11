@@ -115,12 +115,18 @@ describe('EVERY pack: the answer never leaks into the question text', () => {
     // history / culture head-nouns
     'war', 'battle', 'treaty', 'empire', 'dynasty', 'revolution', 'code', 'age', 'period',
     'era', 'century', 'king', 'queen', 'emperor', 'pope', 'saint', 'language', 'alphabet',
+    // buildings / structures / organisations (generic head-nouns)
+    'mosque', 'tower', 'towers', 'studio', 'palace', 'fort', 'castle', 'bridge', 'temple',
+    'cathedral', 'stadium', 'circuit', 'causeway', 'governorate', 'emirate',
     // sports head-nouns
     'medal', 'league', 'club', 'final', 'open', 'championship', 'tournament', 'event',
     'jersey', 'cup', 'goal', 'series', 'cricket', 'football', 'tennis', 'golf', 'rugby',
     // screen / music head-nouns
     'film', 'movie', 'show', 'series', 'award', 'prize', 'band', 'novel', 'poem', 'play',
     'genre', 'sonata', 'overture', 'painting', 'opera', 'god', 'goddess', 'myth',
+    // faith descriptors + pronouns/common words that legitimately recur
+    'islam', 'islamic', 'muslim', 'christian', 'buddhist', 'hindu', 'jewish', 'faith',
+    'your', 'this', 'that', 'them', 'with', 'from', 'into',
   ]);
   const leaks = (q: string, a: string): boolean => {
     const ql = ` ${q.toLowerCase().replace(/[^a-z0-9]+/g, ' ')} `;

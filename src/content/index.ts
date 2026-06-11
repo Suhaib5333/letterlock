@@ -14,6 +14,35 @@ import { moviesPack, moviesHardPack } from './screen';
 import { musicMediumPack, musicHardPack } from './musicpack';
 import { melodiesPack } from './melodies';
 import { songsPack } from './songs';
+// Expansions authored to push every pack past 200 questions.
+import { moviesMediumExtra } from './moviesExtra';
+import { moviesHardExtra } from './moviesHardExtra';
+import { musicMediumExtra, musicHardExtra } from './musicExtra';
+import { sportsEasyExtra, sportsMediumExtra } from './sportsExtra';
+import { geoExtra } from './geoExtra';
+import { flagsEasyExtra, flagsMediumExtra, flagsHardExtra } from './flagsExtra';
+// New packs: regional + charades.
+import { bahrainPack } from './bahrain';
+import { saudiPack, uaePack, gulfPack } from './gcc';
+import {
+  charadesEasyPack,
+  charadesAnimalsPack,
+  charadesMoviesPack,
+  charadesActionsPack,
+  charadesHardPack,
+} from './charades';
+import {
+  charadesEasyExtra,
+  charadesAnimalsExtra,
+  charadesMoviesExtra,
+  charadesActionsExtra,
+  charadesHardExtra,
+} from './charadesExtra';
+import { charadesMovies2 } from './charadesMovies2';
+import { charadesEasy2, charadesAnimals2 } from './charades2a';
+import { charadesActions2, charadesHard2 } from './charades2b';
+import { charadesAnimals3, charadesActions3, charadesHard3 } from './charades3';
+import { saudiExtra, uaeExtra, gulfExtra } from './gccExtra';
 
 /**
  * Re-bucket every question under the letter its ANSWER actually starts with.
@@ -48,8 +77,41 @@ function withExtra(base: RawPack, ...extras: Record<string, RawPack['letters'][s
   return { ...base, letters };
 }
 
-const fullGeneralKnowledge = withExtra(generalKnowledgePack, extraGeneralKnowledge, extraGeneralKnowledge3);
+const fullGeneralKnowledge = withExtra(
+  generalKnowledgePack,
+  extraGeneralKnowledge,
+  extraGeneralKnowledge3,
+  geoExtra, // more geography feeds GK + the World Geography themed pack
+);
 const fullKids = withExtra(kidsPack, extraKids);
+
+// Trivia packs expanded past 200 questions via authored extras.
+const fullMovies = withExtra(moviesPack, moviesMediumExtra);
+const fullMoviesHard = withExtra(moviesHardPack, moviesHardExtra);
+const fullMusic = withExtra(musicMediumPack, musicMediumExtra);
+const fullMusicHard = withExtra(musicHardPack, musicHardExtra);
+const fullSportsEasy = withExtra(sportsEasyPack, sportsEasyExtra);
+const fullSportsMedium = withExtra(sportsMediumPack, sportsMediumExtra);
+const fullFlagsEasy = withExtra(flagsEasyPack, flagsEasyExtra);
+const fullFlagsMedium = withExtra(flagsMediumPack, flagsMediumExtra);
+const fullFlagsHard = withExtra(flagsHardPack, flagsHardExtra);
+
+/** Auto-attach a keyword image to charade prompts (the secret prompt shown via QR). */
+function charadeImg(answer: string): string {
+  const tags = answer
+    .toLowerCase()
+    .replace(/^(the|a|an)\s+/, '')
+    .split(/\s+/)
+    .join(',');
+  return `https://loremflickr.com/640/480/${encodeURIComponent(tags)}`;
+}
+function withCharadeImages(pack: RawPack): RawPack {
+  const letters: RawPack['letters'] = {};
+  for (const [letter, qs] of Object.entries(pack.letters)) {
+    letters[letter] = qs.map((q) => ({ ...q, image: q.image ?? charadeImg(q.a) }));
+  }
+  return { ...pack, letters };
+}
 
 /** Build a themed pack by filtering the GK pack to a set of categories. */
 function themedFrom(
@@ -95,25 +157,36 @@ const worldPack = themedFrom(
 export const PACKS: QuestionPack[] = [
   fullKids,
   fullGeneralKnowledge,
-  flagsEasyPack,
-  flagsMediumPack,
-  flagsHardPack,
+  fullFlagsEasy,
+  fullFlagsMedium,
+  fullFlagsHard,
   logosEasyPack,
   logosMediumPack,
   logosHardPack,
-  sportsEasyPack,
-  sportsMediumPack,
+  fullSportsEasy,
+  fullSportsMedium,
   sciencePack,
   worldPack,
-  moviesPack,
-  moviesHardPack,
-  musicMediumPack,
-  musicHardPack,
+  fullMovies,
+  fullMoviesHard,
+  fullMusic,
+  fullMusicHard,
   melodiesPack,
   songsPack,
   historyPack,
   spacePack,
   geniusPack,
+  // Regional packs (Bahrain + GCC).
+  bahrainPack,
+  withExtra(saudiPack, saudiExtra),
+  withExtra(uaePack, uaeExtra),
+  withExtra(gulfPack, gulfExtra),
+  // Charades (images attached for the QR secret-prompt page).
+  withCharadeImages(withExtra(charadesEasyPack, charadesEasyExtra, charadesEasy2)),
+  withCharadeImages(withExtra(charadesAnimalsPack, charadesAnimalsExtra, charadesAnimals2, charadesAnimals3)),
+  withCharadeImages(withExtra(charadesMoviesPack, charadesMoviesExtra, charadesMovies2)),
+  withCharadeImages(withExtra(charadesActionsPack, charadesActionsExtra, charadesActions2, charadesActions3)),
+  withCharadeImages(withExtra(charadesHardPack, charadesHardExtra, charadesHard2, charadesHard3)),
 ]
   .map((p) => normalizePack(rebucketByAnswer(p)))
   .sort((a, b) => DIFFICULTY_RANK[a.difficulty] - DIFFICULTY_RANK[b.difficulty]);

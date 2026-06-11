@@ -35,6 +35,12 @@ export function Game() {
   const lastPulse = useRef(0);
   const [blockToast, setBlockToast] = useState(false);
   const [confirmingExit, setConfirmingExit] = useState(false);
+  const [pieDismissed, setPieDismissed] = useState(false);
+
+  // Reset the dismiss flag once the swap window closes (so a new game can offer it).
+  useEffect(() => {
+    if (!canPieSwap) setPieDismissed(false);
+  }, [canPieSwap]);
 
   // Hero-moment audio + haptics driven by the reducer's pulse counter.
   useEffect(() => {
@@ -98,29 +104,49 @@ export function Game() {
               </motion.div>
             )}
           </AnimatePresence>
-          {canPieSwap && ui.phase === 'pick' && (
-            <motion.div
-              className="pie-banner"
-              data-testid="pie-banner"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <span>
-                ⇄ <strong>{teams[picker].name}</strong>, you can <strong>swap sides</strong> instead of
-                playing — neutralises the opening advantage.
-              </span>
-              <button
-                className="btn btn-secondary sm"
-                data-testid="pie-swap"
-                onClick={() => {
-                  play('steal');
-                  dispatch({ type: 'PIE_SWAP' });
-                }}
+          {/* Pie-rule prompt is an OVERLAY popup — it floats over the board and
+              never reflows/shrinks it. Dismissable with ✕ (declines the swap). */}
+          <AnimatePresence>
+            {canPieSwap && ui.phase === 'pick' && !pieDismissed && (
+              <motion.div
+                className="pie-pop"
+                data-testid="pie-banner"
+                role="dialog"
+                aria-label="Swap sides"
+                initial={{ opacity: 0, y: -14, scale: 0.92 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 340, damping: 24 }}
               >
-                Swap sides
-              </button>
-            </motion.div>
-          )}
+                <button
+                  className="pie-pop-close"
+                  data-testid="pie-dismiss"
+                  aria-label="Keep my side"
+                  onClick={() => {
+                    play('tap');
+                    setPieDismissed(true);
+                  }}
+                >
+                  ✕
+                </button>
+                <div className="pie-pop-icon">⇄</div>
+                <div className="pie-pop-body">
+                  <strong>{teams[picker].name}</strong>, swap sides?
+                  <span>Take over the opening hex instead of playing — neutralises the first-move advantage.</span>
+                </div>
+                <button
+                  className="btn btn-primary sm"
+                  data-testid="pie-swap"
+                  onClick={() => {
+                    play('steal');
+                    dispatch({ type: 'PIE_SWAP' });
+                  }}
+                >
+                  Swap sides
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="board-stage">
             <Board
@@ -144,6 +170,18 @@ export function Game() {
               <span className="turn-dir">
                 connect {game.directions[picker] === 'horizontal' ? 'left ↔ right' : 'top ↕ bottom'}
               </span>
+              <button
+                className="switch-turn-btn"
+                data-testid="switch-turn"
+                aria-label="Switch turn to the other team"
+                title="Manually switch whose turn it is (host intervention)"
+                onClick={() => {
+                  play('swap');
+                  dispatch({ type: 'SWITCH_TURN' });
+                }}
+              >
+                ⇄<span className="switch-label"> switch</span>
+              </button>
             </div>
           )}
         </div>
@@ -162,7 +200,9 @@ export function Game() {
                 {timer > 0 && (
                   <Timer
                     seconds={timer}
-                    resetKey={ui.served!.question.id + ui.pulse}
+                    // Stable across a skip (selectedCell + pulse don't change on
+                    // skip) so the countdown CONTINUES; resets only on a new pick.
+                    resetKey={`${ui.selectedCell}-${ui.pulse}`}
                     active
                     pickerName={teams[picker].name}
                     otherName={teams[other].name}
@@ -175,6 +215,8 @@ export function Game() {
                   teams={teams}
                   hideLetter={hideLetters}
                   tts={state.settings.tts}
+                  canSkip={ui.skipsUsed < 1}
+                  repeated={ui.repeated}
                   onReveal={() => dispatch({ type: 'REVEAL_ANSWER' })}
                   onSkip={() => dispatch({ type: 'SKIP_QUESTION' })}
                 />
