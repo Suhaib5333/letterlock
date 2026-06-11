@@ -713,6 +713,18 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
   melody clip, exit modal), no-scroll checker **ALL CLEAR** across 15 devices in default /
   xlarge-text / flags / logos / songs / melodies / sports.
 
+## II.3e Round-5 — answer-logic bug, timer smoothness (2026-06-11)
+
+- ✅ **Clue-restatement / sentence-answer bug** (e.g. board letter "U", answer stored as
+  "Ukraine's capital is Kyiv"): audited **every** answer in **every** pack via the loaded pack
+  data (quote-safe), found the class already largely fixed in round-4 plus two stragglers
+  ("Afrika Niger"→"Niger", "Old Heraclitus"→"Heraclitus"); now **0** remain. Added a permanent
+  **guard test** that fails the build if any answer restates its clue ("capital is", possessive
+  "…'s … is …", "the country whose…", etc.) — so it can never regress (132 unit/content tests).
+- ✅ **Timer smoothness**: removed the CSS `transition` on the fill bar that was fighting the
+  per-frame rAF updates (caused the stutter / "doesn't sweep cleanly"). Verified via Playwright
+  that the bar depletes monotonically and exactly one timer is ever present.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily

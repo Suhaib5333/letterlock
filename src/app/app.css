@@ -1015,7 +1015,9 @@
   width: 100%;
   transform-origin: left;
   background: linear-gradient(90deg, var(--blue-glow), var(--blue));
-  transition: transform 0.1s linear;
+  /* updated every animation frame via rAF — a CSS transition here fights those
+     updates and makes the bar stutter, so we let rAF drive it directly */
+  will-change: transform;
 }
 .timer.urgent .timer-fill {
   background: linear-gradient(90deg, var(--amber-glow), var(--amber));

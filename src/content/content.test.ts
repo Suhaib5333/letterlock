@@ -59,6 +59,24 @@ describe('all registered packs are playable', () => {
   }
 });
 
+describe('no clue-restatement / sentence answers (the "Ukraine\'s capital is Kyiv" bug)', () => {
+  // Narrow patterns that indicate the answer restates the clue instead of being the
+  // clean answer — kept tight so real titles ("No Country for Old Men") aren't flagged.
+  const BUG = /(capital is|capital of|'s capital|\bbegins with\b|^the country whose|^the .* whose)/i;
+  const POSSESSIVE_IS = /\b\w+'s\b[^,]*\bis\b/i; // e.g. "Ukraine's capital is Kyiv"
+  for (const pack of PACKS) {
+    it(`${pack.name}`, () => {
+      const bad: string[] = [];
+      for (const qs of Object.values(pack.letters)) {
+        for (const q of qs) {
+          if (BUG.test(q.a) || POSSESSIVE_IS.test(q.a)) bad.push(q.a);
+        }
+      }
+      expect(bad, `Clue-restatement answers in "${pack.name}":\n${bad.join('\n')}`).toEqual([]);
+    });
+  }
+});
+
 describe('EVERY registered pack: every answer starts with its letter', () => {
   for (const pack of PACKS) {
     it(`${pack.name}`, () => {
