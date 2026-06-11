@@ -14,7 +14,12 @@ type SoundName =
   | 'pass'
   | 'win'
   | 'tick'
-  | 'reveal';
+  | 'reveal'
+  | 'select'
+  | 'swap'
+  | 'undo'
+  | 'whoosh'
+  | 'sparkle';
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -122,63 +127,146 @@ export function play(name: SoundName) {
       noise(0.42, 0.4, 0.1);
       break;
     }
+    case 'select': // soft pluck when a hex is highlighted
+      tone(587, 0, 0.07, 'triangle', 0.12, 740);
+      break;
+    case 'swap': // pie-rule swap shimmer
+      tone(440, 0, 0.1, 'triangle', 0.14, 660);
+      tone(660, 0.06, 0.12, 'sine', 0.1, 880);
+      break;
+    case 'undo': // little reverse blip
+      tone(500, 0, 0.1, 'sine', 0.12, 300);
+      break;
+    case 'whoosh':
+      noise(0, 0.18, 0.12);
+      break;
+    case 'sparkle':
+      [880, 1175, 1568].forEach((f, i) => tone(f, i * 0.05, 0.12, 'sine', 0.08));
+      break;
   }
 }
 
 /* ============================================================
-   Ambient music — an ORIGINAL, calm, nostalgic generative piece
-   (homage to mellow homescreen-style piano; not any copyrighted track).
-   Soft randomized pentatonic notes over a slow swelling pad, with the whole
-   thing gently fading in and out so it breathes. Has its own gain so it's
-   independent of the SFX mute.
+   Ambient music — ORIGINAL generative pieces (homages to mellow, nostalgic
+   game-menu vibes; NOT any copyrighted track). Several "moods" rotate in a
+   random sequence, each fading in/out so the soundtrack keeps changing. It runs
+   quieter during a match, and ducks fully when a question clip plays.
    ============================================================ */
-let musicGain: GainNode | null = null;
-let musicOn = false;
-let noteTimer: ReturnType<typeof setTimeout> | null = null;
-let swellTimer: ReturnType<typeof setTimeout> | null = null;
+interface Mood {
+  name: string;
+  scale: number[]; // frequencies (Hz)
+  wave: OscillatorType;
+  gapMin: number; // ms between notes
+  gapMax: number;
+  noteDur: number; // seconds
+  harmony: number; // 0..1 chance of a lower harmony note
+  pad: boolean; // sustained low drone
+}
 
-// C-major pentatonic across a couple of octaves — warm and consonant.
-const MUSIC_NOTES = [
-  261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25, 783.99, 880.0,
+// Each scale is a consonant set; together they give distinct flavours.
+const MOODS: Mood[] = [
+  // calm major pentatonic piano-ish (the signature vibe)
+  { name: 'calm', scale: [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25], wave: 'triangle', gapMin: 1600, gapMax: 3200, noteDur: 2.8, harmony: 0.4, pad: true },
+  // "blocky" sparse minecrafty pentatonic, higher + airier
+  { name: 'blocky', scale: [329.63, 392.0, 440.0, 523.25, 587.33, 659.25, 783.99, 880.0], wave: 'sine', gapMin: 2000, gapMax: 4200, noteDur: 3.4, harmony: 0.25, pad: true },
+  // warm lydian-ish reflective
+  { name: 'warm', scale: [293.66, 329.63, 369.99, 440.0, 493.88, 554.37, 659.25], wave: 'triangle', gapMin: 1400, gapMax: 2800, noteDur: 2.4, harmony: 0.5, pad: false },
+  // dreamy minor pentatonic
+  { name: 'dream', scale: [261.63, 311.13, 349.23, 392.0, 466.16, 523.25, 622.25], wave: 'sine', gapMin: 1800, gapMax: 3600, noteDur: 3.0, harmony: 0.45, pad: true },
 ];
 
-function softNote(freq: number, when: number, dur: number, peak: number) {
+let musicGain: GainNode | null = null;
+let padOsc: OscillatorNode[] = [];
+let musicOn = false;
+let ducked = false;
+let musicContext: 'menu' | 'game' = 'menu';
+let mood: Mood = MOODS[0];
+let noteTimer: ReturnType<typeof setTimeout> | null = null;
+let moodTimer: ReturnType<typeof setTimeout> | null = null;
+
+function targetVolume(): number {
+  if (ducked) return 0.0001;
+  return musicContext === 'game' ? 0.05 : 0.13; // quieter during a match
+}
+
+function rampMusic(to: number, seconds: number) {
   if (!ctx || !musicGain) return;
+  const now = ctx.currentTime;
+  musicGain.gain.cancelScheduledValues(now);
+  musicGain.gain.setValueAtTime(Math.max(musicGain.gain.value, 0.0001), now);
+  musicGain.gain.linearRampToValueAtTime(Math.max(to, 0.0001), now + seconds);
+}
+
+function softNote(freq: number, dur: number, peak: number) {
+  if (!ctx || !musicGain) return;
+  const t = ctx.currentTime + 0.02;
   const osc = ctx.createOscillator();
   const g = ctx.createGain();
-  osc.type = 'triangle';
+  osc.type = mood.wave;
   osc.frequency.value = freq;
-  g.gain.setValueAtTime(0.0001, when);
-  g.gain.exponentialRampToValueAtTime(peak, when + 0.4); // gentle attack
-  g.gain.exponentialRampToValueAtTime(0.0001, when + dur); // long release
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(peak, t + 0.4);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   osc.connect(g);
   g.connect(musicGain);
-  osc.start(when);
-  osc.stop(when + dur + 0.1);
+  osc.start(t);
+  osc.stop(t + dur + 0.1);
+}
+
+function stopPad() {
+  padOsc.forEach((o) => {
+    try {
+      o.stop();
+    } catch {
+      /* already stopped */
+    }
+  });
+  padOsc = [];
+}
+
+function startPad() {
+  stopPad();
+  if (!ctx || !musicGain || !mood.pad) return;
+  const root = mood.scale[0] / 2;
+  [root, root * 1.5].forEach((f) => {
+    const o = ctx!.createOscillator();
+    const g = ctx!.createGain();
+    o.type = 'sine';
+    o.frequency.value = f;
+    g.gain.value = 0.05;
+    o.connect(g);
+    g.connect(musicGain!);
+    o.start();
+    padOsc.push(o);
+  });
 }
 
 function scheduleNotes() {
   if (!ctx || !musicOn) return;
-  const now = ctx.currentTime;
-  const freq = MUSIC_NOTES[Math.floor(Math.random() * MUSIC_NOTES.length)];
-  softNote(freq, now + 0.02, 2.6 + Math.random() * 1.5, 0.16);
-  // occasional soft harmony a fifth/third below
-  if (Math.random() < 0.4) softNote(freq * 0.5, now + 0.05, 3.2, 0.1);
-  const gap = 1500 + Math.random() * 2600;
+  const freq = mood.scale[Math.floor(Math.random() * mood.scale.length)];
+  softNote(freq, mood.noteDur + Math.random() * 1.2, 0.16);
+  if (Math.random() < mood.harmony) softNote(freq / 2, mood.noteDur + 0.4, 0.09);
+  const gap = mood.gapMin + Math.random() * (mood.gapMax - mood.gapMin);
   noteTimer = setTimeout(scheduleNotes, gap);
 }
 
-/** Slow breathing swell so the music fades in and out over ~24s cycles. */
-function scheduleSwell() {
-  if (!ctx || !musicGain || !musicOn) return;
-  const now = ctx.currentTime;
-  const base = 0.0001;
-  const peak = 0.14;
-  musicGain.gain.cancelScheduledValues(now);
-  musicGain.gain.setValueAtTime(Math.max(musicGain.gain.value, base), now);
-  musicGain.gain.linearRampToValueAtTime(peak, now + 10); // fade in
-  musicGain.gain.linearRampToValueAtTime(base * 60, now + 22); // fade out (audible floor)
-  swellTimer = setTimeout(scheduleSwell, 24000);
+/** Switch to a new random mood with a gentle cross-fade (loops forever). */
+function rotateMood(initial = false) {
+  if (!ctx || !musicOn) return;
+  const fade = initial ? 4 : 3;
+  if (!initial) rampMusic(0.0001, fade); // fade current out
+  const apply = () => {
+    if (!musicOn) return;
+    let next = mood;
+    while (next === mood && MOODS.length > 1) next = MOODS[Math.floor(Math.random() * MOODS.length)];
+    mood = next;
+    startPad();
+    rampMusic(targetVolume(), fade);
+  };
+  if (initial) apply();
+  else setTimeout(apply, fade * 1000);
+  // each "track" lasts 30–50s, then rotate again
+  moodTimer = setTimeout(rotateMood, (initial ? 0 : fade * 1000) + 30000 + Math.random() * 20000);
 }
 
 export function startMusic() {
@@ -188,24 +276,39 @@ export function startMusic() {
   musicGain.connect(ctx.destination);
   musicOn = true;
   if (ctx.state === 'suspended') ctx.resume();
-  scheduleSwell();
+  mood = MOODS[Math.floor(Math.random() * MOODS.length)];
+  rotateMood(true);
   scheduleNotes();
 }
 
 export function stopMusic() {
   musicOn = false;
   if (noteTimer) clearTimeout(noteTimer);
-  if (swellTimer) clearTimeout(swellTimer);
-  noteTimer = swellTimer = null;
+  if (moodTimer) clearTimeout(moodTimer);
+  noteTimer = moodTimer = null;
+  stopPad();
   if (ctx && musicGain) {
-    const now = ctx.currentTime;
-    musicGain.gain.cancelScheduledValues(now);
-    musicGain.gain.setValueAtTime(musicGain.gain.value, now);
-    musicGain.gain.linearRampToValueAtTime(0.0001, now + 1.8); // fade out
+    rampMusic(0.0001, 1.6);
     const g = musicGain;
-    setTimeout(() => g.disconnect(), 2200);
+    setTimeout(() => g.disconnect(), 2000);
     musicGain = null;
   }
+}
+
+/** Louder in menus, quieter during a match. */
+export function setMusicContext(c: 'menu' | 'game') {
+  musicContext = c;
+  if (musicOn && !ducked) rampMusic(targetVolume(), 1.5);
+}
+
+/** Duck (pause) the music while a question audio/video clip plays; restore after. */
+export function duckMusic(on: boolean) {
+  ducked = on;
+  if (musicOn) rampMusic(targetVolume(), on ? 0.3 : 1.0);
+}
+
+export function isMusicOn() {
+  return musicOn;
 }
 
 export function haptic(ms = 12) {

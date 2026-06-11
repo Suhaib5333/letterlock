@@ -151,7 +151,14 @@ export function Game() {
         <aside className="game-side">
           <AnimatePresence mode="wait">
             {inQuestion ? (
-              <div className="question-zone" key="q">
+              <motion.div
+                className="question-zone"
+                key="q"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
                 {timer > 0 && (
                   <Timer
                     seconds={timer}
@@ -191,7 +198,7 @@ export function Game() {
                     dispatch({ type: 'UNDO' });
                   }}
                 />
-              </div>
+              </motion.div>
             ) : (
               <motion.div
                 className="pick-help"

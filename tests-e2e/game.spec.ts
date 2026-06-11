@@ -129,6 +129,20 @@ test('flags pack hides board letters (no first-letter hint) and shows a flag', a
   await expect(page.locator('.qcard-flag')).toHaveCount(1);
 });
 
+test('melody pack plays a real audio clip and hides board letters', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('pack-melodies').click();
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await expect(page.locator('.ll-board .hex-letter')).toHaveCount(0); // letters hidden
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  const audio = page.getByTestId('qcard-audio');
+  await expect(audio).toHaveCount(1);
+  await expect(audio).toHaveAttribute('src', /\/clips\/.*\.wav$/);
+});
+
 test('tutorial walkthrough is reachable and playable', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'How to play' }).click();

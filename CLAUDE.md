@@ -680,6 +680,39 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
 - ✅ Re-verified: **89 unit tests**, **20 Playwright E2E**, and the no-scroll checker ALL CLEAR
   in default, xlarge-text, and the new extreme/history/flag packs.
 
+## II.3d Round-4 — media clips, new categories, quality pass (2026-06-11)
+
+- ✅ **Real audio clips** (the "clips" blocker, solved legally two ways):
+  - 🎼 **Guess the Melody** — 23 famous PUBLIC-DOMAIN tunes synthesized from scratch into
+    tiny WAVs (`scripts/genclips.mjs` → `/public/clips`, 2.7 MB total). Compositions are PD,
+    the rendition is ours — fully bundleable.
+  - 🎧 **Guess the Song** — 38 real songs via the free **iTunes Search API** 30-second
+    **preview** URLs (`scripts/gensongs.mjs`), hotlinked from Apple's preview CDN (made for
+    preview players) — nothing copyrighted is stored. `<audio>`/`<video>` players added to the
+    question card; **background music auto-ducks** while a clip plays and resumes after.
+  - Movie/TV *video* clips: no free, hotlinkable, legal source exists (iTunes exposes no movie
+    previews; YouTube can't be bundled), so those ship as **trivia** packs + the player infra
+    is ready for user-supplied clips.
+- ✅ **New categories** (21 packs total, **~3,200 questions** shown on home, difficulty-ordered):
+  Guess the Logo (Easy/Medium/Hard via symbol-only **SimpleIcons**, dead CDN slugs auto-pruned,
+  logos shown on a light panel so any colour is visible), **Sports** (Easy/Medium, some flag
+  images), **Movies & TV** (Medium/Hard trivia), **Music** (Medium/Hard trivia), plus the two
+  audio-clip packs above.
+- ✅ **Music overhaul**: 4 rotating generative moods (calm/blocky/warm/dream) in a random loop,
+  louder in menus + quieter in-game, ducking; 5 new SFX (select/swap/undo/whoosh/sparkle).
+- ✅ **Quality pass** (the user's "two-part / illogical / wrong" complaints): parallel agents +
+  a hard validator. ~**400 contrived/padded answers** rewritten to real natural answers across
+  Sports/Space/History/GK; ~**100 compound/illogical/factually-wrong questions** fixed (e.g.
+  Seneca↦Cicero error, "baby dog → Doe", coastline rambles). Every question now **re-bucketed
+  by its answer's first letter** + **de-duplicated**, with a test asserting *every answer in
+  every pack* starts with its letter (111 unit/content tests).
+- ✅ **Timer**: hardened so exactly one countdown loop ever runs (no StrictMode double / overlap).
+- ✅ **Team name follows the chosen colour** (no text input). Difficulty chip **vertically
+  centred** in pack cards.
+- ✅ Re-verified: **111 unit tests**, **22 Playwright E2E** (incl. colour carry-through, flag &
+  melody clip, exit modal), no-scroll checker **ALL CLEAR** across 15 devices in default /
+  xlarge-text / flags / logos / songs / melodies / sports.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily

@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import type { TeamConfig, TeamId } from '../core/models';
-import { play, speak } from '../services/audio';
+import { duckMusic, play, speak } from '../services/audio';
 import type { Served } from '../state/types';
 
 interface Props {
@@ -62,8 +62,35 @@ export function QuestionCard({
           <img
             className="qcard-flag"
             src={served.question.image}
-            alt="Flag to identify"
+            alt="Image to identify"
             draggable={false}
+          />
+        </div>
+      )}
+
+      {served.question.audio && (
+        <audio
+          className="qcard-audio"
+          data-testid="qcard-audio"
+          src={served.question.audio}
+          controls
+          onPlay={() => duckMusic(true)}
+          onPause={() => duckMusic(false)}
+          onEnded={() => duckMusic(false)}
+        />
+      )}
+
+      {served.question.video && (
+        <div className="qcard-video-wrap">
+          <video
+            className="qcard-video"
+            data-testid="qcard-video"
+            src={served.question.video}
+            controls
+            playsInline
+            onPlay={() => duckMusic(true)}
+            onPause={() => duckMusic(false)}
+            onEnded={() => duckMusic(false)}
           />
         </div>
       )}

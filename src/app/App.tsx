@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect } from 'react';
-import { initAudio, setAudioEnabled, startMusic, stopMusic } from '../services/audio';
+import { initAudio, setAudioEnabled, setMusicContext, startMusic, stopMusic } from '../services/audio';
 import { applyTeamColors } from '../state/palette';
 import { useStore } from '../state/store';
 import { Home } from '../screens/Home';
@@ -46,6 +46,11 @@ export function App() {
   // Reset scroll on every screen change so a screen never opens mid-scroll.
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, [screen]);
+
+  // Music plays quieter during a match, fuller in menus.
+  useEffect(() => {
+    setMusicContext(screen === 'game' ? 'game' : 'menu');
   }, [screen]);
 
   // Drive the live team colors. During a match use the locked-in team colors;

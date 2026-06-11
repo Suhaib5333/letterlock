@@ -224,6 +224,7 @@
   scroll-snap-align: start;
   text-align: left;
   display: flex;
+  align-items: center; /* vertically centre emoji + body in the (stretched) card */
   gap: 14px;
   padding: var(--s-3);
   border-radius: var(--r-lg);
@@ -263,9 +264,17 @@
   font-size: var(--t-sm);
   margin: 4px 0 10px;
 }
+.pack-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* keep name/desc/chips centred, never top-stuck */
+  min-width: 0;
+  flex: 1;
+}
 .pack-meta {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 .chip {
   font-size: var(--t-xs);
@@ -860,12 +869,32 @@
 .qcard-flag {
   width: auto;
   max-width: 100%;
-  max-height: clamp(64px, 16vh, 150px);
-  border-radius: 10px;
+  max-height: clamp(80px, 18vh, 168px);
+  border-radius: 12px;
   border: 1px solid var(--line-strong);
   box-shadow: var(--shadow-2);
   object-fit: contain;
-  background: var(--surface-2);
+  /* light panel so ANY logo colour (incl. black glyphs) is clearly visible */
+  background: #fff;
+  padding: clamp(8px, 1.8vh, 16px);
+}
+.qcard-audio {
+  width: 100%;
+  height: 40px;
+  margin-bottom: var(--s-3);
+}
+.qcard-video-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--s-3);
+}
+.qcard-video {
+  width: auto;
+  max-width: 100%;
+  max-height: clamp(120px, 28vh, 260px);
+  border-radius: 10px;
+  background: #000;
+  border: 1px solid var(--line-strong);
 }
 .qcard-q {
   font-size: clamp(1.2rem, 2.4vw, 1.6rem);
@@ -1507,12 +1536,14 @@
     flex: 0 0 clamp(150px, 46vw, 190px);
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
     gap: 6px;
     padding: 12px;
   }
   .pack-body {
     width: 100%;
+    align-items: center;
   }
   .pack-meta {
     justify-content: center;

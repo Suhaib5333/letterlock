@@ -8,6 +8,12 @@ import { flagsEasyPack, flagsMediumPack, flagsHardPack } from './flags';
 import { historyPack } from './history';
 import { spacePack } from './space';
 import { geniusPack } from './genius';
+import { logosEasyPack, logosMediumPack, logosHardPack } from './logos';
+import { sportsEasyPack, sportsMediumPack } from './sports';
+import { moviesPack, moviesHardPack } from './screen';
+import { musicMediumPack, musicHardPack } from './musicpack';
+import { melodiesPack } from './melodies';
+import { songsPack } from './songs';
 
 /**
  * Re-bucket every question under the letter its ANSWER actually starts with.
@@ -16,10 +22,14 @@ import { geniusPack } from './genius';
  */
 function rebucketByAnswer(pack: RawPack): RawPack {
   const letters: RawPack['letters'] = {};
+  const seen = new Set<string>(); // drop duplicate questions within a pack
   for (const qs of Object.values(pack.letters)) {
     for (const q of qs) {
       const k = q.a.trim()[0]?.toUpperCase();
       if (!k || k < 'A' || k > 'Z') continue; // skip non A–Z answers
+      const sig = `${q.q.trim().toLowerCase()}|${q.a.trim().toLowerCase()}`;
+      if (seen.has(sig)) continue; // de-duplicate
+      seen.add(sig);
       (letters[k] ??= []).push(q);
     }
   }
@@ -87,11 +97,22 @@ export const PACKS: QuestionPack[] = [
   fullGeneralKnowledge,
   flagsEasyPack,
   flagsMediumPack,
+  flagsHardPack,
+  logosEasyPack,
+  logosMediumPack,
+  logosHardPack,
+  sportsEasyPack,
+  sportsMediumPack,
   sciencePack,
   worldPack,
+  moviesPack,
+  moviesHardPack,
+  musicMediumPack,
+  musicHardPack,
+  melodiesPack,
+  songsPack,
   historyPack,
   spacePack,
-  flagsHardPack,
   geniusPack,
 ]
   .map((p) => normalizePack(rebucketByAnswer(p)))
