@@ -30,7 +30,7 @@ export const musicMediumPack: RawPack = {
     ],
     D: [
       { q: 'Canadian rapper and singer known for "God\'s Plan" and "Hotline Bling".', a: 'Drake', category: 'music' },
-      { q: 'British rock icon born David Jones, famous for personas like Ziggy Stardust.', a: 'David Bowie', category: 'music' },
+      { q: 'British glam-rock icon who invented alter egos including Ziggy Stardust and the Thin White Duke.', a: 'David Bowie', category: 'music' },
       { q: 'The percussion instrument that forms the rhythmic backbone of a rock or jazz band.', a: 'Drums', category: 'music' },
     ],
     E: [
@@ -50,7 +50,7 @@ export const musicMediumPack: RawPack = {
     ],
     H: [
       { q: 'Austrian composer who wrote over 100 symphonies and is called the "Father of the Symphony".', a: 'Haydn', category: 'music' },
-      { q: 'American guitarist who played the US national anthem at Woodstock in 1969.', a: 'Hendrix', category: 'music' },
+      { q: 'American singer-rapper Lauryn ___ whose 1998 debut solo album swept five Grammy Awards in 1999.', a: 'Hill', category: 'music' },
       { q: 'A musical note worth half of a whole note.', a: 'Half note', category: 'music' },
     ],
     I: [
@@ -58,7 +58,7 @@ export const musicMediumPack: RawPack = {
     ],
     J: [
       { q: 'Genre of American music born in New Orleans blending African rhythms with European harmony.', a: 'Jazz', category: 'music' },
-      { q: 'American pop icon known for the "Thriller" album and the moonwalk dance move.', a: 'Jackson Michael', category: 'music' },
+      { q: 'American pop icon known for the "Thriller" album and the moonwalk dance move.', a: 'Michael Jackson', category: 'music' },
       { q: 'American guitarist who pioneered psychedelic blues-rock and died aged 27.', a: 'Jimi Hendrix', category: 'music' },
     ],
     K: [
@@ -66,7 +66,7 @@ export const musicMediumPack: RawPack = {
       { q: 'The combination of sharps or flats at the start of a staff that tells you what key a piece is in.', a: 'Key signature', category: 'music' },
     ],
     L: [
-      { q: 'British rock band whose name references a Led airship, famous for "Stairway to Heaven".', a: 'Led Zeppelin', category: 'music' },
+      { q: 'British rock band famous for "Stairway to Heaven", whose two-word name combines a heavy metal and a lighter-than-air craft.', a: 'Led Zeppelin', category: 'music' },
       { q: 'Italian tempo marking indicating a very slow, broad pace.', a: 'Largo', category: 'music' },
       { q: 'New Zealand singer known for the minimalist pop hit "Royals".', a: 'Lorde', category: 'music' },
     ],
@@ -78,7 +78,7 @@ export const musicMediumPack: RawPack = {
     ],
     N: [
       { q: 'American rapper known for "Super Bass" and "Anaconda".', a: 'Nicki Minaj', category: 'music' },
-      { q: 'Manchester band known for "Wonderwall" and "Don\'t Look Back in Anger", fronted by Noel and Liam Gallagher.', a: 'Noel Gallagher', category: 'music' },
+      { q: 'Manchester band known for "Wonderwall" and "Don\'t Look Back in Anger", fronted by Noel and Liam Gallagher.', a: 'Oasis', category: 'music' },
     ],
     O: [
       { q: 'An interval spanning eight notes of a musical scale — for example from C up to the next C.', a: 'Octave', category: 'music' },
@@ -92,7 +92,7 @@ export const musicMediumPack: RawPack = {
     ],
     Q: [
       { q: 'British rock band known for "Bohemian Rhapsody", "We Will Rock You", and "We Are the Champions".', a: 'Queen', category: 'music' },
-      { q: 'A musical note worth one-quarter of a whole note.', a: 'Quarter note', category: 'music' },
+      { q: 'In music notation, the note value that lasts one beat in common time, receiving one count out of four.', a: 'Quarter note', category: 'music' },
     ],
     R: [
       { q: 'Barbados-born pop star known for "Umbrella" and "Diamonds".', a: 'Rihanna', category: 'music' },
@@ -116,7 +116,7 @@ export const musicMediumPack: RawPack = {
     ],
     V: [
       { q: 'The highest-pitched bowed string instrument in the orchestra.', a: 'Violin', category: 'music' },
-      { q: 'Italian opera composer of "Aida", "Rigoletto", and "La Traviata".', a: 'Verdi', category: 'music' },
+      { q: 'Northern Irish singer-songwriter known for "Brown Eyed Girl" and the album "Astral Weeks".', a: 'Van Morrison', category: 'music' },
       { q: 'The bowed string instrument pitched between the violin and cello.', a: 'Viola', category: 'music' },
     ],
     W: [
@@ -155,18 +155,18 @@ export const musicHardPack: RawPack = {
     ],
     B: [
       { q: 'Hungarian composer and ethnomusicologist who composed "Bluebeard\'s Castle" and collected Balkan folk songs.', a: 'Bartok', category: 'music' },
-      { q: 'The lowest-pitched member of the woodwind family, pitched an octave below the standard clarinet.', a: 'Bass clarinet', category: 'music' },
+      { q: 'The large low-pitched woodwind instrument pitched an octave beneath its soprano cousin, with a curved neck and upturned bell.', a: 'Bass clarinet', category: 'music' },
       { q: 'Austrian late-Romantic composer who wrote nine vast symphonies, always revising and never finishing a tenth.', a: 'Bruckner', category: 'music' },
     ],
     C: [
-      { q: 'Spanish cellist and conductor Pau Casals, considered the pre-eminent cellist of the first half of the 20th century.', a: 'Casals', category: 'music' },
+      { q: 'Catalan cellist who rescued Bach\'s unaccompanied cello suites from obscurity and is regarded as the greatest cellist of the first half of the 20th century.', a: 'Casals', category: 'music' },
       { q: 'French Romantic composer known for his nocturnes, preludes, and etudes for solo piano.', a: 'Chopin', category: 'music' },
       { q: 'A virtuosic passage near the end of a concerto movement where the soloist plays alone, displaying technique.', a: 'Cadenza', category: 'music' },
       { q: 'A scale that uses all 12 pitches within an octave, proceeding entirely in half-step intervals.', a: 'Chromatic scale', category: 'music' },
     ],
     D: [
       { q: 'French Impressionist composer known for "Clair de lune" and the orchestral seascape "La Mer".', a: 'Debussy', category: 'music' },
-      { q: 'American jazz trumpeter and bandleader who led the landmark "Birth of the Cool" recording sessions in 1949–50.', a: 'Davis Miles', category: 'music' },
+      { q: 'American jazz trumpeter and bandleader who led the landmark "Birth of the Cool" recording sessions in 1949–50.', a: 'Miles Davis', category: 'music' },
       { q: 'A compositional technique presenting a theme in shorter note values, effectively doubling its speed.', a: 'Diminution', category: 'music' },
       { q: 'Czech Romantic composer known for the "New World" Symphony and his cello concerto in B minor.', a: 'Dvorak', category: 'music' },
     ],
@@ -178,7 +178,7 @@ export const musicHardPack: RawPack = {
     F: [
       { q: 'A polyphonic composition in which a theme is stated by one voice and then imitated by the others in succession.', a: 'Fugue', category: 'music' },
       { q: 'Spanish Nationalist composer who wrote the ballet "The Three-Cornered Hat" and "Nights in the Gardens of Spain".', a: 'Falla', category: 'music' },
-      { q: 'The technique of playing a stringed instrument by plucking the strings rather than bowing them.', a: 'Fingerpicking', category: 'music' },
+      { q: 'The technique of plucking guitar strings with individual fingers rather than using a flat pick.', a: 'Fingerpicking', category: 'music' },
     ],
     G: [
       { q: 'American composer who blended jazz and classical styles in "Rhapsody in Blue" and the opera "Porgy and Bess".', a: 'Gershwin', category: 'music' },
@@ -187,7 +187,7 @@ export const musicHardPack: RawPack = {
     ],
     H: [
       { q: 'German-British Baroque composer who wrote the oratorio "Messiah" and the "Water Music" suite for King George I.', a: 'Handel', category: 'music' },
-      { q: 'A stride jazz piano style born in 1920s Harlem, where the left hand alternates bass notes with mid-range chords.', a: 'Harlem stride', category: 'music' },
+      { q: 'A Jazz Age piano style originating in 1920s New York in which the left hand leaps between low single notes and mid-register chords.', a: 'Harlem stride', category: 'music' },
       { q: 'The sequence of overtones produced naturally above a fundamental pitch.', a: 'Harmonic series', category: 'music' },
     ],
     I: [
@@ -195,7 +195,7 @@ export const musicHardPack: RawPack = {
       { q: 'A genre of South African Zulu choral music, made famous globally by Ladysmith Black Mambazo.', a: 'Isicathamiya', category: 'music' },
     ],
     J: [
-      { q: 'A subgenre of jazz from the 1940s characterised by fast tempos, altered chords, and virtuosic improvisation.', a: 'Jazz bebop', category: 'music' },
+      { q: 'A subgenre of jazz from the 1940s characterised by fast tempos, altered chords, and virtuosic improvisation.', a: 'Bebop', category: 'music' },
       { q: 'American composer who wrote "Show Boat" and "Ol\' Man River", a founding figure of the Broadway musical.', a: 'Jerome Kern', category: 'music' },
     ],
     K: [
@@ -248,27 +248,27 @@ export const musicHardPack: RawPack = {
     ],
     U: [
       { q: 'Performing or singing the exact same pitch together — the interval of zero semitones.', a: 'Unison', category: 'music' },
-      { q: 'An upbeat note or group of notes that precede the first full measure of a piece — the note before "beat one".', a: 'Upbeat', category: 'music' },
+      { q: 'In music, the one or more notes at the very opening that arrive before the first strong beat of the bar, also called an anacrusis.', a: 'Upbeat', category: 'music' },
     ],
     V: [
-      { q: 'Italian Baroque composer who wrote over 500 concertos and "The Four Seasons".', a: 'Vivaldi', category: 'music' },
+      { q: 'The term for a fluctuation in pitch produced on a sustained note by a singer or string player, adding warmth and expressiveness.', a: 'Vibrato', category: 'music' },
       { q: 'A marimba-like instrument with metal bars and motorised rotating discs that create a gentle vibrato effect.', a: 'Vibraphone', category: 'music' },
-      { q: 'A German Romantic song setting a poem for voice and piano — the foundational form of the Lied tradition.', a: 'Volkslied', category: 'music' },
+      { q: 'A German Romantic song setting a poem for voice and piano — the art-song form perfected by Schubert and Schumann.', a: 'Lied', category: 'music' },
     ],
     W: [
       { q: 'German opera composer who wrote the four-opera "Ring" cycle and developed the leitmotif technique.', a: 'Wagner', category: 'music' },
-      { q: 'A ballroom dance in triple meter, originating in 18th-century Austria and Germany.', a: 'Waltz', category: 'music' },
-      { q: 'American composer of film scores including "Star Wars" and "Schindler\'s List".', a: 'Williams John', category: 'music' },
+      { q: 'An interval spanning two semitones — one full step up the major scale — used to build the symmetrical scale Debussy favoured.', a: 'Whole tone', category: 'music' },
+      { q: 'American composer of film scores including "Star Wars" and "Schindler\'s List".', a: 'John Williams', category: 'music' },
     ],
     X: [
       { q: 'A percussion instrument with wooden bars struck by mallets, producing bright, pitched tones.', a: 'Xylophone', category: 'music' },
     ],
     Y: [
       { q: 'A Russian-born American violinist who made his professional debut aged 7 and became one of the 20th century\'s greatest.', a: 'Yehudi Menuhin', category: 'music' },
-      { q: 'Japanese traditional theatre combining chant, movement, and mask, in which the music is called "yokyoku".', a: 'Yokyoku', category: 'music' },
+      { q: 'The chanted vocal music of Japanese Noh theatre, performed to flute and drum accompaniment.', a: 'Yokyoku', category: 'music' },
     ],
     Z: [
-      { q: 'Italian Renaissance theorist Gioseffo Zarlino wrote the foundational rules of this system that underpins Western harmony.', a: 'Zarlino', category: 'music' },
+      { q: 'The 16th-century Venetian music theorist whose treatises codified the rules of counterpoint and tonal harmony.', a: 'Zarlino', category: 'music' },
       { q: 'A Louisiana Creole music style blending French, African, and Caribbean influences, driven by accordion and washboard.', a: 'Zydeco', category: 'music' },
     ],
   },

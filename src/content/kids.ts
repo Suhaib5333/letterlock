@@ -39,7 +39,7 @@ export const kidsPack: RawPack = {
       { q: 'The biggest land animal, with a trunk.', a: 'Elephant' },
       { q: 'A breakfast food that birds lay.', a: 'Egg' },
       { q: 'The planet we live on.', a: 'Earth' },
-      { q: 'A part of your body you hear with.', a: 'Ear' },
+      { q: 'The body part on the side of your head you use to listen.', a: 'Ear' },
     ],
     F: [
       { q: 'An animal that swims and has fins.', a: 'Fish' },
@@ -74,14 +74,14 @@ export const kidsPack: RawPack = {
     K: [
       { q: 'A hopping animal from Australia with a pouch.', a: 'Kangaroo' },
       { q: 'A toy you fly in the wind on a string.', a: 'Kite' },
-      { q: 'A man who wears a crown and rules a kingdom.', a: 'King' },
+      { q: 'A man who wears a crown and rules a country.', a: 'King' },
       { q: 'A baby cat.', a: 'Kitten' },
     ],
     L: [
       { q: 'The "king of the jungle".', a: 'Lion' },
       { q: 'A yellow, sour fruit.', a: 'Lemon' },
       { q: 'A baby sheep.', a: 'Lamb' },
-      { q: 'A flash of light in a thunderstorm.', a: 'Lightning' },
+      { q: 'A bright electric flash you see in a thunderstorm.', a: 'Lightning' },
     ],
     M: [
       { q: 'A small animal that squeaks, chased by cats.', a: 'Mouse' },
@@ -93,7 +93,7 @@ export const kidsPack: RawPack = {
       { q: 'The part of your face you smell with.', a: 'Nose' },
       { q: 'The time when it is dark and you sleep.', a: 'Night' },
       { q: 'A bird builds this to lay its eggs.', a: 'Nest' },
-      { q: 'A snack like a peanut or almond.', a: 'Nut' },
+      { q: 'A hard-shelled snack like an almond or cashew.', a: 'Nut' },
     ],
     O: [
       { q: 'A round fruit, also a colour.', a: 'Orange' },
@@ -115,7 +115,7 @@ export const kidsPack: RawPack = {
     ],
     R: [
       { q: 'A fluffy animal with long ears that hops.', a: 'Rabbit' },
-      { q: 'The colours in the sky after rain.', a: 'Rainbow' },
+      { q: 'The colourful arc you see in the sky after a shower.', a: 'Rainbow' },
       { q: 'Water that flows to the sea.', a: 'River' },
       { q: 'A red flower with thorns.', a: 'Rose' },
     ],

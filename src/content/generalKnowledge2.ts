@@ -85,7 +85,7 @@ export const extraGeneralKnowledge: Record<string, RawQuestion[]> = {
   ],
   J: [
     { q: 'The month that starts the year.', a: 'January', category: 'misc' },
-    { q: 'A long journey, especially by sea or space.', a: 'Journey', category: 'misc' },
+    { q: 'A long trip or voyage, especially by sea or through space.', a: 'Journey', category: 'misc' },
     { q: 'A king and queen rule a kingdom; the playing card ranked between ten and queen.', a: 'Jack', category: 'misc' },
     { q: 'South Africa\'s largest city, nicknamed "Jo\'burg," and the country\'s economic hub.', a: 'Johannesburg', category: 'geography' },
     { q: 'A device that lifts a car to change a tyre.', a: 'Jack', category: 'misc' },
