@@ -14,13 +14,9 @@ function q(country: string, code: string, alt?: string[]): RawQuestion {
 
 // ~30 more WELL-KNOWN countries (none duplicate flags.ts Easy/Medium/Hard).
 export const flagsEasyExtra: Record<string, RawQuestion[]> = {
-  A: [q('Austria', 'at')],
-  C: [q('Chile', 'cl'), q('Colombia', 'co'), q('Czechia', 'cz', ['czech republic'])],
-  H: [q('Hungary', 'hu')],
-  I: [q('Indonesia', 'id'), q('Israel', 'il')],
-  N: [q('New Zealand', 'nz'), q('Nigeria', 'ng')],
-  P: [q('Peru', 'pe'), q('Philippines', 'ph', ['the philippines'])],
-  Q: [q('Qatar', 'qa')],
+  C: [q('Czechia', 'cz', ['czech republic'])],
+  N: [q('New Zealand', 'nz')],
+  P: [q('Philippines', 'ph', ['the philippines'])],
   S: [
     q('Saudi Arabia', 'sa'),
     q('Singapore', 'sg'),
@@ -28,31 +24,28 @@ export const flagsEasyExtra: Record<string, RawQuestion[]> = {
     q('South Korea', 'kr'),
   ],
   U: [
-    q('Ukraine', 'ua'),
     q('United Arab Emirates', 'ae', ['uae', 'emirates']),
   ],
 };
 
 // ~40 moderately-known countries (none duplicate flags.ts or Easy above).
 export const flagsMediumExtra: Record<string, RawQuestion[]> = {
-  A: [q('Algeria', 'dz'), q('Armenia', 'am'), q('Azerbaijan', 'az')],
+  A: [q('Algeria', 'dz')],
   B: [
     q('Bahrain', 'bh'),
     q('Belarus', 'by'),
     q('Bosnia and Herzegovina', 'ba', ['bosnia']),
   ],
-  C: [q('Cambodia', 'kh'), q('Costa Rica', 'cr'), q('Cuba', 'cu'), q('Cyprus', 'cy')],
+  C: [q('Costa Rica', 'cr'), q('Cuba', 'cu'), q('Cyprus', 'cy')],
   E: [q('Ethiopia', 'et')],
   L: [q('Latvia', 'lv'), q('Luxembourg', 'lu')],
   M: [
     q('Mongolia', 'mn'),
     q('Montenegro', 'me'),
-    q('Myanmar', 'mm'),
   ],
   N: [q('North Macedonia', 'mk', ['macedonia'])],
   O: [q('Oman', 'om')],
   P: [q('Panama', 'pa'), q('Paraguay', 'py')],
-  S: [q('Sri Lanka', 'lk')],
   T: [q('Tanzania', 'tz'), q('Tunisia', 'tn')],
 };
 
@@ -93,7 +86,6 @@ export const flagsHardExtra: Record<string, RawQuestion[]> = {
     q('Mozambique', 'mz'),
   ],
   N: [q('Nicaragua', 'ni'), q('Niger', 'ne')],
-  P: [q('Palau', 'pw')],
   R: [q('Rwanda', 'rw')],
   S: [
     q('Samoa', 'ws'),

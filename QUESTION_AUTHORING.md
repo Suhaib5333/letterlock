@@ -125,6 +125,24 @@ A base pack and its `withExtra(...)` files (e.g. `kids.ts` + `kids2.ts`) merge i
 identical `q` strings across them are silently de-duplicated at runtime (wasting a question).
 When authoring an expansion, check new clues against the base file too — write fresh phrasings.
 
+### 14. Media / image-by-identifier packs (flags, logos, songs, melodies)
+These render an asset by an external identifier, so the answer and the identifier are
+**two facts that must agree** — a wrong id silently shows the wrong asset (no test catches it).
+- **Flags** (`flagcdn.com/<iso2>`): the code must be the country's real ISO 3166-1 alpha-2.
+  Watch look-alikes: Congo `cg` vs DR Congo `cd`; Niger `ne` vs Nigeria `ng`;
+  Guinea `gn` vs Equatorial Guinea `gq` vs Guinea-Bissau `gw`.
+- **Logos** (`cdn.simpleicons.org/<slug>`): the slug = the *Simple Icons brand title*
+  (lowercased, punctuation/spaces stripped, `.`→`dot`, `&`→`and`). A generic-looking slug
+  is often a specific product — `rocket` = **WP Rocket**, `origin` = EA's Origin,
+  `delta` = the airline. Set `a` to that exact brand; everyday name → `alt`.
+- **Songs / melodies** (audio clips): no two entries share the same clip URL, and no `a`
+  title repeats (runtime de-dupe silently drops the second). `a` = clean Title-Case title
+  (keep official stylisation: "HUMBLE.", "Señorita"); `alt` carries the **performing artist**.
+- **Dedupe globally** across the base file and every `*Extra` expansion — each country /
+  brand / song should appear exactly once.
+- These packs set `hideBoardLetters: true`; tiles are **not** pinned to a letter — any hex
+  serves a random item of any starting letter (verified: `scripts/verify_flags.mjs`).
+
 ## Style guide (quality, not just passing tests)
 
 - **One clean fact per question.** No two-part / compound clues ("X and also Y").
@@ -146,6 +164,33 @@ shows no letters and tiles are **not pinned to a letter** — any tile can serve
 question. The card prompt should be generic ("Name this flag", "Act this out").
 Answers still must start with a real letter (used for nothing on the board, but
 keeps validation/serving consistent).
+
+### Charade-specific rules
+
+In a charade pack `q` is a **fixed acting instruction** (e.g. "Act this out — no
+talking!") and `a` is the **thing to mime** — a generic word or short phrase is
+*correct* here (it is NOT a rule-6 "generic category" violation, because there is
+no clue describing one specific thing). Additional rules for charade answers:
+
+- **The answer must be a real, correctly-spelled, recognisable thing** a team could
+  reasonably *guess* — a concrete object, animal, action, profession, emotion,
+  concept, or a **genuine, well-known movie/TV title**. No invented/padded terms
+  ("Volcano eruption", "Cricket bug", "Jellyfish bloom", "Lobster trap" → use the
+  real single word: "Vase", "Cicada", "Jay", "Labrador"), and nothing so obscure the
+  guesser can't know it.
+- **No duplicate answer across the whole charade family.** The charade packs span
+  six source files (`charades.ts`, `charadesExtra.ts`, `charades2a/2b.ts`,
+  `charades3.ts`, `charadesMovies2.ts`); the same word in two different themed packs
+  (Easy / Animals / Actions / Hard / Movies) still counts as a duplicate — keep one,
+  and file each word in its best-fit pack (animals → Animals, verbs/sports → Actions,
+  everyday objects/simple mimes → Easy). `rebucketByAnswer` only de-dupes the *exact*
+  `q|a` pair *within one merged pack*, so it will NOT catch a same-answer/different-
+  instruction or cross-pack repeat — author these out by hand.
+- **Movie/TV titles must be real and broadly known.** Prefer the canonical English
+  title ("The Matrix", not "Matrix"; avoid foreign-release names like "Vaiana" for
+  "Moana"). The board key letter is ignored (titles rebucket by the title's first
+  letter), so a title placed under the "wrong" object key still files correctly — but
+  keep it tidy.
 
 ## Where files live & how they're wired
 

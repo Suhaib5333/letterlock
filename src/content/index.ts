@@ -14,6 +14,7 @@ import { moviesPack, moviesHardPack } from './screen';
 import { musicMediumPack, musicHardPack } from './musicpack';
 import { melodiesPack } from './melodies';
 import { songsPack } from './songs';
+import { songsExtra } from './songsExtra';
 // Expansions authored to push every pack past 200 questions.
 import { moviesMediumExtra } from './moviesExtra';
 import { moviesHardExtra } from './moviesHardExtra';
@@ -173,7 +174,7 @@ export const PACKS: QuestionPack[] = [
   fullMusic,
   fullMusicHard,
   melodiesPack,
-  songsPack,
+  withExtra(songsPack, songsExtra),
   historyPack,
   spacePack,
   geniusPack,

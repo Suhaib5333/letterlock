@@ -164,7 +164,7 @@ export const charadesEasy2: Record<string, RawQuestion[]> = {
   V: [
     { q: MIME, a: 'Vegetable garden', category: 'charade' },
     { q: ACT2, a: 'Van', category: 'charade' },
-    { q: DRAW, a: 'Volcano eruption', category: 'charade' },
+    { q: DRAW, a: 'Vase', category: 'charade' },
   ],
   W: [
     { q: ACT2, a: 'Watermelon', category: 'charade' },

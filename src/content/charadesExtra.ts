@@ -193,7 +193,7 @@ export const charadesMoviesExtra: Record<string, RawQuestion[]> = {
     { q: ACT, a: 'Pirates of the Caribbean', category: 'charade' },
   ],
   R: [
-    { q: MIME, a: 'Ratatouille', category: 'charade' },
+    { q: MIME, a: 'Raya and the Last Dragon', category: 'charade' },
     { q: ACT2, a: 'Robin Hood', category: 'charade' },
   ],
   S: [
@@ -206,7 +206,7 @@ export const charadesMoviesExtra: Record<string, RawQuestion[]> = {
     { q: ACT2, a: 'Terminator', category: 'charade' },
     { q: DRAW, a: 'Top Gun', category: 'charade' },
   ],
-  V: [{ q: SHOW, a: 'Vaiana', category: 'charade' }],
+  V: [{ q: SHOW, a: 'Megamind', category: 'charade' }],
   W: [
     { q: ACT, a: 'Wonder Woman', category: 'charade' },
     { q: MIME, a: 'Wreck-It Ralph', category: 'charade' },

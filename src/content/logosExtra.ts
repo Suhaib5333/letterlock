@@ -766,7 +766,7 @@ export const logosHardExtra: Record<string, RawQuestion[]> = {
     q("Ruby", "ruby"),
     q("React", "react"),
     q("Remix", "remix"),
-    q("Rocket", "rocket"),
+    q("WP Rocket", "rocket", ["Rocket"]),
     q("Redux", "redux"),
     q("Redis", "redis"),
     q("RabbitMQ", "rabbitmq"),

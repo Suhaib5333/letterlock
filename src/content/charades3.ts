@@ -33,7 +33,7 @@ export const charadesAnimals3: Record<string, RawQuestion[]> = {
   C: [
     { q: MIME, a: 'Cockatoo', category: 'charade' },
     { q: ACT2, a: 'Coyote', category: 'charade' },
-    { q: DRAW, a: 'Cricket bug', category: 'charade' },
+    { q: DRAW, a: 'Cicada', category: 'charade' },
     { q: SHOW, a: 'Crane', category: 'charade' },
     { q: HUSH, a: 'Caribou', category: 'charade' },
   ],
@@ -62,14 +62,14 @@ export const charadesAnimals3: Record<string, RawQuestion[]> = {
     { q: DRAW, a: 'Ibis', category: 'charade' },
   ],
   J: [
-    { q: ACT, a: 'Jellyfish bloom', category: 'charade' },
+    { q: ACT, a: 'Jay', category: 'charade' },
   ],
   K: [
     { q: ACT2, a: 'Krill', category: 'charade' },
     { q: DRAW, a: 'Komodo dragon', category: 'charade' },
   ],
   L: [
-    { q: SHOW, a: 'Lobster trap', category: 'charade' },
+    { q: SHOW, a: 'Labrador', category: 'charade' },
     { q: ACT, a: 'Lemming', category: 'charade' },
     { q: MIME, a: 'Locust', category: 'charade' },
   ],
@@ -84,7 +84,7 @@ export const charadesAnimals3: Record<string, RawQuestion[]> = {
   ],
   O: [
     { q: MIME, a: 'Okapi', category: 'charade' },
-    { q: ACT2, a: 'Opossum', category: 'charade' },
+    { q: ACT2, a: 'Ocelot', category: 'charade' },
   ],
   P: [
     { q: DRAW, a: 'Pangolin', category: 'charade' },

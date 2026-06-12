@@ -75,7 +75,7 @@ export const charadesActions2: Record<string, RawQuestion[]> = {
   J: [
     { q: MIME, a: 'Janitor', category: 'charade' },
     { q: ACT2, a: 'Jeweler', category: 'charade' },
-    { q: SHOW, a: 'Jump rope', category: 'charade' },
+    { q: SHOW, a: 'Jousting', category: 'charade' },
   ],
   K: [
     { q: DRAW, a: 'Kayaking', category: 'charade' },
@@ -111,7 +111,7 @@ export const charadesActions2: Record<string, RawQuestion[]> = {
   R: [
     { q: ACT, a: 'Receptionist', category: 'charade' },
     { q: MIME, a: 'Roofer', category: 'charade' },
-    { q: ACT2, a: 'Raking leaves', category: 'charade' },
+    { q: ACT2, a: 'Racquetball', category: 'charade' },
     { q: SHOW, a: 'Rock climbing', category: 'charade' },
     { q: DRAW, a: 'Roller skating', category: 'charade' },
   ],
@@ -122,7 +122,7 @@ export const charadesActions2: Record<string, RawQuestion[]> = {
     { q: ACT2, a: 'Snorkeling', category: 'charade' },
     { q: DRAW, a: 'Sewing', category: 'charade' },
     { q: SHOW, a: 'Shoveling snow', category: 'charade' },
-    { q: PERF, a: 'Stretching', category: 'charade' },
+    { q: PERF, a: 'Saluting', category: 'charade' },
   ],
   T: [
     { q: ACT, a: 'Translator', category: 'charade' },
@@ -216,7 +216,7 @@ export const charadesHard2: Record<string, RawQuestion[]> = {
   ],
   L: [
     { q: ACT, a: 'Loyalty', category: 'charade' },
-    { q: MIME, a: 'Lightning', category: 'charade' },
+    { q: MIME, a: 'Lava', category: 'charade' },
     { q: ACT2, a: 'Longing', category: 'charade' },
     { q: SHOW, a: 'Laziness', category: 'charade' },
   ],

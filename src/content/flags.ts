@@ -55,7 +55,7 @@ export const flagsMediumPack: RawPack = {
   accent: '#6a4c93',
   hideBoardLetters: true,
   letters: {
-    A: [q('Austria', 'at'), q('Albania', 'al'), q('Argentina', 'ar')],
+    A: [q('Austria', 'at'), q('Albania', 'al')],
     B: [q('Bangladesh', 'bd'), q('Bolivia', 'bo'), q('Bulgaria', 'bg')],
     C: [q('Croatia', 'hr'), q('Colombia', 'co'), q('Chile', 'cl')],
     D: [q('Dominican Republic', 'do')],
