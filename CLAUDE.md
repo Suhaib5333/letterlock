@@ -758,6 +758,30 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
   real movie/TV video clips (no free legal source); real licensed/Minecraft music (copyright);
   logos/flags/melodies/songs packs stay under 200 (source-capped).
 
+## II.3g Round-7 — movie trailers, exit/timer polish, iPhone layout (2026-06-12)
+
+- ✅ **🎬 "Guess the Movie (Trailer)" pack SHIPS** (the long-standing "movie clips" ask, finally
+  unblocked WITHOUT a TMDB key). `src/content/movieClips.ts` (id `movies-clips`, letterless)
+  embeds **64 real official trailers** via the existing `youtube` field →
+  `youtube-nocookie.com/embed/<id>`. Built by `scripts/genmovies.mjs`: a curated
+  `[title, year, youtubeId]` list, each id **verified at build time against the real video title
+  via YouTube's keyless oEmbed** — only ids whose title matches the movie AND is a trailer are
+  kept (10/74 candidates auto-dropped as dead). A wrong/dead id can never ship. Guarded by an
+  e2e test. To expand: add rows to the script + re-run.
+- ✅ **Exit-modal "Keep playing"**: the `‹` arrow is now pinned at the button's LEFT edge on its
+  own (absolute), with the label centred — was glued to the text (`.exit-keep` + `.exit-keep-arrow`).
+- ✅ **Steal-phase timer fix** (user: "looks weird when it gets towards the second team
+  stealing"): (a) the `urgent` pulse no longer blinks for the WHOLE steal phase — it pulses only
+  in the last 5s of either phase; the steal phase is signalled by amber colour + a `⚡ {team}
+  steals` label + a gently-flashing bolt. (b) The steal label no longer truncates to "⚡ Amber
+  st…" (`.timer.steal .timer-label { max-width: 18ch }`). (c) The bar refills to full instantly
+  on phase change (`setRemaining(seconds/2)`) so there's no empty-frame flicker; rAF still drives
+  depletion (no CSS transition fighting it).
+- ✅ **iPhone portrait + landscape re-verified** (390×844, 375×667, 844×390, 667×375): question
+  text, revealed answer, and host pad all fully on-screen, board the biggest element, zero
+  document scroll. New `scripts/verify_fixes.mjs` captures all four fixes before/after.
+- ✅ **218 unit/content tests, 34 Playwright e2e**, noscroll ALL CLEAR (default + `movies-clips`).
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily

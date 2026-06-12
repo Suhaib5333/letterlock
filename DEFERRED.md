@@ -61,25 +61,27 @@ as #1). Local-only high scores wouldn't be "global."
 
 ---
 
-## 3. 🎬 Real movie / TV video clips  — **infra READY, needs a TMDB key to populate**
+## 3. 🎬 Real movie / TV video clips  — ✅ **DONE (2026-06-12) — "Guess the Movie (Trailer)" pack ships**
 
-**Requested (repeatedly):** actual video clips for guessing popular movies.
+**Requested (repeatedly):** actual video clips for guessing popular movies. **Built and live.**
 
-**Status — the player is now built:** `QuestionCard` supports a `youtube` field that embeds a
-trailer via `youtube-nocookie.com/embed/<id>` (16:9, capped, privacy mode). So a
-"Guess the Movie (Trailer)" pack is **one data file away** — just needs the trailer YouTube ids.
+**What ships:** a **"Guess the Movie (Trailer)"** pack (`src/content/movieClips.ts`, id
+`movies-clips`, 🎬, medium, letterless) with **64 real official trailers** embedded via
+`QuestionCard`'s `youtube` field → `youtube-nocookie.com/embed/<id>` (16:9, capped, privacy mode).
+Card prompt: "Watch the trailer — name the movie. (year)".
 
-**Why not populated yet:** sourcing the *correct* official-trailer id per movie reliably needs a
-lookup. Dead ends tried: **iTunes movie search returns 0** (Apple disabled it); **Deezer** is
-audio-only and hotlink-blocked anyway; guessing YouTube ids from memory risks embedding the
-*wrong* video. **The clean fix:** a free **TMDB API key** — then a script (`scripts/genmovies.mjs`,
-to be written) fetches each movie's official trailer key from `/movie/{id}/videos` and writes the
-pack. (oEmbed `https://www.youtube.com/oembed?url=…` can verify each id maps to the right
-trailer at build time so nothing wrong ships.)
+**How it was solved without a TMDB key** (the previously-assumed blocker): `scripts/genmovies.mjs`
+holds a curated `[title, year, youtubeId]` candidate list and **verifies every id at build time
+against the real video title via YouTube's keyless oEmbed**
+(`https://www.youtube.com/oembed?format=json&url=…` returns the title). Only ids whose title
+actually matches the movie AND is a trailer/teaser are kept — so a wrong/guessed/dead id can
+never ship (10 of 74 candidates were auto-dropped as "not found"). Re-run the script to add more.
+Embedding promotional trailers is legal; nothing copyrighted is stored. Guarded by an e2e test
+(`movie-trailer pack embeds a YouTube trailer`).
 
-**To unblock:** drop a **TMDB API key** (free, ~1 min at themoviedb.org) — or paste YouTube
-trailer links — and the movie-clip pack populates immediately. Embedding promotional trailers
-is legal; nothing copyrighted is stored.
+> Note: a few studios disable embedding on specific videos; those would show YouTube's own
+> "watch on YouTube" panel inside the iframe — Reveal/Skip still work, so play never stalls.
+> To expand: add `[title, year, id]` rows to `scripts/genmovies.mjs` and re-run.
 
 ---
 

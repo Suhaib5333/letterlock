@@ -291,7 +291,7 @@ export function Game() {
               <p className="go-sub">Your progress is saved — you can resume from the home screen anytime.</p>
               <div className="exit-actions">
                 <button
-                  className="btn btn-secondary"
+                  className="btn btn-secondary exit-keep"
                   data-testid="exit-cancel"
                   autoFocus
                   onClick={() => {
@@ -299,7 +299,8 @@ export function Game() {
                     setConfirmingExit(false);
                   }}
                 >
-                  ‹ Keep playing
+                  <span className="exit-keep-arrow" aria-hidden="true">‹</span>
+                  <span>Keep playing</span>
                 </button>
                 <button
                   className="btn btn-primary"

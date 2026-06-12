@@ -143,6 +143,20 @@ test('melody pack plays a real audio clip and hides board letters', async ({ pag
   await expect(audio).toHaveAttribute('src', /\/clips\/.*\.wav$/);
 });
 
+test('movie-trailer pack embeds a YouTube trailer and hides board letters', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('pack-movies-clips').click();
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await expect(page.locator('.ll-board .hex-letter')).toHaveCount(0); // letters hidden
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  const yt = page.getByTestId('qcard-youtube');
+  await expect(yt).toHaveCount(1);
+  await expect(yt).toHaveAttribute('src', /youtube-nocookie\.com\/embed\/[\w-]+/);
+});
+
 test('pie-rule prompt is an overlay that does not shrink the board, and swap works (no blank)', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await startMatch(page, { size: 5, mode: 'single' });

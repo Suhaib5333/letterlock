@@ -59,6 +59,7 @@ export function Timer({
           // hand the other team half the time to steal
           phaseRef.current = 'steal';
           setPhase('steal');
+          setRemaining(seconds / 2); // refill to full immediately (no empty-frame flicker)
           startRef.current = now;
           tickRef.current = 0;
           play('steal');
@@ -83,23 +84,29 @@ export function Timer({
   if (seconds === 0) return null;
   const total = phase === 'steal' ? seconds / 2 : seconds;
   const pct = Math.max(0, Math.min(1, remaining / total));
-  const urgent = phase === 'steal' || (remaining <= 5 && remaining > 0);
+  // Pulse ONLY in the last few seconds of a phase (not the whole steal phase — that
+  // continuous blink looked broken). The steal phase is signalled by colour + label.
+  const urgent = remaining <= 5 && remaining > 0;
   const done = phase === 'done';
-
-  const label =
-    phase === 'done'
-      ? 'Time!'
-      : phase === 'steal'
-        ? `⚡ ${otherName} steal`
-        : pickerName;
+  const steal = phase === 'steal';
 
   return (
     <div
-      className={`timer ${urgent ? 'urgent' : ''} ${done ? 'done' : ''} ${phase === 'steal' ? 'steal' : ''}`}
+      className={`timer ${urgent ? 'urgent' : ''} ${done ? 'done' : ''} ${steal ? 'steal' : ''}`}
       data-testid="timer"
       data-phase={phase}
     >
-      <span className="timer-label">{label}</span>
+      <span className="timer-label">
+        {done ? (
+          'Time!'
+        ) : steal ? (
+          <>
+            <span className="timer-bolt" aria-hidden="true">⚡</span> {otherName} steals
+          </>
+        ) : (
+          pickerName
+        )}
+      </span>
       <div className="timer-bar">
         <div className="timer-fill" style={{ transform: `scaleX(${pct})` }} />
       </div>

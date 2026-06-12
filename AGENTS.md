@@ -22,10 +22,10 @@ Companion docs: `CLAUDE.md` (full plan + build log), `QUESTION_AUTHORING.md` (co
 ## 2. ⭐ The standing workflow (do this every change)
 1. Make the change.
 2. `npx tsc -b` — must be clean.
-3. `npx vitest run` — all unit + content tests green (currently **214**).
+3. `npx vitest run` — all unit + content tests green (currently **218**).
 4. If layout/CSS changed: `node scripts/noscroll.mjs` in **3+ modes** (see §3) → "ALL CLEAR".
 5. If content changed: `npx vitest run src/content` (leak/letter/dup/Surname guards).
-6. `npx playwright test` — e2e green (currently **32**, desktop + mobile).
+6. `npx playwright test` — e2e green (currently **34**, desktop + mobile).
 7. Commit (**no AI attribution** — see §6) + `git push origin main` (Cloudflare deploys).
 
 > ### ⚠️ ALWAYS VERIFY WITH PLAYWRIGHT — before AND after — especially LANDSCAPE PHONES
@@ -81,6 +81,13 @@ drivers) + `Read` the PNGs instead — same coverage, no MCP needed.
   - `scripts/genflags.mjs` → downloads flag SVGs into `public/flags/` (bundled locally so flags
     always load — flagcdn.com is blocked on some networks). Flag helper uses `/flags/<code>.svg`.
   - `scripts/genclips.mjs` → synthesizes public-domain melody WAVs into `public/clips/`.
+  - `scripts/genmovies.mjs` → `movieClips.ts` ("Guess the Movie (Trailer)"). Curated
+    `[title, year, youtubeId]` list, each **verified at build time via YouTube keyless oEmbed**
+    (`https://www.youtube.com/oembed?format=json&url=…` returns the title) — only ids whose title
+    matches the movie AND is a trailer are kept, so no wrong/dead id ships. Add rows + re-run to
+    expand. (No TMDB key needed — that earlier blocker is resolved.)
+  - `scripts/verify_fixes.mjs` → focused before/after Playwright check (movie iframe, exit-modal
+    arrow geometry, steal-timer label/phase, iPhone portrait+landscape visibility) → `verify-shots/`.
 - **Counts:** `npx vite-node /tmp/counts.mjs` (a tiny script that prints questions per pack).
   Every text pack is 200+; flags & melodies are the source-capped exceptions (see DEFERRED.md).
 

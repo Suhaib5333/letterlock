@@ -1361,6 +1361,18 @@ iframe.qcard-video {
 }
 .timer.steal .timer-label {
   color: var(--amber-glow);
+  /* the steal label ("⚡ Amber steals") needs more room than the 11ch main label,
+     otherwise it truncated to "⚡ Amber st…" which read as broken */
+  max-width: 18ch;
+}
+.timer-bolt {
+  display: inline-block;
+  animation: boltFlash 0.9s ease-in-out infinite;
+}
+@keyframes boltFlash {
+  50% {
+    opacity: 0.45;
+  }
 }
 .timer.steal .timer-fill {
   background: linear-gradient(90deg, var(--amber-glow), var(--amber));
@@ -1632,6 +1644,21 @@ iframe.qcard-video {
 }
 .exit-actions .btn {
   flex: 1;
+}
+/* "Keep playing": the ‹ arrow sits pinned at the LEFT on its own, the label stays
+   centred in the button (rather than the arrow being glued to the text). */
+.exit-keep {
+  position: relative;
+  text-align: center;
+}
+.exit-keep-arrow {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.25em;
+  line-height: 1;
+  opacity: 0.8;
 }
 
 /* ---------- Settings modal ---------- */
