@@ -27,7 +27,17 @@ Companion docs: `CLAUDE.md` (full plan + build log), `QUESTION_AUTHORING.md` (co
 5. If content changed: `npx vitest run src/content` (leak/letter/dup/Surname guards).
 6. `npx playwright test` — e2e green (currently **32**, desktop + mobile).
 7. Commit (**no AI attribution** — see §6) + `git push origin main` (Cloudflare deploys).
-> Verify **before and after** visually with Playwright when the user reports a UI issue.
+
+> ### ⚠️ ALWAYS VERIFY WITH PLAYWRIGHT — before AND after — especially LANDSCAPE PHONES
+> This is the #1 standing instruction from the user. For **any** UI/layout change, capture
+> screenshots **before and after** with Playwright (`scripts/audit.mjs` / `diag.mjs` /
+> `measure.mjs`, then `Read` the PNGs) and run `noscroll.mjs`. **Landscape phones are the
+> most fragile and most often broken** — small landscape (e.g. **667×375**, 740×360, 844×390)
+> fell into the portrait column layout and cut off the question. They are now in
+> `noscroll.mjs`'s viewport list AND get the side-by-side 2-col layout
+> (`@media (orientation: landscape) and (max-height: 520px)`). **Never ship a layout change
+> without screenshotting portrait AND landscape (small + large) and confirming the question
+> card + Show-answer + host pad are fully visible and the board is the biggest element.**
 
 ## 3. 🧪 Verification toolchain — what / how / when / how often
 Everything runs against a local preview: `npm run build` then `npm run preview` (port **4173**).

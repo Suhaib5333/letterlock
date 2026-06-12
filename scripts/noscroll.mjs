@@ -9,6 +9,8 @@ const VIEWPORTS = [
   { name: 'pixel7', w: 412, h: 915 },
   { name: 'galaxy-s8', w: 360, h: 740 },
   { name: 'phone-landscape', w: 740, h: 360 },
+  { name: 'se-landscape', w: 667, h: 375 },
+  { name: 'iphone-landscape', w: 844, h: 390 },
   { name: 'ipad-mini-p', w: 768, h: 1024 },
   { name: 'ipad-pro-p', w: 834, h: 1112 },
   { name: 'ipad-landscape', w: 1024, h: 768 },

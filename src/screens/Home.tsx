@@ -8,6 +8,14 @@ import { play } from '../services/audio';
 import { remaining } from '../state/progress';
 import { resumeSavedGame, useStore } from '../state/store';
 
+// Regional packs use a flag — but flag EMOJIS (🇧🇭) render as "BH"/"SA"/"AE" letter
+// placeholders on Windows/many browsers, so we show the real (bundled) flag image instead.
+const PACK_FLAG: Record<string, string> = {
+  bahrain: 'bh',
+  'saudi-arabia': 'sa',
+  uae: 'ae',
+};
+
 export function Home() {
   const { state, dispatch, hasSavedGame } = useStore();
   const [showSettings, setShowSettings] = useState(false);
@@ -110,7 +118,11 @@ export function Home() {
                   dispatch({ type: 'UPDATE_SETUP', patch: { packId: pack.id } });
                 }}
               >
-                <div className="pack-emoji">{pack.emoji}</div>
+                {PACK_FLAG[pack.id] ? (
+                  <img className="pack-flag-icon" src={`/flags/${PACK_FLAG[pack.id]}.svg`} alt="" aria-hidden="true" draggable={false} />
+                ) : (
+                  <div className="pack-emoji">{pack.emoji}</div>
+                )}
                 <div className="pack-body">
                   <div className="pack-name">{pack.name}</div>
                   <div className="pack-desc">{pack.description}</div>
