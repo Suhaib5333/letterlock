@@ -84,7 +84,17 @@ export function Game() {
         >
           ‹<span className="exit-label"> Exit</span>
         </button>
-        <Scoreboard teams={teams} game={game} series={series} mode={MODE_LABEL[opts.mode]} />
+        <Scoreboard
+          teams={teams}
+          game={game}
+          series={series}
+          mode={MODE_LABEL[opts.mode]}
+          canSwitch={game.status === 'playing' && ui.phase === 'pick'}
+          onSwitchTurn={() => {
+            play('swap');
+            dispatch({ type: 'SWITCH_TURN' });
+          }}
+        />
         <div className="game-head-spacer" />
       </header>
 
@@ -172,18 +182,6 @@ export function Game() {
               <span className="turn-dir">
                 connect {game.directions[picker] === 'horizontal' ? 'left ↔ right' : 'top ↕ bottom'}
               </span>
-              <button
-                className="switch-turn-btn"
-                data-testid="switch-turn"
-                aria-label="Switch turn to the other team"
-                title="Manually switch whose turn it is (host intervention)"
-                onClick={() => {
-                  play('swap');
-                  dispatch({ type: 'SWITCH_TURN' });
-                }}
-              >
-                ⇄<span className="switch-label"> switch</span>
-              </button>
             </div>
           )}
         </div>
@@ -210,18 +208,20 @@ export function Game() {
                     otherName={teams[other].name}
                   />
                 )}
-                <QuestionCard
-                  served={ui.served!}
-                  answerRevealed={ui.answerRevealed}
-                  picker={picker}
-                  teams={teams}
-                  hideLetter={hideLetters}
-                  tts={state.settings.tts}
-                  canSkip={ui.skipsUsed < 1}
-                  repeated={ui.repeated}
-                  onReveal={() => dispatch({ type: 'REVEAL_ANSWER' })}
-                  onSkip={() => dispatch({ type: 'SKIP_QUESTION' })}
-                />
+                <div className="qcard-scroll">
+                  <QuestionCard
+                    served={ui.served!}
+                    answerRevealed={ui.answerRevealed}
+                    picker={picker}
+                    teams={teams}
+                    hideLetter={hideLetters}
+                    tts={state.settings.tts}
+                    canSkip={ui.skipsUsed < 1}
+                    repeated={ui.repeated}
+                    onReveal={() => dispatch({ type: 'REVEAL_ANSWER' })}
+                    onSkip={() => dispatch({ type: 'SKIP_QUESTION' })}
+                  />
+                </div>
                 <HostPad
                   teams={teams}
                   picker={picker}

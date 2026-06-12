@@ -190,6 +190,10 @@ test('charades pack shows a QR secret-prompt and the /img page renders the word'
   await page.locator('.ll-hex.claimable').first().click();
   await expect(page.getByTestId('question-card')).toBeVisible();
   await expect(page.getByTestId('charade-qr')).toBeVisible();
+  // "Show answer" reveals the word + the prompt image (host verification).
+  await page.getByTestId('reveal-answer').click();
+  await expect(page.getByTestId('answer-text')).toBeVisible();
+  await expect(page.locator('.answer-charade-img')).toHaveCount(1);
   // The standalone secret-prompt deep link renders a name.
   await page.goto('/?view=img&w=Elephant&img=&h=Act%20it%20out!');
   await expect(page.getByTestId('imgview-name')).toHaveText('Elephant');

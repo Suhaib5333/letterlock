@@ -5,6 +5,8 @@ interface Props {
   game: GameState;
   series: { A: number; B: number; gamesNeeded: number };
   mode: string;
+  canSwitch?: boolean;
+  onSwitchTurn?: () => void;
 }
 
 function dirLabel(game: GameState, team: TeamId) {
@@ -54,13 +56,24 @@ function TeamPanel({
   );
 }
 
-export function Scoreboard({ teams, game, series, mode }: Props) {
+export function Scoreboard({ teams, game, series, mode, canSwitch, onSwitchTurn }: Props) {
   return (
     <div className="scoreboard">
       <TeamPanel team="A" teams={teams} game={game} series={series} />
       <div className="score-mid">
         <span className="mode-tag">{mode}</span>
-        <span className="vs-mini">VS</span>
+        <span className="vs-badge">VS</span>
+        {canSwitch && (
+          <button
+            className="vs-switch"
+            data-testid="switch-turn"
+            aria-label="Switch turn to the other team"
+            title="Switch whose turn it is (host intervention)"
+            onClick={onSwitchTurn}
+          >
+            ⇄ <span className="vs-switch-label">switch</span>
+          </button>
+        )}
       </div>
       <TeamPanel team="B" teams={teams} game={game} series={series} />
     </div>
