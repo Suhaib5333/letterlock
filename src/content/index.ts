@@ -14,6 +14,7 @@ import { moviesPack, moviesHardPack } from './screen';
 import { tvClipsEasyPack, tvClipsMediumPack, tvClipsHardPack } from './movieClips';
 import { musicMediumPack, musicHardPack } from './musicpack';
 import { melodiesPack } from './melodies';
+import { melodiesExtra } from './melodiesExtra';
 import { songsPack } from './songs';
 import { songsExtra } from './songsExtra';
 // Expansions authored to push every pack past 200 questions.
@@ -46,6 +47,11 @@ import { charadesEasy2, charadesAnimals2 } from './charades2a';
 import { charadesActions2, charadesHard2 } from './charades2b';
 import { charadesAnimals3, charadesActions3, charadesHard3 } from './charades3';
 import { saudiExtra, uaeExtra, gulfExtra } from './gccExtra';
+// Round-9 regional expansions (each pushes its pack past 200 questions).
+import { bahrainExtra } from './bahrainExtra';
+import { saudiExtra2 } from './saudiExtra2';
+import { uaeExtra2 } from './uaeExtra2';
+import { gulfExtra2 } from './gulfExtra2';
 
 /**
  * Re-bucket every question under the letter its ANSWER actually starts with.
@@ -98,6 +104,16 @@ const fullSportsMedium = withExtra(sportsMediumPack, sportsMediumExtra);
 const fullFlagsEasy = withExtra(flagsEasyPack, flagsEasyExtra);
 const fullFlagsMedium = withExtra(flagsMediumPack, flagsMediumExtra);
 const fullFlagsHard = withExtra(flagsHardPack, flagsHardExtra);
+
+// TV clips: iTunes can't supply 200+ *recognizable* shows per difficulty tier, so the
+// three tiers are merged into ONE "TV Show Clips" pack (~220, all real verified clips).
+const fullTvClips: RawPack = {
+  ...withExtra(tvClipsEasyPack, tvClipsMediumPack.letters, tvClipsHardPack.letters),
+  id: 'tv-clips',
+  name: 'TV Show Clips',
+  description: 'Watch a real episode clip and name the series — no title, no spoilers.',
+  difficulty: 'medium',
+};
 
 /** Auto-attach a keyword image to charade prompts (the secret prompt shown via QR). */
 function charadeImg(answer: string): string {
@@ -195,23 +211,21 @@ export const PACKS: QuestionPack[] = [
   fullSportsMedium,
   sciencePack,
   worldPack,
-  tvClipsEasyPack,
-  tvClipsMediumPack,
-  tvClipsHardPack,
+  fullTvClips,
   fullMovies,
   fullMoviesHard,
   fullMusic,
   fullMusicHard,
-  melodiesPack,
+  withExtra(melodiesPack, melodiesExtra),
   withExtra(songsPack, songsExtra),
   historyPack,
   spacePack,
   geniusPack,
   // Regional packs (Bahrain + GCC).
-  bahrainPack,
-  withExtra(saudiPack, saudiExtra),
-  withExtra(uaePack, uaeExtra),
-  withExtra(gulfPack, gulfExtra),
+  withExtra(bahrainPack, bahrainExtra),
+  withExtra(saudiPack, saudiExtra, saudiExtra2),
+  withExtra(uaePack, uaeExtra, uaeExtra2),
+  withExtra(gulfPack, gulfExtra, gulfExtra2),
   // Charades (images attached for the QR secret-prompt page).
   withCharadeImages(withExtra(charadesEasyPack, charadesEasyExtra, charadesEasy2)),
   withCharadeImages(withExtra(charadesAnimalsPack, charadesAnimalsExtra, charadesAnimals2, charadesAnimals3)),

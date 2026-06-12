@@ -148,12 +148,14 @@ test('melody pack plays a real audio clip and hides board letters', async ({ pag
   await expect(page.getByTestId('question-card')).toBeVisible();
   const audio = page.getByTestId('qcard-audio');
   await expect(audio).toHaveCount(1);
-  await expect(audio).toHaveAttribute('src', /\/clips\/.*\.wav$/);
+  // A melody is either a synthesized PD clip (/clips/*.wav) or an iTunes instrumental
+  // preview (.m4a) — both are real, playable audio.
+  await expect(audio).toHaveAttribute('src', /\/clips\/.*\.wav$|itunes\.apple\.com.*\.m4a/);
 });
 
 test('tv-clips pack plays a real episode video clip and hides board letters', async ({ page }) => {
   await page.goto('/');
-  await selectPack(page, 'tv-clips-easy');
+  await selectPack(page, 'tv-clips');
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
@@ -169,7 +171,7 @@ test('tv-clips pack plays a real episode video clip and hides board letters', as
 test('clip timer holds until the clip is first played, then counts down', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/');
-  await selectPack(page, 'tv-clips-easy');
+  await selectPack(page, 'tv-clips');
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();

@@ -114,16 +114,21 @@ drop CC0/CC-BY `.mp3`/`.ogg` files into `public/music/` and wire them in `servic
 
 ---
 
-## 5. 📦 Packs still under 200  — **source-limited (the two hard exceptions)**
+## 5. 📦 Packs still under 200  — **only World Flags (the sole exception)**
 
-Almost every pack is now **200+**. Two remain genuinely capped by their medium, plus the
-regional packs (kept short for quality):
+**Round-9 update:** every pack is now **200+ EXCEPT the three World Flags packs** (the user's stated
+exception). 31 packs, ~7,367 questions total. What was fixed this round:
+- **Regional** Bahrain (259), Saudi (229), UAE (228), Gulf (233) — authored to 200+ (round-9 `*Extra2`
+  files, accuracy-audited, leak-guarded).
+- **Guess the Melody → 235** — kept the ~23 synthesized PD WAVs and added ~214 **real iTunes preview
+  clips of famous instrumental themes** (film/TV/game scores + classical) via
+  `scripts/genmelodies_itunes.mjs` → `melodiesExtra.ts` (each preview confirmed to match the piece).
+- **TV Show Clips → 204** — the three difficulty tiers were **merged into one pack** (iTunes doesn't
+  have 200+ *recognisable* shows per tier, so per-tier 200 was impossible without obscure padding).
 
 | Pack | Count | Cap reason |
 |---|---|---|
-| **World Flags** (easy/med/hard) | ~49 / 61 / 81 (~191 total) | Only ~195 sovereign countries exist — this is essentially the ceiling. *(User pre-excepted flags.)* |
-| **Guess the Melody** | 23 | **Hard exception.** Each clip is a hand-transcribed public-domain tune synthesized to a bundled WAV (`scripts/genclips.mjs`). Reaching 200 would need ~177 more accurate transcriptions **and ~20 MB of bundled audio**; auto-generating risks wrong-note, unrecognisable clips. Could be scaled later by switching to iTunes previews of famous instrumental/classical pieces (loses the synthesized charm). |
-| Bahrain / Saudi / UAE / Gulf | ~125 / 72 / 67 / 67 | Quality regional trivia is finite; kept tight to avoid padded/contrived answers (a known prior complaint). |
+| **World Flags** (easy/med/hard) | 39 / 55 / 81 | Only ~195 sovereign countries exist — this is the ceiling. *(User pre-excepted flags.)* |
 
 Now at 200+: **Guess the Song** (≈200, iTunes previews via `scripts/gensongs.mjs`), **Logos**
 easy/med/hard (≈215 / 203 / 323, every slug verified against `cdn.simpleicons.org` via

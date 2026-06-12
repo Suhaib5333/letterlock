@@ -27,7 +27,7 @@ const afterTap = await p.evaluate(() => document.activeElement === document.quer
 console.log('  focuses on tap:', afterTap);
 
 // 2) TV clip: native video supports fullscreen, has controls, no nofullscreen restriction.
-await p.getByTestId('pack-tv-clips-easy').click();
+await p.getByTestId('pack-tv-clips').click();
 await sleep(200);
 await p.getByTestId('play-button').click();
 await p.getByTestId('mode-single').click().catch(() => {});

@@ -30,6 +30,6 @@ async function run(pack, mediaTestId, label) {
   await c.close();
 }
 
-await run('tv-clips-easy', 'qcard-video', 'VIDEO (TV)');
+await run('tv-clips', 'qcard-video', 'VIDEO (TV)');
 await run('songs', 'qcard-audio', 'AUDIO (song)');
 await b.close();

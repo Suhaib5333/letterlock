@@ -843,6 +843,23 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
   tv-clips + category menu), noscroll ALL CLEAR. Mobile verified: search no-autofocus + video
   fullscreen-enabled + readyState 4.
 
+## II.3j Round-9 — every pack 200+ except flags (2026-06-12)
+
+- ✅ **Regional packs authored to 200+**: Bahrain 259, Saudi 229, UAE 228, Gulf 233 (round-9
+  `bahrainExtra.ts` / `saudiExtra2.ts` / `uaeExtra2.ts` / `gulfExtra2.ts`, written by 4 parallel
+  agents). Accuracy-first (well-established facts only); then a leak-fix agent pass + a manual fix
+  cleared all answer-in-question leaks. Content tests green.
+- ✅ **Guess the Melody → 235**: kept the synthesized PD WAVs (~23) and added ~214 **real iTunes
+  preview clips of famous instrumental themes** (film/TV/game scores + classical) via
+  `scripts/genmelodies_itunes.mjs` → `melodiesExtra.ts`. Each preview is confirmed (loose token
+  match) to be the right piece; `checkmedia` → 235/235 reachable.
+- ✅ **TV Show Clips → one 204-question pack**: the 3 difficulty tiers were merged (iTunes has no
+  200+ *recognisable* shows per tier, so per-tier 200 was impossible without obscure padding —
+  which violates accuracy). `groupOf('tv-clips')` keeps it in Movies & TV.
+- ✅ **Result: 31 packs, ~7,367 questions; the ONLY packs under 200 are the three World Flags
+  packs** (the user's stated exception — ~195 countries exist). `checkmedia` 0 dead across
+  melodies/tv-clips/songs. **218 unit tests, 36 e2e**, noscroll ALL CLEAR.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily
