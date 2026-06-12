@@ -5,7 +5,9 @@ import type { RawPack, RawQuestion } from '../core/packs';
  * and the answer is the country's name. The board letters are HIDDEN for these packs
  * (hideBoardLetters) so the first letter never gives the answer away.
  */
-const flag = (code: string): string => `https://flagcdn.com/${code}.svg`;
+// Bundled locally (public/flags/, via scripts/genflags.mjs) so flags always load
+// from our own origin — flagcdn.com can be blocked/slow on some networks.
+const flag = (code: string): string => `/flags/${code}.svg`;
 const PROMPT = 'Which country does this flag belong to?';
 
 function q(country: string, code: string, alt?: string[]): RawQuestion {

@@ -1184,6 +1184,14 @@
   justify-content: center;
   margin-bottom: var(--s-3);
 }
+/* YouTube trailer embed (guess-the-movie) — 16:9, capped to the panel height. */
+iframe.qcard-video {
+  width: min(100%, 46vh * 1.78);
+  aspect-ratio: 16 / 9;
+  max-height: clamp(120px, 30vh, 280px);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+}
 .qcard-video {
   width: auto;
   max-width: 100%;
@@ -1362,6 +1370,20 @@
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   padding: 10px 16px;
+}
+/* Short / landscape screens: shrink the scoreboard so the game area (board + the
+   full question card) gets the height it needs and nothing is cut off. */
+@media (max-height: 480px) {
+  .scoreboard {
+    padding: 4px 12px;
+  }
+  .team-stats,
+  .series-pips {
+    display: none;
+  }
+  .team-score {
+    font-size: 1.25rem;
+  }
 }
 .team-panel {
   position: relative;
@@ -1786,13 +1808,14 @@
      readable minimum). So a question always shows fully, and in the pick phase the
      board is large. (The pie-swap prompt is an absolute overlay, so it never
      resizes the board.) */
-  /* The board yields AGGRESSIVELY (high shrink) so the question card + host-pad
-     footer fit on-screen with no scroll; only an unusually tall card (charade QR
-     on a tiny phone) makes .qcard-scroll scroll — and the host pad, being a fixed
-     footer, is ALWAYS visible and never clipped. */
+  /* The hex board is the BIGGEST content piece: it keeps a large share of the
+     height (≈36vh) and grows larger in the pick phase. The question panel takes
+     the rest; a normal question fits with no scroll, and only a tall card (charade
+     QR) scrolls inside .qcard-scroll. The host pad is a fixed footer — always
+     visible, never clipped. */
   .board-wrap {
-    flex: 1 3 auto;
-    min-height: clamp(84px, 15vh, 170px);
+    flex: 1 1 auto;
+    min-height: clamp(140px, 32vh, 300px);
   }
   .game-side {
     flex: 0 1 auto;
@@ -1872,6 +1895,36 @@
   }
   .award-sub {
     display: none;
+  }
+  /* Short phones: compact the question card so the whole thing (question + Show
+     answer + Skip) fits under a large board, with no scroll. */
+  @media (max-height: 720px) {
+    .qcard {
+      padding: 9px 12px;
+    }
+    .qcard-top {
+      margin-bottom: 5px;
+      gap: 8px;
+    }
+    .letter-badge {
+      width: 36px;
+      height: 40px;
+      font-size: 1.2rem;
+    }
+    .qcard-q {
+      font-size: 0.98rem;
+      margin-bottom: 6px;
+    }
+    .qcard-answer {
+      gap: 6px;
+    }
+    .qcard-answer .btn,
+    .answer-reveal {
+      padding: 6px 13px;
+    }
+    .hostpad .award {
+      padding: 9px 8px;
+    }
   }
   /* trim the scoreboard height on phones */
   .team-stats {

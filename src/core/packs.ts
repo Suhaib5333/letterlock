@@ -10,6 +10,7 @@ export interface Question {
   image?: string; // optional image URL (e.g. a flag/logo to identify)
   audio?: string; // optional audio clip URL (e.g. guess-the-song)
   video?: string; // optional video clip URL (e.g. guess-the-movie)
+  youtube?: string; // optional YouTube id — embedded trailer (e.g. guess-the-movie)
 }
 
 export interface QuestionPack {

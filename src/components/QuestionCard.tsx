@@ -170,6 +170,19 @@ export function QuestionCard({
           </div>
         ))}
 
+      {served.question.youtube && (
+        <div className="qcard-video-wrap">
+          <iframe
+            className="qcard-video"
+            data-testid="qcard-youtube"
+            src={`https://www.youtube-nocookie.com/embed/${served.question.youtube}?rel=0&modestbranding=1`}
+            title="Watch and guess"
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      )}
+
       <p className="qcard-q" data-testid="question-text">
         {served.question.q}
       </p>

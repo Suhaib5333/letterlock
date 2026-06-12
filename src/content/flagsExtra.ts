@@ -5,7 +5,7 @@ import type { RawQuestion } from '../core/packs';
  * any country already used there. Same image source (flagcdn.com) and helper
  * format. Each entry is bucketed under the FIRST LETTER of the country name.
  */
-const flag = (code: string): string => `https://flagcdn.com/${code}.svg`;
+const flag = (code: string): string => `/flags/${code}.svg`; // bundled locally (public/flags/)
 const PROMPT = 'Which country does this flag belong to?';
 
 function q(country: string, code: string, alt?: string[]): RawQuestion {

@@ -61,19 +61,25 @@ as #1). Local-only high scores wouldn't be "global."
 
 ---
 
-## 3. 🎬 Real movie / TV video clips  — **BLOCKED: legal / no free source**
+## 3. 🎬 Real movie / TV video clips  — **infra READY, needs a TMDB key to populate**
 
-**Requested:** actual clips of popular movies "at whatever cost."
+**Requested (repeatedly):** actual video clips for guessing popular movies.
 
-**Why it's blocked (re-confirmed):** there is **no free, hotlinkable, legal source** for
-copyrighted film/TV clips. iTunes exposes audio previews but **no movie previews**; YouTube
-can't be embedded-and-bundled legally. Bundling copyrighted clips is infringement.
+**Status — the player is now built:** `QuestionCard` supports a `youtube` field that embeds a
+trailer via `youtube-nocookie.com/embed/<id>` (16:9, capped, privacy mode). So a
+"Guess the Movie (Trailer)" pack is **one data file away** — just needs the trailer YouTube ids.
 
-**What ships instead / paths forward:**
-- The Movies & TV packs are rich **trivia** (200+ each) and there are **Charades · Movies & TV**
-  packs. The `<video>` player infra in `QuestionCard` is **ready** for clips.
-- To add real clips legally, provide one of: (a) licensed clip files we host, (b) a TMDB/JustWatch
-  API key for trailer links (trailers are promotional), or (c) user-supplied clip URLs.
+**Why not populated yet:** sourcing the *correct* official-trailer id per movie reliably needs a
+lookup. Dead ends tried: **iTunes movie search returns 0** (Apple disabled it); **Deezer** is
+audio-only and hotlink-blocked anyway; guessing YouTube ids from memory risks embedding the
+*wrong* video. **The clean fix:** a free **TMDB API key** — then a script (`scripts/genmovies.mjs`,
+to be written) fetches each movie's official trailer key from `/movie/{id}/videos` and writes the
+pack. (oEmbed `https://www.youtube.com/oembed?url=…` can verify each id maps to the right
+trailer at build time so nothing wrong ships.)
+
+**To unblock:** drop a **TMDB API key** (free, ~1 min at themoviedb.org) — or paste YouTube
+trailer links — and the movie-clip pack populates immediately. Embedding promotional trailers
+is legal; nothing copyrighted is stored.
 
 ---
 
