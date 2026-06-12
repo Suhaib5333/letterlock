@@ -74,6 +74,21 @@ Don't repeat the same `q` string. Vary phrasing.
 Spread answers across the alphabet. (The two fully-covered packs — General
 Knowledge and Kids — must cover **all 26**.)
 
+### 6. Answers must be the SPECIFIC named entity, never a generic category
+If the clue describes **one particular thing**, the answer must name *that thing*,
+not the category it belongs to. A generic answer is wrong because many things fit it.
+- ❌ `a: 'Causeway'` for "the crossing linking Bahrain to Saudi Arabia" → ✅ `a: 'King Fahd Causeway'`
+- ❌ `a: 'Roundabout'` for the 2011 Manama monument → ✅ `a: 'Pearl Roundabout'`
+- ❌ `a: 'Tower'`, `a: 'Mosque'`, `a: 'Airport'`, `a: 'Museum'` when a *named* one is meant
+  → ✅ `'Burj Khalifa'`, `'Al-Fateh Grand Mosque'`, `'Bahrain International Airport'`, `'Louvre Abu Dhabi'`
+- ❌ contrived number/word padding like `a: 'Number six'` → ✅ `a: 'Six'` (just the clean word)
+Keep the **distinctive part of the name out of the clue** (rule 2 still applies), e.g.
+clue "named for a Saudi monarch" + answer "King Fahd Causeway" is fine ("King Fahd" isn't in the clue).
+
+### 7. Be factually exact, especially dates/places
+Double-check specifics. (e.g. Bahrain declared **independence on 15 Aug 1971**; its
+**National Day is 16 Dec** — don't conflate them. The UAE federation was **2 Dec 1971**.)
+
 ## Style guide (quality, not just passing tests)
 
 - **One clean fact per question.** No two-part / compound clues ("X and also Y").

@@ -15,7 +15,7 @@ export const bahrainPack: RawPack = {
       { q: 'The lightweight silvery metal smelted at the kingdom\'s huge industrial plant near Askar, a major non-oil export.', a: 'Aluminium', category: 'bahrain', difficulty: 2 },
       { q: 'The Bronze Age burial mounds at this village west of the capital form a vast prehistoric necropolis and a UNESCO feature.', a: 'A\'ali', category: 'bahrain', difficulty: 4 },
       { q: 'The seahorse-shaped man-made luxury archipelago off the northern coast, an upmarket residential development.', a: 'Amwaj Islands', category: 'bahrain', difficulty: 4, alt: ['Amwaj'] },
-      { q: 'The historic 16th-century stronghold on Muharraq island, built by the Portuguese and named for its surrounding district.', a: 'Arad Fort', category: 'bahrain', difficulty: 4, alt: ['Arad'] },
+      { q: 'The historic 15th-century stronghold on Muharraq island, built in traditional Islamic style and named for its surrounding district.', a: 'Arad Fort', category: 'bahrain', difficulty: 4, alt: ['Arad'] },
       { q: 'The peninsula and region to the west across the water; the kingdom lies just off this larger landmass.', a: 'Arabia', category: 'bahrain', difficulty: 2, alt: ['Arabian Peninsula'] },
       { q: 'The traditional reed-and-palm-frond hut once used as summer housing in Gulf villages.', a: 'Arish', category: 'bahrain', difficulty: 5, alt: ['Barasti'] },
     ],
@@ -29,9 +29,9 @@ export const bahrainPack: RawPack = {
       { q: 'The financial complex of twin towers in the diplomatic area housing the kingdom\'s stock exchange and central bank offices.', a: 'BFH', category: 'bahrain', difficulty: 5, alt: ['Bahrain Financial Harbour'] },
     ],
     C: [
-      { q: 'The 25-kilometre road link of bridges and embankments connecting the kingdom to Saudi Arabia.', a: 'Causeway', category: 'bahrain', difficulty: 2, alt: ['King Fahd Causeway'] },
+      { q: 'The 25-kilometre road link of bridges and embankments connecting the kingdom to Saudi Arabia.', a: 'King Fahd Causeway', category: 'bahrain', difficulty: 2, alt: ['Causeway'] },
       { q: 'The thick, dark Arabic brew, served unsweetened with dates and flavoured with cardamom, central to local hospitality.', a: 'Coffee', category: 'bahrain', difficulty: 2, alt: ['Gahwa', 'Qahwa', 'Arabic Coffee'] },
-      { q: 'The motorsport racetrack that opened near Sakhir in 2004 is best described by this word for a closed racing loop.', a: 'Circuit', category: 'bahrain', difficulty: 3 },
+      { q: 'The Sakhir motorsport venue that opened in 2004 and hosts the kingdom\'s round of the Formula One world championship.', a: 'Bahrain International Circuit', category: 'bahrain', difficulty: 3, alt: ['BIC', 'Circuit'] },
       { q: 'The seat of government and most populous of the four governorates, containing the capital city.', a: 'Capital Governorate', category: 'bahrain', difficulty: 3, alt: ['Capital'] },
       { q: 'The fortified residence at Riffa and the one at Arad are examples of this defensive stone structure dotting the islands.', a: 'Castle', category: 'bahrain', difficulty: 3, alt: ['Fort'] },
     ],
@@ -45,8 +45,8 @@ export const bahrainPack: RawPack = {
       { q: 'The first British political officer was stationed here in 1816; the islands became a British one of these protected states by treaty in 1861.', a: 'Dependency', category: 'bahrain', difficulty: 5, alt: ['Protectorate'] },
     ],
     E: [
-      { q: 'The black liquid hydrocarbon was first struck on the islands in 1932, beginning an era driven by this kind of fuel export.', a: 'Energy', category: 'bahrain', difficulty: 3, alt: ['Oil'] },
-      { q: 'The land-from-sea works that have steadily enlarged the islands and grown the country\'s area for decades.', a: 'Expansion', category: 'bahrain', difficulty: 4, alt: ['Reclamation'] },
+      { q: 'Foreign-born residents, who outnumber citizens and make up well over half the kingdom\'s population — this term for non-nationals.', a: 'Expatriates', category: 'bahrain', difficulty: 3, alt: ['Expats'] },
+      { q: 'The festival of fast-breaking that follows the holy month of Ramadan, celebrated across the kingdom.', a: 'Eid al-Fitr', category: 'bahrain', difficulty: 3, alt: ['Eid'] },
       { q: 'The hereditary title held by the ruler of the islands before he adopted the title of king in 2002.', a: 'Emir', category: 'bahrain', difficulty: 3, alt: ['Amir', 'Sheikh'] },
       { q: 'The kingdom\'s banking-led economy made it an early regional financial hub of this rising "Middle ___" region.', a: 'East', category: 'bahrain', difficulty: 4, alt: ['Middle East'] },
       { q: 'The widely spoken second language of business and tourism in the kingdom, a legacy of long British ties.', a: 'English', category: 'bahrain', difficulty: 2 },
@@ -78,10 +78,10 @@ export const bahrainPack: RawPack = {
     ],
     I: [
       { q: 'The country is an archipelago made up of dozens of these landforms, both natural and reclaimed.', a: 'Islands', category: 'bahrain', difficulty: 1, alt: ['Island'] },
-      { q: 'On the 16th of December 1971 the kingdom declared this from British protection.', a: 'Independence', category: 'bahrain', difficulty: 2 },
+      { q: 'On the 15th of August 1971 the kingdom declared this from British protection (its National Day is later, on 16 December).', a: 'Independence', category: 'bahrain', difficulty: 2 },
       { q: 'The dominant religion of the kingdom, whose followers form the large majority of the population.', a: 'Islam', category: 'bahrain', difficulty: 1 },
       { q: 'The neighbouring country across the Gulf to the northeast that has historically laid claims to the islands.', a: 'Iran', category: 'bahrain', difficulty: 3 },
-      { q: 'The kingdom\'s only major civil aviation gateway, located on Muharraq island and one of the Gulf\'s oldest regional hubs.', a: 'International Airport', category: 'bahrain', difficulty: 3, alt: ['Bahrain International Airport', 'Airport'] },
+      { q: 'The kingdom\'s only major civil aviation gateway, located on Muharraq island and one of the Gulf\'s oldest regional hubs.', a: 'Bahrain International Airport', category: 'bahrain', difficulty: 3, alt: ['Airport', 'BIA'] },
       { q: 'The ruling Sheikh from 1961 to 1999 who led the islands to independence and is honoured on National Day.', a: 'Isa bin Salman', category: 'bahrain', difficulty: 4, alt: ['Isa'] },
     ],
     J: [
@@ -99,10 +99,10 @@ export const bahrainPack: RawPack = {
     ],
     L: [
       { q: 'A famous solitary mesquite, said to be around 400 years old, surviving in the desert with no obvious water — the "Tree of ___".', a: 'Life', category: 'bahrain', difficulty: 2, alt: ['Tree of Life', 'Shajarat al-Hayat'] },
-      { q: 'The man-made works that create new ground from the sea have added large amounts of this to the islands.', a: 'Land', category: 'bahrain', difficulty: 3 },
+      { q: 'The triangular rig on a long slanting yard that powered the traditional Gulf dhow, also common across the Mediterranean.', a: 'Lateen sail', category: 'bahrain', difficulty: 4, alt: ['Lateen'] },
       { q: 'The dried fruit used to flavour machboos and other dishes, also called loomi when blackened.', a: 'Lime', category: 'bahrain', difficulty: 4, alt: ['Loomi', 'Dried lime'] },
       { q: 'The traditional men\'s drum-and-song performance of African-rooted Gulf communities, a recognised cultural heritage of the islands.', a: 'Liwa', category: 'bahrain', difficulty: 5 },
-      { q: 'The reclamation works create new ground from the sea; the country has grown by adding much of this since the 1960s.', a: 'Landmass', category: 'bahrain', difficulty: 4, alt: ['Land'] },
+      { q: 'The Arabic word for "pearl" that named the demolished 2011 protest monument and a Manama shopping mall.', a: 'Lulu', category: 'bahrain', difficulty: 5 },
     ],
     M: [
       { q: 'The capital city of the kingdom, on the northeast coast of the main island.', a: 'Manama', category: 'bahrain', difficulty: 1 },
@@ -110,8 +110,8 @@ export const bahrainPack: RawPack = {
       { q: 'The spiced rice-and-meat dish, slow-cooked with dried lime, regarded as the kingdom\'s national dish.', a: 'Machboos', category: 'bahrain', difficulty: 2, alt: ['Machbous', 'Kabsa'] },
       { q: 'The Islamic house of worship; the Al Fateh and the ancient Al-Khamis are notable examples on the islands.', a: 'Mosque', category: 'bahrain', difficulty: 1 },
       { q: 'The earthen tombs of A\'ali and Saar, numbering in the tens of thousands, are these prehistoric burial features.', a: 'Mounds', category: 'bahrain', difficulty: 3, alt: ['Burial Mounds', 'Tumuli'] },
-      { q: 'The reigning king\'s personal name, born 1950, who acceded in 1999 and proclaimed the kingdom in 2002 — Hamad bin Isa.', a: 'Monarch', category: 'bahrain', difficulty: 4, alt: ['King Hamad', 'Hamad'] },
-      { q: 'The chain of islands and reefs forming the country is a geographic feature of this type, dotted across the Gulf.', a: 'Microstate', category: 'bahrain', difficulty: 4, alt: ['Archipelago'] },
+      { q: 'The crowned head of state of the kingdom; the office Sheikh Hamad redefined for himself in 2002 — this royal title.', a: 'Monarch', category: 'bahrain', difficulty: 4, alt: ['King'] },
+      { q: 'The chain of many islands and reefs forming the country is a geographic feature of this type, dotted across the Gulf.', a: 'Microstate', category: 'bahrain', difficulty: 4, alt: ['Archipelago'] },
     ],
     N: [
       { q: 'The lustrous sea gems, harvested by divers from oysters, that made the islands wealthy before petroleum.', a: 'Natural pearls', category: 'bahrain', difficulty: 3, alt: ['Pearls'] },
@@ -123,7 +123,7 @@ export const bahrainPack: RawPack = {
     O: [
       { q: 'The black liquid hydrocarbon first struck in 1932 at Jebel Dukhan, the first commercial find on the Arab side of the Gulf.', a: 'Oil', category: 'bahrain', difficulty: 2 },
       { q: 'The bivalve mollusc that produces the pearls divers once sought in the Gulf shallows.', a: 'Oyster', category: 'bahrain', difficulty: 2, alt: ['Oysters'] },
-      { q: 'The petroleum company "Bapco", set up in 1929 by foreign investors, pioneered this commodity\'s extraction on the Arab side of the Gulf.', a: 'Onshore oil', category: 'bahrain', difficulty: 4, alt: ['Oil'] },
+      { q: 'The 1929-founded national petroleum firm, long the kingdom\'s sole oil producer and refiner, known by a five-letter acronym.', a: 'Bapco', category: 'bahrain', difficulty: 4, alt: ['Bahrain Petroleum Company'] },
       { q: 'The sultanate at the eastern end of the Arabian Peninsula, a fellow GCC member sharing maritime heritage with the islands.', a: 'Oman', category: 'bahrain', difficulty: 2 },
     ],
     P: [
@@ -145,7 +145,7 @@ export const bahrainPack: RawPack = {
       { q: 'The central town with a historic 19th-century fort and the royal family\'s traditional seat.', a: 'Riffa', category: 'bahrain', difficulty: 3 },
       { q: 'The fasting month of the Islamic calendar, observed across the kingdom with the nightly ghabga meal.', a: 'Ramadan', category: 'bahrain', difficulty: 2 },
       { q: 'The hereditary head of state who governed the islands as an emir before the title changed to king in 2002.', a: 'Ruler', category: 'bahrain', difficulty: 3, alt: ['Emir'] },
-      { q: 'The traffic circle and monument demolished after the 2011 unrest had stood at a major junction in the capital, named for the islands\' famous gem.', a: 'Roundabout', category: 'bahrain', difficulty: 4, alt: ['Pearl Roundabout'] },
+      { q: 'The traffic circle and monument demolished after the 2011 unrest had stood at a major junction in the capital, named for the islands\' famous gem.', a: 'Pearl Roundabout', category: 'bahrain', difficulty: 4, alt: ['Lulu Roundabout', 'GCC Roundabout'] },
     ],
     S: [
       { q: 'The desert area in the centre-south of the main island that hosts the F1 circuit and a royal camel track.', a: 'Sakhir', category: 'bahrain', difficulty: 3 },

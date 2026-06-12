@@ -5,13 +5,15 @@ import { duckMusic, play, speak } from '../services/audio';
 import type { Served } from '../state/types';
 import { QrCode } from './QrCode';
 
-/** URL the charade QR points to — opens the standalone secret-prompt page. */
+/** URL the charade QR points to — opens the standalone secret-prompt page.
+ *  Respects the deploy base path (root domain or a GitHub Pages subpath). */
 function charadeUrl(name: string, image?: string, hint?: string): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const base = import.meta.env.BASE_URL || '/'; // '/' or e.g. '/letterlock/'
   const p = new URLSearchParams({ view: 'img', w: name });
   if (image) p.set('img', image);
   if (hint) p.set('h', hint);
-  return `${origin}/?${p.toString()}`;
+  return `${origin}${base}?${p.toString()}`;
 }
 
 interface Props {

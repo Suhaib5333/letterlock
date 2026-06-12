@@ -91,7 +91,7 @@ export const saudiPack: RawPack = {
       { q: 'The annual journey of the faithful to the holy city, the broad English word for such a sacred trip.', a: 'Pilgrimage', category: 'gcc', difficulty: 2 },
     ],
     G: [
-      { q: 'The vast Islamic house of worship in the holy city that encloses the Kaaba, the largest in the world.', a: 'Grand Mosque', category: 'gcc', difficulty: 3, alt: ['Masjid al-Haram'] },
+      { q: 'The vast house of worship in the holy city that encloses the Kaaba, the largest in the world, known in Arabic by this two-word name.', a: 'Masjid al-Haram', category: 'gcc', difficulty: 3, alt: ['Grand Mosque', 'Great Mosque of Mecca'] },
       { q: 'The traditional coffee, lightly roasted and spiced with cardamom, served to guests.', a: 'Gahwa', category: 'gcc', difficulty: 4, alt: ['Arabic coffee', 'Qahwa'] },
     ],
     O: [
@@ -227,7 +227,7 @@ export const uaePack: RawPack = {
       { q: 'The black liquid whose 1960s discovery turned a poor pearling coast into one of the world\'s richest nations.', a: 'Oil', category: 'gcc', difficulty: 1, alt: ['Petroleum'] },
     ],
     M: [
-      { q: 'The shopping centre in the largest city, among the world\'s biggest, beside the tallest tower.', a: 'Mall', category: 'gcc', difficulty: 3, alt: ['Dubai Mall'] },
+      { q: 'The shopping centre beside Burj Khalifa, among the world\'s biggest by area, drawing tens of millions of visitors a year.', a: 'Dubai Mall', category: 'gcc', difficulty: 3, alt: ['The Dubai Mall'] },
       { q: 'The reception room where Emiratis traditionally welcome guests, also the word for a consultative council.', a: 'Majlis', category: 'gcc', difficulty: 4 },
       { q: 'The coastal salt-tolerant trees whose protected forests line the capital\'s shoreline and shelter wildlife.', a: 'Mangroves', category: 'gcc', difficulty: 4 },
     ],
@@ -240,7 +240,7 @@ export const uaePack: RawPack = {
       { q: 'The duty of welcoming and generously feeding guests, a deeply held Bedouin and Emirati value.', a: 'Hospitality', category: 'gcc', difficulty: 3 },
     ],
     N: [
-      { q: 'The number of emirates that united on 2 December 1971, before a seventh joined in 1972.', a: 'Number six', category: 'gcc', difficulty: 4, alt: ['Six'] },
+      { q: 'How many emirates united on 2 December 1971, before a seventh joined the following year?', a: 'Six', category: 'gcc', difficulty: 4 },
     ],
     W: [
       { q: 'The valley channels that flow only after rare desert rains, dotting the landscape.', a: 'Wadi', category: 'gcc', difficulty: 4 },
@@ -281,7 +281,7 @@ export const gulfPack: RawPack = {
       { q: 'The capital of Oman, a coastal city flanked by mountains and old forts.', a: 'Muscat', category: 'gcc', difficulty: 3 },
       { q: 'The spiced rice-and-meat dish, Qatar and Kuwait\'s national favourite.', a: 'Machboos', category: 'gcc', difficulty: 3, alt: ['Majboos'] },
       { q: 'The peninsula of Oman jutting toward Iran at the mouth of the Gulf, separated from the rest of the country.', a: 'Musandam', category: 'gcc', difficulty: 5 },
-      { q: 'The Bahraini capital whose name means "the two seas".', a: 'Manama', category: 'gcc', difficulty: 3 },
+      { q: 'The Bahraini capital and largest city, on the northeast coast of the kingdom\'s main island.', a: 'Manama', category: 'gcc', difficulty: 3 },
     ],
     B: [
       { q: 'The island nation in the Gulf connected to Saudi Arabia by a long causeway.', a: 'Bahrain', category: 'gcc', difficulty: 2 },
@@ -324,7 +324,7 @@ export const gulfPack: RawPack = {
       { q: 'The Doha-based news network, one of the most watched in the Arab world.', a: 'Al Jazeera', category: 'gcc', difficulty: 3 },
       { q: 'The body of water south of Oman, part of the Indian Ocean, that the sultanate\'s long southern coast faces.', a: 'Arabian Sea', category: 'gcc', difficulty: 3 },
       { q: 'The small wooden water-taxi that ferries people across the creek of the Emirates\' largest city.', a: 'Abra', category: 'gcc', difficulty: 5 },
-      { q: 'The vast UNESCO-listed sand sea spanning Saudi Arabia, Oman and the Emirates, the largest in the world.', a: 'Arabian Empty Quarter', category: 'gcc', difficulty: 4, alt: ['Rub al Khali', 'Empty Quarter'] },
+      { q: 'The great desert covering most of the peninsula, whose southern sand sea is the largest continuous expanse of sand on Earth.', a: 'Arabian Desert', category: 'gcc', difficulty: 4, alt: ['Rub al Khali', 'Empty Quarter'] },
     ],
     R: [
       { q: 'The currency of Oman and Qatar, divided into smaller units like baisa or dirhams.', a: 'Rial', category: 'gcc', difficulty: 3, alt: ['Riyal'] },
@@ -338,7 +338,7 @@ export const gulfPack: RawPack = {
     ],
     C: [
       { q: 'The single-humped desert animal raced and revered across the Gulf.', a: 'Camel', category: 'gcc', difficulty: 1 },
-      { q: 'The bridge-and-embankment crossing linking Bahrain to Saudi Arabia, named for a king.', a: 'Causeway', category: 'gcc', difficulty: 4, alt: ['King Fahd Causeway'] },
+      { q: 'The bridge-and-embankment crossing linking Bahrain to Saudi Arabia, named for a Saudi monarch.', a: 'King Fahd Causeway', category: 'gcc', difficulty: 4, alt: ['Causeway'] },
       { q: 'The aromatic green-podded spice that flavours the region\'s traditional coffee.', a: 'Cardamom', category: 'gcc', difficulty: 3 },
       { q: 'The seaside promenade lining the waterfronts of Doha, Muscat and other Gulf cities, a French-derived word.', a: 'Corniche', category: 'gcc', difficulty: 4 },
     ],
