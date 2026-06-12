@@ -3,6 +3,12 @@
 > Paste this whole file into a new chat. It tells you exactly what the project is, how it's
 > built, **how to test/verify everything**, the invariants you must not break, and the known
 > open items. After reading, you can continue fixing and shipping immediately.
+>
+> **Companion docs (read these too):** `TECH.md` = the exhaustive "everything" reference (every
+> technology, decision, media source + how it's fetched/verified, and a full change log);
+> `AGENTS.md` = the standing workflow + verification toolchain; `CLAUDE.md` = master plan + dated
+> build log (PART II rounds 1–9); `QUESTION_AUTHORING.md` = content rules; `DEFERRED.md` = blocked
+> work. If anything below conflicts with `TECH.md`/`CLAUDE.md`, those are newer — trust them.
 
 ---
 
@@ -15,7 +21,8 @@ one team connects left↔right, the other top↔bottom; first to connect wins. H
 - **Repo:** `c:\Users\Suhaib\Desktop\RAL\repos\letterlock`
 - **GitHub:** `https://github.com/Suhaib5333/letterlock` — branch **`main`** (push freely, the user does NOT require permission to push).
 - **Stack:** **React 18 + TypeScript + Vite** (NOT Flutter — deliberate; see §8). Node 24, npm 11, Windows.
-- **Status:** fully playable, deployed-ready PWA. 153 unit/content tests + 22 Playwright E2E + a custom no-scroll checker all green.
+- **Status:** fully playable, deployed-ready PWA. **218 unit/content tests + 36 Playwright E2E** + a custom no-scroll checker + a media-reachability checker, all green. **31 packs, ~7,367 questions.**
+- **Deploy:** **Cloudflare Pages, auto-deploy on push to `main`** (`npm run build` → `dist/` → `letterlock.raltech.dev`). There is **no VPS step** — just commit + push, then hard-refresh (CF cache).
 - **Commit message rule (IMPORTANT):** NEVER add AI attribution / "Co-Authored-By: Claude" / "Generated with Claude Code". Commit as the user alone. (Global user rule.)
 
 ---
@@ -27,7 +34,8 @@ npm install
 npm run dev            # Vite dev server → http://localhost:5173
 npm run build          # tsc -b + vite build → dist/
 npm run preview        # serve production build → http://localhost:4173
-npm test               # Vitest: unit + content tests (currently 153 passing)
+npm test               # Vitest: unit + content tests (currently 218 passing)
+npx vite-node scripts/checkmedia.mjs   # verify EVERY clip/audio/flag URL is reachable (0 dead on clip packs)
 npx vitest run src/content   # just the content-validation tests
 npm run typecheck      # tsc -b (strict)
 npm run e2e            # Playwright (needs: npx playwright install chromium)
@@ -42,7 +50,8 @@ npm run e2e            # Playwright (needs: npx playwright install chromium)
    - `src/content/content.test.ts`: validates EVERY pack:
      - **every answer starts with its letter** (the core mechanic),
      - **no answer leaks into its question text** (guard test, see §5),
-     - every pack is playable (≥16 answerable letters, serves a question per letter).
+     - every pack is playable (≥16 answerable letters; **letterless packs** — flags/logos/clips/
+       charades — instead need `totalQuestions ≥ 16` since they serve from the whole pool).
 
 2. **`node scripts/noscroll.mjs` — the custom "app-like, nothing cut off" checker (CRITICAL).**
    It launches headless Chromium across **15 device viewports** (iPhone SE … 4K TV, incl.
@@ -93,7 +102,11 @@ src/
                              Helpers: rebucketByAnswer (see §4), withExtra (merge), themedFrom (derive Science/World from GK)
     generalKnowledge.ts      base GK pack (hand-authored). + generalKnowledge2.ts + generalKnowledge3.ts (merged via withExtra)
     kids.ts (+ kids2.ts)     Kids & Family
-    flags.ts                 flagsEasy/Medium/HardPack — flag IMAGES from flagcdn.com; hideBoardLetters:true
+    flags.ts                 flagsEasy/Medium/HardPack — flag IMAGES bundled locally in /public/flags (flagcdn is blocked on some networks); hideBoardLetters:true
+    movieClips.ts            ⭐ AUTO-GENERATED tvClips packs — REAL iTunes episode preview clips (.m4v), merged into ONE "TV Show Clips" pack (204) in index.ts. (YouTube/movie-trailer clips were REMOVED — can't be spoiler-safe in fullscreen; see TECH.md.)
+    melodiesExtra.ts         ⭐ AUTO-GENERATED — ~214 real iTunes instrumental-theme previews (.m4a) merged into melodiesPack (→235)
+    bahrainExtra.ts, gcc.ts, gccExtra.ts, saudiExtra2.ts, uaeExtra2.ts, gulfExtra2.ts   regional packs (all 200+)
+    charades*.ts             5 charade packs; QR → /?view=img secret-prompt page
     logos.ts                 logosEasy/Medium/HardPack — brand icons from cdn.simpleicons.org; hideBoardLetters
     sports.ts                sportsEasy/MediumPack
     screen.ts                moviesPack + moviesHardPack (Movies & TV)
@@ -105,13 +118,14 @@ src/
   board/geometry.ts          pure SVG hex layout (boardGeometry, pathThroughCells)
   components/
     Board.tsx                SVG board; team colors via CSS vars (--ta*/--tb*); `hideLetters` prop; winning lightning trace; "selected" neutral highlight
-    QuestionCard.tsx         question/answer; renders flag/logo `image`; `<audio>`/`<video>` for songs/melodies; `hideLetter` (shows 🚩); TTS button
+    QuestionCard.tsx         question/answer; renders flag/logo `image`; native `<audio>`/`<video controls>` (SAFE fullscreen) for songs/melodies/TV clips; `hideLetter` (🚩); TTS. Media `onError` → AUTO-ADVANCES to a fresh question (AUTO_SKIP, capped 12/pick); Skip always enabled on clips. `onMediaPlay` starts the timer on first play.
     HostPad.tsx              ✅A / ✅B(steal) / ⬜No-one / ↩Undo
     Timer.tsx                TWO-PHASE: picker full time → other team HALF time to steal (advisory; host still adjudicates)
     Scoreboard.tsx           team panels, series pips, stats
     Logo.tsx, SettingsModal.tsx
   screens/
-    Home.tsx                 pack CAROUSEL (horizontal swipe, scroll-snap) + live "N packs · M questions" count
+    Home.tsx                 a "Category" button (shows the selected pack) that opens CategoryMenu; hero + Play
+    CategoryMenu.tsx         ⭐ full-screen, scrollable, SEARCHABLE pack browser, grouped (PACK_GROUPS/groupOf in index.ts) with filter chips; cards keep data-testid="pack-<id>". Search autofocuses only on (pointer:fine) desktop — NOT touch (no keyboard pop)
     Setup.tsx                team COLOR SWATCHES (name follows color, NOT typable), mode, board size, timer, pie rule
     Game.tsx                 orchestration; in-UI exit modal; block toast; confetti; steal timer wiring
     Victory.tsx, Tutorial.tsx
@@ -124,9 +138,11 @@ src/
   app/app.css                ⭐ all layout/components; the no-scroll/responsive rules live here
   app/App.tsx, main.tsx
 public/  favicon.svg, manifest.webmanifest, clips/ (melody WAVs)
-scripts/ noscroll.mjs (checker), shots.mjs (screenshots), genclips.mjs, gensongs.mjs (content generators)
-tests-e2e/ game.spec.ts (Playwright)
-CLAUDE.md  living design+build plan (PART I plan, PART II web build log)   README.md
+public/flags/ bundled flag SVGs.  public/clips/ synth melody WAVs.
+scripts/ noscroll.mjs (layout checker), checkmedia.mjs (media reachability), audit.mjs/measure.mjs/diag.mjs/verify_*.mjs (Playwright visual checks),
+         genmovies.mjs (iTunes TV clips), gensongs.mjs (iTunes songs), genmelodies_itunes.mjs (iTunes themes), genlogos.mjs, genflags.mjs, genclips.mjs (content generators)
+tests-e2e/ game.spec.ts (Playwright, 18 tests × desktop+mobile = 36)
+TECH.md  ⭐ everything reference   CLAUDE.md  master plan + build log   AGENTS.md  workflow   QUESTION_AUTHORING.md   DEFERRED.md   README.md
 ```
 
 ---
@@ -172,7 +188,10 @@ is placed under the letter its **answer's first letter** dictates (A–Z). Conse
    ocean, planet, war, film, composer, river, number, etc.). Examples of bugs fixed:
    - "Which country produced composer Grieg? → Norway" (music-tagged, country answer) — reframed to ask for the composer.
    - "A bear that is cuddly… → Bear", "the Amazon rainforest → Amazon", "played in Augusta → Augusta National".
-3. Every pack playable (≥16 answerable letters).
+3. Every pack playable (≥16 answerable letters; letterless packs need `totalQuestions ≥ 16` instead).
+4. No clue-restatement ("X's capital is Y"), no "Surname, First" names, no dup question text.
+5. **Media-clip packs:** no-spoiler source (no title/thumbnail), native `<audio>`/`<video>` (no
+   iframes), generic prompt, `onError`→auto-advance. See `QUESTION_AUTHORING.md` media-clip rules.
 
 **When you add/edit questions:** keep answers natural, keep facts accurate, and make sure the clue
 **describes** the answer without **naming** it. Then `npx vitest run src/content` must stay green.
@@ -212,6 +231,14 @@ is placed under the letter its **answer's first letter** dictates (A–Z). Conse
   errors, contrived/reversed answers, the "No —" self-contradicting clues, and **answer-in-question
   leaks** (a permanent guard test now prevents regressions). Audio/song packs (`melodies.ts`,
   `songs.ts`) and `logos.ts` were added externally and wired into `index.ts`.
+- **Rounds 8–9 (latest):** ① **searchable full-screen category menu** replaced the home carousel.
+  ② **TV Show Clips** (real iTunes episode previews, native `<video>`, safe fullscreen). ③ **YouTube
+  removed** (movie trailer clips dropped — an iframe leaks title/thumbnail/end-screen and can't
+  fullscreen safely; iTunes movie API is dead, so movie *content* lives in the Movies & TV trivia
+  packs). ④ **Media robustness**: `onError` → **auto-advance** to a new question; **Skip always on**;
+  `checkmedia.mjs` (0 dead). ⑤ **Timer starts on the clip's first play.** ⑥ **Mobile search no
+  autofocus.** ⑦ **Every pack 200+ except World Flags** — regional packs authored to 200+, **Guess
+  the Melody → 235** (synth WAVs + iTunes instrumental-theme previews), TV clips merged to 204.
 
 ---
 
@@ -220,19 +247,29 @@ is placed under the letter its **answer's first letter** dictates (A–Z). Conse
 - **Web (React) instead of Flutter** (the original `CLAUDE.md` plan specified Flutter): chosen so
   the SVG/DOM UI is Playwright-inspectable and deployable as a PWA today. The pure `src/core/` is a
   1:1 spec to port to Dart if ever needed. Documented in `CLAUDE.md` PART II.
-- **External media dependencies (need internet):** flags = `flagcdn.com`, logos =
-  `cdn.simpleicons.org`, songs = iTunes 30s preview CDN. Melodies = bundled WAVs in `/public/clips`.
-  These can rot (dead slugs / 404 audio).
+- **External media dependencies (need internet):** logos = `cdn.simpleicons.org`; songs, melodies
+  (partly), TV clips = iTunes preview CDN; charades = loremflickr (degrade gracefully on error).
+  Flags are **bundled locally** in `/public/flags` (flagcdn is blocked on some networks); synth
+  melodies are bundled WAVs. Hotlinked URLs can rot — but every media element `onError` →
+  auto-advances, and `checkmedia.mjs` re-verifies reachability. **Do NOT use Deezer** (hotlink-
+  blocked) and **do NOT use YouTube embeds for clips** (spoiler chrome; can't fullscreen safely).
 - **Content is not 100% human-fact-checked.** All *mechanical* issues are tested/fixed (letter
   bucketing, answer leaks, playability) and many factual errors were corrected, but ~thousands of
   questions across hard/extreme packs aren't individually verified.
 
 ## 9. OPEN TASKS (what to do next)
 
-1. **Logos pack:** verify `cdn.simpleicons.org/<slug>` slugs resolve; replace dead ones. (Image won't render if the slug is wrong.)
-2. **Songs / Melodies packs:** verify audio URLs still play (iTunes preview links can expire); the melody WAVs in `/public/clips` are safe.
-3. **Deeper factual pass** on the Genius (Extreme) and Hard packs (Space/History/Music-Hard/Movies-Hard).
-4. Anything new the user reports — reproduce in Playwright MCP, fix, re-run §1 tools, push.
+1. **Periodically re-run `npx vite-node scripts/checkmedia.mjs`** — iTunes/loremflickr hotlinks can
+   expire; if a clip pack shows dead URLs, re-run its generator (`genmovies.mjs` / `gensongs.mjs` /
+   `genmelodies_itunes.mjs`) to refresh. (Runtime auto-advance covers occasional rot.)
+2. **Deeper factual pass** on the Genius (Extreme) / Hard packs and the new regional `*Extra2` files
+   (content is mechanically tested but not 100% human-fact-checked).
+3. **World Flags** is the only category under 200 (≈195 countries exist — the ceiling; user-excepted).
+4. **Deferred (see `DEFERRED.md`):** accounts/login/leaderboard (need Supabase/Resend/Google creds),
+   licensed music (copyright). Movie-*video* clips need a spoiler-safe + fullscreen-safe source (none
+   free today; YouTube is banned for clips).
+5. Anything new the user reports — reproduce with the `scripts/*.mjs` Playwright drivers (or MCP when
+   connected), fix, re-run §1 tools + `checkmedia`, push to `main`.
 
 ## 10. Conventions checklist before every push
 - [ ] `npx tsc -b` clean

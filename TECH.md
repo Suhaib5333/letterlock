@@ -169,6 +169,11 @@ Detailed entries live in `CLAUDE.md`; this is the index.
   source; iTunes movie API dead). TV clips kept + expanded to ~221 via iTunes (native `<video>`,
   **safe fullscreen**). **Answer timer starts on the clip's first play.** Movie *content* stays in
   the Movies & TV trivia packs.
+- **Round 9**: **every pack 200+ except World Flags.** Regional packs authored to 200+ (Bahrain 259 /
+  Saudi 229 / UAE 228 / Gulf 233, via 4 parallel agents + leak-fix pass). **Guess the Melody → 235**
+  (kept synth PD WAVs + ~214 real iTunes instrumental-theme previews, `scripts/genmelodies_itunes.mjs`).
+  **TV Show Clips → one 204 pack** (3 tiers merged — iTunes has no 200+ recognisable shows per tier).
+  **Final: 31 packs, ~7,367 questions; 218 unit / 36 e2e; checkmedia 0 dead.**
 
 ---
 

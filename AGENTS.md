@@ -23,7 +23,7 @@ change log), `CLAUDE.md` (full plan + build log), `QUESTION_AUTHORING.md` (conte
 ## 2. ⭐ The standing workflow (do this every change)
 1. Make the change.
 2. `npx tsc -b` — must be clean.
-3. `npx vitest run` — all unit + content tests green (currently **226**).
+3. `npx vitest run` — all unit + content tests green (currently **218**).
 4. If layout/CSS changed: `node scripts/noscroll.mjs` in **3+ modes** (see §3) → "ALL CLEAR".
 5. If content changed: `npx vitest run src/content` (leak/letter/dup/Surname guards).
 6. If media changed: `npx vite-node scripts/checkmedia.mjs` (set `ALL=1` to include logos/charades) — every clip/audio/flag URL must be reachable (clip packs should show **0 dead**).
