@@ -15,7 +15,7 @@ export const sportsEasyExtra: Record<string, RawQuestion[]> = {
   C: [
     { q: 'The bat-and-ball sport with wickets and overs that is hugely popular in India, Australia and England.', a: 'Cricket', category: 'sports', difficulty: 1 },
     { q: 'Portuguese forward famous for the "Siuuu" celebration, rival to Messi, who wears the number 7.', a: 'Cristiano Ronaldo', category: 'sports', difficulty: 1 },
-    { q: 'A "clean sheet" describes a goalkeeper who concedes none of these in a match.', a: 'Conceded goals', category: 'sports', difficulty: 2 },
+    { q: 'A goalkeeper earns a "clean sheet" by letting in none of these for the whole match.', a: 'Goals', category: 'sports', difficulty: 2 },
     { q: 'Soccer star Lionel Messi led Argentina to victory in the 2022 final held in this Gulf country.', a: 'Qatar', category: 'sports', difficulty: 2 },
   ],
   D: [
@@ -147,7 +147,7 @@ export const sportsMediumExtra: Record<string, RawQuestion[]> = {
   ],
   G: [
     { q: 'The decisive seventh and final match of a championship playoff series in basketball or hockey.', a: 'Game seven', category: 'sports', difficulty: 3 },
-    { q: 'Highest-scoring legal delivery situation: in rugby union, the number of points awarded for a try.', a: 'Five points', category: 'sports', difficulty: 3 },
+    { q: 'In rugby union, the number of points awarded for scoring a try.', a: 'Five points', category: 'sports', difficulty: 3 },
     { q: 'The German football league, top flight of clubs like Bayern Munich and Borussia Dortmund.', a: 'Bundesliga', category: 'sports', difficulty: 3 },
   ],
   H: [
@@ -198,12 +198,12 @@ export const sportsMediumExtra: Record<string, RawQuestion[]> = {
   R: [
     { q: 'The Parisian stadium that hosts the French Open tennis tournament.', a: 'Roland Garros', category: 'sports', difficulty: 3 },
     { q: 'The Austrian-owned Formula One team that won titles with Sebastian Vettel and Max Verstappen.', a: 'Red Bull Racing', category: 'sports', difficulty: 3 },
-    { q: 'In rowing, the head-to-head championship between Oxford and Cambridge on the Thames is called the Boat ___.', a: 'Race', category: 'sports', difficulty: 3 },
+    { q: 'The annual rowing contest on the Thames between the Oxford and Cambridge university crews.', a: 'The Boat Race', category: 'sports', difficulty: 3 },
   ],
   S: [
     { q: 'The Milan stadium shared by the city\'s two great football clubs, named after a district.', a: 'San Siro', category: 'sports', difficulty: 4 },
     { q: 'The cue sport played on a green baize table with red and coloured balls, popular in Britain.', a: 'Snooker', category: 'sports', difficulty: 3 },
-    { q: 'German football star and Bayern striker who won the World Cup in 2014; the prolific Polish number nine.', a: 'Robert Lewandowski', category: 'sports', difficulty: 4 },
+    { q: 'The prolific Polish striker who scored a record number of goals for Bayern Munich before joining Barcelona.', a: 'Robert Lewandowski', category: 'sports', difficulty: 4 },
   ],
   T: [
     { q: 'The shortest format of cricket, an explosive game with just twenty overs per side.', a: 'Twenty20', category: 'sports', difficulty: 3 },
@@ -211,11 +211,11 @@ export const sportsMediumExtra: Record<string, RawQuestion[]> = {
     { q: 'The north London club nicknamed Spurs, whose motto is "to dare is to do", plays its home games at a stadium opened in 2019.', a: 'Tottenham Hotspur', category: 'sports', difficulty: 4 },
   ],
   U: [
-    { q: 'The English football club from Manchester nicknamed the Red Devils, based at Old Trafford.', a: 'United', category: 'sports', difficulty: 3 },
+    { q: 'The Old Trafford football club known as the Red Devils, long managed by Sir Alex Ferguson.', a: 'Manchester United', category: 'sports', difficulty: 3 },
     { q: 'The mixed martial arts promotion whose initials stand for an "ultimate" fighting organisation.', a: 'UFC', category: 'sports', difficulty: 3 },
   ],
   V: [
-    { q: 'The Spanish Grand Tour of cycling, held in late summer across the Iberian peninsula.', a: 'Vuelta', category: 'sports', difficulty: 4 },
+    { q: 'The Spanish Grand Tour of cycling, held in late summer across the Iberian peninsula.', a: 'Vuelta a Espana', category: 'sports', difficulty: 4 },
     { q: 'German Formula One driver who won four straight world titles with Red Bull from 2010 to 2013.', a: 'Sebastian Vettel', category: 'sports', difficulty: 3 },
   ],
   W: [
@@ -241,7 +241,7 @@ const sportsMediumExtraMore: Record<string, RawQuestion[]> = {
     { q: 'The Brazilian footballer who won three World Cups and is regarded by many as the greatest ever.', a: 'Pele', category: 'sports', difficulty: 3 },
   ],
   C: [
-    { q: 'The famous London tennis-club suburb aside, the racket-and-shuttlecock sport with a net is this.', a: 'Badminton', category: 'sports', difficulty: 3 },
+    { q: 'The racket sport played over a net with a feathered shuttlecock rather than a ball.', a: 'Badminton', category: 'sports', difficulty: 3 },
     { q: 'The annual cricket series between England and Australia, played for a tiny terracotta urn.', a: 'The Ashes', category: 'sports', difficulty: 4 },
   ],
   D: [
@@ -249,14 +249,14 @@ const sportsMediumExtraMore: Record<string, RawQuestion[]> = {
     { q: 'The German city, home to Borussia, whose football club fills a famous Yellow Wall of fans.', a: 'Dortmund', category: 'sports', difficulty: 4 },
   ],
   E: [
-    { q: 'In a marathon, the final burst of speed a runner produces near the finish line.', a: 'End sprint', category: 'sports', difficulty: 4 },
+    { q: 'In distance running, the late surge of pace an athlete unleashes approaching the line.', a: 'Finishing kick', category: 'sports', difficulty: 4 },
   ],
   F: [
     { q: 'The Portuguese capital\'s biggest football club, eagle on its crest, record domestic champions.', a: 'Benfica', category: 'sports', difficulty: 4 },
     { q: 'The position in football played by goal-scorers such as Haaland and Lewandowski, leading the attack.', a: 'Forward', category: 'sports', difficulty: 3 },
   ],
   G: [
-    { q: 'Spanish coach who won the treble with Barcelona and the Champions League again with Bayern then moved to England.', a: 'Pep Guardiola', category: 'sports', difficulty: 4 },
+    { q: 'Spanish coach who won the treble with Barcelona, then league titles with Bayern Munich before dominating England with Manchester City.', a: 'Pep Guardiola', category: 'sports', difficulty: 4 },
     { q: 'The Australian Grand Slam tennis tournament is held in this southern city each January.', a: 'Melbourne', category: 'sports', difficulty: 4 },
   ],
   H: [

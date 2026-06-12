@@ -13,7 +13,7 @@ export const sportsEasyPack: RawPack = {
     A: [
       { q: 'The country of Lionel Messi, winner of the 2022 FIFA World Cup.', a: 'Argentina', category: 'sports' },
       { q: 'In golf, a score of two under par on a single hole.', a: 'Albatross', category: 'sports' },
-      { q: 'The exclusive private golf club in Georgia that hosts the Masters tournament each April.', a: 'Augusta National', category: 'sports' },
+      { q: 'The exclusive private Georgia golf club that hosts the Masters tournament each April.', a: 'Augusta National', category: 'sports' },
       { q: 'The Grand Slam tennis tournament held in Melbourne each January, the first of the four majors each year.', a: 'Australian Open', category: 'sports' },
       { q: 'The sport where athletes run, jump and throw, also called track and field.', a: 'Athletics', category: 'sports' },
       { q: 'The country whose cricket team is nicknamed The Baggy Greens.', a: 'Australia', category: 'sports' },
@@ -52,7 +52,7 @@ export const sportsEasyPack: RawPack = {
       { q: 'In golf, a score of two under par on a hole.', a: 'Eagle', category: 'sports' },
       { q: 'The Classic horse race held each June on the Downs in Surrey, England, and one of the oldest flat races in the world.', a: 'Epsom Derby', category: 'sports' },
       { q: 'Simone Biles is a multiple Olympic champion in this athletic discipline involving floor, beam and vault.', a: 'Gymnastics', category: 'sports' },
-      { q: 'The London football stadium where Arsenal play their home matches.', a: 'Emirates Stadium', category: 'sports' },
+      { q: 'The London football stadium, named for an airline sponsor, where Arsenal play their home matches.', a: 'Emirates Stadium', category: 'sports' },
       { q: 'The swimming stroke where both arms sweep forward together over the water.', a: 'Butterfly', category: 'sports' },
       { q: 'The international competition that brings together athletes from all over the world every four years.', a: 'Olympics', category: 'sports' },
     ],
@@ -246,7 +246,7 @@ export const sportsMediumPack: RawPack = {
         image: 'https://flagcdn.com/us.svg',
         category: 'sports',
       },
-      { q: 'The F1 constructor that won the most Constructors\' Championships between 2009 and 2013.', a: 'Red Bull', category: 'sports' },
+      { q: 'The F1 constructor that won four consecutive Constructors\' Championships from 2010 to 2013 with Sebastian Vettel.', a: 'Red Bull', category: 'sports' },
       { q: 'In basketball, the statistical category recording passes that directly lead to a score.', a: 'Assists', category: 'sports' },
       { q: 'The German city that hosted the 1972 Summer Olympics, marred by a tragic hostage crisis.', a: 'Munich', category: 'sports' },
       { q: 'In tennis, hitting the ball on the non-dominant arm side with the arm crossing the body.', a: 'Backhand', category: 'sports' },
@@ -292,7 +292,7 @@ export const sportsMediumPack: RawPack = {
       { q: 'In football, a pass played behind the defence for a teammate to run onto.', a: 'Through ball', category: 'sports' },
       { q: 'In rugby union, the loose forward who plays at the back of the scrum, binding on both props.', a: 'Number eight', category: 'sports' },
       { q: 'The Italian three-week cycling stage race that ends in Milan every May.', a: 'Giro d\'Italia', category: 'sports' },
-      { q: 'In tennis, when a player wins a set 6-0 it is known informally as a breadstick or this.', a: 'Full bagel', category: 'sports' },
+      { q: 'In tennis slang, the nickname for a set won six games to love, after the shape of the zero.', a: 'Bagel', category: 'sports' },
       { q: 'The F1 circuit in Belgium that hosts a Grand Prix and is famous for its Eau Rouge corner.', a: 'Spa-Francorchamps', category: 'sports' },
     ],
     G: [
@@ -320,7 +320,7 @@ export const sportsMediumPack: RawPack = {
       { q: 'The football cup competition contested by South American national teams since 1916.', a: 'Copa America', category: 'sports' },
       { q: 'The global cricket governing body based in Dubai.', a: 'ICC', category: 'sports' },
       {
-        q: 'This country won the Rugby World Cup for the first time in 2019 in Japan.',
+        q: 'This nation, the Springboks, beat England in the 2019 Rugby World Cup final held in Japan.',
         a: 'South Africa',
         image: 'https://flagcdn.com/za.svg',
         category: 'sports',
@@ -395,7 +395,7 @@ export const sportsMediumPack: RawPack = {
       { q: 'The Spanish tennis player who has won the French Open a record 14 times.', a: 'Rafael Nadal', category: 'sports' },
       { q: 'The F1 circuit in Hungary that has hosted a Grand Prix every year since 1986.', a: 'Hungaroring', category: 'sports' },
       { q: 'In rugby union, the kick through the posts after a try that adds two more points.', a: 'Conversion', category: 'sports' },
-      { q: 'In cricket, a batsman\'s total runs scored divided by total dismissals gives this measure of consistency.', a: 'Batting average', category: 'sports' },
+      { q: 'In cricket, a player\'s total runs scored divided by total dismissals gives this measure of consistency.', a: 'Batting average', category: 'sports' },
       {
         q: 'This country has historically dominated Olympic Greco-Roman wrestling.',
         a: 'Russia',
@@ -414,7 +414,7 @@ export const sportsMediumPack: RawPack = {
     T: [
       { q: 'In cycling, the leader of the Tour de France points classification wears this colour jersey.', a: 'Green jersey', category: 'sports' },
       { q: 'In rugby union, the act of grounding the ball over the opponent\'s in-goal area that scores five points.', a: 'Try', category: 'sports' },
-      { q: 'The F1 constructor founded by a British racing driver and based in Grove, Oxfordshire, that won seven Constructors\' Championships.', a: 'Williams', category: 'sports' },
+      { q: 'The F1 constructor founded by a British racing driver and based in Grove, Oxfordshire, that won nine Constructors\' Championships.', a: 'Williams', category: 'sports' },
       { q: 'In tennis, the electronic ball-tracking system used by players to challenge a line judge\'s ruling.', a: 'Hawk-Eye', category: 'sports' },
       { q: 'In cricket, a batsman who reaches 100 runs in an innings is said to have scored this.', a: 'Century', category: 'sports' },
     ],

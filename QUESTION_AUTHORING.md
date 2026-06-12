@@ -89,6 +89,42 @@ clue "named for a Saudi monarch" + answer "King Fahd Causeway" is fine ("King Fa
 Double-check specifics. (e.g. Bahrain declared **independence on 15 Aug 1971**; its
 **National Day is 16 Dec** — don't conflate them. The UAE federation was **2 Dec 1971**.)
 
+### 8. Write names in natural spoken order — and spell out digit/symbol-led names
+"Albert Einstein", **never** "Einstein, Albert" (index-card order reads as a database
+entry *and* mis-files the question under the surname's letter). For names that start with
+a digit or symbol, use the spoken form as `a` and put the literal in `alt`:
+"Fifty Cent" (alt `50 cent`), "Pink" (alt `p!nk`). **Test-enforced** (no "Surname, First").
+
+### 9. No contrived padding answers
+Don't force a word onto a letter with a roundabout clue or an invented term. Define the
+word for what it actually is.
+- ❌ "the number of legs on an octopus" → `Octet`; ❌ `Aurea ratio`, `Metaphysical forms`,
+  `Number six`, `Tiger elephant` (not a real thing). ✅ a genuine definition + the real name.
+
+### 10. Verify type & self-consistency of compound clues
+- **Type match:** a clue that opens "Director of…/Composer of…" must answer the *person*;
+  "X's 1994 film…" or a plot description must answer the *work*. Don't pair a "director of…"
+  clue with a film-title answer.
+- **Self-consistency:** every sub-fact in a clue must be true and non-contradictory — don't
+  call a player "German… the Polish striker", or claim a coach won a trophy he didn't.
+  One verified fact beats two unverified ones.
+
+### 11. No same-stem giveaways (beyond the exact-word leak test)
+Rule 2's test only catches the exact answer words. Also avoid a *different* word that shares
+the answer's distinctive **root/stem**: ❌ clue "founded by **Constantine**" → `Constantinople`;
+❌ "the **Newton**ian era" → `Isaac Newton`. Use a periphrasis ("the emperor it's named after").
+
+### 12. Keep facts current, and don't repeat a superlative across the pack
+Rankings/records drift — verify against today (most populous country = **India**; planet with
+most moons = **Saturn**; largest rough-diamond producer = **Russia**). Prefer timeless framings
+("by some measures", definitional). And don't let two questions both claim the same superlative
+(largest/hottest/tallest) — pick one canonical holder.
+
+### 13. Duplicates span a pack AND its expansion files
+A base pack and its `withExtra(...)` files (e.g. `kids.ts` + `kids2.ts`) merge into ONE pack;
+identical `q` strings across them are silently de-duplicated at runtime (wasting a question).
+When authoring an expansion, check new clues against the base file too — write fresh phrasings.
+
 ## Style guide (quality, not just passing tests)
 
 - **One clean fact per question.** No two-part / compound clues ("X and also Y").

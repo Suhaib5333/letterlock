@@ -61,7 +61,7 @@ export const geoExtra: Record<string, RawQuestion[]> = {
     { q: 'The largest lake in Africa by surface area, bordered by three nations.', a: 'Lake Victoria', category: 'geography', difficulty: 4 },
   ],
   T: [
-    { q: 'The strait between Spain and Morocco is to the west; this Asian strait separates Malaysia from Sumatra.', a: 'Strait of Malacca', category: 'geography', difficulty: 5, alt: ['malacca'] },
+    { q: 'The busy shipping strait separating Peninsular Malaysia from the Indonesian island of Sumatra.', a: 'Strait of Malacca', category: 'geography', difficulty: 5, alt: ['malacca'] },
     { q: 'The river flowing through London past the Houses of Parliament.', a: 'Thames', category: 'geography', difficulty: 3 },
   ],
   D: [
@@ -70,7 +70,7 @@ export const geoExtra: Record<string, RawQuestion[]> = {
   ],
   R: [
     { q: 'The longest river system in the United States, draining much of the central plains.', a: 'Mississippi', category: 'geography', difficulty: 3 },
-    { q: 'The arid desert covering much of central Australia, dotted with red sand.', a: 'Outback', category: 'geography', difficulty: 4 },
+    { q: 'The vast red-sand desert at the heart of Australia, named for a British monarch.', a: 'Great Victoria Desert', category: 'geography', difficulty: 4 },
   ],
   I: [
     { q: 'The island nation southeast of Australia whose capital is Wellington.', a: 'New Zealand', category: 'geography', difficulty: 2 },

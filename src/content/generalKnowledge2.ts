@@ -38,11 +38,11 @@ export const extraGeneralKnowledge: Record<string, RawQuestion[]> = {
   ],
   D: [
     { q: 'The currency of the United States.', a: 'Dollar', category: 'misc' },
-    { q: 'A small songbird, symbol of peace.', a: 'Dove', category: 'nature' },
+    { q: 'A pale, cooing bird used worldwide as a symbol of peace.', a: 'Dove', category: 'nature' },
     { q: 'A period of ten years.', a: 'Decade', category: 'misc' },
     { q: 'A shape with ten sides.', a: 'Decagon', category: 'maths' },
     { q: 'The largest hot, sandy region; the Sahara is one.', a: 'Desert', category: 'geography' },
-    { q: 'A female deer, rabbit, or kangaroo.', a: 'Doe', category: 'nature', alt: ['Puppy'] },
+    { q: 'A female deer, rabbit, or kangaroo.', a: 'Doe', category: 'nature' },
   ],
   E: [
     { q: 'The capital of Scotland.', a: 'Edinburgh', category: 'geography' },
@@ -58,7 +58,7 @@ export const extraGeneralKnowledge: Record<string, RawQuestion[]> = {
     { q: 'A baby horse.', a: 'Foal', category: 'nature' },
     { q: 'The North American word for the season when leaves change colour and drop from trees.', a: 'Fall', category: 'misc', alt: ['Autumn'] },
     { q: 'A unit of distance equal to twelve inches.', a: 'Foot', category: 'maths' },
-    { q: 'A bird that cannot fly and lives on a farm, says "cluck".', a: 'Fowl', category: 'nature', alt: ['Hen', 'Chicken'] },
+    { q: 'A farmyard bird that says "cluck" and lays the eggs we eat.', a: 'Fowl', category: 'nature', alt: ['Hen', 'Chicken'] },
   ],
   G: [
     { q: 'The precious yellow metal with chemical symbol Au, used in jewellery and currency.', a: 'Gold', category: 'science' },
@@ -87,7 +87,7 @@ export const extraGeneralKnowledge: Record<string, RawQuestion[]> = {
     { q: 'The month that starts the year.', a: 'January', category: 'misc' },
     { q: 'A long trip or voyage, especially by sea or through space.', a: 'Journey', category: 'misc' },
     { q: 'A king and queen rule a kingdom; the playing card ranked between ten and queen.', a: 'Jack', category: 'misc' },
-    { q: 'South Africa\'s largest city, nicknamed "Jo\'burg," and the country\'s economic hub.', a: 'Johannesburg', category: 'geography' },
+    { q: 'South Africa\'s largest city and economic hub, built on the gold-rich Witwatersrand.', a: 'Johannesburg', category: 'geography' },
     { q: 'A device that lifts a car to change a tyre.', a: 'Jack', category: 'misc' },
   ],
   K: [
@@ -99,7 +99,7 @@ export const extraGeneralKnowledge: Record<string, RawQuestion[]> = {
   ],
   L: [
     { q: 'The capital of Peru.', a: 'Lima', category: 'geography' },
-    { q: 'The capital of Nigeria is Abuja; its largest, most famous city.', a: 'Lagos', category: 'geography' },
+    { q: 'Nigeria\'s largest city and former capital, a sprawling coastal megacity.', a: 'Lagos', category: 'geography' },
     { q: 'The large African big cat that lives in social groups called prides, known as the king of the jungle.', a: 'Lion', category: 'nature' },
     { q: 'A unit of volume for liquids, about a quart.', a: 'Litre', category: 'maths', alt: ['Liter'] },
     { q: 'The sound you make when something is funny, expressing amusement or joy.', a: 'Laugh', category: 'misc', alt: ['Laughter'] },
@@ -120,7 +120,7 @@ export const extraGeneralKnowledge: Record<string, RawQuestion[]> = {
     { q: 'The capital of the Bahamas.', a: 'Nassau', category: 'geography' },
   ],
   O: [
-    { q: 'The number of legs on an octopus.', a: 'Octet', category: 'maths', alt: ['Eight'] },
+    { q: 'A group of eight musicians, or a musical composition for eight performers.', a: 'Octet', category: 'music' },
     { q: 'A shape like a stretched circle, an egg shape.', a: 'Oval', category: 'maths' },
     { q: 'The tenth month of the year.', a: 'October', category: 'misc' },
     { q: 'A large body of saltwater.', a: 'Ocean', category: 'geography' },

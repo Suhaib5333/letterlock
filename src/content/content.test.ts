@@ -113,7 +113,7 @@ describe('EVERY pack: the answer never leaks into the question text', () => {
     'mount', 'cape', 'gulf', 'bay', 'strait', 'range', 'peak', 'falls', 'kingdom',
     'country', 'nation', 'capital', 'republic', 'sea', 'union',
     // history / culture head-nouns
-    'war', 'battle', 'treaty', 'empire', 'dynasty', 'revolution', 'code', 'age', 'period',
+    'war', 'battle', 'treaty', 'empire', 'dynasty', 'revolution', 'coup', 'code', 'age', 'period',
     'era', 'century', 'king', 'queen', 'emperor', 'pope', 'saint', 'language', 'alphabet',
     // buildings / structures / organisations (generic head-nouns)
     'mosque', 'tower', 'towers', 'studio', 'palace', 'fort', 'castle', 'bridge', 'temple',
@@ -146,6 +146,25 @@ describe('EVERY pack: the answer never leaks into the question text', () => {
         }
       }
       expect(bad, `Answer leaks in "${pack.name}" (${bad.length}):\n${bad.join('\n')}`).toEqual([]);
+    });
+  }
+});
+
+describe('EVERY pack: names in natural spoken order, not "Surname, First" (rule 8)', () => {
+  // Index-card order ("Einstein, Albert") reads as a database row AND mis-files the
+  // question under the surname's letter. Flag a two-token "Word, Word" answer — but
+  // SKIP title-based packs, where comma titles are legitimate ("Crouching Tiger,
+  // Hidden Dragon"; "Hello, Goodbye").
+  const SURNAME_FIRST = /^[A-Z][a-z]+,\s+[A-Z][a-z]+$/;
+  const TITLE_PACK = /movies|songs|melodies|music|charades|screen/;
+  for (const pack of PACKS) {
+    if (TITLE_PACK.test(pack.id)) continue;
+    it(`${pack.name}`, () => {
+      const bad: string[] = [];
+      for (const qs of Object.values(pack.letters)) {
+        for (const q of qs) if (SURNAME_FIRST.test(q.a.trim())) bad.push(q.a);
+      }
+      expect(bad, `"Surname, First" answers in "${pack.name}":\n${bad.join('\n')}`).toEqual([]);
     });
   }
 });

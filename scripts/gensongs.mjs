@@ -158,11 +158,13 @@ const SONGS = [
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Source previews from the Deezer API (free, no key, lenient rate limit). Each
-// track has a 30-second `preview` MP3 on Deezer's hotlinkable preview CDN.
+// Source previews from the iTunes Search API. Apple's preview CDN
+// (audio-ssl.itunes.apple.com) is DIRECTLY hotlinkable and plays in an <audio>
+// tag on real browsers (Safari/Chrome decode the AAC/m4a). (Deezer's preview CDN
+// is hotlink-protected and won't play cross-site, so we don't use it.)
 async function lookupOnce(title, artist) {
   const term = encodeURIComponent(`${title} ${artist}`);
-  const url = `https://api.deezer.com/search?q=${term}&limit=8`;
+  const url = `https://itunes.apple.com/search?term=${term}&entity=song&limit=5&country=US`;
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), 8000); // never hang on a stalled connection
   let res;
@@ -174,12 +176,12 @@ async function lookupOnce(title, artist) {
   const text = await res.text();
   if (!text.trim().startsWith('{')) throw new Error('non-JSON (rate-limited?)');
   const data = JSON.parse(text);
-  const results = data.data || [];
+  const results = data.results || [];
   const a = artist.toLowerCase().replace(/[^a-z]/g, '');
   const pick =
-    results.find((r) => r.preview && (r.artist?.name || '').toLowerCase().replace(/[^a-z]/g, '').includes(a.slice(0, 6))) ||
-    results.find((r) => r.preview);
-  return pick?.preview || null;
+    results.find((r) => r.previewUrl && (r.artistName || '').toLowerCase().replace(/[^a-z]/g, '').includes(a.slice(0, 6))) ||
+    results.find((r) => r.previewUrl);
+  return pick?.previewUrl || null;
 }
 
 // Retry a couple of times with backoff to ride out iTunes rate-limiting.

@@ -71,7 +71,7 @@ export const musicMediumExtra: Record<string, RawQuestion[]> = {
   K: [
     { q: 'American singer-songwriter of "Roar" and "Firework" who once kissed a girl and liked it.', a: 'Katy Perry', category: 'music', difficulty: 2 },
     { q: 'American singer-songwriter behind "All I Want for Christmas Is You", a vocalist famed for her range.', a: 'Mariah Carey', category: 'music', difficulty: 2 },
-    { q: 'A small upright piano-like instrument; also a wind-pumped reed organ.', a: 'Keyboard', category: 'music', difficulty: 2 },
+    { q: 'The general name for an electronic instrument played by pressing a row of black and white keys.', a: 'Keyboard', category: 'music', difficulty: 2 },
   ],
   L: [
     { q: 'British rock band of Robert Plant and Jimmy Page behind "Stairway to Heaven".', a: 'Led Zeppelin', category: 'music', difficulty: 2 },
@@ -167,7 +167,7 @@ export const musicMediumExtra: Record<string, RawQuestion[]> = {
     { q: 'American rock band from Las Vegas behind "Mr. Brightside" and "Human".', a: 'The Killers', category: 'music', difficulty: 2, alt: ['killers'] },
     { q: 'American singer behind "Genie in a Bottle" and "Beautiful", a powerhouse of the early 2000s.', a: 'Christina Aguilera', category: 'music', difficulty: 2 },
     { q: 'British acid-jazz and funk band behind "Virtual Insanity", led by the hat-wearing Jay Kay.', a: 'Jamiroquai', category: 'music', difficulty: 2 },
-    { q: 'American hip-hop artist behind "In Da Club" and "21 Questions".', a: '50 Cent', category: 'music', difficulty: 2, alt: ['fifty cent'] },
+    { q: 'American hip-hop artist behind "In Da Club" and "21 Questions".', a: 'Fifty Cent', category: 'music', difficulty: 2, alt: ['50 cent'] },
     { q: 'American singer behind "Toxic" and "Oops!... I Did It Again".', a: 'Britney Spears', category: 'music', difficulty: 2 },
     { q: 'British band behind "Bitter Sweet Symphony", led by Richard Ashcroft.', a: 'The Verve', category: 'music', difficulty: 2, alt: ['verve'] },
     { q: 'American funk and pop legend behind "Superstition" and "Isn\'t She Lovely", blind since infancy.', a: 'Stevie Wonder', category: 'music', difficulty: 2 },
@@ -203,10 +203,10 @@ export const musicMediumExtra: Record<string, RawQuestion[]> = {
 export const musicHardExtra: Record<string, RawQuestion[]> = {
   A: [
     { q: 'American jazz saxophonist behind the spiritual masterpiece "A Love Supreme".', a: 'John Coltrane', category: 'music', difficulty: 4 },
-    { q: 'The third and fourth scale degree interval named "imperfect" in medieval theory; a stack of two thirds builds this chord.', a: 'Arpeggio', category: 'music', difficulty: 4 },
-    { q: 'German Baroque suite movement, the second standard dance, in moderate 4/4 of German origin.', a: 'Allemande', category: 'music', difficulty: 4 },
+    { q: 'A chord whose notes are sounded one after another rather than together, ascending or descending.', a: 'Arpeggio', category: 'music', difficulty: 4 },
+    { q: 'The opening dance movement of a Baroque suite, in moderate 4/4 and of German origin.', a: 'Allemande', category: 'music', difficulty: 4 },
     { q: 'A chromatic note foreign to the prevailing key, often spelled with a sharp, flat, or natural sign.', a: 'Accidental', category: 'music', difficulty: 4 },
-    { q: 'The legendary Greenwich Village club where Bob Dylan and others performed; its name evokes harmony.', a: 'Café Wha?', category: 'music', difficulty: 4 },
+    { q: 'A gradual quickening of the tempo, the opposite of a ritardando.', a: 'Accelerando', category: 'music', difficulty: 4 },
     { q: 'British prog-rock group behind the suite "Supper\'s Ready" and the album "Foxtrot".', a: 'Genesis', category: 'music', difficulty: 4 },
   ],
   B: [
