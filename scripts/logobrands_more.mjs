@@ -1,0 +1,46 @@
+// Supplementary brand candidates to push logos easy/medium past 200 after
+// de-duplication. Resolved + verified by genlogos.mjs against cdn.simpleicons.org.
+export const easyMore = [
+  'Honda', 'Ford', 'Chevrolet', 'Nissan', 'Hyundai', 'Kia', 'Mazda', 'Subaru', 'Jeep', 'Volvo',
+  'Porsche', 'Lamborghini', 'Maserati', 'Bentley', 'Jaguar', 'Land Rover', 'Mini', 'Fiat', 'Renault', 'Peugeot',
+  'Gucci', 'Prada', 'Chanel', 'Louis Vuitton', 'Versace', 'Burberry', 'Lacoste', 'Calvin Klein', 'Tommy Hilfiger', 'Under Armour',
+  'Reebok', 'New Balance', 'Vans', 'Converse', 'Crocs', 'Fila', 'Asics', 'Skechers',
+  'KFC', 'Subway', 'Dominos', "McDonald's", 'Starbucks', 'Dunkin', 'Wendys', 'Chipotle', 'Nestle', 'Kelloggs',
+  'Heinz', 'Oreo', 'Nutella', 'Lays', 'Doritos', 'Gatorade', 'Red Bull', 'Monster', 'Sprite', 'Fanta',
+  'Nintendo', 'Xbox', 'PlayStation', 'Sega', 'Roblox', 'Minecraft', 'Fortnite', 'EA', 'Activision',
+  'Sony', 'LG', 'Panasonic', 'Sharp', 'Dell', 'HP', 'Acer', 'Huawei', 'Oppo', 'Vivo', 'OnePlus', 'Realme', 'Motorola', 'Nokia',
+  'Visa', 'Mastercard', 'PayPal', 'American Express', 'Western Union',
+  'FedEx', 'UPS', 'DHL', 'Maersk',
+  'CNN', 'BBC', 'Fox', 'HBO', 'Disney', 'Pixar', 'Marvel', 'Warner Bros', 'Universal',
+  'Emirates', 'Qatar Airways', 'Lufthansa', 'Ryanair', 'British Airways', 'Delta', 'United', 'American Airlines',
+  'Shell', 'BP', 'ExxonMobil', 'Chevron', 'Total',
+  'IKEA', 'Walmart', 'Target', 'Costco', 'Tesco', 'Carrefour', 'Aldi', 'Lidl', 'Zara', 'H&M', 'Uniqlo',
+  'Pinterest', 'Snapchat', 'TikTok', 'Telegram', 'Signal', 'Discord', 'Skype', 'Zoom', 'Twitch', 'Tumblr',
+  // sports leagues + more household brands to clear 200 on EASY
+  'NBA', 'NFL', 'FIFA', 'UEFA', 'NHL', 'MLB', 'ESPN', 'Formula 1', 'Premier League', 'LaLiga',
+  'Bundesliga', 'UFC', 'Wikipedia', 'Gmail', 'Google Maps', 'Google Play', 'Google Chrome', 'Firefox', 'Opera', 'Microsoft Edge',
+  'Bing', 'Yahoo', 'DuckDuckGo', 'Quora', 'LinkedIn', 'WeChat', 'Line', 'Viber', 'Messenger', 'Pepsi',
+  'Mountain Dew', '7-Up', 'Dr Pepper', 'Schweppes', 'Lipton', 'Nescafe', 'Heineken', 'Budweiser', 'Corona', 'Guinness',
+  'Carlsberg', "Jack Daniel's", 'Bacardi', 'Samsung', 'Intel', 'Canon', 'Nikon', 'GoPro', 'JBL', 'Bose',
+  'Beats', 'Logitech', 'Razer', 'Steam', 'Epic Games', 'Ubisoft', 'Rockstar Games', 'Twitter', 'X',
+  // final batch (tech/app/auto — simpleicons-friendly) to clear 200 on EASY
+  'Android', 'Windows', 'Linux', 'Ubuntu', 'Brave', 'Vivaldi', 'Hulu', 'Crunchyroll', 'Duolingo', 'Coursera',
+  'Udemy', 'GitLab', 'Venmo', 'Alipay', 'Tesla', 'Lexus', 'Acura', 'Infiniti', 'Cadillac', 'Dodge',
+  'Bugatti', 'Aston Martin', 'McLaren', 'Suzuki', 'Mitsubishi', 'Reddit', 'GitHub', 'Notion', 'Figma', 'WordPress',
+];
+export const mediumMore = [
+  'Atlassian', 'Jira', 'Trello', 'Asana', 'Notion', 'Airtable', 'Miro', 'Canva', 'Grammarly', 'Evernote',
+  'Mailchimp', 'HubSpot', 'Zendesk', 'Intercom', 'Twilio', 'Okta', 'Auth0', 'DocuSign', 'Squarespace', 'Wix',
+  'Shopify', 'WooCommerce', 'Magento', 'BigCommerce', 'Etsy', 'eBay', 'AliExpress', 'Wish', 'Shein',
+  'Booking.com', 'Expedia', 'TripAdvisor', 'Marriott', 'Hilton', 'Hyatt', 'Lyft', 'Bolt', 'DoorDash', 'Deliveroo',
+  'Michelin', 'Pirelli', 'Bridgestone', 'Goodyear', 'Castrol', 'Mobil',
+  'Bosch', 'Siemens', 'Philips', 'Whirlpool', 'Dyson', 'GE', 'Honeywell', '3M', 'Caterpillar', 'John Deere',
+  'Komatsu', 'Volvo', 'Scania', 'MAN',
+  'Cartier', 'Rolex', 'Omega', 'Tag Heuer', 'Tissot', 'Fossil', 'Casio', 'Swatch',
+  'Adobe', 'Autodesk', 'Unity', 'Unreal Engine', 'Blender', 'Figma', 'Sketch', 'InVision',
+  'Cisco', 'Juniper', 'Netgear', 'TP-Link', 'Ubiquiti', 'Arduino', 'Raspberry Pi', 'Qualcomm', 'AMD', 'Nvidia',
+  'Square', 'Stripe', 'Klarna', 'Revolut', 'Wise', 'Coinbase', 'Binance', 'Robinhood',
+  'Spotify', 'SoundCloud', 'Deezer', 'Tidal', 'Bandcamp', 'Audible', 'iHeartRadio',
+  'Vimeo', 'Dailymotion', 'Patreon', 'Substack', 'Medium', 'WordPress', 'Ghost', 'Drupal', 'Joomla',
+  'Salesforce', 'Oracle', 'SAP', 'IBM', 'VMware', 'Red Hat', 'Dropbox', 'Box', 'Google Drive', 'OneDrive',
+];

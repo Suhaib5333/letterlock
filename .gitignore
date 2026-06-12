@@ -25,6 +25,7 @@ playwright-report/
 test-results/
 .playwright-mcp/
 shots/
+audit-shots/
 /*.png
 
 # OS / editor

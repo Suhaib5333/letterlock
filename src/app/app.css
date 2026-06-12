@@ -845,6 +845,9 @@
 }
 
 /* ---------- Manual switch-turn (host intervention) ---------- */
+.turn-label {
+  white-space: nowrap; /* keep "Name — pick a hex" on one line */
+}
 .switch-turn-btn {
   margin-left: 8px;
   flex: 0 0 auto;
@@ -857,9 +860,23 @@
   font-weight: 600;
   cursor: pointer;
   transition: background var(--dur-fast);
+  white-space: nowrap;
 }
 .switch-turn-btn:hover {
   background: rgba(255, 255, 255, 0.14);
+}
+/* On narrow screens the direction is conveyed by the coloured board edges, so
+   drop the hint + the switch label to keep the turn banner on one tidy line. */
+@media (max-width: 560px), (max-height: 500px) {
+  .turn-banner .turn-dir {
+    display: none;
+  }
+  .switch-turn-btn .switch-label {
+    display: none;
+  }
+  .switch-turn-btn {
+    padding: 5px 10px;
+  }
 }
 
 /* ---------- Side panel ---------- */
@@ -1623,15 +1640,28 @@
     flex-direction: column;
     gap: clamp(6px, 1.4vh, 14px);
   }
+  /* Board is a STABLE size on mobile so popups (pie-swap / charade QR) and the
+     question card NEVER shrink the hex — the question panel scrolls instead. */
   .board-wrap {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
+    height: clamp(190px, 42vh, 460px);
   }
   .game-side {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     justify-content: flex-start;
+    overflow-y: auto;
   }
+  /* Pin the adjudication pad to the bottom of the (scrollable) panel so the
+     Award buttons are ALWAYS reachable, even when a tall card (e.g. charade QR)
+     scrolls and the board stays full-size above. */
   .hostpad {
     grid-template-columns: 1fr 1fr;
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    background: var(--bg);
+    padding-top: 8px;
+    box-shadow: 0 -10px 16px -8px rgba(0, 0, 0, 0.7);
   }
   .scoreboard {
     padding: 6px 10px;
@@ -1647,12 +1677,12 @@
   .team-dir {
     display: none;
   }
-  /* keep the board visible during the question phase — it never fully collapses */
-  .board-wrap {
-    min-height: 110px;
-  }
   .game-side {
     min-height: 0;
+  }
+  /* center the short pick-help in the taller panel; questions fill + scroll */
+  .game-side .pick-help {
+    margin: auto 0;
   }
   .qcard {
     padding: 11px 14px;

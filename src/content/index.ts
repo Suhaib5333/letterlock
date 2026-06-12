@@ -21,6 +21,7 @@ import { musicMediumExtra, musicHardExtra } from './musicExtra';
 import { sportsEasyExtra, sportsMediumExtra } from './sportsExtra';
 import { geoExtra } from './geoExtra';
 import { flagsEasyExtra, flagsMediumExtra, flagsHardExtra } from './flagsExtra';
+import { logosEasyExtra, logosMediumExtra, logosHardExtra } from './logosExtra';
 // New packs: regional + charades.
 import { bahrainPack } from './bahrain';
 import { saudiPack, uaePack, gulfPack } from './gcc';
@@ -160,9 +161,9 @@ export const PACKS: QuestionPack[] = [
   fullFlagsEasy,
   fullFlagsMedium,
   fullFlagsHard,
-  logosEasyPack,
-  logosMediumPack,
-  logosHardPack,
+  withExtra(logosEasyPack, logosEasyExtra),
+  withExtra(logosMediumPack, logosMediumExtra),
+  withExtra(logosHardPack, logosHardExtra),
   fullSportsEasy,
   fullSportsMedium,
   sciencePack,

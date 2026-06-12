@@ -131,8 +131,8 @@ export function Game() {
                 </button>
                 <div className="pie-pop-icon">⇄</div>
                 <div className="pie-pop-body">
-                  <strong>{teams[picker].name}</strong>, swap sides?
-                  <span>Take over the opening hex instead of playing — neutralises the first-move advantage.</span>
+                  <strong>Swap sides?</strong>
+                  <span>{teams[picker].name}, take over the opening hex instead of playing — neutralises the first-move advantage.</span>
                 </div>
                 <button
                   className="btn btn-primary sm"
@@ -166,7 +166,9 @@ export function Game() {
           {ui.phase === 'pick' && game.status === 'playing' && (
             <div className={`turn-banner team-${picker}`} data-testid="turn-banner">
               <span className="dot" />
-              <strong>{teams[picker].name}</strong> — pick a hex
+              <span className="turn-label">
+                <strong>{teams[picker].name}</strong> — pick a hex
+              </span>
               <span className="turn-dir">
                 connect {game.directions[picker] === 'horizontal' ? 'left ↔ right' : 'top ↕ bottom'}
               </span>

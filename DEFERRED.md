@@ -92,18 +92,18 @@ drop CC0/CC-BY `.mp3`/`.ogg` files into `public/music/` and wire them in `servic
 
 ---
 
-## 5. 📦 Source-capped packs (under 200)  — **best effort, source-limited**
+## 5. 📦 Packs still under 200  — **source-limited (the two hard exceptions)**
 
-Per the "200+ for all" goal, every **text** pack is 200+. These remain under 200 because their
-content is bound to a finite or external source (the user pre-acknowledged flags "might be hard"):
+Almost every pack is now **200+**. Two remain genuinely capped by their medium, plus the
+regional packs (kept short for quality):
 
 | Pack | Count | Cap reason |
 |---|---|---|
-| World Flags (easy/med/hard) | 49 / 61 / 81 (~191 total) | ~195 sovereign countries exist — near the ceiling. |
-| Logos (easy/med/hard) | 49 / 47 / 44 | Limited to **verified** `cdn.simpleicons.org` slugs; unverified slugs render broken. (Existing open task: audit slugs, then expand.) |
-| Guess the Song | 38 | Each needs a live iTunes preview URL (via `scripts/gensongs.mjs`). |
-| Guess the Melody | 23 | Each needs a bundled public-domain WAV (via `scripts/genclips.mjs`). |
-| Bahrain / Saudi / UAE / Gulf | 125 / ~170 / ~165 / ~175 | Quality regional trivia is finite; pushed as far as feasible without padding. |
+| **World Flags** (easy/med/hard) | ~49 / 61 / 81 (~191 total) | Only ~195 sovereign countries exist — this is essentially the ceiling. *(User pre-excepted flags.)* |
+| **Guess the Melody** | 23 | **Hard exception.** Each clip is a hand-transcribed public-domain tune synthesized to a bundled WAV (`scripts/genclips.mjs`). Reaching 200 would need ~177 more accurate transcriptions **and ~20 MB of bundled audio**; auto-generating risks wrong-note, unrecognisable clips. Could be scaled later by switching to iTunes previews of famous instrumental/classical pieces (loses the synthesized charm). |
+| Bahrain / Saudi / UAE / Gulf | ~125 / 72 / 67 / 67 | Quality regional trivia is finite; kept tight to avoid padded/contrived answers (a known prior complaint). |
 
-To expand logos/songs/melodies safely: run/extend the generator scripts with **verified**
-slugs/URLs, then merge as `*Extra` files (same pattern as the trivia expansions).
+Now at 200+: **Guess the Song** (≈200, iTunes previews via `scripts/gensongs.mjs`), **Logos**
+easy/med/hard (≈215 / 203 / 323, every slug verified against `cdn.simpleicons.org` via
+`scripts/genlogos.mjs` — fixes the old dead-slug open task), all trivia packs, and all 5
+charades categories.
