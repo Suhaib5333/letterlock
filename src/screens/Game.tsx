@@ -36,11 +36,19 @@ export function Game() {
   const [blockToast, setBlockToast] = useState(false);
   const [confirmingExit, setConfirmingExit] = useState(false);
   const [pieDismissed, setPieDismissed] = useState(false);
+  const [clipPlayed, setClipPlayed] = useState(false);
 
   // Reset the dismiss flag once the swap window closes (so a new game can offer it).
   useEffect(() => {
     if (!canPieSwap) setPieDismissed(false);
   }, [canPieSwap]);
+
+  // Reset the "clip played" gate whenever a new question is served (so each
+  // audio/video question waits for its own first play before the timer starts).
+  const servedId = state.ui.served?.question.id;
+  useEffect(() => {
+    setClipPlayed(false);
+  }, [servedId]);
 
   // Hero-moment audio + haptics driven by the reducer's pulse counter.
   useEffect(() => {
@@ -69,10 +77,14 @@ export function Game() {
   const canUndo = state.log.length > 1;
   const inQuestion = ui.phase === 'question' && ui.served;
   const hideLetters = !!opts.pack.hideBoardLetters;
-  // A media clip can fail to load (region/embedding/network); always allow Skip when
-  // the question carries a clip so a broken clip can never strand the game.
+  // A media clip can fail to load (region/network); always allow Skip when the question
+  // carries a clip so a broken clip can never strand the game.
   const q = ui.served?.question;
-  const hasClip = !!(q && (q.image || q.audio || q.video || q.youtube));
+  const hasClip = !!(q && (q.image || q.audio || q.video));
+  // Audio/video questions: the timer doesn't start until the clip is first played
+  // (so reading + watching the clip isn't on the clock). Images start immediately.
+  const needsPlayToStart = !!(q && (q.audio || q.video));
+  const timerActive = !needsPlayToStart || clipPlayed;
 
   return (
     <div className="game" data-testid="game-screen">
@@ -207,7 +219,9 @@ export function Game() {
                     // Stable across a skip (selectedCell + pulse don't change on
                     // skip) so the countdown CONTINUES; resets only on a new pick.
                     resetKey={`${ui.selectedCell}-${ui.pulse}`}
-                    active
+                    // For audio/video questions, hold the countdown until the clip is
+                    // first played (so watching/listening isn't on the clock).
+                    active={timerActive}
                     pickerName={teams[picker].name}
                     otherName={teams[other].name}
                   />
@@ -226,6 +240,7 @@ export function Game() {
                     onReveal={() => dispatch({ type: 'REVEAL_ANSWER' })}
                     onSkip={() => dispatch({ type: 'SKIP_QUESTION' })}
                     onAutoSkip={() => dispatch({ type: 'AUTO_SKIP' })}
+                    onMediaPlay={() => setClipPlayed(true)}
                   />
                 </div>
                 <HostPad

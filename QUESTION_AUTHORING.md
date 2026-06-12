@@ -192,6 +192,34 @@ no clue describing one specific thing). Additional rules for charade answers:
   letter), so a title placed under the "wrong" object key still files correctly — but
   keep it tidy.
 
+## 🎬 Media-clip packs (audio / video / image) — special rules
+
+Clip packs (`hideBoardLetters: true`) ask players to name a thing from a **clip** or
+**image** instead of a letter. They have extra hard rules so a clip never gives the
+answer away and never strands the game:
+
+1. **The clip/image must NOT reveal the answer.** No title text, no thumbnail with the
+   name, no caption, no on-screen logo that spells it out. This is why **YouTube embeds
+   are banned** — a YouTube iframe always exposes the video title, the poster thumbnail,
+   an end-screen, and a click-through to youtube.com, and there is *no* way to fully hide
+   them (especially in fullscreen). Use sources whose media is *raw* (no title overlay):
+   - ✅ **iTunes `entity=tvEpisode` preview clips** (`.m4v`) — real footage, no title,
+     plays in the native `<video>` (which supports **safe fullscreen**). Matched by
+     `artistName` = show. (Movie clips have **no** safe source — iTunes' movie API is
+     dead and YouTube is banned — so movie *content* lives in the trivia packs instead.)
+   - ✅ iTunes `entity=song` previews (`.m4a`) for audio.
+   - ✅ Bundled flag SVGs / Simple-Icons logos / synthesized melodies.
+2. **Use the native `<audio>`/`<video controls>`** — they support fullscreen and have no
+   spoiler chrome. Don't embed third-party iframes for clips.
+3. **Every clip element must have an `onError`** → the game **auto-advances** to another
+   question (`AUTO_SKIP`, capped 12/pick) and Skip stays enabled. Verify reachability with
+   `npx vite-node scripts/checkmedia.mjs` (clip packs must be **0 dead**).
+4. **The answer timer starts on the clip's first play** (audio/video), not when the
+   question is served — so watching/listening isn't on the clock. (Image clips start
+   immediately.) Handled by `onMediaPlay` → `timerActive` in `Game.tsx`.
+5. **Question text is generic** ("Watch the clip — name the TV show.") — never name or
+   hint the answer in the prompt.
+
 ## Where files live & how they're wired
 
 - One pack (or one expansion batch) per file in `src/content/`.

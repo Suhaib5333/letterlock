@@ -4,7 +4,6 @@ import type { TeamConfig, TeamId } from '../core/models';
 import { duckMusic, play, speak } from '../services/audio';
 import type { Served } from '../state/types';
 import { QrCode } from './QrCode';
-import { YouTubeEmbed } from './YouTubeEmbed';
 
 /** URL the charade QR points to — opens the standalone secret-prompt page.
  *  Respects the deploy base path (root domain or a GitHub Pages subpath). */
@@ -30,6 +29,7 @@ interface Props {
   onReveal: () => void;
   onSkip: () => void;
   onAutoSkip: () => void;
+  onMediaPlay: () => void; // fired the first time a clip is played → starts the timer
 }
 
 export function QuestionCard({
@@ -45,6 +45,7 @@ export function QuestionCard({
   onReveal,
   onSkip,
   onAutoSkip,
+  onMediaPlay,
 }: Props) {
   const pickerTeam = teams[picker];
   const charade = served.question.category === 'charade';
@@ -71,7 +72,6 @@ export function QuestionCard({
     return () => clearTimeout(t);
   }, [mediaError, canAutoSkip, onAutoSkip]);
 
-  const ytUrl = served.question.youtube ? `https://www.youtube.com/watch?v=${served.question.youtube}` : null;
   const mediaFallback = (kind: string) =>
     canAutoSkip ? (
       // Auto-advancing: the game serves another question on its own.
@@ -86,14 +86,9 @@ export function QuestionCard({
     ) : (
       // Cap reached (lots of unreachable clips in a row) — fall back to manual controls.
       <div className="qcard-media-error" data-testid="media-error">
-        <span className="qcard-media-error-msg">🔇 This {kind} couldn’t load here (network, region, or embedding off).</span>
+        <span className="qcard-media-error-msg">🔇 This {kind} couldn’t load here (network or region).</span>
         <div className="qcard-media-error-actions">
           <button className="btn btn-secondary sm" data-testid="media-retry" onClick={retryMedia}>↻ Retry</button>
-          {ytUrl && (
-            <a className="btn btn-ghost sm" href={ytUrl} target="_blank" rel="noreferrer" data-testid="media-yt-link">
-              ▸ Watch on YouTube
-            </a>
-          )}
           <span className="qcard-media-error-hint">You can still reveal the answer or skip.</span>
         </div>
       </div>
@@ -173,7 +168,10 @@ export function QuestionCard({
             src={served.question.audio}
             controls
             preload="auto"
-            onPlay={() => duckMusic(true)}
+            onPlay={() => {
+              duckMusic(true);
+              onMediaPlay();
+            }}
             onPause={() => duckMusic(false)}
             onEnded={() => duckMusic(false)}
             onError={() => setMediaError(true)}
@@ -193,23 +191,15 @@ export function QuestionCard({
               controls
               playsInline
               preload="auto"
-              onPlay={() => duckMusic(true)}
+              onPlay={() => {
+                duckMusic(true);
+                onMediaPlay();
+              }}
               onPause={() => duckMusic(false)}
               onEnded={() => duckMusic(false)}
               onError={() => setMediaError(true)}
             />
           </div>
-        ))}
-
-      {served.question.youtube &&
-        (mediaError ? (
-          mediaFallback('trailer')
-        ) : (
-          <YouTubeEmbed
-            key={`${served.question.id}-${reloadKey}`}
-            videoId={served.question.youtube}
-            onUnplayable={() => setMediaError(true)}
-          />
         ))}
 
       <p className="qcard-q" data-testid="question-text">

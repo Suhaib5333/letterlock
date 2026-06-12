@@ -151,30 +151,6 @@ test('melody pack plays a real audio clip and hides board letters', async ({ pag
   await expect(audio).toHaveAttribute('src', /\/clips\/.*\.wav$/);
 });
 
-test('movie-clips pack embeds a YouTube trailer and hides board letters', async ({ page }) => {
-  await page.goto('/');
-  await selectPack(page, 'movies-clips-easy');
-  await page.getByTestId('play-button').click();
-  await page.getByTestId('mode-single').click();
-  await page.getByTestId('start-match').click();
-  await expect(page.locator('.ll-board .hex-letter')).toHaveCount(0); // letters hidden
-  await page.locator('.ll-hex.claimable').first().click();
-  await expect(page.getByTestId('question-card')).toBeVisible();
-  // The trailer loads via the YouTube IFrame Player API (so we can catch unplayable
-  // videos). Either the embed host renders, or — if the API is blocked/unplayable —
-  // a clean fallback shows. Both are valid; the game must never stall.
-  const embed = page.getByTestId('qcard-youtube');
-  const fallback = page.getByTestId('media-error');
-  await expect(embed.or(fallback)).toBeVisible();
-  // Anti-spoiler: a cover hides YouTube's giveaway poster/title until Play is tapped
-  // (only when the embed actually loads, not the fallback path).
-  if (await embed.count()) {
-    await expect(page.getByTestId('qcard-yt-play')).toBeVisible();
-  }
-  // Skip is ALWAYS available on a clip question so a broken clip never strands play.
-  await expect(page.getByTestId('skip-question')).toBeEnabled();
-});
-
 test('tv-clips pack plays a real episode video clip and hides board letters', async ({ page }) => {
   await page.goto('/');
   await selectPack(page, 'tv-clips-easy');
@@ -188,6 +164,27 @@ test('tv-clips pack plays a real episode video clip and hides board letters', as
   await expect(vid).toHaveCount(1);
   await expect(vid).toHaveAttribute('src', /itunes\.apple\.com.*\.m4v/);
   await expect(page.getByTestId('skip-question')).toBeEnabled();
+});
+
+test('clip timer holds until the clip is first played, then counts down', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  await selectPack(page, 'tv-clips-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  const num = page.locator('.timer-num');
+  await expect(num).toBeVisible();
+  const before = await num.textContent();
+  // Before playing the clip the countdown is HELD (reading/watching isn't on the clock).
+  await page.waitForTimeout(1600);
+  await expect(num).toHaveText(before!); // unchanged
+  // Trigger the clip's first play → the timer starts.
+  await page.getByTestId('qcard-video').evaluate((v: HTMLVideoElement) => v.dispatchEvent(new Event('play')));
+  await page.waitForTimeout(1600);
+  const after = await num.textContent();
+  expect(parseInt(after!)).toBeLessThan(parseInt(before!));
 });
 
 test('pie-rule prompt is an overlay that does not shrink the board, and swap works (no blank)', async ({ page }) => {

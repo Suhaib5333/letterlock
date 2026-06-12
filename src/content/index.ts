@@ -11,14 +11,7 @@ import { geniusPack } from './genius';
 import { logosEasyPack, logosMediumPack, logosHardPack } from './logos';
 import { sportsEasyPack, sportsMediumPack } from './sports';
 import { moviesPack, moviesHardPack } from './screen';
-import {
-  movieClipsEasyPack,
-  movieClipsMediumPack,
-  movieClipsHardPack,
-  tvClipsEasyPack,
-  tvClipsMediumPack,
-  tvClipsHardPack,
-} from './movieClips';
+import { tvClipsEasyPack, tvClipsMediumPack, tvClipsHardPack } from './movieClips';
 import { musicMediumPack, musicHardPack } from './musicpack';
 import { melodiesPack } from './melodies';
 import { songsPack } from './songs';
@@ -202,9 +195,6 @@ export const PACKS: QuestionPack[] = [
   fullSportsMedium,
   sciencePack,
   worldPack,
-  movieClipsEasyPack,
-  movieClipsMediumPack,
-  movieClipsHardPack,
   tvClipsEasyPack,
   tvClipsMediumPack,
   tvClipsHardPack,

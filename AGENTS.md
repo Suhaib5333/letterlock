@@ -2,7 +2,8 @@
 
 **Read this first.** It captures how this repo actually works, the tools we use, how/when
 to use them, and the standing rules — so you don't need fresh instructions each session.
-Companion docs: `CLAUDE.md` (full plan + build log), `QUESTION_AUTHORING.md` (content rules),
+Companion docs: `TECH.md` (the "everything" reference — every technology, decision, media source &
+change log), `CLAUDE.md` (full plan + build log), `QUESTION_AUTHORING.md` (content rules),
 `DEFERRED.md` (blocked work + what unblocks it), `HANDOFF.md` (quick orientation).
 
 ---
@@ -22,7 +23,7 @@ Companion docs: `CLAUDE.md` (full plan + build log), `QUESTION_AUTHORING.md` (co
 ## 2. ⭐ The standing workflow (do this every change)
 1. Make the change.
 2. `npx tsc -b` — must be clean.
-3. `npx vitest run` — all unit + content tests green (currently **238**).
+3. `npx vitest run` — all unit + content tests green (currently **226**).
 4. If layout/CSS changed: `node scripts/noscroll.mjs` in **3+ modes** (see §3) → "ALL CLEAR".
 5. If content changed: `npx vitest run src/content` (leak/letter/dup/Surname guards).
 6. If media changed: `npx vite-node scripts/checkmedia.mjs` (set `ALL=1` to include logos/charades) — every clip/audio/flag URL must be reachable (clip packs should show **0 dead**).
@@ -82,13 +83,13 @@ drivers) + `Read` the PNGs instead — same coverage, no MCP needed.
   - `scripts/genflags.mjs` → downloads flag SVGs into `public/flags/` (bundled locally so flags
     always load — flagcdn.com is blocked on some networks). Flag helper uses `/flags/<code>.svg`.
   - `scripts/genclips.mjs` → synthesizes public-domain melody WAVs into `public/clips/`.
-  - `scripts/genmovies.mjs` → `movieClips.ts` — 6 clip packs (3 movie + 3 TV tiers).
-    **Movies** = official YouTube trailers, each `[title, year, youtubeId]` **verified via YouTube
-    keyless oEmbed** (only titles that match + are trailers are kept; no TMDB key needed). **TV**
-    = REAL iTunes Search API episode **preview clips** (`entity=tvEpisode` → `previewUrl` .m4v,
+  - `scripts/genmovies.mjs` → `movieClips.ts` — **3 TV-clip packs** (easy/med/hard, ~221 total).
+    REAL iTunes Search API episode **preview clips** (`entity=tvEpisode` → `previewUrl` .m4v,
     hotlinkable), matched by `artistName` = show — no guessed ids (the API is the source of truth);
     iTunes rate-limits bursts, so it retries with backoff. Netflix/Disney+/Apple-TV+ originals
-    aren't on iTunes (use network/cable/HBO shows). Add titles/shows + re-run to expand.
+    aren't on iTunes (use network/cable/HBO shows). Add shows + re-run to expand. **YouTube/movie
+    clips were removed** — an iframe leaks the title/thumbnail/end-screen + can't fullscreen safely,
+    and iTunes' movie API is dead; movie *content* lives in the Movies & TV trivia packs.
   - `scripts/checkmedia.mjs` → loads PACKS and checks EVERY media URL is reachable (audio/video
     Range GET, youtube oEmbed, local flags/clips file-exists); reports dead per pack. Clip packs
     must be 0 dead. The YouTube embed uses the **IFrame Player API** (`YouTubeEmbed.tsx`) so an

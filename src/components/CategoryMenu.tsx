@@ -29,6 +29,10 @@ export function CategoryMenu({
 }) {
   const [query, setQuery] = useState('');
   const [group, setGroup] = useState<string>('All');
+  // Only autofocus the search on devices with a fine pointer (desktop/laptop). On
+  // touch phones autofocus pops the on-screen keyboard the moment the menu opens,
+  // covering the categories — so there we focus only when the user taps the field.
+  const autoFocusSearch = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: fine)').matches;
 
   const q = query.trim().toLowerCase();
   const filtered = useMemo(
@@ -90,7 +94,7 @@ export function CategoryMenu({
               data-testid="category-search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              autoFocus
+              autoFocus={autoFocusSearch}
             />
             {query && (
               <button className="cat-search-clear" aria-label="Clear search" onClick={() => setQuery('')}>

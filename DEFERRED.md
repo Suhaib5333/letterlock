@@ -61,7 +61,18 @@ as #1). Local-only high scores wouldn't be "global."
 
 ---
 
-## 3. 🎬 Real movie / TV video clips  — ✅ **DONE (2026-06-12) — 6 clip packs ship (3 movie + 3 TV tiers, ~207 clips)**
+## 3. 🎬 Real movie / TV video clips  — ✅ **TV clips ship; movie clips removed (no safe source)**
+
+> **Update (2026-06-12, round 8c):** the **YouTube movie-clip packs were removed**. A YouTube iframe
+> always leaks the answer (title bar, thumbnail poster, end-screen, click-through to youtube.com) and
+> **cannot be made spoiler-safe in fullscreen** — and fullscreen is required. iTunes' movie API is
+> dead, so there is **no fullscreen-safe movie-video source**. Movie *content* therefore lives in the
+> **Movies & TV trivia packs**. **TV Show Clips remain** (3 tiers, ~221) using iTunes episode previews
+> in the native `<video controls>` — real footage, **safe fullscreen**, no title to leak. To add a
+> movie-clip pack later you'd need a source whose media has no title/thumbnail overlay and allows
+> embedding+fullscreen (none free today).
+
+<details><summary>Original entry (the 6-pack version, now superseded)</summary>
 
 **Requested (repeatedly):** actual video clips for guessing popular movies AND TV shows, in
 easy/medium/hard. **All built, verified, and live** (`src/content/movieClips.ts`, letterless).
@@ -82,9 +93,9 @@ easy/medium/hard. **All built, verified, and live** (`src/content/movieClips.ts`
   ids: the iTunes API is the source of truth. (Netflix/Disney+/Apple-TV+ originals aren't on iTunes,
   so the lists lean on network/cable/HBO shows.)
 
-**Verification:** `scripts/checkmedia.mjs` confirms every trailer/clip URL is reachable (0 dead);
-`scripts/verify_clips.mjs` confirms the YT iframe injects and the TV `<video>` decodes (readyState
-4). Guarded by e2e tests. To expand: add titles/shows to `scripts/genmovies.mjs` and re-run.
+**Verification:** `scripts/checkmedia.mjs` confirms every clip URL is reachable (0 dead). Guarded by
+e2e tests. To expand: add shows to `scripts/genmovies.mjs` and re-run.
+</details>
 
 ---
 

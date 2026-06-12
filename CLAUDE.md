@@ -819,6 +819,30 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
   The ≥16-letters playability rule is relaxed for letterless packs (clips/flags serve from the
   whole pool regardless of letter) → `totalQuestions ≥ 16` instead.
 
+## II.3i Round-8c — YouTube removed, TV clips + safe fullscreen, timer-on-play, mobile keyboard, TECH.md (2026-06-12)
+
+- ✅ **YouTube removed entirely** (`YouTubeEmbed.tsx` deleted; movie-clip packs dropped). A YouTube
+  iframe always leaks the answer (title bar, thumbnail, end-screen, click-through to youtube.com)
+  and **can't be made spoiler-safe in fullscreen** — and the user requires fullscreen. iTunes' movie
+  API is dead, so there's no fullscreen-safe movie-*video* source; movie **content lives in the
+  Movies & TV trivia packs**. (Reverses the round-8/8b YouTube work by design.)
+- ✅ **TV Show Clips kept + expanded to ~221** (easy/med/hard) via iTunes `entity=tvEpisode`
+  previews, played in the native **`<video controls>`** → **safe fullscreen** (real footage, no
+  title overlay). `scripts/genmovies.mjs` is now TV-only with much bigger show lists.
+- ✅ **Answer timer starts on the clip's FIRST play** (audio/video) — `onMediaPlay` → `timerActive`
+  in `Game.tsx`; reset per question. So watching/listening isn't on the clock. Images start at once.
+- ✅ **Fullscreen always allowed** — native media controls (no `controlslist` restriction);
+  verified `fullscreenEnabled` on mobile.
+- ✅ **Mobile category search no longer auto-pops the keyboard** — `autoFocus` only on
+  `(pointer: fine)` (desktop); touch devices focus only when the field is tapped.
+- ✅ **New `TECH.md`** — the canonical "everything" doc: every technology, decision, external media
+  source (+ how fetched/verified/legality), layout/UX decisions, and a change-log index. Linked
+  from `AGENTS.md`. `QUESTION_AUTHORING.md` gained a **media-clip rules** section (no-spoiler source,
+  native player, onError→auto-advance, timer-on-play, generic prompt).
+- ✅ **226 unit/content tests, 36 Playwright e2e** (incl. timer-holds-until-play + auto-advance +
+  tv-clips + category menu), noscroll ALL CLEAR. Mobile verified: search no-autofocus + video
+  fullscreen-enabled + readyState 4.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily
