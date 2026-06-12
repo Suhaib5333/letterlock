@@ -12,6 +12,14 @@ async function startMatch(
   await expect(page.getByTestId('game-screen')).toBeVisible();
 }
 
+/** Open the category browse menu and choose a pack (selecting closes the menu). */
+async function selectPack(page: Page, id: string) {
+  await page.getByTestId('open-categories').click();
+  await expect(page.getByTestId('category-menu')).toBeVisible();
+  await page.getByTestId(`pack-${id}`).click();
+  await expect(page.getByTestId('category-menu')).toHaveCount(0);
+}
+
 /** Pick a specific neutral hex and award it to a team via the host pad. */
 async function claimFor(page: Page, cell: number, team: 'A' | 'B') {
   await page.locator(`.ll-hex.claimable[data-cell="${cell}"]`).click();
@@ -21,7 +29,7 @@ async function claimFor(page: Page, cell: number, team: 'A' | 'B') {
 
 test('home → setup → board renders with both teams', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByTestId('pack-grid')).toBeVisible();
+  await expect(page.getByTestId('open-categories')).toBeVisible();
   await page.getByTestId('play-button').click();
   await page.getByTestId('swatch-a-teal').click();
   await page.getByTestId('swatch-b-rose').click();
@@ -98,7 +106,7 @@ test('exit uses an in-UI modal, not a browser dialog', async ({ page }) => {
   await expect(page.getByTestId('game-screen')).toBeVisible(); // stayed in game
   await page.getByTestId('exit-btn').click();
   await page.getByTestId('exit-confirm').click();
-  await expect(page.getByTestId('pack-grid')).toBeVisible(); // back home
+  await expect(page.getByTestId('open-categories')).toBeVisible(); // back home
 });
 
 test('teams can pick colors and it carries into the match', async ({ page }) => {
@@ -117,7 +125,7 @@ test('teams can pick colors and it carries into the match', async ({ page }) => 
 
 test('flags pack hides board letters (no first-letter hint) and shows a flag', async ({ page }) => {
   await page.goto('/');
-  await page.getByTestId('pack-flags-easy').click();
+  await selectPack(page, 'flags-easy');
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
@@ -131,7 +139,7 @@ test('flags pack hides board letters (no first-letter hint) and shows a flag', a
 
 test('melody pack plays a real audio clip and hides board letters', async ({ page }) => {
   await page.goto('/');
-  await page.getByTestId('pack-melodies').click();
+  await selectPack(page, 'melodies');
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
@@ -143,9 +151,9 @@ test('melody pack plays a real audio clip and hides board letters', async ({ pag
   await expect(audio).toHaveAttribute('src', /\/clips\/.*\.wav$/);
 });
 
-test('movie-trailer pack embeds a YouTube trailer and hides board letters', async ({ page }) => {
+test('movie-clips pack embeds a YouTube trailer and hides board letters', async ({ page }) => {
   await page.goto('/');
-  await page.getByTestId('pack-movies-clips').click();
+  await selectPack(page, 'movies-clips-easy');
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
@@ -155,6 +163,20 @@ test('movie-trailer pack embeds a YouTube trailer and hides board letters', asyn
   const yt = page.getByTestId('qcard-youtube');
   await expect(yt).toHaveCount(1);
   await expect(yt).toHaveAttribute('src', /youtube-nocookie\.com\/embed\/[\w-]+/);
+});
+
+test('tv-clips pack plays a real episode video clip and hides board letters', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'tv-clips-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await expect(page.locator('.ll-board .hex-letter')).toHaveCount(0); // letters hidden
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  const vid = page.getByTestId('qcard-video');
+  await expect(vid).toHaveCount(1);
+  await expect(vid).toHaveAttribute('src', /itunes\.apple\.com.*\.m4v/);
 });
 
 test('pie-rule prompt is an overlay that does not shrink the board, and swap works (no blank)', async ({ page }) => {
@@ -197,7 +219,7 @@ test('only one skip is allowed and the skip button then disables', async ({ page
 
 test('charades pack shows a QR secret-prompt and the /img page renders the word', async ({ page }) => {
   await page.goto('/');
-  await page.getByTestId('pack-charades-easy').click();
+  await selectPack(page, 'charades-easy');
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
@@ -215,7 +237,7 @@ test('charades pack shows a QR secret-prompt and the /img page renders the word'
 
 test('a failed media clip falls back gracefully — the game never stalls', async ({ page }) => {
   await page.goto('/');
-  await page.getByTestId('pack-songs').click();
+  await selectPack(page, 'songs');
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();

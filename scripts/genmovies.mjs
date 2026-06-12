@@ -1,102 +1,88 @@
-// Build the "Guess the Movie (Trailer)" pack. We can't search YouTube without an
-// API key (and iTunes' movie API is dead), so we curate a candidate list of
-// [movie, year, youtubeId] and VERIFY each id against the real video title via
-// YouTube's keyless oEmbed endpoint. Only ids whose title actually matches the
-// movie (and is a trailer/teaser) are kept — so a wrong/guessed id can never ship.
+// Build the "Guess the Movie / TV-Show" clip packs — 3 movie tiers + 3 TV tiers.
+//
+// MOVIES: official YouTube trailers. We can't search YouTube without an API key, so we
+//   curate [title, year, youtubeId] and VERIFY each id against the real video title via
+//   YouTube's keyless oEmbed — only ids whose title matches AND is a trailer survive, so
+//   a wrong/dead id can never ship. Embedded via youtube-nocookie (legal; nothing stored).
+//
+// TV SHOWS: REAL 30-second episode preview clips from the iTunes Search API
+//   (entity=tvEpisode → previewUrl .m4v, hotlinkable like the song previews). We match
+//   results by artistName (= the show) so the clip is genuinely from that series. This
+//   is "guess the show from real footage" — and needs no guessed ids (the API is the
+//   source of truth). Netflix/HBO-Max originals aren't on iTunes, so the TV lists lean on
+//   network/cable/HBO shows that are.
 //
 // Run:  node scripts/genmovies.mjs   → writes src/content/movieClips.ts
 import { writeFile } from 'node:fs/promises';
 
-// [title, year, youtubeId]  — official-trailer ids from studio / Rotten Tomatoes channels.
-const CANDIDATES = [
-  ['Inception', 2010, 'YoHD9XEInc0'],
-  ['Interstellar', 2014, 'zSWdZVtXT7E'],
-  ['The Dark Knight', 2008, 'EXeTwQWrcwY'],
-  ['The Matrix', 1999, 'vKQi3bBA1y8'],
-  ['Avatar: The Way of Water', 2022, 'd9MyW72ELq0'],
-  ['Avengers: Endgame', 2019, 'TcMBFSGVi1c'],
-  ['Avengers: Infinity War', 2018, '6ZfuNTqbHE8'],
-  ['The Avengers', 2012, 'eOrNdBpGMv8'],
-  ['Joker', 2019, 'zAGVQLHvwOY'],
-  ['The Lion King', 2019, '7TavVZMewpY'],
-  ['Jurassic World', 2015, 'RFinNxS5KN4'],
-  ['Jurassic Park', 1993, 'lc0UehYemQA'],
-  ['Star Wars: The Force Awakens', 2015, 'sGbxmsDFVnE'],
-  ['Gladiator', 2000, 'owK1qxDselE'],
-  ['The Godfather', 1972, 'sY1S34973zA'],
-  ['Pulp Fiction', 1994, 's7EdQ4FqbhY'],
-  ['Forrest Gump', 1994, 'bLvqoHBptjg'],
-  ['The Shawshank Redemption', 1994, 'NmzuHjWmXOc'],
-  ['Spider-Man: No Way Home', 2021, 'JfVOs4VSpmA'],
-  ['Black Panther', 2018, 'xjDjIWPwcPU'],
-  ['Frozen', 2013, 'TbQm5doF_Uc'],
-  ['Frozen II', 2019, 'Zi4LMpSDccc'],
-  ['Harry Potter and the Sorcerer’s Stone', 2001, 'VyHV0BRtdxo'],
-  ['The Lord of the Rings: The Fellowship of the Ring', 2001, 'V75dMMIW2B4'],
-  ['Finding Nemo', 2003, '2zLkY7P2VK0'],
-  ['Coco', 2017, 'Rvr68u6k5sI'],
-  ['Moana', 2016, 'LKFuXETZUsI'],
-  ['Encanto', 2021, 'CaimKeDcudo'],
-  ['Minions', 2015, 'eisKxhjBnZ0'],
-  ['Barbie', 2023, 'pBk4NYhWNMM'],
-  ['Oppenheimer', 2023, 'uYPbbksJxIg'],
-  ['Top Gun: Maverick', 2022, 'qSqVVswa420'],
-  ['Dune', 2021, 'n9xhJrPXop4'],
-  ['Deadpool', 2016, 'ONHBaC-pfsk'],
-  ['Guardians of the Galaxy', 2014, 'd96cjJhvlMA'],
-  ['Captain America: Civil War', 2016, 'dKrVegVI0Us'],
-  ['Thor: Ragnarok', 2017, 'ue80QwXMRHg'],
-  ['Zootopia', 2016, 'jWM0ct-OLsM'],
-  ['Inside Out', 2015, 'yRUAzGQ3nSY'],
-  ['Toy Story 3', 2010, 'JcUBdT-zCVk'],
-  ['Shrek', 2001, 'W1HpyT9Hr6E'],
-  ['The Incredibles', 2004, '-UaGUdNJdRQ'],
-  ['Wonder Woman', 2017, '1Q8fG0TtVAY'],
-  ['Aquaman', 2018, 'WDkg3h8PCVU'],
-  ['Doctor Strange', 2016, 'HSzx-zryEgM'],
+// ---------- MOVIES (YouTube trailers) ----------
+const MOVIES_EASY = [
+  ['Frozen', 2013, 'TbQm5doF_Uc'], ['Frozen II', 2019, 'Zi4LMpSDccc'], ['The Lion King', 2019, '7TavVZMewpY'],
+  ['Minions', 2015, 'eisKxhjBnZ0'], ['Barbie', 2023, 'pBk4NYhWNMM'], ['Jurassic World', 2015, 'RFinNxS5KN4'],
+  ['Jurassic Park', 1993, 'lc0UehYemQA'], ['The Avengers', 2012, 'eOrNdBpGMv8'], ['Avengers: Endgame', 2019, 'TcMBFSGVi1c'],
+  ['Avengers: Infinity War', 2018, '6ZfuNTqbHE8'], ['Spider-Man: No Way Home', 2021, 'JfVOs4VSpmA'],
+  ['Spider-Man: Into the Spider-Verse', 2018, 'g4Hbz2jLxvQ'], ['Black Panther', 2018, 'xjDjIWPwcPU'],
+  ['Titanic', 1997, '2e-eXJ6HgkQ'], ['Harry Potter and the Sorcerer’s Stone', 2001, 'VyHV0BRtdxo'],
+  ['Star Wars: The Force Awakens', 2015, 'sGbxmsDFVnE'], ['Moana', 2016, 'LKFuXETZUsI'], ['Encanto', 2021, 'CaimKeDcudo'],
+  ['Coco', 2017, 'Rvr68u6k5sI'], ['Zootopia', 2016, 'jWM0ct-OLsM'], ['Inside Out', 2015, 'yRUAzGQ3nSY'],
+  ['Aquaman', 2018, 'WDkg3h8PCVU'], ['Wonder Woman', 2017, '1Q8fG0TtVAY'], ['Sonic the Hedgehog', 2020, 'szby7ZHLnkA'],
+  ['The Lego Movie', 2014, 'fZ_JOBCLF-I'], ['Brave', 2012, 'TEHWDA_6e3M'], ['Wall-E', 2008, 'alIq_wG9FNk'],
+  ['Ratatouille', 2007, 'c3sBBRxDAqk'], ['The Incredibles', 2004, '-UaGUdNJdRQ'], ['The Hunger Games', 2012, 'mfmrPu43DF8'],
   ['Iron Man', 2008, '8ugaeA-nMTc'],
-  ['Spider-Man: Into the Spider-Verse', 2018, 'g4Hbz2jLxvQ'],
-  ['Ratatouille', 2007, 'c3sBBRxDAqk'],
-  ['Up', 2009, 'pkqzFUhGPJg'],
-  ['Despicable Me', 2010, 'eFC8AG90QnY'],
-  ['The Hunger Games', 2012, 'mfmrPu43DF8'],
-  ['Titanic', 1997, '2e-eXJ6HgkQ'],
-  ['Tenet', 2020, 'L3pk_TBkihU'],
-  ['Black Widow', 2021, 'Fp9pNPdNwjI'],
-  ['Wakanda Forever', 2022, 'RlOB3UALvrQ'],
-  ['No Time to Die', 2021, 'BIhNsAtPbPI'],
-  ['Skyfall', 2012, '6kw1UVovByw'],
-  ['Mad Max: Fury Road', 2015, 'hEJnMQG9ev8'],
-  ['La La Land', 2016, '0pdqf4P9MB8'],
-  ['Bohemian Rhapsody', 2018, 'mP0VHJYFOAU'],
-  ['Parasite', 2019, '5xH0HfJHsaY'],
-  ['Get Out', 2017, 'DzfpyUB60YY'],
-  ['It', 2017, 'FnCdOQsX5kc'],
-  ['A Quiet Place', 2018, 'WR7cc5t7tv8'],
-  ['John Wick', 2014, 'C0BMx-qxsP4'],
-  ['The Lego Movie', 2014, 'fZ_JOBCLF-I'],
-  ['Sonic the Hedgehog', 2020, 'szby7ZHLnkA'],
-  ['Cars', 2006, 'WnLEnDQxFiQ'],
-  ['Brave', 2012, 'TEHWDA_6e3M'],
-  ['Tangled', 2010, 'ZQUg7Mu8C04'],
-  ['Wall-E', 2008, 'alIq_wG9FNk'],
-  ['Monsters, Inc.', 2001, 'gZ4fnufgkAU'],
-  ['Kung Fu Panda', 2008, '-Ob1Nz7Rdjs'],
-  ['How to Train Your Dragon', 2010, 'Q9_eL3jWVUw'],
+];
+const MOVIES_MEDIUM = [
+  ['Inception', 2010, 'YoHD9XEInc0'], ['Interstellar', 2014, 'zSWdZVtXT7E'], ['The Dark Knight', 2008, 'EXeTwQWrcwY'],
+  ['The Matrix', 1999, 'vKQi3bBA1y8'], ['Gladiator', 2000, 'owK1qxDselE'], ['Avatar: The Way of Water', 2022, 'd9MyW72ELq0'],
+  ['Joker', 2019, 'zAGVQLHvwOY'], ['Dune', 2021, 'n9xhJrPXop4'], ['Deadpool', 2016, 'ONHBaC-pfsk'],
+  ['Guardians of the Galaxy', 2014, 'd96cjJhvlMA'], ['Captain America: Civil War', 2016, 'dKrVegVI0Us'],
+  ['Thor: Ragnarok', 2017, 'ue80QwXMRHg'], ['Doctor Strange', 2016, 'HSzx-zryEgM'], ['Top Gun: Maverick', 2022, 'qSqVVswa420'],
+  ['Tenet', 2020, 'L3pk_TBkihU'], ['Black Widow', 2021, 'Fp9pNPdNwjI'], ['Wakanda Forever', 2022, 'RlOB3UALvrQ'],
+  ['No Time to Die', 2021, 'BIhNsAtPbPI'], ['Skyfall', 2012, '6kw1UVovByw'], ['Mad Max: Fury Road', 2015, 'hEJnMQG9ev8'],
+  ['John Wick', 2014, 'C0BMx-qxsP4'], ['A Quiet Place', 2018, 'WR7cc5t7tv8'], ['Get Out', 2017, 'DzfpyUB60YY'],
+  ['It', 2017, 'FnCdOQsX5kc'], ['Bohemian Rhapsody', 2018, 'mP0VHJYFOAU'], ['La La Land', 2016, '0pdqf4P9MB8'],
+  ['Oppenheimer', 2023, 'uYPbbksJxIg'],
+];
+const MOVIES_HARD = [
+  ['The Godfather', 1972, 'sY1S34973zA'], ['Pulp Fiction', 1994, 's7EdQ4FqbhY'], ['The Shawshank Redemption', 1994, 'NmzuHjWmXOc'],
+  ['Forrest Gump', 1994, 'bLvqoHBptjg'], ['Parasite', 2019, '5xH0HfJHsaY'],
+  ['The Lord of the Rings: The Fellowship of the Ring', 2001, 'V75dMMIW2B4'], ['Whiplash', 2014, '7d_jQycdQGo'],
+  ['Fight Club', 1999, 'qtRKdVHc-cE'], ['Goodfellas', 1990, '2ilzidi_J8Q'], ['The Departed', 2006, 'iojhqm0JTW4'],
+  ['Schindler’s List', 1993, 'gG22XNhtnoY'], ['No Country for Old Men', 2007, '38A__WT3-o0'], ['Django Unchained', 2012, '0fUCuvNlOCg'],
+  ['The Prestige', 2006, 'o4gHCmTQDVI'], ['Blade Runner 2049', 2017, 'gCcx85zbxz4'], ['The Grand Budapest Hotel', 2014, '1Fg5iWmQjwk'],
+  ['1917', 2019, 'YqNYrYUiMfg'], ['Moonlight', 2016, '9NJj12tJzqc'], ['Drive', 2011, 'KBiOF3y1W0Y'], ['Birdman', 2014, 'uJfLoE6hanc'],
+  ['The Silence of the Lambs', 1991, 'W6Mm8Sbe__o'], ['Memento', 2000, '0vS0E9bBSL0'], ['Alien', 1979, 'LjLamj-b0I8'],
+];
+
+// ---------- TV SHOWS (iTunes episode preview clips) ----------
+const TV_EASY = [
+  'The Office', 'Friends', 'The Big Bang Theory', 'Game of Thrones', "Grey's Anatomy", 'How I Met Your Mother',
+  'The Simpsons', 'Modern Family', 'Breaking Bad', 'Family Guy', 'SpongeBob SquarePants', 'Brooklyn Nine-Nine',
+  'Parks and Recreation', 'Two and a Half Men', 'NCIS', 'The Big Bang Theory', 'Glee', 'Desperate Housewives',
+  'CSI: Miami', 'Hannah Montana', 'Scrubs', 'That 70s Show', 'Malcolm in the Middle', 'Spongebob', 'The Fresh Prince of Bel-Air',
+];
+const TV_MEDIUM = [
+  'Lost', 'Prison Break', 'Dexter', 'House', 'Suits', 'Sons of Anarchy', 'Vikings', 'Homeland', 'Gossip Girl',
+  'Pretty Little Liars', 'Supernatural', 'Arrow', 'The Flash', '24', 'Heroes', 'Smallville', 'The Vampire Diaries',
+  'White Collar', 'Burn Notice', 'Castle', 'Bones', 'Fringe', 'Entourage', 'Californication', 'True Blood',
+];
+const TV_HARD = [
+  'The Wire', 'The Sopranos', 'Mad Men', 'Deadwood', 'Boardwalk Empire', 'Six Feet Under', 'Twin Peaks',
+  'Battlestar Galactica', 'Band of Brothers', 'Curb Your Enthusiasm', "It's Always Sunny in Philadelphia",
+  'Frasier', 'Seinfeld', 'Cheers', 'The X-Files', 'Buffy the Vampire Slayer', 'The West Wing', 'Oz',
+  'Veep', 'Rome', 'Justified', 'The Shield', 'Spartacus', 'Sherlock',
 ];
 
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-const STOP = new Set(['the', 'of', 'and', 'a', 'an', 'to', 'in', 'ii', 'iii', 'your', 'how', 'no']);
+const STOP = new Set(['the', 'of', 'and', 'a', 'an', 'to', 'in', 'ii', 'iii', 'your', 'how', 'no', 'will', 'be']);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function oembedTitle(id) {
-  const url = `https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=${id}`;
+async function getJson(url) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 12000);
   try {
     const res = await fetch(url, { signal: ctrl.signal });
     if (!res.ok) return null;
-    const j = await res.json();
-    return j.title || null;
+    return await res.json();
   } catch {
     return null;
   } finally {
@@ -104,67 +90,101 @@ async function oembedTitle(id) {
   }
 }
 
-function matches(movie, title) {
-  const tnorm = norm(title);
-  if (!/\b(trailer|teaser)\b/.test(tnorm)) return false; // must be a trailer, not a clip/review
-  const tokens = norm(movie).split(' ').filter((w) => w.length >= 3 && !STOP.has(w));
-  if (tokens.length === 0) return tnorm.includes(norm(movie)); // tiny titles: whole-name match
-  // require ALL distinctive tokens present (so "Frozen II" ≠ "Frozen") — order-free
+// --- movies via YouTube oEmbed ---
+function ytMatches(title, ytTitle) {
+  const tnorm = norm(ytTitle);
+  if (!/\b(trailer|teaser|first look)\b/.test(tnorm)) return false;
+  const tokens = norm(title).split(' ').filter((w) => w.length >= 3 && !STOP.has(w));
+  if (tokens.length === 0) return tnorm.includes(norm(title));
   return tokens.every((tok) => tnorm.includes(tok));
 }
-
-const kept = [];
-const dropped = [];
-for (const [movie, year, id] of CANDIDATES) {
-  const title = await oembedTitle(id);
-  if (title && matches(movie, title)) {
-    kept.push({ movie, year, id, title });
-    console.log(`✅ ${movie} (${year}) → ${id}  ::  ${title}`);
-  } else {
-    dropped.push({ movie, id, title });
-    console.log(`❌ ${movie} → ${id}  ::  ${title ?? '(no title / not found)'}`);
+async function verifyMovies(list, kind) {
+  const kept = [];
+  for (const [title, year, id] of list) {
+    const j = await getJson(`https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=${encodeURIComponent(id)}`);
+    if (j?.title && ytMatches(title, j.title)) kept.push({ title, year, id });
+    else console.log(`  ❌ movie ${title} → ${id}`);
+    await sleep(110);
   }
-  await new Promise((r) => setTimeout(r, 120)); // gentle pacing
+  console.log(`  [${kind}] kept ${kept.length}/${list.length}`);
+  return kept;
 }
 
-// Ensure ≥16 distinct first-letters (the playability rule). Report it.
-const letters = new Set(kept.map((k) => k.movie.replace(/^(the|a|an)\s+/i, '')[0]?.toUpperCase()));
-console.log(`\nKept ${kept.length}/${CANDIDATES.length}; distinct first-letters: ${letters.size}`);
+// --- TV via iTunes episode previews ---
+async function verifyTv(shows, kind) {
+  const kept = [];
+  const seen = new Set();
+  for (const show of shows) {
+    if (seen.has(norm(show))) continue;
+    seen.add(norm(show));
+    const j = await getJson(`https://itunes.apple.com/search?term=${encodeURIComponent(show)}&entity=tvEpisode&limit=30&country=US`);
+    const target = norm(show);
+    const hit = j?.results?.find((x) => {
+      if (!x.previewUrl) return false;
+      const a = norm(x.artistName || '');
+      const c = norm(x.collectionName || '');
+      return a === target || a.startsWith(target + ' ') || c.startsWith(target + ' ') || c === target;
+    });
+    if (hit) kept.push({ title: show, url: hit.previewUrl, year: (hit.releaseDate || '').slice(0, 4) });
+    else console.log(`  ❌ tv ${show}`);
+    await sleep(150);
+  }
+  console.log(`  [${kind}] kept ${kept.length}/${shows.length}`);
+  return kept;
+}
 
-// Build the pack file. Answers are the movie titles; rebucketByAnswer files each
-// under its first letter automatically. Letterless (hideBoardLetters) so any hex
-// serves any trailer. Question is a clean generic prompt (no answer leak).
-const rows = kept
-  .map(
-    (k) =>
-      `  { q: 'Watch the trailer — name the movie. (${k.year})', a: ${JSON.stringify(k.movie)}, youtube: ${JSON.stringify(k.id)}, category: 'screen', difficulty: 2 },`,
-  )
-  .join('\n');
+const movieRow = (k) =>
+  `      { q: 'Watch the trailer — name the movie. (${k.year})', a: ${JSON.stringify(k.title)}, youtube: ${JSON.stringify(k.id)}, category: 'screen', difficulty: 2 },`;
+const tvRow = (k) =>
+  `      { q: 'Watch the clip — name the TV show.', a: ${JSON.stringify(k.title)}, video: ${JSON.stringify(k.url)}, category: 'screen', difficulty: 2 },`;
 
-const out = `// AUTO-GENERATED by scripts/genmovies.mjs — do not hand-edit.
-// "Guess the Movie (Trailer)" — each question embeds an OFFICIAL trailer (YouTube,
-// privacy-mode no-cookie) and asks the player to name the film. Every id below was
-// verified at build time against the real video title via YouTube oEmbed, so no
-// wrong/dead trailer can ship. Embedding promotional trailers is legal; nothing is stored.
-import type { RawPack } from '../core/packs';
-
-export const movieClipsPack: RawPack = {
-  id: 'movies-clips',
-  name: 'Guess the Movie (Trailer)',
-  description: 'Watch an official trailer and name the blockbuster. Eyes on the screen!',
-  emoji: '🎬',
-  accent: '#e85d75',
-  difficulty: 'medium',
+function packLiteral(varName, id, name, desc, emoji, accent, difficulty, kept, rowFn) {
+  return `export const ${varName}: RawPack = {
+  id: '${id}',
+  name: ${JSON.stringify(name)},
+  description: ${JSON.stringify(desc)},
+  emoji: '${emoji}',
+  accent: '${accent}',
+  difficulty: '${difficulty}',
   locale: 'en',
   contentRating: 'everyone',
   hideBoardLetters: true,
   letters: {
     _: [
-${rows.replace(/^/gm, '    ')}
+${kept.map(rowFn).join('\n')}
     ],
   },
 };
 `;
+}
+
+console.log('=== MOVIES (YouTube trailers) ===');
+const me = await verifyMovies(MOVIES_EASY, 'movies-easy');
+const mm = await verifyMovies(MOVIES_MEDIUM, 'movies-medium');
+const mh = await verifyMovies(MOVIES_HARD, 'movies-hard');
+console.log('=== TV SHOWS (iTunes episode previews) ===');
+const te = await verifyTv(TV_EASY, 'tv-easy');
+const tm = await verifyTv(TV_MEDIUM, 'tv-medium');
+const th = await verifyTv(TV_HARD, 'tv-hard');
+
+const out = `// AUTO-GENERATED by scripts/genmovies.mjs — do not hand-edit.
+// "Guess the Movie / TV-Show" clip packs.
+//  • Movies: official YouTube trailers (privacy-mode embed), each id verified at build
+//    time against the real video title via YouTube oEmbed — no wrong/dead trailer ships.
+//  • TV shows: REAL 30-second episode preview clips from the iTunes Search API
+//    (hotlinked .m4v, same CDN family as the song previews), matched by show name.
+// Both are letterless: any hex serves any clip. Promotional trailers / store previews
+// are meant for embedding — nothing copyrighted is stored.
+import type { RawPack } from '../core/packs';
+
+${packLiteral('movieClipsEasyPack', 'movies-clips-easy', 'Movie Clips — Easy', 'Watch an official trailer and name the blockbuster everyone knows.', '🎬', '#e85d75', 'easy', me, movieRow)}
+${packLiteral('movieClipsMediumPack', 'movies-clips-medium', 'Movie Clips — Medium', 'Name the movie from its trailer — modern hits and classics.', '🎬', '#d6336c', 'medium', mm, movieRow)}
+${packLiteral('movieClipsHardPack', 'movies-clips-hard', 'Movie Clips — Hard', 'For film buffs — name the acclaimed film from its trailer.', '🎬', '#a61e4d', 'hard', mh, movieRow)}
+${packLiteral('tvClipsEasyPack', 'tv-clips-easy', 'TV Show Clips — Easy', 'Watch a real clip and name the hit series.', '📺', '#4c6ef5', 'easy', te, tvRow)}
+${packLiteral('tvClipsMediumPack', 'tv-clips-medium', 'TV Show Clips — Medium', 'Name the TV show from a real episode clip.', '📺', '#3b5bdb', 'medium', tm, tvRow)}
+${packLiteral('tvClipsHardPack', 'tv-clips-hard', 'TV Show Clips — Hard', 'For true binge-watchers — name the prestige series from a clip.', '📺', '#364fc7', 'hard', th, tvRow)}
+`;
 
 await writeFile(new URL('../src/content/movieClips.ts', import.meta.url), out, 'utf8');
-console.log(`\nWrote src/content/movieClips.ts with ${kept.length} verified trailers.`);
+console.log('Counts:', { me: me.length, mm: mm.length, mh: mh.length, te: te.length, tm: tm.length, th: th.length });
+console.log('Wrote src/content/movieClips.ts');

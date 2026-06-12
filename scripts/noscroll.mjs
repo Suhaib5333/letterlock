@@ -86,7 +86,12 @@ for (const vp of VIEWPORTS) {
   await sleep(400);
   rows.push(['home', await overflow(page)]);
 
-  if (PACK) await page.getByTestId(`pack-${PACK}`).click().catch(() => {});
+  if (PACK) {
+    await page.getByTestId('open-categories').click().catch(() => {});
+    await sleep(150);
+    await page.getByTestId(`pack-${PACK}`).click().catch(() => {});
+    await sleep(150);
+  }
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-single').click().catch(() => {});
   await sleep(350);

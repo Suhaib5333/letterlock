@@ -15,7 +15,12 @@ const browser = await chromium.launch();
 async function gotoBoard(page, packId, { single = true } = {}) {
   await page.goto(BASE);
   await sleep(300);
-  if (packId) await page.getByTestId(`pack-${packId}`).click().catch(() => {});
+  if (packId) {
+    await page.getByTestId('open-categories').click().catch(() => {});
+    await sleep(150);
+    await page.getByTestId(`pack-${packId}`).click().catch(() => {});
+    await sleep(150);
+  }
   await page.getByTestId('play-button').click();
   if (single) await page.getByTestId('mode-single').click().catch(() => {});
   await sleep(250);

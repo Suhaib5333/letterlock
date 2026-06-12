@@ -1,25 +1,27 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { PACKS } from '../content';
-import { answerableLetters, totalQuestions } from '../core/packs';
+import { PACKS, packById } from '../content';
+import { totalQuestions } from '../core/packs';
+import { CategoryMenu } from '../components/CategoryMenu';
 import { Logo, Wordmark } from '../components/Logo';
 import { SettingsModal } from '../components/SettingsModal';
 import { play } from '../services/audio';
 import { remaining } from '../state/progress';
 import { resumeSavedGame, useStore } from '../state/store';
 
-// Regional packs use a flag — but flag EMOJIS (🇧🇭) render as "BH"/"SA"/"AE" letter
-// placeholders on Windows/many browsers, so we show the real (bundled) flag image instead.
-const PACK_FLAG: Record<string, string> = {
-  bahrain: 'bh',
-  'saudi-arabia': 'sa',
-  uae: 'ae',
-};
+// Regional packs use a real (bundled) flag image — flag EMOJIS (🇧🇭) render as
+// "BH"/"SA"/"AE" letter placeholders on Windows/many browsers.
+const PACK_FLAG: Record<string, string> = { bahrain: 'bh', 'saudi-arabia': 'sa', uae: 'ae' };
+
+const TOTAL_QUESTIONS = PACKS.reduce((sum, p) => sum + totalQuestions(p), 0);
 
 export function Home() {
   const { state, dispatch, hasSavedGame } = useStore();
   const [showSettings, setShowSettings] = useState(false);
-  const selectedPack = state.setup.packId;
+  const [showCategories, setShowCategories] = useState(false);
+  const selectedPack = packById(state.setup.packId);
+  const total = totalQuestions(selectedPack);
+  const left = remaining(selectedPack.id, total);
 
   return (
     <div className="home">
@@ -56,8 +58,35 @@ export function Home() {
           transition={{ delay: 0.15, duration: 0.5 }}
         >
           A fair, gorgeous reinvention of <em>Blockbusters</em>. Two teams battle on a honeycomb —
-          one races left&nbsp;↔&nbsp;right, the other top&nbsp;↔&nbsp;bottom. Block, build, and lock it in.
+          one races left&nbsp;↔&nbsp;right, the other top&nbsp;↕&nbsp;bottom. Block, build, and lock it in.
         </motion.p>
+
+        {/* Category picker: a single button that opens the full searchable menu. */}
+        <div className="cat-picker">
+          <span className="cat-picker-label">Category</span>
+          <button
+            className="cat-picker-btn"
+            data-testid="open-categories"
+            onClick={() => {
+              play('tap');
+              setShowCategories(true);
+            }}
+          >
+            {PACK_FLAG[selectedPack.id] ? (
+              <img className="cat-picker-flag" src={`/flags/${PACK_FLAG[selectedPack.id]}.svg`} alt="" aria-hidden="true" draggable={false} />
+            ) : (
+              <span className="cat-picker-emoji">{selectedPack.emoji}</span>
+            )}
+            <span className="cat-picker-text">
+              <span className="cat-picker-name">{selectedPack.name}</span>
+              <span className="cat-picker-meta">
+                {selectedPack.difficulty} · {total} questions{left < total ? ` · ↻ ${left} left` : ''}
+              </span>
+            </span>
+            <span className="cat-picker-chev" aria-hidden="true">⌄</span>
+          </button>
+          <span className="cat-picker-hint">{PACKS.length} categories · {TOTAL_QUESTIONS.toLocaleString()} questions — tap to browse &amp; search</span>
+        </div>
 
         <div className="hero-cta">
           {hasSavedGame && (
@@ -85,69 +114,18 @@ export function Home() {
         </div>
       </section>
 
-      <section className="packs">
-        <div className="section-head">
-          <h2>Question packs</h2>
-          <span className="muted">
-            {PACKS.length} packs ·{' '}
-            {PACKS.reduce(
-              (sum, p) => sum + answerableLetters(p).reduce((n, l) => n + p.letters[l].length, 0),
-              0,
-            ).toLocaleString()}{' '}
-            questions
-          </span>
-        </div>
-        <div className="pack-grid" data-testid="pack-grid">
-          {PACKS.map((pack, i) => {
-            const active = pack.id === selectedPack;
-            const total = totalQuestions(pack);
-            const left = remaining(pack.id, total);
-            const seenSome = left < total;
-            return (
-              <motion.button
-                key={pack.id}
-                className={`pack-card ${active ? 'active' : ''}`}
-                data-testid={`pack-${pack.id}`}
-                style={{ '--accent': pack.accent } as React.CSSProperties}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.06, duration: 0.4 }}
-                whileHover={{ y: -4 }}
-                onClick={() => {
-                  play('tap');
-                  dispatch({ type: 'UPDATE_SETUP', patch: { packId: pack.id } });
-                }}
-              >
-                {PACK_FLAG[pack.id] ? (
-                  <img className="pack-flag-icon" src={`/flags/${PACK_FLAG[pack.id]}.svg`} alt="" aria-hidden="true" draggable={false} />
-                ) : (
-                  <div className="pack-emoji">{pack.emoji}</div>
-                )}
-                <div className="pack-body">
-                  <div className="pack-name">{pack.name}</div>
-                  <div className="pack-desc">{pack.description}</div>
-                  <div className="pack-meta">
-                    <span className="chip">{pack.difficulty}</span>
-                    <span className="chip ghost">{total} questions</span>
-                    {seenSome && (
-                      <span className="chip ghost" data-testid={`pack-left-${pack.id}`} title="Unique questions left before this pack repeats">
-                        ↻ {left} unique left
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {active && <div className="pack-check" aria-label="Selected">✓</div>}
-              </motion.button>
-            );
-          })}
-        </div>
-      </section>
-
       <footer className="home-foot">
         <span>Best on a TV or tablet · colorblind-safe · keyboard friendly</span>
       </footer>
 
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      {showCategories && (
+        <CategoryMenu
+          selectedPack={selectedPack.id}
+          onSelect={(id) => dispatch({ type: 'UPDATE_SETUP', patch: { packId: id } })}
+          onClose={() => setShowCategories(false)}
+        />
+      )}
     </div>
   );
 }

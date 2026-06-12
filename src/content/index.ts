@@ -11,7 +11,14 @@ import { geniusPack } from './genius';
 import { logosEasyPack, logosMediumPack, logosHardPack } from './logos';
 import { sportsEasyPack, sportsMediumPack } from './sports';
 import { moviesPack, moviesHardPack } from './screen';
-import { movieClipsPack } from './movieClips';
+import {
+  movieClipsEasyPack,
+  movieClipsMediumPack,
+  movieClipsHardPack,
+  tvClipsEasyPack,
+  tvClipsMediumPack,
+  tvClipsHardPack,
+} from './movieClips';
 import { musicMediumPack, musicHardPack } from './musicpack';
 import { melodiesPack } from './melodies';
 import { songsPack } from './songs';
@@ -156,6 +163,31 @@ const worldPack = themedFrom(
   new Set(['geography']),
 );
 
+/** Ordered category groups for the browse menu. */
+export const PACK_GROUPS = [
+  'Trivia & Knowledge',
+  'Movies & TV',
+  'Music',
+  'Flags',
+  'Logos & Brands',
+  'Sports',
+  'Charades',
+  'Regional',
+] as const;
+export type PackGroup = (typeof PACK_GROUPS)[number];
+
+/** Map a pack id to its browse-menu group. */
+export function groupOf(id: string): PackGroup {
+  if (/^flags/.test(id)) return 'Flags';
+  if (/^logos/.test(id)) return 'Logos & Brands';
+  if (/^sports/.test(id)) return 'Sports';
+  if (/^charades/.test(id)) return 'Charades';
+  if (/clips|^movies-tv|^movies/.test(id)) return 'Movies & TV';
+  if (/^music|^melodies|^songs/.test(id)) return 'Music';
+  if (/^bahrain|^saudi|^uae|^gulf/.test(id)) return 'Regional';
+  return 'Trivia & Knowledge';
+}
+
 /** All packs, sorted easiest → hardest for the selector. */
 export const PACKS: QuestionPack[] = [
   fullKids,
@@ -170,7 +202,12 @@ export const PACKS: QuestionPack[] = [
   fullSportsMedium,
   sciencePack,
   worldPack,
-  movieClipsPack,
+  movieClipsEasyPack,
+  movieClipsMediumPack,
+  movieClipsHardPack,
+  tvClipsEasyPack,
+  tvClipsMediumPack,
+  tvClipsHardPack,
   fullMovies,
   fullMoviesHard,
   fullMusic,
@@ -192,7 +229,7 @@ export const PACKS: QuestionPack[] = [
   withCharadeImages(withExtra(charadesActionsPack, charadesActionsExtra, charadesActions2, charadesActions3)),
   withCharadeImages(withExtra(charadesHardPack, charadesHardExtra, charadesHard2, charadesHard3)),
 ]
-  .map((p) => normalizePack(rebucketByAnswer(p)))
+  .map((p) => ({ ...normalizePack(rebucketByAnswer(p)), group: groupOf(p.id) }))
   .sort((a, b) => DIFFICULTY_RANK[a.difficulty] - DIFFICULTY_RANK[b.difficulty]);
 
 export const DEFAULT_PACK_ID = fullGeneralKnowledge.id;

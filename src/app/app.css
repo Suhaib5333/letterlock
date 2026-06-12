@@ -371,6 +371,322 @@
   font-size: var(--t-sm);
 }
 
+/* ---------- Home category picker (opens the browse menu) ---------- */
+.cat-picker {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(560px, 100%);
+  margin: 0 auto;
+}
+.cat-picker-label {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.cat-picker-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(160deg, var(--surface), var(--bg-2));
+  border: 1px solid var(--line-strong);
+  text-align: left;
+  transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur-fast), box-shadow var(--dur-mid);
+}
+.cat-picker-btn:hover {
+  border-color: var(--blue);
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+.cat-picker-emoji {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+.cat-picker-flag {
+  flex-shrink: 0;
+  width: 40px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+}
+.cat-picker-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.cat-picker-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cat-picker-meta {
+  color: var(--text-dim);
+  font-size: var(--t-sm);
+  text-transform: capitalize;
+}
+.cat-picker-chev {
+  font-size: 1.4rem;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.cat-picker-hint {
+  font-size: var(--t-xs);
+  color: var(--text-faint);
+}
+
+/* ---------- Category browse menu (full-screen, searchable) ---------- */
+.cat-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(6, 8, 14, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(8px, 3vh, 40px) clamp(8px, 3vw, 40px);
+}
+.cat-panel {
+  width: min(1040px, 100%);
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(165deg, var(--surface), var(--bg-1));
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+}
+.cat-head {
+  flex: 0 0 auto;
+  padding: clamp(12px, 2vh, 20px) clamp(14px, 2.4vw, 26px) 10px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cat-head-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cat-head-top h2 {
+  font-size: var(--t-h2);
+}
+.cat-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.cat-search-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 1rem;
+  opacity: 0.7;
+  pointer-events: none;
+}
+.cat-search input {
+  width: 100%;
+  padding: 12px 40px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  font-size: 1rem;
+}
+.cat-search input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px rgba(0, 114, 178, 0.35);
+}
+.cat-search-clear {
+  position: absolute;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.06);
+}
+.cat-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+.cat-chip {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  color: var(--text-dim);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all var(--dur-fast);
+}
+.cat-chip.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+.cat-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(12px, 2vh, 20px) clamp(14px, 2.4vw, 26px) clamp(20px, 4vh, 36px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.6vh, 28px);
+}
+.cat-empty {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 40px 10px;
+}
+.cat-section-head {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cat-section-count {
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text-faint);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+.cat-card {
+  --accent: var(--blue);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(160deg, var(--surface), var(--bg-2));
+  border: 1px solid var(--line);
+  text-align: left;
+  overflow: hidden;
+  transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur-fast), box-shadow var(--dur-mid);
+}
+.cat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--accent);
+  opacity: 0.85;
+}
+.cat-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+.cat-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent), var(--shadow-2);
+}
+.cat-card-emoji {
+  font-size: 1.9rem;
+  flex-shrink: 0;
+}
+.cat-card-flag {
+  flex-shrink: 0;
+  width: 38px;
+  height: 26px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+}
+.cat-card-body {
+  min-width: 0;
+  flex: 1;
+}
+.cat-card-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.02rem;
+  line-height: 1.2;
+}
+.cat-card-desc {
+  color: var(--text-dim);
+  font-size: var(--t-xs);
+  margin: 3px 0 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cat-card-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.cat-card-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+/* difficulty-tinted chips in the menu */
+.chip.diff-kids { background: rgba(76, 175, 80, 0.22); }
+.chip.diff-easy { background: rgba(76, 175, 80, 0.22); }
+.chip.diff-medium { background: rgba(0, 114, 178, 0.25); }
+.chip.diff-hard { background: rgba(230, 159, 0, 0.25); }
+.chip.diff-expert { background: rgba(213, 94, 0, 0.28); }
+.chip.diff-extreme { background: rgba(204, 0, 51, 0.3); }
+@media (max-width: 560px) {
+  .cat-scrim {
+    padding: 0;
+  }
+  .cat-panel {
+    border-radius: 0;
+    max-height: 100%;
+  }
+  .cat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---------- Sub-screen header ---------- */
 .sub-head {
   flex: 0 0 auto;
@@ -957,7 +1273,13 @@
    (bottom footer). The card scrolls WITHIN its region so the host pad never overlaps
    it — and the board above never has to shrink. */
 .question-zone {
-  flex: 1 1 auto;
+  /* Size to CONTENT (not stretch) so the host pad sits directly under the question
+     card — `.game-side { justify-content:center }` then centres the whole group in the
+     tall side panel. Previously this stretched to fill the column, pushing the
+     Blue/Amber/No-one/Undo pad ~260px below the question on desktop. It can still
+     shrink + scroll (via .qcard-scroll) if a long card exceeds the height. */
+  flex: 0 1 auto;
+  max-height: 100%;
   min-height: 0;
   display: flex;
   flex-direction: column;

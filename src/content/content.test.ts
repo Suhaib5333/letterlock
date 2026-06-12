@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { answerableLetters, normalizePack, serveQuestion } from '../core/packs';
+import { answerableLetters, normalizePack, serveQuestion, totalQuestions } from '../core/packs';
 import { mulberry32 } from '../core/rng';
 import { generalKnowledgePack } from './generalKnowledge';
 import { kidsPack } from './kids';
@@ -54,7 +54,15 @@ describe('all registered packs are playable', () => {
         expect(served.question.a.length).toBeGreaterThan(0);
       }
       // Themed packs may not cover all letters, but must cover enough to play.
-      expect(answerableLetters(pack).length).toBeGreaterThanOrEqual(16);
+      // Letterless packs (flags/logos/clips) serve from the WHOLE pack regardless of
+      // the cell's letter, so their letter spread is irrelevant — only the total count
+      // matters (e.g. many TV titles start with "The" → one bucket, but every tile still
+      // draws a distinct clip from the whole pool).
+      if (pack.hideBoardLetters) {
+        expect(totalQuestions(pack)).toBeGreaterThanOrEqual(16);
+      } else {
+        expect(answerableLetters(pack).length).toBeGreaterThanOrEqual(16);
+      }
     });
   }
 });
@@ -156,7 +164,7 @@ describe('EVERY pack: names in natural spoken order, not "Surname, First" (rule 
   // SKIP title-based packs, where comma titles are legitimate ("Crouching Tiger,
   // Hidden Dragon"; "Hello, Goodbye").
   const SURNAME_FIRST = /^[A-Z][a-z]+,\s+[A-Z][a-z]+$/;
-  const TITLE_PACK = /movies|songs|melodies|music|charades|screen/;
+  const TITLE_PACK = /movies|songs|melodies|music|charades|screen|clips|tv-/;
   for (const pack of PACKS) {
     if (TITLE_PACK.test(pack.id)) continue;
     it(`${pack.name}`, () => {
