@@ -71,6 +71,11 @@ easy/medium/hard. **All built, verified, and live** (`src/content/movieClips.ts`
   whose title matches the movie AND is a trailer are kept — no TMDB key needed, no wrong/dead id).
   Rendered through the **IFrame Player API** (`YouTubeEmbed.tsx`) so unplayable/non-embeddable
   trailers (onError 100/101/150) fall back to a clean card + "Watch on YouTube" + Skip.
+  **Anti-spoiler:** YouTube otherwise reveals the answer via the player title bar, the thumbnail
+  poster, and the end-screen — so the embed hides all of it: a Play cover masks the poster/title
+  until tapped, a top strip masks the title bar (it flashes on start/hover/pause), fullscreen +
+  keyboard + annotations + related videos are disabled, and the trailer **re-covers when it ends**
+  (Replay) so the end-screen titles never show.
 - 📺 **TV Show Clips — Easy/Medium/Hard** (38/40/33) = REAL **iTunes episode preview clips**
   (`entity=tvEpisode` → hotlinked `.m4v`, same CDN family as the song previews), matched by show
   name so the clip is genuinely from that series — "guess the show from real footage". No guessed

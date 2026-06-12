@@ -808,6 +808,11 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
 - ✅ **Desktop host-pad gap fixed**: the Blue/Amber/No-one/Undo pad sat ~260px below the question
   on desktop (`.question-zone` stretched the column). Now the timer+card+pad group sizes to content
   and centres (`flex: 0 1 auto`) → gap **260px → 13px** desktop, 10px laptop, 42px landscape.
+- ✅ **Anti-spoiler trailers** (round-8b): YouTube embeds revealed the answer via the title bar,
+  thumbnail poster, and end-screen. `YouTubeEmbed.tsx` now hides all of it — a Play cover masks the
+  poster/title until tapped, a top strip masks the title bar (flashes on start/hover/pause),
+  `fs/disablekb/iv_load_policy/rel` are locked down, and the trailer **re-covers on end** (Replay)
+  so end-screen titles never show. Guarded by an e2e assertion (`qcard-yt-play` cover present).
 - ✅ **238 unit/content tests, 36 Playwright e2e**, noscroll ALL CLEAR (default + movie + TV packs).
   The ≥16-letters playability rule is relaxed for letterless packs (clips/flags serve from the
   whole pool regardless of letter) → `totalQuestions ≥ 16` instead.

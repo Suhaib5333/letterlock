@@ -166,6 +166,11 @@ test('movie-clips pack embeds a YouTube trailer and hides board letters', async 
   const embed = page.getByTestId('qcard-youtube');
   const fallback = page.getByTestId('media-error');
   await expect(embed.or(fallback)).toBeVisible();
+  // Anti-spoiler: a cover hides YouTube's giveaway poster/title until Play is tapped
+  // (only when the embed actually loads, not the fallback path).
+  if (await embed.count()) {
+    await expect(page.getByTestId('qcard-yt-play')).toBeVisible();
+  }
   // Skip is ALWAYS available on a clip question so a broken clip never strands play.
   await expect(page.getByTestId('skip-question')).toBeEnabled();
 });
