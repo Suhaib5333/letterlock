@@ -28,7 +28,10 @@ const MOVIES_EASY = [
   ['Aquaman', 2018, 'WDkg3h8PCVU'], ['Wonder Woman', 2017, '1Q8fG0TtVAY'], ['Sonic the Hedgehog', 2020, 'szby7ZHLnkA'],
   ['The Lego Movie', 2014, 'fZ_JOBCLF-I'], ['Brave', 2012, 'TEHWDA_6e3M'], ['Wall-E', 2008, 'alIq_wG9FNk'],
   ['Ratatouille', 2007, 'c3sBBRxDAqk'], ['The Incredibles', 2004, '-UaGUdNJdRQ'], ['The Hunger Games', 2012, 'mfmrPu43DF8'],
-  ['Iron Man', 2008, '8ugaeA-nMTc'],
+  ['Iron Man', 2008, '8ugaeA-nMTc'], ['The Little Mermaid', 2023, 'kpGo2_d3oYE'], ['Beauty and the Beast', 2017, 'e1nqfMN2vN4'],
+  ['Aladdin', 2019, 'foyufD52aog'], ['The Jungle Book', 2016, 'lac8DBwxiHo'], ['The Super Mario Bros. Movie', 2023, 'TnGl01FkMMo'],
+  ['Despicable Me 2', 2013, 'AC4xVjY1NY0'], ['Kung Fu Panda', 2008, 'wbHCxBn5sV4'], ['How to Train Your Dragon', 2010, 'pq8Yu25fmgY'],
+  ['Madagascar', 2005, 'pBVKv8iWUVo'], ['Shrek 2', 2004, 'qWS9b9DJPZs'],
 ];
 const MOVIES_MEDIUM = [
   ['Inception', 2010, 'YoHD9XEInc0'], ['Interstellar', 2014, 'zSWdZVtXT7E'], ['The Dark Knight', 2008, 'EXeTwQWrcwY'],
@@ -40,7 +43,10 @@ const MOVIES_MEDIUM = [
   ['No Time to Die', 2021, 'BIhNsAtPbPI'], ['Skyfall', 2012, '6kw1UVovByw'], ['Mad Max: Fury Road', 2015, 'hEJnMQG9ev8'],
   ['John Wick', 2014, 'C0BMx-qxsP4'], ['A Quiet Place', 2018, 'WR7cc5t7tv8'], ['Get Out', 2017, 'DzfpyUB60YY'],
   ['It', 2017, 'FnCdOQsX5kc'], ['Bohemian Rhapsody', 2018, 'mP0VHJYFOAU'], ['La La Land', 2016, '0pdqf4P9MB8'],
-  ['Oppenheimer', 2023, 'uYPbbksJxIg'],
+  ['Oppenheimer', 2023, 'uYPbbksJxIg'], ['Avatar', 2009, '5PSNL1qE6VY'], ['The Wolf of Wall Street', 2013, 'iszwuX1AK6A'],
+  ['Logan', 2017, 'Div0iP65aZo'], ['The Batman', 2022, 'mqqft2x_Aa4'], ['Venom', 2018, 'u9Mv98Gr5pY'],
+  ['Shutter Island', 2010, '5iaYLCiq5RM'], ['The Revenant', 2015, 'LfWkXDfmk9w'], ['Once Upon a Time in Hollywood', 2019, 'ELeMaP8EPAA'],
+  ['Knives Out', 2019, 'qGqiHJTsRkQ'],
 ];
 const MOVIES_HARD = [
   ['The Godfather', 1972, 'sY1S34973zA'], ['Pulp Fiction', 1994, 's7EdQ4FqbhY'], ['The Shawshank Redemption', 1994, 'NmzuHjWmXOc'],
@@ -51,25 +57,36 @@ const MOVIES_HARD = [
   ['The Prestige', 2006, 'o4gHCmTQDVI'], ['Blade Runner 2049', 2017, 'gCcx85zbxz4'], ['The Grand Budapest Hotel', 2014, '1Fg5iWmQjwk'],
   ['1917', 2019, 'YqNYrYUiMfg'], ['Moonlight', 2016, '9NJj12tJzqc'], ['Drive', 2011, 'KBiOF3y1W0Y'], ['Birdman', 2014, 'uJfLoE6hanc'],
   ['The Silence of the Lambs', 1991, 'W6Mm8Sbe__o'], ['Memento', 2000, '0vS0E9bBSL0'], ['Alien', 1979, 'LjLamj-b0I8'],
+  ['Inglourious Basterds', 2009, 'KnrRy6kSFF0'], ['Saving Private Ryan', 1998, 'zwhP5b4tD6g'], ['Gladiator II', 2024, 'Vqkdiu5R7Vk'],
+  ['The Green Mile', 1999, 'Ki4haFrqSrw'], ['Casino', 1995, '4-rAvHL7vyA'], ['Heat', 1995, '2GfZl4kuVNI'],
+  ['Scarface', 1983, 'tF-vBA0KZ8s'], ['Apocalypse Now', 1979, 'Fm10MNkVHII'],
 ];
 
 // ---------- TV SHOWS (iTunes episode preview clips) ----------
 const TV_EASY = [
   'The Office', 'Friends', 'The Big Bang Theory', 'Game of Thrones', "Grey's Anatomy", 'How I Met Your Mother',
   'The Simpsons', 'Modern Family', 'Breaking Bad', 'Family Guy', 'SpongeBob SquarePants', 'Brooklyn Nine-Nine',
-  'Parks and Recreation', 'Two and a Half Men', 'NCIS', 'The Big Bang Theory', 'Glee', 'Desperate Housewives',
-  'CSI: Miami', 'Hannah Montana', 'Scrubs', 'That 70s Show', 'Malcolm in the Middle', 'Spongebob', 'The Fresh Prince of Bel-Air',
+  'Parks and Recreation', 'Two and a Half Men', 'NCIS', 'Glee', 'Desperate Housewives', 'The Walking Dead',
+  'CSI: Miami', 'Hannah Montana', 'Scrubs', 'That 70s Show', 'Malcolm in the Middle', 'The Fresh Prince of Bel-Air',
+  'iCarly', 'Wizards of Waverly Place', 'Drake & Josh', 'Victorious', 'Phineas and Ferb', 'South Park',
+  'American Dad', 'Futurama', "Bob's Burgers", 'King of the Hill', 'Avatar: The Last Airbender', 'Riverdale',
+  'Gossip Girl', 'Pretty Little Liars', 'New Girl', 'The Vampire Diaries', 'Community', 'Gilmore Girls',
 ];
 const TV_MEDIUM = [
-  'Lost', 'Prison Break', 'Dexter', 'House', 'Suits', 'Sons of Anarchy', 'Vikings', 'Homeland', 'Gossip Girl',
-  'Pretty Little Liars', 'Supernatural', 'Arrow', 'The Flash', '24', 'Heroes', 'Smallville', 'The Vampire Diaries',
-  'White Collar', 'Burn Notice', 'Castle', 'Bones', 'Fringe', 'Entourage', 'Californication', 'True Blood',
+  'Lost', 'Prison Break', 'Dexter', 'House', 'Suits', 'Sons of Anarchy', 'Vikings', 'Homeland',
+  'Supernatural', 'Arrow', 'The Flash', '24', 'Heroes', 'Smallville', 'White Collar', 'Burn Notice',
+  'Castle', 'Bones', 'Fringe', 'Entourage', 'Californication', 'True Blood', 'Person of Interest',
+  'The Mentalist', 'Criminal Minds', 'Law & Order: Special Victims Unit', 'CSI', 'Chuck', 'Once Upon a Time',
+  'Grimm', 'Hawaii Five-0', 'Blue Bloods', 'Elementary', 'Luther', 'Broadchurch', 'Downton Abbey',
+  'The Americans', 'Banshee', 'Hell on Wheels', 'Ray Donovan', 'Billions', 'Shameless', 'The Affair',
 ];
 const TV_HARD = [
   'The Wire', 'The Sopranos', 'Mad Men', 'Deadwood', 'Boardwalk Empire', 'Six Feet Under', 'Twin Peaks',
   'Battlestar Galactica', 'Band of Brothers', 'Curb Your Enthusiasm', "It's Always Sunny in Philadelphia",
   'Frasier', 'Seinfeld', 'Cheers', 'The X-Files', 'Buffy the Vampire Slayer', 'The West Wing', 'Oz',
-  'Veep', 'Rome', 'Justified', 'The Shield', 'Spartacus', 'Sherlock',
+  'Veep', 'Rome', 'Justified', 'The Shield', 'Spartacus', 'Sherlock', 'Better Call Saul', 'Fargo',
+  'Westworld', 'Mr. Robot', 'The Newsroom', 'Hannibal', 'The Knick', 'Boardwalk Empire', 'Generation Kill',
+  'Angels in America', 'John Adams', 'True Detective', 'Big Love', 'Carnivale', 'Treme',
 ];
 
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -117,17 +134,25 @@ async function verifyTv(shows, kind) {
   for (const show of shows) {
     if (seen.has(norm(show))) continue;
     seen.add(norm(show));
-    const j = await getJson(`https://itunes.apple.com/search?term=${encodeURIComponent(show)}&entity=tvEpisode&limit=30&country=US`);
+    // iTunes rate-limits bursts → retry with backoff so a throttle doesn't drop a real show.
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(show)}&entity=tvEpisode&limit=50&country=US`;
+    let j = null;
+    for (let attempt = 0; attempt < 4 && !j; attempt++) {
+      if (attempt) await sleep(800 * attempt);
+      j = await getJson(url);
+    }
     const target = norm(show);
-    const hit = j?.results?.find((x) => {
+    const cands = (j?.results || []).filter((x) => {
       if (!x.previewUrl) return false;
       const a = norm(x.artistName || '');
       const c = norm(x.collectionName || '');
       return a === target || a.startsWith(target + ' ') || c.startsWith(target + ' ') || c === target;
     });
+    // Prefer an exact-artist match (avoids spin-offs sneaking in via startsWith).
+    const hit = cands.find((x) => norm(x.artistName || '') === target) || cands[0];
     if (hit) kept.push({ title: show, url: hit.previewUrl, year: (hit.releaseDate || '').slice(0, 4) });
     else console.log(`  ❌ tv ${show}`);
-    await sleep(150);
+    await sleep(350);
   }
   console.log(`  [${kind}] kept ${kept.length}/${shows.length}`);
   return kept;

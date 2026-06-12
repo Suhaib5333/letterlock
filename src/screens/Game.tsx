@@ -69,6 +69,10 @@ export function Game() {
   const canUndo = state.log.length > 1;
   const inQuestion = ui.phase === 'question' && ui.served;
   const hideLetters = !!opts.pack.hideBoardLetters;
+  // A media clip can fail to load (region/embedding/network); always allow Skip when
+  // the question carries a clip so a broken clip can never strand the game.
+  const q = ui.served?.question;
+  const hasClip = !!(q && (q.image || q.audio || q.video || q.youtube));
 
   return (
     <div className="game" data-testid="game-screen">
@@ -216,7 +220,7 @@ export function Game() {
                     teams={teams}
                     hideLetter={hideLetters}
                     tts={state.settings.tts}
-                    canSkip={ui.skipsUsed < 1}
+                    canSkip={ui.skipsUsed < 1 || hasClip}
                     repeated={ui.repeated}
                     onReveal={() => dispatch({ type: 'REVEAL_ANSWER' })}
                     onSkip={() => dispatch({ type: 'SKIP_QUESTION' })}

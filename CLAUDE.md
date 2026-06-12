@@ -782,6 +782,36 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
   document scroll. New `scripts/verify_fixes.mjs` captures all four fixes before/after.
 - ✅ **218 unit/content tests, 34 Playwright e2e**, noscroll ALL CLEAR (default + `movies-clips`).
 
+## II.3h Round-8 — category menu, movie+TV clip tiers, media robustness, desktop gap (2026-06-12)
+
+- ✅ **Searchable category menu** (`CategoryMenu.tsx`): Home's pack carousel is replaced by a
+  single **Category** button that opens a full-screen, scrollable, **searchable** browser. Packs
+  are organised into 8 groups (Trivia & Knowledge, Movies & TV, Music, Flags, Logos & Brands,
+  Sports, Charades, Regional — `groupOf(id)` + `PACK_GROUPS` in `content/index.ts`), filterable by
+  search box + group chips, difficulty-tinted cards. Selecting a pack closes the menu. Cards keep
+  `data-testid="pack-<id>"` so tests work via a `selectPack()` helper (opens menu → click).
+- ✅ **Movie clips → 3 tiers + NEW TV clips → 3 tiers** (`scripts/genmovies.mjs`):
+  - 🎬 **Movie Clips Easy/Medium/Hard** = official YouTube trailers (33/35/26), each id verified
+    via YouTube oEmbed. Embedded through the **IFrame Player API** (`YouTubeEmbed.tsx`) so an
+    unplayable/non-embeddable trailer is caught (onError 100/101/150 / load-timeout) → clean
+    fallback + "Watch on YouTube" + Skip.
+  - 📺 **TV Show Clips Easy/Medium/Hard** = REAL iTunes episode **preview clips** (38/40/33;
+    `entity=tvEpisode` → hotlinked `.m4v`), matched by show name — "guess the show from real
+    footage". The creative fix for the no-API-key blocker (iTunes is the source of truth; no
+    guessed ids). **~207 clip questions total.**
+- ✅ **Media robustness** (`scripts/checkmedia.mjs`): every clip/audio/flag URL verified reachable
+  — **0 dead** across flags (39/55/81), movie trailers, TV clips, melodies (23), songs (222).
+  Every media element (`image/audio/video/youtube`) has an `onError` → fallback + Retry; **Skip is
+  always enabled on a clip question** (`hasClip`) so a broken clip can never strand the game.
+  Charade keyword-images (loremflickr, flaky on abstract nouns) now hide gracefully on error (the
+  WORD always shows) on both the card and the `/img` secret-prompt page.
+- ✅ **Desktop host-pad gap fixed**: the Blue/Amber/No-one/Undo pad sat ~260px below the question
+  on desktop (`.question-zone` stretched the column). Now the timer+card+pad group sizes to content
+  and centres (`flex: 0 1 auto`) → gap **260px → 13px** desktop, 10px laptop, 42px landscape.
+- ✅ **238 unit/content tests, 36 Playwright e2e**, noscroll ALL CLEAR (default + movie + TV packs).
+  The ≥16-letters playability rule is relaxed for letterless packs (clips/flags serve from the
+  whole pool regardless of letter) → `totalQuestions ≥ 16` instead.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily

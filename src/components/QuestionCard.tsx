@@ -4,6 +4,7 @@ import type { TeamConfig, TeamId } from '../core/models';
 import { duckMusic, play, speak } from '../services/audio';
 import type { Served } from '../state/types';
 import { QrCode } from './QrCode';
+import { YouTubeEmbed } from './YouTubeEmbed';
 
 /** URL the charade QR points to — opens the standalone secret-prompt page.
  *  Respects the deploy base path (root domain or a GitHub Pages subpath). */
@@ -58,11 +59,17 @@ export function QuestionCard({
     setReloadKey((k) => k + 1);
   };
 
+  const ytUrl = served.question.youtube ? `https://www.youtube.com/watch?v=${served.question.youtube}` : null;
   const mediaFallback = (kind: string) => (
     <div className="qcard-media-error" data-testid="media-error">
-      <span className="qcard-media-error-msg">🔇 This {kind} clip couldn’t load (network or region).</span>
+      <span className="qcard-media-error-msg">🔇 This {kind} couldn’t load here (network, region, or embedding off).</span>
       <div className="qcard-media-error-actions">
         <button className="btn btn-secondary sm" data-testid="media-retry" onClick={retryMedia}>↻ Retry</button>
+        {ytUrl && (
+          <a className="btn btn-ghost sm" href={ytUrl} target="_blank" rel="noreferrer" data-testid="media-yt-link">
+            ▸ Watch on YouTube
+          </a>
+        )}
         <span className="qcard-media-error-hint">You can still reveal the answer or skip.</span>
       </div>
     </div>
@@ -170,18 +177,16 @@ export function QuestionCard({
           </div>
         ))}
 
-      {served.question.youtube && (
-        <div className="qcard-video-wrap">
-          <iframe
-            className="qcard-video"
-            data-testid="qcard-youtube"
-            src={`https://www.youtube-nocookie.com/embed/${served.question.youtube}?rel=0&modestbranding=1`}
-            title="Watch and guess"
-            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
+      {served.question.youtube &&
+        (mediaError ? (
+          mediaFallback('trailer')
+        ) : (
+          <YouTubeEmbed
+            key={`${served.question.id}-${reloadKey}`}
+            videoId={served.question.youtube}
+            onUnplayable={() => setMediaError(true)}
           />
-        </div>
-      )}
+        ))}
 
       <p className="qcard-q" data-testid="question-text">
         {served.question.q}
@@ -198,8 +203,8 @@ export function QuestionCard({
           >
             <span className="answer-label">Answer</span>
             <span className="answer-value">{served.question.a}</span>
-            {charade && served.question.image && (
-              <img className="answer-charade-img" src={served.question.image} alt={served.question.a} draggable={false} />
+            {charade && served.question.image && !mediaError && (
+              <img className="answer-charade-img" src={served.question.image} alt={served.question.a} draggable={false} onError={() => setMediaError(true)} />
             )}
           </motion.div>
         ) : (

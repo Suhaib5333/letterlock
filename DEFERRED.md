@@ -61,27 +61,25 @@ as #1). Local-only high scores wouldn't be "global."
 
 ---
 
-## 3. 🎬 Real movie / TV video clips  — ✅ **DONE (2026-06-12) — "Guess the Movie (Trailer)" pack ships**
+## 3. 🎬 Real movie / TV video clips  — ✅ **DONE (2026-06-12) — 6 clip packs ship (3 movie + 3 TV tiers, ~207 clips)**
 
-**Requested (repeatedly):** actual video clips for guessing popular movies. **Built and live.**
+**Requested (repeatedly):** actual video clips for guessing popular movies AND TV shows, in
+easy/medium/hard. **All built, verified, and live** (`src/content/movieClips.ts`, letterless).
 
-**What ships:** a **"Guess the Movie (Trailer)"** pack (`src/content/movieClips.ts`, id
-`movies-clips`, 🎬, medium, letterless) with **64 real official trailers** embedded via
-`QuestionCard`'s `youtube` field → `youtube-nocookie.com/embed/<id>` (16:9, capped, privacy mode).
-Card prompt: "Watch the trailer — name the movie. (year)".
+- 🎬 **Movie Clips — Easy/Medium/Hard** (33/35/26) = official **YouTube trailers**. Each
+  `[title, year, youtubeId]` is **verified at build time via YouTube's keyless oEmbed** (only ids
+  whose title matches the movie AND is a trailer are kept — no TMDB key needed, no wrong/dead id).
+  Rendered through the **IFrame Player API** (`YouTubeEmbed.tsx`) so unplayable/non-embeddable
+  trailers (onError 100/101/150) fall back to a clean card + "Watch on YouTube" + Skip.
+- 📺 **TV Show Clips — Easy/Medium/Hard** (38/40/33) = REAL **iTunes episode preview clips**
+  (`entity=tvEpisode` → hotlinked `.m4v`, same CDN family as the song previews), matched by show
+  name so the clip is genuinely from that series — "guess the show from real footage". No guessed
+  ids: the iTunes API is the source of truth. (Netflix/Disney+/Apple-TV+ originals aren't on iTunes,
+  so the lists lean on network/cable/HBO shows.)
 
-**How it was solved without a TMDB key** (the previously-assumed blocker): `scripts/genmovies.mjs`
-holds a curated `[title, year, youtubeId]` candidate list and **verifies every id at build time
-against the real video title via YouTube's keyless oEmbed**
-(`https://www.youtube.com/oembed?format=json&url=…` returns the title). Only ids whose title
-actually matches the movie AND is a trailer/teaser are kept — so a wrong/guessed/dead id can
-never ship (10 of 74 candidates were auto-dropped as "not found"). Re-run the script to add more.
-Embedding promotional trailers is legal; nothing copyrighted is stored. Guarded by an e2e test
-(`movie-trailer pack embeds a YouTube trailer`).
-
-> Note: a few studios disable embedding on specific videos; those would show YouTube's own
-> "watch on YouTube" panel inside the iframe — Reveal/Skip still work, so play never stalls.
-> To expand: add `[title, year, id]` rows to `scripts/genmovies.mjs` and re-run.
+**Verification:** `scripts/checkmedia.mjs` confirms every trailer/clip URL is reachable (0 dead);
+`scripts/verify_clips.mjs` confirms the YT iframe injects and the TV `<video>` decodes (readyState
+4). Guarded by e2e tests. To expand: add titles/shows to `scripts/genmovies.mjs` and re-run.
 
 ---
 

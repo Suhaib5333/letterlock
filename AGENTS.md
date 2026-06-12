@@ -22,10 +22,11 @@ Companion docs: `CLAUDE.md` (full plan + build log), `QUESTION_AUTHORING.md` (co
 ## 2. ⭐ The standing workflow (do this every change)
 1. Make the change.
 2. `npx tsc -b` — must be clean.
-3. `npx vitest run` — all unit + content tests green (currently **218**).
+3. `npx vitest run` — all unit + content tests green (currently **238**).
 4. If layout/CSS changed: `node scripts/noscroll.mjs` in **3+ modes** (see §3) → "ALL CLEAR".
 5. If content changed: `npx vitest run src/content` (leak/letter/dup/Surname guards).
-6. `npx playwright test` — e2e green (currently **34**, desktop + mobile).
+6. If media changed: `npx vite-node scripts/checkmedia.mjs` (set `ALL=1` to include logos/charades) — every clip/audio/flag URL must be reachable (clip packs should show **0 dead**).
+7. `npx playwright test` — e2e green (currently **36**, desktop + mobile).
 7. Commit (**no AI attribution** — see §6) + `git push origin main` (Cloudflare deploys).
 
 > ### ⚠️ ALWAYS VERIFY WITH PLAYWRIGHT — before AND after — especially LANDSCAPE PHONES
@@ -81,13 +82,20 @@ drivers) + `Read` the PNGs instead — same coverage, no MCP needed.
   - `scripts/genflags.mjs` → downloads flag SVGs into `public/flags/` (bundled locally so flags
     always load — flagcdn.com is blocked on some networks). Flag helper uses `/flags/<code>.svg`.
   - `scripts/genclips.mjs` → synthesizes public-domain melody WAVs into `public/clips/`.
-  - `scripts/genmovies.mjs` → `movieClips.ts` ("Guess the Movie (Trailer)"). Curated
-    `[title, year, youtubeId]` list, each **verified at build time via YouTube keyless oEmbed**
-    (`https://www.youtube.com/oembed?format=json&url=…` returns the title) — only ids whose title
-    matches the movie AND is a trailer are kept, so no wrong/dead id ships. Add rows + re-run to
-    expand. (No TMDB key needed — that earlier blocker is resolved.)
-  - `scripts/verify_fixes.mjs` → focused before/after Playwright check (movie iframe, exit-modal
-    arrow geometry, steal-timer label/phase, iPhone portrait+landscape visibility) → `verify-shots/`.
+  - `scripts/genmovies.mjs` → `movieClips.ts` — 6 clip packs (3 movie + 3 TV tiers).
+    **Movies** = official YouTube trailers, each `[title, year, youtubeId]` **verified via YouTube
+    keyless oEmbed** (only titles that match + are trailers are kept; no TMDB key needed). **TV**
+    = REAL iTunes Search API episode **preview clips** (`entity=tvEpisode` → `previewUrl` .m4v,
+    hotlinkable), matched by `artistName` = show — no guessed ids (the API is the source of truth);
+    iTunes rate-limits bursts, so it retries with backoff. Netflix/Disney+/Apple-TV+ originals
+    aren't on iTunes (use network/cable/HBO shows). Add titles/shows + re-run to expand.
+  - `scripts/checkmedia.mjs` → loads PACKS and checks EVERY media URL is reachable (audio/video
+    Range GET, youtube oEmbed, local flags/clips file-exists); reports dead per pack. Clip packs
+    must be 0 dead. The YouTube embed uses the **IFrame Player API** (`YouTubeEmbed.tsx`) so an
+    unplayable/non-embeddable trailer (onError 100/101/150) falls back cleanly; Skip is ALWAYS
+    enabled on a clip question so a broken clip never strands play.
+  - `scripts/verify_fixes.mjs` / `scripts/verify_clips.mjs` → focused before/after Playwright
+    checks (fixes geometry; clip iframe-injection + `<video>` readyState) → `verify-shots/`.
 - **Counts:** `npx vite-node /tmp/counts.mjs` (a tiny script that prints questions per pack).
   Every text pack is 200+; flags & melodies are the source-capped exceptions (see DEFERRED.md).
 

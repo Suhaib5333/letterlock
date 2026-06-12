@@ -1,22 +1,27 @@
+import { useState } from 'react';
+
 /**
  * Standalone "secret prompt" view opened by scanning the charade QR code
  * (`?view=img&w=<name>&img=<url>`). Shows the thing's IMAGE plus its NAME so the
  * acting player can see their prompt privately on their phone. Rendered outside
- * the game store (a deep-linkable page) — see main.tsx.
+ * the game store (a deep-linkable page) — see main.tsx. The NAME always shows; the
+ * image is a bonus and hides itself if it fails to load (so a broken keyword-image
+ * service never strands the prompt).
  */
 export function ImgView() {
   const params = new URLSearchParams(window.location.search);
   const name = params.get('w') ?? '';
   const img = params.get('img') ?? '';
   const hint = params.get('h') ?? 'Act it out — no talking!';
+  const [imgFailed, setImgFailed] = useState(false);
 
   return (
     <div className="imgview" data-testid="imgview">
       <div className="imgview-card">
         <div className="imgview-tag">Your secret prompt</div>
-        {img && (
+        {img && !imgFailed && (
           <div className="imgview-imgwrap">
-            <img className="imgview-img" src={img} alt={name} draggable={false} />
+            <img className="imgview-img" src={img} alt={name} draggable={false} onError={() => setImgFailed(true)} />
           </div>
         )}
         <h1 className="imgview-name" data-testid="imgview-name">{name}</h1>

@@ -160,9 +160,14 @@ test('movie-clips pack embeds a YouTube trailer and hides board letters', async 
   await expect(page.locator('.ll-board .hex-letter')).toHaveCount(0); // letters hidden
   await page.locator('.ll-hex.claimable').first().click();
   await expect(page.getByTestId('question-card')).toBeVisible();
-  const yt = page.getByTestId('qcard-youtube');
-  await expect(yt).toHaveCount(1);
-  await expect(yt).toHaveAttribute('src', /youtube-nocookie\.com\/embed\/[\w-]+/);
+  // The trailer loads via the YouTube IFrame Player API (so we can catch unplayable
+  // videos). Either the embed host renders, or — if the API is blocked/unplayable —
+  // a clean fallback shows. Both are valid; the game must never stall.
+  const embed = page.getByTestId('qcard-youtube');
+  const fallback = page.getByTestId('media-error');
+  await expect(embed.or(fallback)).toBeVisible();
+  // Skip is ALWAYS available on a clip question so a broken clip never strands play.
+  await expect(page.getByTestId('skip-question')).toBeEnabled();
 });
 
 test('tv-clips pack plays a real episode video clip and hides board letters', async ({ page }) => {
@@ -177,6 +182,7 @@ test('tv-clips pack plays a real episode video clip and hides board letters', as
   const vid = page.getByTestId('qcard-video');
   await expect(vid).toHaveCount(1);
   await expect(vid).toHaveAttribute('src', /itunes\.apple\.com.*\.m4v/);
+  await expect(page.getByTestId('skip-question')).toBeEnabled();
 });
 
 test('pie-rule prompt is an overlay that does not shrink the board, and swap works (no blank)', async ({ page }) => {

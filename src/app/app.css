@@ -1516,13 +1516,22 @@
   justify-content: center;
   margin-bottom: var(--s-3);
 }
-/* YouTube trailer embed (guess-the-movie) — 16:9, capped to the panel height. */
-iframe.qcard-video {
+/* YouTube trailer embed (guess-the-movie) — 16:9, capped to the panel height.
+   The IFrame Player API injects an <iframe> inside .qcard-yt-host, so style both. */
+iframe.qcard-video,
+.qcard-yt-host {
   width: min(100%, 46vh * 1.78);
   aspect-ratio: 16 / 9;
   max-height: clamp(120px, 30vh, 280px);
   border: 1px solid var(--line-strong);
   border-radius: 10px;
+  overflow: hidden;
+}
+.qcard-yt-host iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
 }
 .qcard-video {
   width: auto;
