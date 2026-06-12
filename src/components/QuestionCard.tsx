@@ -25,9 +25,11 @@ interface Props {
   tts: boolean;
   hideLetter?: boolean;
   canSkip: boolean;
+  canAutoSkip: boolean;
   repeated: boolean;
   onReveal: () => void;
   onSkip: () => void;
+  onAutoSkip: () => void;
 }
 
 export function QuestionCard({
@@ -38,9 +40,11 @@ export function QuestionCard({
   tts,
   hideLetter,
   canSkip,
+  canAutoSkip,
   repeated,
   onReveal,
   onSkip,
+  onAutoSkip,
 }: Props) {
   const pickerTeam = teams[picker];
   const charade = served.question.category === 'charade';
@@ -58,22 +62,42 @@ export function QuestionCard({
     setMediaError(false);
     setReloadKey((k) => k + 1);
   };
+  // When a clip is unreachable, AUTO-ADVANCE to a fresh question on its own (no manual
+  // skip needed). A brief pause lets the player see why, then we move on. Capped by the
+  // store (canAutoSkip) so a fully-broken pack can't loop — then the manual card stays.
+  useEffect(() => {
+    if (!mediaError || !canAutoSkip) return;
+    const t = setTimeout(onAutoSkip, 1100);
+    return () => clearTimeout(t);
+  }, [mediaError, canAutoSkip, onAutoSkip]);
 
   const ytUrl = served.question.youtube ? `https://www.youtube.com/watch?v=${served.question.youtube}` : null;
-  const mediaFallback = (kind: string) => (
-    <div className="qcard-media-error" data-testid="media-error">
-      <span className="qcard-media-error-msg">🔇 This {kind} couldn’t load here (network, region, or embedding off).</span>
-      <div className="qcard-media-error-actions">
-        <button className="btn btn-secondary sm" data-testid="media-retry" onClick={retryMedia}>↻ Retry</button>
-        {ytUrl && (
-          <a className="btn btn-ghost sm" href={ytUrl} target="_blank" rel="noreferrer" data-testid="media-yt-link">
-            ▸ Watch on YouTube
-          </a>
-        )}
-        <span className="qcard-media-error-hint">You can still reveal the answer or skip.</span>
+  const mediaFallback = (kind: string) =>
+    canAutoSkip ? (
+      // Auto-advancing: the game serves another question on its own.
+      <div className="qcard-media-error" data-testid="media-error" data-auto="1">
+        <span className="qcard-media-error-msg">
+          🔇 This {kind} couldn’t load — <strong>finding another question…</strong>
+        </span>
+        <div className="qcard-media-error-actions">
+          <span className="qcard-media-error-hint">Moving on automatically.</span>
+        </div>
       </div>
-    </div>
-  );
+    ) : (
+      // Cap reached (lots of unreachable clips in a row) — fall back to manual controls.
+      <div className="qcard-media-error" data-testid="media-error">
+        <span className="qcard-media-error-msg">🔇 This {kind} couldn’t load here (network, region, or embedding off).</span>
+        <div className="qcard-media-error-actions">
+          <button className="btn btn-secondary sm" data-testid="media-retry" onClick={retryMedia}>↻ Retry</button>
+          {ytUrl && (
+            <a className="btn btn-ghost sm" href={ytUrl} target="_blank" rel="noreferrer" data-testid="media-yt-link">
+              ▸ Watch on YouTube
+            </a>
+          )}
+          <span className="qcard-media-error-hint">You can still reveal the answer or skip.</span>
+        </div>
+      </div>
+    );
 
   return (
     <motion.div

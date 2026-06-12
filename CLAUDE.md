@@ -801,8 +801,10 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
     guessed ids). **~207 clip questions total.**
 - ✅ **Media robustness** (`scripts/checkmedia.mjs`): every clip/audio/flag URL verified reachable
   — **0 dead** across flags (39/55/81), movie trailers, TV clips, melodies (23), songs (222).
-  Every media element (`image/audio/video/youtube`) has an `onError` → fallback + Retry; **Skip is
-  always enabled on a clip question** (`hasClip`) so a broken clip can never strand the game.
+  Every media element (`image/audio/video/youtube`) has an `onError` → and now **AUTO-ADVANCES to
+  another question on its own** (`AUTO_SKIP` action; no manual skip needed, doesn't spend the host's
+  skip), capped at 12/pick so a fully-broken pack can't loop (then it shows the manual Retry/skip
+  card). **Skip is also always enabled on a clip question** (`hasClip`) as a backstop.
   Charade keyword-images (loremflickr, flaky on abstract nouns) now hide gracefully on error (the
   WORD always shows) on both the card and the `/img` secret-prompt page.
 - ✅ **Desktop host-pad gap fixed**: the Blue/Amber/No-one/Undo pad sat ~260px below the question

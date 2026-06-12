@@ -56,6 +56,7 @@ const EMPTY_UI: UiState = {
   blockHint: false,
   pulse: 0,
   skipsUsed: 0,
+  autoSkips: 0,
   repeated: false,
 };
 
@@ -91,6 +92,7 @@ type Action =
   | { type: 'PICK_CELL'; cell: number }
   | { type: 'REVEAL_ANSWER' }
   | { type: 'SKIP_QUESTION' }
+  | { type: 'AUTO_SKIP' }
   | { type: 'ADJUDICATE'; team: TeamId | null }
   | { type: 'PIE_SWAP' }
   | { type: 'SWITCH_TURN' }
@@ -248,6 +250,7 @@ function reducer(state: StoreState, action: Action): StoreState {
           served: { question, letter, cell: action.cell },
           answerRevealed: false,
           skipsUsed: 0, // a fresh pick resets the skip allowance + timer
+          autoSkips: 0, // and the auto-advance (unreachable-media) counter
           repeated,
         },
       };
@@ -281,6 +284,38 @@ function reducer(state: StoreState, action: Action): StoreState {
           served: { question, letter, cell },
           answerRevealed: false,
           skipsUsed: state.ui.skipsUsed + 1,
+          repeated,
+        },
+      };
+    }
+
+    // Auto-advance past an UNREACHABLE media clip (audio/video/trailer/image) — the
+    // card detects the load error and dispatches this so play continues on its own,
+    // WITHOUT spending the host's manual skip. Capped so a fully-broken pack can't
+    // loop forever (after the cap it stops and the manual fallback card stays).
+    case 'AUTO_SKIP': {
+      if (!state.opts || !state.ui.served) return state;
+      if (state.ui.autoSkips >= 12) return state; // loop guard
+      const cell = state.ui.served.cell;
+      const skip: GameEvent = {
+        type: 'QuestionSkipped',
+        letter: state.ui.served.letter,
+        questionId: state.ui.served.question.id,
+      };
+      const log1 = [...state.log, skip];
+      const g1 = replay(log1);
+      const { question, letter, repeated } = chooseQuestion(state.opts, g1, cell);
+      const serve: GameEvent = { type: 'QuestionServed', cell, letter, questionId: question.id };
+      const log2 = [...log1, serve];
+      return {
+        ...state,
+        log: log2,
+        game: replay(log2),
+        ui: {
+          ...state.ui, // selectedCell + pulse unchanged → timer keeps running
+          served: { question, letter, cell },
+          answerRevealed: false,
+          autoSkips: state.ui.autoSkips + 1,
           repeated,
         },
       };

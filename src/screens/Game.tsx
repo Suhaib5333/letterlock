@@ -221,9 +221,11 @@ export function Game() {
                     hideLetter={hideLetters}
                     tts={state.settings.tts}
                     canSkip={ui.skipsUsed < 1 || hasClip}
+                    canAutoSkip={ui.autoSkips < 12}
                     repeated={ui.repeated}
                     onReveal={() => dispatch({ type: 'REVEAL_ANSWER' })}
                     onSkip={() => dispatch({ type: 'SKIP_QUESTION' })}
+                    onAutoSkip={() => dispatch({ type: 'AUTO_SKIP' })}
                   />
                 </div>
                 <HostPad

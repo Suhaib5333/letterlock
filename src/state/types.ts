@@ -51,5 +51,6 @@ export interface UiState {
   blockHint: boolean; // a recent claim cut the opponent's near-complete path
   pulse: number; // monotonically increasing tick to retrigger effects
   skipsUsed: number; // skips taken on the current pick (max 1 — plan §3.2)
+  autoSkips: number; // questions auto-advanced past on this pick (unreachable media)
   repeated: boolean; // the served question is a forced repeat (whole pack cycled)
 }

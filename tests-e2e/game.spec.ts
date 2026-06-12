@@ -246,7 +246,7 @@ test('charades pack shows a QR secret-prompt and the /img page renders the word'
   await expect(page.getByTestId('imgview-name')).toHaveText('Elephant');
 });
 
-test('a failed media clip falls back gracefully — the game never stalls', async ({ page }) => {
+test('an unreachable media clip AUTO-ADVANCES to another question on its own', async ({ page }) => {
   await page.goto('/');
   await selectPack(page, 'songs');
   await page.getByTestId('play-button').click();
@@ -256,13 +256,16 @@ test('a failed media clip falls back gracefully — the game never stalls', asyn
   await expect(page.getByTestId('question-card')).toBeVisible();
   const audio = page.getByTestId('qcard-audio');
   await expect(audio).toHaveCount(1);
+  const firstSrc = await audio.getAttribute('src');
   // Simulate the hotlinked preview failing to load.
   await audio.evaluate((el) => el.dispatchEvent(new Event('error')));
-  await expect(page.getByTestId('media-error')).toBeVisible();
-  await expect(page.getByTestId('media-retry')).toBeVisible();
-  // Play can still continue: reveal + skip remain available (the key guarantee).
-  await expect(page.getByTestId('reveal-answer')).toBeVisible();
-  await expect(page.getByTestId('skip-question')).toBeVisible();
+  // It shows the auto-advance notice (no manual action needed)…
+  await expect(page.getByTestId('media-error')).toHaveAttribute('data-auto', '1');
+  // …then serves a DIFFERENT question all by itself — the game never stalls.
+  await expect
+    .poll(async () => page.getByTestId('qcard-audio').getAttribute('src'), { timeout: 5000 })
+    .not.toBe(firstSrc);
+  await expect(page.getByTestId('question-card')).toBeVisible();
 });
 
 test('tutorial walkthrough is reachable and playable', async ({ page }) => {
