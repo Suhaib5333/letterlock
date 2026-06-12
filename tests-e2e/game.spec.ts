@@ -195,6 +195,28 @@ test('charades pack shows a QR secret-prompt and the /img page renders the word'
   await expect(page.getByTestId('imgview-name')).toHaveText('Elephant');
 });
 
+test('a failed media clip falls back gracefully — the game never stalls', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('pack-songs').click();
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  const audio = page.getByTestId('qcard-audio');
+  await expect(audio).toHaveCount(1);
+  // Simulate the hotlinked preview failing to load.
+  await audio.evaluate((el) => el.dispatchEvent(new Event('error')));
+  await expect(page.getByTestId('media-error')).toBeVisible();
+  await expect(page.getByTestId('media-retry')).toBeVisible();
+  // Play can still continue: reveal + skip remain available.
+  await expect(page.getByTestId('reveal-answer')).toBeVisible();
+  await expect(page.getByTestId('skip-question')).toBeVisible();
+  // Retry restores the player.
+  await page.getByTestId('media-retry').click();
+  await expect(page.getByTestId('qcard-audio')).toHaveCount(1);
+});
+
 test('tutorial walkthrough is reachable and playable', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'How to play' }).click();

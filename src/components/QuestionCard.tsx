@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { useEffect, useState } from 'react';
 import type { TeamConfig, TeamId } from '../core/models';
 import { duckMusic, play, speak } from '../services/audio';
 import type { Served } from '../state/types';
@@ -40,6 +41,31 @@ export function QuestionCard({
 }: Props) {
   const pickerTeam = teams[picker];
   const charade = served.question.category === 'charade';
+
+  // Media clips are HOTLINKED previews (Deezer/iTunes/flagcdn/simpleicons) and can
+  // fail to load (expired URL, region block, offline). Never let that strand the
+  // game: on error we swap the broken player for a clean fallback + Retry, and the
+  // Reveal/Skip buttons stay available so play always continues.
+  const [mediaError, setMediaError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  useEffect(() => {
+    setMediaError(false); // reset for each new question
+  }, [served.question.id]);
+  const retryMedia = () => {
+    setMediaError(false);
+    setReloadKey((k) => k + 1);
+  };
+
+  const mediaFallback = (kind: string) => (
+    <div className="qcard-media-error" data-testid="media-error">
+      <span className="qcard-media-error-msg">🔇 This {kind} clip couldn’t load (network or region).</span>
+      <div className="qcard-media-error-actions">
+        <button className="btn btn-secondary sm" data-testid="media-retry" onClick={retryMedia}>↻ Retry</button>
+        <span className="qcard-media-error-hint">You can still reveal the answer or skip.</span>
+      </div>
+    </div>
+  );
+
   return (
     <motion.div
       className="qcard"
@@ -86,44 +112,61 @@ export function QuestionCard({
           </div>
         </div>
       ) : (
-        served.question.image && (
+        served.question.image &&
+        (mediaError ? (
+          mediaFallback('image')
+        ) : (
           <div className="qcard-flag-wrap">
             <img
+              key={`${served.question.id}-${reloadKey}`}
               className="qcard-flag"
               src={served.question.image}
               alt="Image to identify"
               draggable={false}
+              onError={() => setMediaError(true)}
             />
           </div>
-        )
+        ))
       )}
 
-      {served.question.audio && (
-        <audio
-          className="qcard-audio"
-          data-testid="qcard-audio"
-          src={served.question.audio}
-          controls
-          onPlay={() => duckMusic(true)}
-          onPause={() => duckMusic(false)}
-          onEnded={() => duckMusic(false)}
-        />
-      )}
-
-      {served.question.video && (
-        <div className="qcard-video-wrap">
-          <video
-            className="qcard-video"
-            data-testid="qcard-video"
-            src={served.question.video}
+      {served.question.audio &&
+        (mediaError ? (
+          mediaFallback('audio')
+        ) : (
+          <audio
+            key={`${served.question.id}-${reloadKey}`}
+            className="qcard-audio"
+            data-testid="qcard-audio"
+            src={served.question.audio}
             controls
-            playsInline
+            preload="auto"
             onPlay={() => duckMusic(true)}
             onPause={() => duckMusic(false)}
             onEnded={() => duckMusic(false)}
+            onError={() => setMediaError(true)}
           />
-        </div>
-      )}
+        ))}
+
+      {served.question.video &&
+        (mediaError ? (
+          mediaFallback('video')
+        ) : (
+          <div className="qcard-video-wrap">
+            <video
+              key={`${served.question.id}-${reloadKey}`}
+              className="qcard-video"
+              data-testid="qcard-video"
+              src={served.question.video}
+              controls
+              playsInline
+              preload="auto"
+              onPlay={() => duckMusic(true)}
+              onPause={() => duckMusic(false)}
+              onEnded={() => duckMusic(false)}
+              onError={() => setMediaError(true)}
+            />
+          </div>
+        ))}
 
       <p className="qcard-q" data-testid="question-text">
         {served.question.q}

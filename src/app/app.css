@@ -1073,6 +1073,32 @@
   height: 40px;
   margin-bottom: var(--s-3);
 }
+
+/* Graceful fallback when a hotlinked clip/image fails — the game never stalls. */
+.qcard-media-error {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: var(--s-3);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed var(--line-strong);
+}
+.qcard-media-error-msg {
+  font-size: var(--t-sm);
+  color: var(--text);
+}
+.qcard-media-error-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.qcard-media-error-hint {
+  font-size: var(--t-xs, 0.78rem);
+  color: var(--text-faint);
+}
 .qcard-video-wrap {
   display: flex;
   justify-content: center;
