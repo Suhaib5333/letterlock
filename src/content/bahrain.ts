@@ -102,7 +102,7 @@ export const bahrainPack: RawPack = {
       { q: 'The triangular rig on a long slanting yard that powered the traditional Gulf dhow, also common across the Mediterranean.', a: 'Lateen sail', category: 'bahrain', difficulty: 4, alt: ['Lateen'] },
       { q: 'The dried fruit used to flavour machboos and other dishes, also called loomi when blackened.', a: 'Lime', category: 'bahrain', difficulty: 4, alt: ['Loomi', 'Dried lime'] },
       { q: 'The traditional men\'s drum-and-song performance of African-rooted Gulf communities, a recognised cultural heritage of the islands.', a: 'Liwa', category: 'bahrain', difficulty: 5 },
-      { q: 'The Arabic word for "pearl" that named the demolished 2011 protest monument and a Manama shopping mall.', a: 'Lulu', category: 'bahrain', difficulty: 5 },
+      { q: 'The Arabic word for the natural gem that Bahrain was famed for diving and trading for centuries.', a: 'Lulu', category: 'bahrain', difficulty: 5 },
     ],
     M: [
       { q: 'The capital city of the kingdom, on the northeast coast of the main island.', a: 'Manama', category: 'bahrain', difficulty: 1 },
@@ -128,7 +128,7 @@ export const bahrainPack: RawPack = {
     ],
     P: [
       { q: 'The lustrous gem grown inside oysters; trade in this natural product was the islands\' economic backbone for centuries.', a: 'Pearl', category: 'bahrain', difficulty: 1, alt: ['Pearls'] },
-      { q: 'The traffic circle and monument at the centre of the 2011 protests, later demolished, was named for the islands\' famous gem.', a: 'Pearl Roundabout', category: 'bahrain', difficulty: 4 },
+      { q: 'The UNESCO World Heritage trail in Muharraq tracing the islands\' history of diving for natural gems.', a: 'Pearling Path', category: 'bahrain', difficulty: 4 },
       { q: 'The crude struck in 1932 made the country a pioneer of this fuel industry in the Arabian Gulf region.', a: 'Petroleum', category: 'bahrain', difficulty: 2 },
       { q: 'The kingdom was historically a British one of these — a state under London\'s protection rather than a full colony.', a: 'Protectorate', category: 'bahrain', difficulty: 3 },
       { q: 'The European power that built early forts on the islands in the 16th century before being expelled in 1602.', a: 'Portugal', category: 'bahrain', difficulty: 4, alt: ['Portuguese'] },
@@ -145,7 +145,7 @@ export const bahrainPack: RawPack = {
       { q: 'The central town with a historic 19th-century fort and the royal family\'s traditional seat.', a: 'Riffa', category: 'bahrain', difficulty: 3 },
       { q: 'The fasting month of the Islamic calendar, observed across the kingdom with the nightly ghabga meal.', a: 'Ramadan', category: 'bahrain', difficulty: 2 },
       { q: 'The hereditary head of state who governed the islands as an emir before the title changed to king in 2002.', a: 'Ruler', category: 'bahrain', difficulty: 3, alt: ['Emir'] },
-      { q: 'The traffic circle and monument demolished after the 2011 unrest had stood at a major junction in the capital, named for the islands\' famous gem.', a: 'Pearl Roundabout', category: 'bahrain', difficulty: 4, alt: ['Lulu Roundabout', 'GCC Roundabout'] },
+      { q: 'The European power that seized Bahrain in 1521 and built a coastal fort before being driven out in 1602.', a: 'Portuguese', category: 'bahrain', difficulty: 4 },
     ],
     S: [
       { q: 'The desert area in the centre-south of the main island that hosts the F1 circuit and a royal camel track.', a: 'Sakhir', category: 'bahrain', difficulty: 3 },

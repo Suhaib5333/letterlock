@@ -157,6 +157,27 @@
   display: flex;
   gap: 10px;
   align-items: center;
+  flex: 0 0 auto;
+}
+.home-top-actions .btn {
+  white-space: nowrap; /* "How to play" stays on one line */
+}
+/* Narrow phones: compact the top bar so brand + "How to play" + settings fit one
+   row without wrapping or running off the edge. */
+@media (max-width: 440px) {
+  .ll-wordmark {
+    font-size: 1.18rem;
+  }
+  .brand {
+    gap: 8px;
+  }
+  .home-top-actions {
+    gap: 6px;
+  }
+  .home-top-actions .btn {
+    padding: 7px 10px;
+    font-size: 0.8rem;
+  }
 }
 .hero {
   flex: 1 1 auto;
@@ -186,6 +207,31 @@
   justify-content: center;
   flex-wrap: wrap;
 }
+/* Short / landscape phones: compact the hero so the whole home fits with NO scroll
+   — drop the long blurb, shrink the title, tighten gaps. The pack carousel stays. */
+@media (max-height: 520px) {
+  .home {
+    gap: 8px;
+  }
+  .hero {
+    flex: 0 0 auto;
+    overflow: visible;
+    gap: 6px;
+  }
+  .hero-sub {
+    display: none;
+  }
+  .hero-title {
+    font-size: clamp(1.2rem, 7vh, 1.8rem);
+    max-width: none;
+  }
+  .hero-cta .btn {
+    padding: 8px 18px;
+  }
+  .section-head {
+    margin-bottom: 4px;
+  }
+}
 .packs {
   flex: 0 0 auto;
 }
@@ -193,10 +239,15 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  gap: 6px 14px;
+  flex-wrap: wrap; /* count drops to its own line when it won't fit beside the title */
   margin-bottom: var(--s-3);
 }
 .section-head h2 {
   font-size: var(--t-h2);
+}
+.section-head .muted {
+  white-space: nowrap; /* keep "N packs · M questions" intact as one unit */
 }
 /* horizontal swipe carousel — always one row, scrolls internally so the rest of
    Home (header + hero) stays fixed on every screen */
@@ -1011,11 +1062,15 @@
   background: #fff;
   padding: 6px;
 }
-/* Shrink the QR on short screens so the whole charade card fits above the footer */
+/* Short screens: shrink the QR and drop the verbose sub-instruction so the whole
+   charade card fits above the footer with little/no scroll. */
 @media (max-height: 740px) {
   .qcard-charade .qr-img {
-    width: 104px;
-    height: 104px;
+    width: 100px;
+    height: 100px;
+  }
+  .qcard-charade-text span {
+    display: none;
   }
 }
 .qr-loading {
@@ -1726,14 +1781,22 @@
     flex-direction: column;
     gap: clamp(6px, 1.4vh, 14px);
   }
-  /* Board is a STABLE size on mobile so popups (pie-swap / charade QR) and the
-     question card NEVER shrink the hex — the question panel scrolls instead. */
+  /* Everything fits on-screen with NO scroll: the question panel takes the height
+     its content needs, and the board flexes into whatever's left (never below a
+     readable minimum). So a question always shows fully, and in the pick phase the
+     board is large. (The pie-swap prompt is an absolute overlay, so it never
+     resizes the board.) */
+  /* The board yields AGGRESSIVELY (high shrink) so the question card + host-pad
+     footer fit on-screen with no scroll; only an unusually tall card (charade QR
+     on a tiny phone) makes .qcard-scroll scroll — and the host pad, being a fixed
+     footer, is ALWAYS visible and never clipped. */
   .board-wrap {
-    flex: 0 0 auto;
-    height: clamp(190px, 42vh, 460px);
+    flex: 1 3 auto;
+    min-height: clamp(84px, 15vh, 170px);
   }
   .game-side {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
+    min-height: 0;
     justify-content: flex-start;
     overflow-y: auto;
   }
