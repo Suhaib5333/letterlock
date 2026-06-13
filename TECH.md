@@ -49,8 +49,11 @@ this + `AGENTS.md` (workflow) + `CLAUDE.md` (master plan & build log) and you kn
 | **ESLint** | (config) | Lint. |
 
 ### 1.5 Deploy
-- **Cloudflare Pages**, auto-deploy on push to `main` (`npm run build` → `dist/`). **No VPS step.**
-  `base: '/'`. PWA manifest + theme color. Hard-refresh after deploy (CF cache).
+- ⚠️ **AUTOMATIC DEPLOY ON PUSH TO `main`.** Pushing to `main` triggers a **Cloudflare Pages**
+  build & deploy automatically — there is **no manual deploy step**. So every push to `main` goes
+  live: make sure `npm run build`, `npm test`, and `npm run e2e` are green before pushing.
+- Build: `npm run build` → static `dist/`. `base: '/'`. PWA manifest + theme color. **No VPS step.**
+- After a deploy, **hard-refresh** (Cloudflare edge cache) to see the new version.
 
 ---
 

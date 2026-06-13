@@ -5,7 +5,13 @@
 // token check) so we don't ship a wrong recording. Run: node scripts/genmelodies_itunes.mjs
 import { writeFile } from 'node:fs/promises';
 
-// [answer, searchTerm] — searchTerm includes composer/artist for a reliable hit.
+// [answer, searchTerm].
+//  - answer  = the clean, CONSISTENT, FULL display name shown to players. For classical
+//              / art-music pieces this is "<Proper title> (<Composer>)" so it's always a
+//              full, recognizable name — never a bare composer ("Beethoven") nor a bare
+//              key/movement ("…in D minor"). Franchise themes keep their property name.
+//  - searchTerm = composer/artist + work, used ONLY to fetch & VERIFY the right preview.
+//  Every entry is a distinct piece (no duplicate works under different names).
 const PIECES = [
   // ---- Film scores ----
   ['Star Wars', 'Star Wars main title John Williams'],
@@ -72,7 +78,6 @@ const PIECES = [
   ['Sherlock', 'Sherlock theme David Arnold'],
   ['House of Cards', 'House of Cards main title Jeff Beal'],
   ['Peaky Blinders', 'Peaky Blinders Red Right Hand Nick Cave'],
-  ['Mission Impossible TV', 'Mission Impossible original TV theme'],
   ['Curb Your Enthusiasm', 'Curb Your Enthusiasm Frolic theme'],
   // ---- Video game ----
   ['Super Mario Bros.', 'Super Mario Bros theme Koji Kondo'],
@@ -87,79 +92,101 @@ const PIECES = [
   ['Castlevania', 'Castlevania Vampire Killer'],
   ['Mega Man', 'Mega Man 2 Dr Wily theme'],
   ['Donkey Kong', 'Donkey Kong Country Aquatic Ambience'],
-  // ---- Classical ----
-  ["Beethoven's 5th Symphony", 'Beethoven Symphony No. 5 Allegro con brio'],
-  ['Ode to Joy', 'Beethoven Ode to Joy Symphony No 9'],
-  ['Für Elise', 'Beethoven Fur Elise'],
-  ['Moonlight Sonata', 'Beethoven Moonlight Sonata'],
-  ['Eine kleine Nachtmusik', 'Mozart Eine kleine Nachtmusik'],
-  ['Turkish March', 'Mozart Rondo alla Turca'],
-  ['The Marriage of Figaro', 'Mozart Marriage of Figaro overture'],
-  ['The Four Seasons', 'Vivaldi Four Seasons Spring'],
-  ['Canon in D', 'Pachelbel Canon in D'],
-  ['Toccata and Fugue in D minor', 'Bach Toccata and Fugue in D minor'],
-  ['Air on the G String', 'Bach Air on the G String'],
-  ["Brandenburg Concerto", 'Bach Brandenburg Concerto No 3'],
-  ['Ave Maria', 'Schubert Ave Maria'],
-  ['The Blue Danube', 'Strauss Blue Danube waltz'],
-  ['Bolero', 'Ravel Bolero'],
-  ['Clair de Lune', 'Debussy Clair de Lune'],
-  ['Gymnopedie', 'Satie Gymnopedie No 1'],
-  ['Nocturne', 'Chopin Nocturne Op 9 No 2'],
-  ['Prelude in E minor', 'Chopin Prelude Op 28 No 4'],
-  ['Hungarian Rhapsody', 'Liszt Hungarian Rhapsody No 2'],
-  ['Swan Lake', 'Tchaikovsky Swan Lake'],
-  ['The Nutcracker', 'Tchaikovsky Dance of the Sugar Plum Fairy'],
-  ['1812 Overture', 'Tchaikovsky 1812 Overture'],
-  ['Flight of the Bumblebee', 'Rimsky-Korsakov Flight of the Bumblebee'],
-  ['In the Hall of the Mountain King', 'Grieg In the Hall of the Mountain King'],
-  ['Carmen', 'Bizet Carmen Habanera'],
-  ['William Tell Overture', 'Rossini William Tell Overture finale'],
-  ['Ride of the Valkyries', 'Wagner Ride of the Valkyries'],
-  ['Pomp and Circumstance', 'Elgar Pomp and Circumstance'],
-  ['The Planets: Mars', 'Holst The Planets Mars'],
-  ['Rhapsody in Blue', 'Gershwin Rhapsody in Blue'],
-  ['Boléro', 'Ravel Bolero orchestra'],
-  ['Peer Gynt: Morning Mood', 'Grieg Morning Mood Peer Gynt'],
-  ['Pictures at an Exhibition', 'Mussorgsky Pictures at an Exhibition Promenade'],
-  ['Carmina Burana', 'Carl Orff O Fortuna Carmina Burana'],
-  ['Adagio for Strings', 'Barber Adagio for Strings'],
-  ['New World Symphony', 'Dvorak New World Symphony Largo'],
-  ['Peter and the Wolf', 'Prokofiev Peter and the Wolf'],
-  ['Clarinet Concerto', 'Mozart Clarinet Concerto Adagio'],
-  ['Pachelbel', 'Pachelbel Canon orchestra'],
-  ['Habanera', 'Bizet Habanera Carmen'],
-  ['Greensleeves', 'Greensleeves classical'],
-  ['Pavane', 'Faure Pavane'],
-  ['Liebestraum', 'Liszt Liebestraum No 3'],
-  ['Hallelujah Chorus', 'Handel Hallelujah Chorus Messiah'],
-  ['Eine Alpensinfonie', 'Strauss Also sprach Zarathustra opening'],
-  ['Spring Sonata', 'Beethoven Spring Sonata'],
-  ['Clair', 'Debussy Reverie'],
-  ['Nessun Dorma', 'Puccini Nessun Dorma'],
-  ['Vltava', 'Smetana Vltava Moldau'],
-  ['Bolero Ravel', 'Maurice Ravel Bolero'],
-  // ---- Other famous instrumentals ----
-  ['Take Five', 'Dave Brubeck Take Five'],
-  ['Rondo Alla Turca', 'Mozart Turkish March piano'],
-  ['Comptine', "Yann Tiersen Comptine d'un autre ete"],
-  ['River Flows in You', 'Yiruma River Flows in You'],
-  ['Nuvole Bianche', 'Ludovico Einaudi Nuvole Bianche'],
-  ['Experience', 'Ludovico Einaudi Experience'],
-  ['The Entertainer', 'Scott Joplin The Entertainer'],
-  ['Maple Leaf Rag', 'Scott Joplin Maple Leaf Rag'],
-  ['Sabre Dance', 'Khachaturian Sabre Dance'],
-  ['Flight Facilities', 'Vangelis Conquest of Paradise'],
-  ['Oxygene', 'Jean-Michel Jarre Oxygene'],
-  ['Tubular Bells', 'Mike Oldfield Tubular Bells'],
-  ['Axel F', 'Harold Faltermeyer Axel F Beverly Hills Cop'],
-  ['Chariots', 'Vangelis Chariots of Fire titles'],
-  ['Albatross', 'Fleetwood Mac Albatross'],
-  ['Apache', 'The Shadows Apache'],
-  ['Sleepwalk', 'Santo and Johnny Sleepwalk'],
-  ['Europa', 'Santana Europa'],
-  ['Cavatina', 'Cavatina Deer Hunter Stanley Myers'],
-  ['Classical Gas', 'Mason Williams Classical Gas'],
+  // ---- Classical: "<Proper title> (<Composer>)" — full, consistent, one entry per work ----
+  ['Symphony No. 5 (Beethoven)', 'Beethoven Symphony No. 5 Allegro con brio'],
+  ['Ode to Joy (Beethoven)', 'Beethoven Ode to Joy Symphony No 9'],
+  ['Für Elise (Beethoven)', 'Beethoven Fur Elise'],
+  ['Moonlight Sonata (Beethoven)', 'Beethoven Moonlight Sonata'],
+  ['Spring Sonata (Beethoven)', 'Beethoven Spring Sonata violin'],
+  ['Pathétique Sonata (Beethoven)', 'Beethoven Pathetique Sonata 2nd movement'],
+  ['Emperor Concerto (Beethoven)', 'Beethoven Emperor Concerto'],
+  ['Eine kleine Nachtmusik (Mozart)', 'Mozart Eine kleine Nachtmusik'],
+  ['Rondo alla Turca (Mozart)', 'Mozart Rondo alla Turca Turkish March'],
+  ['The Marriage of Figaro (Mozart)', 'Mozart Marriage of Figaro overture'],
+  ['Symphony No. 40 (Mozart)', 'Mozart Symphony No 40 G minor'],
+  ['Clarinet Concerto (Mozart)', 'Mozart Clarinet Concerto Adagio'],
+  ['Requiem: Lacrimosa (Mozart)', 'Mozart Requiem Lacrimosa'],
+  ['The Four Seasons: Spring (Vivaldi)', 'Vivaldi Four Seasons Spring'],
+  ['The Four Seasons: Winter (Vivaldi)', 'Vivaldi Four Seasons Winter'],
+  ['Canon in D (Pachelbel)', 'Pachelbel Canon in D'],
+  ['Toccata and Fugue in D minor (Bach)', 'Bach Toccata and Fugue in D minor'],
+  ['Air on the G String (Bach)', 'Bach Air on the G String'],
+  ['Brandenburg Concerto No. 3 (Bach)', 'Bach Brandenburg Concerto No 3'],
+  ["Jesu, Joy of Man's Desiring (Bach)", 'Bach Jesu Joy of Man Desiring'],
+  ['Cello Suite No. 1 (Bach)', 'Bach Cello Suite No 1 Prelude'],
+  ['Ave Maria (Schubert)', 'Schubert Ave Maria'],
+  ['The Blue Danube (Strauss)', 'Strauss Blue Danube waltz'],
+  ['Boléro (Ravel)', 'Ravel Bolero'],
+  ['Clair de Lune (Debussy)', 'Debussy Clair de Lune'],
+  ['Arabesque No. 1 (Debussy)', 'Debussy Arabesque No 1'],
+  ['Rêverie (Debussy)', 'Debussy Reverie'],
+  ['Gymnopédie No. 1 (Satie)', 'Satie Gymnopedie No 1'],
+  ['Gnossienne No. 1 (Satie)', 'Satie Gnossienne No 1'],
+  ['Nocturne in E-flat (Chopin)', 'Chopin Nocturne Op 9 No 2'],
+  ['Prelude in E minor (Chopin)', 'Chopin Prelude Op 28 No 4'],
+  ['Minute Waltz (Chopin)', 'Chopin Minute Waltz'],
+  ['Revolutionary Étude (Chopin)', 'Chopin Revolutionary Etude'],
+  ['Funeral March (Chopin)', 'Chopin Funeral March Sonata No 2'],
+  ['Hungarian Rhapsody No. 2 (Liszt)', 'Liszt Hungarian Rhapsody No 2'],
+  ['Liebestraum No. 3 (Liszt)', 'Liszt Liebestraum No 3'],
+  ['La Campanella (Liszt)', 'Liszt La Campanella'],
+  ['Swan Lake (Tchaikovsky)', 'Tchaikovsky Swan Lake'],
+  ['Dance of the Sugar Plum Fairy (Tchaikovsky)', 'Tchaikovsky Dance of the Sugar Plum Fairy'],
+  ['1812 Overture (Tchaikovsky)', 'Tchaikovsky 1812 Overture'],
+  ['Piano Concerto No. 1 (Tchaikovsky)', 'Tchaikovsky Piano Concerto No 1'],
+  ['Flight of the Bumblebee (Rimsky-Korsakov)', 'Rimsky-Korsakov Flight of the Bumblebee'],
+  ['In the Hall of the Mountain King (Grieg)', 'Grieg In the Hall of the Mountain King'],
+  ['Morning Mood (Grieg)', 'Grieg Morning Mood Peer Gynt'],
+  ["Anitra's Dance (Grieg)", 'Grieg Anitra Dance Peer Gynt'],
+  ['Carmen: Habanera (Bizet)', 'Bizet Carmen Habanera'],
+  ['Carmen: Toreador Song (Bizet)', 'Bizet Toreador Song Carmen'],
+  ['William Tell Overture (Rossini)', 'Rossini William Tell Overture finale'],
+  ['Ride of the Valkyries (Wagner)', 'Wagner Ride of the Valkyries'],
+  ['Bridal Chorus (Wagner)', 'Wagner Bridal Chorus Here Comes the Bride'],
+  ['Pomp and Circumstance (Elgar)', 'Elgar Pomp and Circumstance'],
+  ['The Planets: Mars (Holst)', 'Holst The Planets Mars'],
+  ['The Planets: Jupiter (Holst)', 'Holst The Planets Jupiter'],
+  ['Rhapsody in Blue (Gershwin)', 'Gershwin Rhapsody in Blue'],
+  ['Pictures at an Exhibition (Mussorgsky)', 'Mussorgsky Pictures at an Exhibition Promenade'],
+  ['O Fortuna (Orff)', 'Carl Orff O Fortuna Carmina Burana'],
+  ['Adagio for Strings (Barber)', 'Barber Adagio for Strings'],
+  ['New World Symphony (Dvořák)', 'Dvorak New World Symphony Largo'],
+  ['Peter and the Wolf (Prokofiev)', 'Prokofiev Peter and the Wolf'],
+  ['Greensleeves (Traditional)', 'Greensleeves classical'],
+  ['Pavane (Fauré)', 'Faure Pavane'],
+  ['Hallelujah Chorus (Handel)', 'Handel Hallelujah Chorus Messiah'],
+  ['Nessun Dorma (Puccini)', 'Puccini Nessun Dorma'],
+  ['Vltava (Smetana)', 'Smetana Vltava Moldau'],
+  ['Danse Macabre (Saint-Saëns)', 'Saint-Saens Danse Macabre'],
+  ['The Swan (Saint-Saëns)', 'Saint-Saens The Swan Carnival of the Animals'],
+  ['Méditation from Thaïs (Massenet)', 'Massenet Meditation Thais'],
+  ['Csárdás (Monti)', 'Monti Csardas'],
+  ['Hungarian Dance No. 5 (Brahms)', 'Brahms Hungarian Dance No 5'],
+  ['Adagio in G minor (Albinoni)', 'Albinoni Adagio in G minor'],
+  ['Sabre Dance (Khachaturian)', 'Khachaturian Sabre Dance'],
+  ['Finlandia (Sibelius)', 'Sibelius Finlandia'],
+  ['Wedding March (Mendelssohn)', 'Mendelssohn Wedding March'],
+  ['The Entertainer (Joplin)', 'Scott Joplin The Entertainer'],
+  ['Maple Leaf Rag (Joplin)', 'Scott Joplin Maple Leaf Rag'],
+  // ---- Other famous instrumentals (jazz / modern / easy-listening) ----
+  ['Take Five (Brubeck)', 'Dave Brubeck Take Five'],
+  ['River Flows in You (Yiruma)', 'Yiruma River Flows in You'],
+  ['Nuvole Bianche (Einaudi)', 'Ludovico Einaudi Nuvole Bianche'],
+  ['Experience (Einaudi)', 'Ludovico Einaudi Experience'],
+  ['Por una Cabeza (Gardel)', 'Gardel Por una Cabeza tango'],
+  ['Libertango (Piazzolla)', 'Piazzolla Libertango'],
+  ['Zorba the Greek (Theodorakis)', 'Theodorakis Zorba the Greek'],
+  ['Conquest of Paradise (Vangelis)', 'Vangelis Conquest of Paradise'],
+  ['Oxygène (Jean-Michel Jarre)', 'Jean-Michel Jarre Oxygene'],
+  ['Tubular Bells (Mike Oldfield)', 'Mike Oldfield Tubular Bells'],
+  ['Axel F (Beverly Hills Cop)', 'Harold Faltermeyer Axel F Beverly Hills Cop'],
+  ['Albatross (Fleetwood Mac)', 'Fleetwood Mac Albatross'],
+  ['Apache (The Shadows)', 'The Shadows Apache'],
+  ['Sleepwalk (Santo & Johnny)', 'Santo and Johnny Sleepwalk'],
+  ['Europa (Santana)', 'Santana Europa'],
+  ['Cavatina (The Deer Hunter)', 'Cavatina Deer Hunter Stanley Myers'],
+  ['Classical Gas (Mason Williams)', 'Mason Williams Classical Gas'],
+  ['Clocks (Coldplay)', 'Coldplay Clocks instrumental'],
   // ---- Batch 2: more film ----
   ['Star Trek', 'Star Trek original series theme'],
   ['The Terminator', 'Terminator theme Brad Fiedel'],
@@ -188,37 +215,6 @@ const PIECES = [
   ['Ratatouille', 'Ratatouille Le Festin instrumental'],
   ['Coco', 'Coco Remember Me instrumental'],
   ['Frozen', 'Frozen Vuelie instrumental'],
-  // ---- Batch 2: more classical ----
-  ['Jesu, Joy of Man\'s Desiring', 'Bach Jesu Joy of Man Desiring'],
-  ['Cello Suite No. 1', 'Bach Cello Suite No 1 Prelude'],
-  ['Wedding March', 'Mendelssohn Wedding March'],
-  ['Bridal Chorus', 'Wagner Bridal Chorus Here Comes the Bride'],
-  ['Funeral March', 'Chopin Funeral March Sonata No 2'],
-  ['Minute Waltz', 'Chopin Minute Waltz'],
-  ['Revolutionary Etude', 'Chopin Revolutionary Etude'],
-  ['La Campanella', 'Liszt La Campanella'],
-  ['Danse Macabre', 'Saint-Saens Danse Macabre'],
-  ['The Swan', 'Saint-Saens The Swan Carnival of the Animals'],
-  ['Meditation from Thais', 'Massenet Meditation Thais'],
-  ['Csardas', 'Monti Csardas'],
-  ['Zorba the Greek', 'Theodorakis Zorba the Greek'],
-  ['Por una Cabeza', 'Gardel Por una Cabeza tango'],
-  ['Libertango', 'Piazzolla Libertango'],
-  ['Hungarian Dance No. 5', 'Brahms Hungarian Dance No 5'],
-  ['Adagio in G minor', 'Albinoni Adagio in G minor'],
-  ['Jupiter', 'Holst The Planets Jupiter'],
-  ['Finlandia', 'Sibelius Finlandia'],
-  ['Pathetique Sonata', 'Beethoven Pathetique Sonata 2nd movement'],
-  ['Emperor Concerto', 'Beethoven Emperor Concerto'],
-  ['Piano Concerto No. 1', 'Tchaikovsky Piano Concerto No 1'],
-  ['Clair de Lune Debussy', 'Debussy Arabesque No 1'],
-  ['Gnossienne', 'Satie Gnossienne No 1'],
-  ['O Fortuna', 'Carl Orff O Fortuna'],
-  ['Symphony No. 40', 'Mozart Symphony No 40 G minor'],
-  ['Spring', 'Vivaldi Four Seasons Winter'],
-  ['Toreador Song', 'Bizet Toreador Song Carmen'],
-  ['Peer Gynt', 'Grieg Anitra\'s Dance'],
-  ['Lacrimosa', 'Mozart Requiem Lacrimosa'],
   // ---- Batch 2: more TV / games / other ----
   ['MASH', 'MASH Suicide Is Painless instrumental'],
   ['The Twilight Zone', 'Twilight Zone theme'],
@@ -236,13 +232,14 @@ const PIECES = [
   ['Civilization IV', 'Baba Yetu Civilization'],
   ['Metal Gear Solid', 'Metal Gear Solid theme'],
   ['Animal Crossing', 'Animal Crossing main theme'],
-  ['Clocks', 'Coldplay Clocks instrumental'],
   ['Cantina Band', 'Star Wars Cantina Band'],
   ['The Imperial March', 'Star Wars Imperial March'],
   ['Duel of the Fates', 'Star Wars Duel of the Fates'],
 ];
 
-const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+// Accent-insensitive normalize so "Bolero"/"Boléro" dedupe to the same key.
+const norm = (s) =>
+  s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 const STOP = new Set(['the', 'a', 'an', 'of', 'and', 'in', 'no', 'op', 'minor', 'major', 'theme', 'main', 'title', 'overture', 'symphony', 'concerto', 'sonata', 'march', 'suite', 'instrumental']);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -268,6 +265,7 @@ function tokensOf(s) {
 const kept = [];
 const seenUrl = new Set();
 const seenAns = new Set();
+let dropped = 0;
 for (const [answer, term] of PIECES) {
   if (seenAns.has(norm(answer))) continue;
   let j = null;
@@ -275,19 +273,31 @@ for (const [answer, term] of PIECES) {
     if (a) await sleep(700 * a);
     j = await search(term);
   }
-  const want = [...new Set([...tokensOf(answer), ...tokensOf(term)])];
-  const hit = (j?.results || []).find((x) => {
-    if (!x.previewUrl || x.kind !== 'song') return false;
+  // Distinctive tokens (work title words, minus generic music words) must drive the
+  // pick — composer alone is NOT enough, so e.g. "Vivaldi Winter" can't grab a Spring
+  // recording. Score each result by distinctive-token hits and take the best (>=1).
+  // NO loose fallback: a non-matching search is DROPPED, never shipped mislabeled.
+  const distinctive = new Set(tokensOf(answer).concat(tokensOf(term)));
+  let best = null;
+  let bestScore = 0;
+  for (const x of j?.results || []) {
+    if (!x.previewUrl || x.kind !== 'song' || seenUrl.has(x.previewUrl)) continue;
     const hay = norm(`${x.trackName} ${x.collectionName} ${x.artistName}`);
-    return want.some((w) => hay.includes(w));
-  }) || (j?.results || []).find((x) => x.previewUrl);
-  if (hit && !seenUrl.has(hit.previewUrl)) {
-    seenUrl.add(hit.previewUrl);
+    let score = 0;
+    for (const w of distinctive) if (hay.includes(w)) score += 1;
+    if (score > bestScore) {
+      bestScore = score;
+      best = x;
+    }
+  }
+  if (best && bestScore >= 1) {
+    seenUrl.add(best.previewUrl);
     seenAns.add(norm(answer));
-    kept.push({ answer, url: hit.previewUrl });
-    console.log(`✅ ${answer}`);
+    kept.push({ answer, url: best.previewUrl });
+    console.log(`✅ ${answer}  (score ${bestScore} — ${best.trackName})`);
   } else {
-    console.log(`❌ ${answer}`);
+    dropped += 1;
+    console.log(`❌ ${answer}  (no confident match — dropped)`);
   }
   await sleep(300);
 }
@@ -310,4 +320,4 @@ ${rows}
 `;
 
 await writeFile(new URL('../src/content/melodiesExtra.ts', import.meta.url), out, 'utf8');
-console.log(`\nKept ${kept.length}/${PIECES.length}. Wrote src/content/melodiesExtra.ts`);
+console.log(`\nKept ${kept.length}/${PIECES.length} (dropped ${dropped}). Wrote src/content/melodiesExtra.ts`);

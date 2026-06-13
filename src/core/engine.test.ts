@@ -110,6 +110,17 @@ describe('pie rule', () => {
     expect(canPieSwap(s)).toBe(false);
     expect(() => reduce(s, { type: 'PieSwapped' })).toThrow();
   });
+
+  it('is NOT offered when the opponent STOLE the first hex (no opening hex to take over)', () => {
+    // Regression: B winning the very first hex left A owning nothing, yet the swap
+    // window opened. Invoking it then threw "pie swap found no opening hex", which
+    // crashed the whole UI to a blank screen. The swap must simply be unavailable.
+    let s = createGame(start(5, true) as never);
+    s = reduce(s, { type: 'HexClaimed', cell: 12, team: 'B', stolen: true });
+    expect(s.owners[12]).toBe('B'); // opponent owns the only hex
+    expect(s.turn).toBe('B'); // and it's the opponent's swap window by turn alone
+    expect(canPieSwap(s)).toBe(false); // …but the swap is correctly withheld
+  });
 });
 
 describe('question serving bookkeeping', () => {

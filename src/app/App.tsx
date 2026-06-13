@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect } from 'react';
+import { ErrorBoundary } from './ErrorBoundary';
 import { initAudio, setAudioEnabled, setMusicContext, startMusic, stopMusic } from '../services/audio';
 import { applyTeamColors } from '../state/palette';
 import { useStore } from '../state/store';
@@ -8,6 +9,15 @@ import { Setup } from '../screens/Setup';
 import { Game } from '../screens/Game';
 import { Victory } from '../screens/Victory';
 import { Tutorial } from '../screens/Tutorial';
+
+/** Test-only seam: `?__crashtest=1` throws during render so the ErrorBoundary can be
+ *  verified to show the recovery card (never a blank screen). Inert otherwise. */
+function CrashProbe() {
+  if (new URLSearchParams(window.location.search).has('__crashtest')) {
+    throw new Error('crash test');
+  }
+  return null;
+}
 
 export function App() {
   const { state } = useStore();
@@ -63,22 +73,25 @@ export function App() {
 
   return (
     <div className="ll-app" data-screen={screen}>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={screen}
-          className="ll-screen"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {screen === 'home' && <Home />}
-          {screen === 'setup' && <Setup />}
-          {screen === 'game' && <Game />}
-          {screen === 'victory' && <Victory />}
-          {screen === 'tutorial' && <Tutorial />}
-        </motion.div>
-      </AnimatePresence>
+      <ErrorBoundary>
+        <CrashProbe />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={screen}
+            className="ll-screen"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {screen === 'home' && <Home />}
+            {screen === 'setup' && <Setup />}
+            {screen === 'game' && <Game />}
+            {screen === 'victory' && <Victory />}
+            {screen === 'tutorial' && <Tutorial />}
+          </motion.div>
+        </AnimatePresence>
+      </ErrorBoundary>
     </div>
   );
 }

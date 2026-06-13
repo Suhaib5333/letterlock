@@ -22,23 +22,42 @@ export const melodiesPack: RawPack = {
   emoji: '🎼',
   accent: '#0ea5e9',
   hideBoardLetters: true,
+  // Answers use the same CONSISTENT, FULL-name convention as melodiesExtra:
+  // classical pieces are "<Proper title> (<Composer>)" (never a bare composer or key);
+  // folk / nursery / carol tunes keep their full recognizable name. Clip ids map to the
+  // bundled synthesized WAVs in public/clips and must NOT change. (The merged pack is
+  // re-bucketed by answer first letter at load — see content/index.ts — so the keys
+  // below are only for readability.)
   letters: {
     A: [q('Amazing Grace', 'amazinggrace')],
-    B: [q('Beethoven', 'beethoven5', ["beethoven's fifth", 'fifth symphony', 'symphony no 5']), q('Blue Danube', 'bluedanube', ['the blue danube', 'danube'])],
-    C: [q('Canon in D', 'canon', ['pachelbel', "pachelbel's canon", 'canon']), q('Can-Can', 'cancan', ['cancan'])],
-    E: [q('Eine kleine Nachtmusik', 'einekleine', ['mozart', 'a little night music'])],
-    F: [q('Für Elise', 'furelise', ['fur elise', 'beethoven'])],
-    G: [q('Greensleeves', 'greensleeves')],
-    H: [q('Hall of the Mountain King', 'mountainking', ['grieg', 'in the hall of the mountain king']), q('Happy Birthday', 'happybirthday')],
+    B: [q('The Blue Danube (Strauss)', 'bluedanube', ['the blue danube', 'blue danube', 'danube', 'strauss'])],
+    C: [
+      q('Canon in D (Pachelbel)', 'canon', ['canon in d', 'pachelbel', "pachelbel's canon", 'canon']),
+      q('Can-Can (Offenbach)', 'cancan', ['cancan', 'can can', 'offenbach', 'galop infernal']),
+    ],
+    E: [q('Eine kleine Nachtmusik (Mozart)', 'einekleine', ['eine kleine nachtmusik', 'mozart', 'a little night music'])],
+    F: [q('Für Elise (Beethoven)', 'furelise', ['fur elise', 'beethoven'])],
+    G: [q('Greensleeves (Traditional)', 'greensleeves', ['greensleeves'])],
+    H: [q('Happy Birthday', 'happybirthday')],
+    I: [q('In the Hall of the Mountain King (Grieg)', 'mountainking', ['grieg', 'hall of the mountain king', 'in the hall of the mountain king'])],
     J: [q('Jingle Bells', 'jinglebells')],
-    L: [q('Lullaby', 'lullaby', ['brahms', "brahms' lullaby", 'cradle song'])],
+    L: [q('Lullaby (Brahms)', 'lullaby', ['brahms', "brahms' lullaby", 'cradle song', 'lullaby'])],
     M: [q('Mary Had a Little Lamb', 'marylamb')],
-    N: [q('Nutcracker', 'nutcracker', ['the nutcracker', 'tchaikovsky', 'dance of the sugar plum fairy'])],
-    O: [q('Ode to Joy', 'odetojoy', ['beethoven', 'ninth symphony'])],
-    R: [q('Row Row Row Your Boat', 'rowboat', ['row your boat'])],
-    S: [q('Swan Lake', 'swanlake', ['tchaikovsky']), q('Spring', 'springvivaldi', ['vivaldi', 'the four seasons', 'four seasons'])],
-    T: [q('Turkish March', 'turkishmarch', ['mozart', 'rondo alla turca']), q('Twinkle Twinkle', 'twinkle', ['twinkle twinkle little star', 'twinkle'])],
-    V: [q('Valkyries', 'valkyries', ['ride of the valkyries', 'wagner'])],
-    W: [q('William Tell', 'williamtell', ['william tell overture', 'rossini']), q('Wedding March', 'weddingmarch', ['mendelssohn'])],
+    O: [q('Ode to Joy (Beethoven)', 'odetojoy', ['ode to joy', 'beethoven', 'ninth symphony'])],
+    R: [
+      q('Row Row Row Your Boat', 'rowboat', ['row your boat']),
+      q('Rondo alla Turca (Mozart)', 'turkishmarch', ['turkish march', 'rondo alla turca', 'mozart']),
+      q('Ride of the Valkyries (Wagner)', 'valkyries', ['ride of the valkyries', 'valkyries', 'wagner']),
+    ],
+    S: [
+      q('Symphony No. 5 (Beethoven)', 'beethoven5', ["beethoven's fifth", 'fifth symphony', 'symphony no 5', 'beethoven']),
+      q('Swan Lake (Tchaikovsky)', 'swanlake', ['swan lake', 'tchaikovsky']),
+    ],
+    T: [
+      q('The Nutcracker (Tchaikovsky)', 'nutcracker', ['the nutcracker', 'nutcracker', 'tchaikovsky', 'dance of the sugar plum fairy']),
+      q('The Four Seasons: Spring (Vivaldi)', 'springvivaldi', ['spring', 'vivaldi', 'the four seasons', 'four seasons']),
+      q('Twinkle Twinkle Little Star', 'twinkle', ['twinkle twinkle little star', 'twinkle']),
+    ],
+    W: [q('William Tell Overture (Rossini)', 'williamtell', ['william tell', 'william tell overture', 'rossini']), q('Wedding March (Mendelssohn)', 'weddingmarch', ['wedding march', 'mendelssohn'])],
   },
 };

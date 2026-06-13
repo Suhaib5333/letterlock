@@ -65,7 +65,7 @@ export const flagsMediumPack: RawPack = {
     F: [q('Fiji', 'fj')],
     G: [q('Ghana', 'gh'), q('Georgia', 'ge')],
     H: [q('Hungary', 'hu')],
-    I: [q('Indonesia', 'id'), q('Iceland', 'is'), q('Israel', 'il')],
+    I: [q('Indonesia', 'id'), q('Iceland', 'is')],
     J: [q('Jordan', 'jo')],
     K: [q('Kazakhstan', 'kz'), q('Kuwait', 'kw')],
     L: [q('Lebanon', 'lb'), q('Lithuania', 'lt')],

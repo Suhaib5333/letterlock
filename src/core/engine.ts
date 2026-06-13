@@ -28,14 +28,19 @@ export function createGame(ev: Extract<GameEvent, { type: 'GameStarted' }>): Gam
   };
 }
 
-/** True when team B (the opponent of the first picker) may invoke the pie rule. */
+/** True when team B (the opponent of the first picker) may invoke the pie rule.
+ *  The swap means "take over the opening hex instead of playing", so it is only
+ *  valid when the opening hex actually belongs to the FIRST PICKER. If the opponent
+ *  STOLE the first hex, the first picker owns nothing to swap into — offering the
+ *  swap then would crash (no opening hex to take over), so it must be disallowed. */
 export function canPieSwap(s: GameState): boolean {
   return (
     s.status === 'playing' &&
     s.pieRuleEnabled &&
     !s.pieSwapped &&
     s.moveCount === 1 &&
-    s.turn === opponent(s.firstPicker)
+    s.turn === opponent(s.firstPicker) &&
+    s.owners.includes(s.firstPicker) // opening hex is the first picker's (not stolen)
   );
 }
 

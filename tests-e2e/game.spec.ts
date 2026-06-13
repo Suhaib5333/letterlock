@@ -209,6 +209,38 @@ test('pie-rule prompt is an overlay that does not shrink the board, and swap wor
   await expect(pop).toHaveCount(0); // prompt dismissed after swapping
 });
 
+test('an uncaught error shows a recovery card, never a blank screen', async ({ page }) => {
+  // A blank screen = the React tree unmounted on an uncaught error. The top-level
+  // ErrorBoundary must catch ANY such error and show a recoverable card instead.
+  await page.goto('/?__crashtest=1');
+  await expect(page.getByTestId('crash-screen')).toBeVisible();
+  await expect(page.getByTestId('crash-recover')).toBeVisible();
+  // Recover returns to a clean home (no crash param) — fully playable again.
+  await page.getByTestId('crash-recover').click();
+  await expect(page.getByTestId('open-categories')).toBeVisible();
+  await expect(page.getByTestId('crash-screen')).toHaveCount(0);
+});
+
+test('no pie-swap offer (and no blank-screen crash) when the opponent steals the first hex', async ({ page }) => {
+  // Regression: B stealing the very first hex left A owning nothing, but the swap
+  // window still opened. Clicking "Swap sides" then threw and crashed the whole UI
+  // to a blank screen. The swap must simply not be offered in that case.
+  const crashes: string[] = [];
+  page.on('pageerror', (e) => crashes.push(e.message));
+  await startMatch(page, { size: 5, mode: 'single' });
+  // A picks the opening hex but B WINS it (steal) via the host pad.
+  await claimFor(page, 0, 'B');
+  await expect(page.locator('.ll-hex[data-cell="0"][data-owner="B"]')).toHaveCount(1);
+  // The pie-swap prompt must NOT appear (A owns no hex to swap into).
+  await expect(page.getByTestId('pie-banner')).toHaveCount(0);
+  // The game keeps playing normally — board on screen, never blanked.
+  await expect(page.getByTestId('game-screen')).toBeVisible();
+  await expect(page.locator('.ll-board')).toBeVisible();
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  expect(crashes).toEqual([]); // no uncaught error ever reached the page
+});
+
 test('manual switch-turn flips the active team', async ({ page }) => {
   await startMatch(page, { size: 5, mode: 'single' });
   const banner = page.getByTestId('turn-banner');

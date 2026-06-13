@@ -1141,6 +1141,38 @@
   box-shadow: 0 0 8px var(--tb);
 }
 
+/* ---------- Crash recovery card (top-level error boundary — never a blank screen) ---------- */
+.crash {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: var(--s-4);
+}
+.crash-card {
+  max-width: 420px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+.crash-icon {
+  font-size: 2.5rem;
+}
+.crash-card h2 {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+}
+.crash-card p {
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
 /* ---------- Pie-rule popup (OVERLAY — never reflows the board) ---------- */
 .pie-pop {
   position: absolute;

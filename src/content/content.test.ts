@@ -176,3 +176,26 @@ describe('EVERY pack: names in natural spoken order, not "Surname, First" (rule 
     });
   }
 });
+
+describe('Guess the Melody: every answer is a full piece name, not a bare composer', () => {
+  // Regression for the "sometimes it just says Beethoven / Pachelbel" inconsistency.
+  // A melody answer must never be a lone composer surname — it must name the WORK.
+  const COMPOSERS = new Set([
+    'beethoven', 'mozart', 'bach', 'pachelbel', 'chopin', 'liszt', 'tchaikovsky', 'vivaldi',
+    'debussy', 'satie', 'grieg', 'bizet', 'rossini', 'wagner', 'elgar', 'holst', 'gershwin',
+    'mussorgsky', 'orff', 'barber', 'dvorak', 'dvořák', 'prokofiev', 'handel', 'puccini',
+    'smetana', 'ravel', 'schubert', 'strauss', 'brahms', 'sibelius', 'mendelssohn', 'joplin',
+    'albinoni', 'khachaturian', 'massenet', 'monti', 'faure', 'fauré', 'rimsky-korsakov',
+  ]);
+  const melodies = PACKS.find((p) => p.id === 'melodies');
+  it('melodies pack is registered', () => expect(melodies).toBeTruthy());
+  it('no answer is a lone composer surname', () => {
+    const bad: string[] = [];
+    for (const qs of Object.values(melodies!.letters)) {
+      for (const q of qs) {
+        if (COMPOSERS.has(q.a.trim().toLowerCase())) bad.push(q.a);
+      }
+    }
+    expect(bad, `Composer-only melody answers:\n${bad.join('\n')}`).toEqual([]);
+  });
+});
