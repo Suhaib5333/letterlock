@@ -32,11 +32,8 @@ export const logosEasyPack: RawPack = {
       q('Airbnb', 'airbnb'),
     ],
     B: [
-      q('BMW', 'bmw'),
-      q('Burger King', 'burgerking', ['BurgerKing', 'Burgerking']),
     ],
     C: [
-      q('Coca-Cola', 'cocacola', ['Coca Cola', 'Coke']),
       q('Chrome', 'googlechrome', ['Google Chrome']),
     ],
     D: [
@@ -44,8 +41,6 @@ export const logosEasyPack: RawPack = {
       q('Dropbox', 'dropbox'),
     ],
     E: [
-      q('eBay', 'ebay'),
-      q('Etsy', 'etsy'),
     ],
     F: [
       q('Facebook', 'facebook'),
@@ -61,11 +56,8 @@ export const logosEasyPack: RawPack = {
     ],
     I: [
       q('Instagram', 'instagram'),
-      q('Intel', 'intel'),
-      q('IKEA', 'ikea'),
     ],
     K: [
-      q('KFC', 'kfc'),
     ],
     L: [
       q('Lamborghini', 'lamborghini'),
@@ -92,7 +84,6 @@ export const logosEasyPack: RawPack = {
       q('Reddit', 'reddit'),
     ],
     S: [
-      q('Samsung', 'samsung'),
       q('Spotify', 'spotify'),
       q('Snapchat', 'snapchat'),
       q('Starbucks', 'starbucks'),
@@ -105,11 +96,9 @@ export const logosEasyPack: RawPack = {
       q('Twitch', 'twitch'),
     ],
     U: [
-      q('Uber', 'uber'),
       q('Ubisoft', 'ubisoft'),
     ],
     V: [
-      q('Visa', 'visa'),
       q('Volkswagen', 'volkswagen'),
       q('Vimeo', 'vimeo'),
     ],
@@ -123,7 +112,6 @@ export const logosEasyPack: RawPack = {
       q('YouTube', 'youtube', ['Youtube']),
     ],
     Z: [
-      q('Zoom', 'zoom'),
     ],
   },
 };
@@ -154,7 +142,6 @@ export const logosMediumPack: RawPack = {
     ],
     C: [
       q('Cloudflare', 'cloudflare'),
-      q('Coinbase', 'coinbase'),
     ],
     D: [
       q('DoorDash', 'doordash', ['Doordash']),
@@ -174,7 +161,6 @@ export const logosMediumPack: RawPack = {
       q('Goodreads', 'goodreads'),
     ],
     H: [
-      q('HubSpot', 'hubspot', ['Hubspot']),
     ],
     I: [
     ],
@@ -276,11 +262,9 @@ export const logosHardPack: RawPack = {
       q('Databricks', 'databricks'),
     ],
     E: [
-      q('Elastic', 'elastic'),
       q('Expo', 'expo'),
     ],
     F: [
-      q('Fastly', 'fastly'),
     ],
     G: [
       q('Grafana', 'grafana'),
