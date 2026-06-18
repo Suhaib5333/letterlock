@@ -52,6 +52,20 @@ import { bahrainExtra } from './bahrainExtra';
 import { saudiExtra2 } from './saudiExtra2';
 import { uaeExtra2 } from './uaeExtra2';
 import { gulfExtra2 } from './gulfExtra2';
+// Round-10: sitcoms (3 tiers) + decade-and-genre music packs.
+import { sitcomsEasyPack } from './sitcomsEasy';
+import { sitcomsMediumPack } from './sitcomsMedium';
+import { sitcomsHardPack } from './sitcomsHard';
+import { music80sPopPack } from './music80sPop';
+import { music80sRockPack } from './music80sRock';
+import { music90sHipHopPack } from './music90sHipHop';
+import { music90sPopPack } from './music90sPop';
+import { music90sAltPack } from './music90sAlt';
+import { music90sRnBPack } from './music90sRnB';
+import { music00sPopPack } from './music00sPop';
+import { music00sHipHopPack } from './music00sHipHop';
+import { music10sPopPack } from './music10sPop';
+import { music10sHipHopPack } from './music10sHipHop';
 
 /**
  * Re-bucket every question under the letter its ANSWER actually starts with.
@@ -191,7 +205,7 @@ export function groupOf(id: string): PackGroup {
   if (/^logos/.test(id)) return 'Logos & Brands';
   if (/^sports/.test(id)) return 'Sports';
   if (/^charades/.test(id)) return 'Charades';
-  if (/clips|^movies-tv|^movies/.test(id)) return 'Movies & TV';
+  if (/^sitcoms|clips|^movies-tv|^movies/.test(id)) return 'Movies & TV';
   if (/^music|^melodies|^songs/.test(id)) return 'Music';
   if (/^bahrain|^saudi|^uae|^gulf/.test(id)) return 'Regional';
   return 'Trivia & Knowledge';
@@ -232,6 +246,21 @@ export const PACKS: QuestionPack[] = [
   withCharadeImages(withExtra(charadesMoviesPack, charadesMoviesExtra, charadesMovies2)),
   withCharadeImages(withExtra(charadesActionsPack, charadesActionsExtra, charadesActions2, charadesActions3)),
   withCharadeImages(withExtra(charadesHardPack, charadesHardExtra, charadesHard2, charadesHard3)),
+  // Round-10: sitcoms (Movies & TV group) — easy → hard.
+  sitcomsEasyPack,
+  sitcomsMediumPack,
+  sitcomsHardPack,
+  // Round-10: era + genre music packs.
+  music80sPopPack,
+  music80sRockPack,
+  music90sPopPack,
+  music90sHipHopPack,
+  music90sAltPack,
+  music90sRnBPack,
+  music00sPopPack,
+  music00sHipHopPack,
+  music10sPopPack,
+  music10sHipHopPack,
 ]
   .map((p) => ({ ...normalizePack(rebucketByAnswer(p)), group: groupOf(p.id) }))
   .sort((a, b) => DIFFICULTY_RANK[a.difficulty] - DIFFICULTY_RANK[b.difficulty]);

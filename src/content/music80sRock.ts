@@ -1,0 +1,181 @@
+import type { RawPack } from '../core/packs';
+
+// 80s Rock trivia: classic rock, glam/hair metal, arena rock, post-punk and
+// new-wave-rock crossover from the 1980s. Bands, songs, albums, members and lore.
+// Every answer's first letter matches its bucket; the answer never appears
+// verbatim inside its own question.
+
+export const music80sRockPack: RawPack = {
+  id: 'music-80s-rock',
+  name: '80s Rock',
+  description: 'Rock, hair metal, and arena anthems of the 1980s.',
+  locale: 'en',
+  difficulty: 'medium',
+  contentRating: 'everyone',
+  emoji: '🎸',
+  accent: '#dc2626',
+  letters: {
+    A: [
+      { q: 'Australian hard-rock band behind "Back in Black" and "Thunderstruck".', a: 'AC/DC', category: '80s-rock' },
+      { q: 'Boston rockers fronted by Steven Tyler who came roaring back with "Permanent Vacation" in 1987.', a: 'Aerosmith', category: '80s-rock' },
+      { q: 'Guns N\' Roses lead singer with the high snarl and the kilt — first name.', a: 'Axl', category: '80s-rock' },
+      { q: 'Guns N\' Roses\' explosive 1987 debut album whose title evokes a fierce hunger.', a: 'Appetite for Destruction', alt: ['Appetite'], category: '80s-rock' },
+      { q: 'Toto\'s biggest 1982 hit, a yacht-rock anthem about wanting to bless the rains down on a certain continent.', a: 'Africa', category: '80s-rock' },
+    ],
+    B: [
+      { q: 'Springsteen\'s 1984 title track misread as a flag-waver but actually a Vietnam-vet lament.', a: 'Born in the U.S.A.', alt: ['Born in the USA'], category: '80s-rock' },
+      { q: 'AC/DC\'s 1980 comeback album released after Bon Scott\'s death, an all-mourning return.', a: 'Back in Black', category: '80s-rock' },
+      { q: 'New Jersey band led by Jon whose anthems include "Wanted Dead or Alive".', a: 'Bon Jovi', category: '80s-rock' },
+      { q: 'Snarling punk-turned-pop-rocker known for "White Wedding" and "Rebel Yell" — full stage name.', a: 'Billy Idol', category: '80s-rock' },
+      { q: 'AC/DC vocalist who took over from Bon Scott in 1980 — first name shared with this Famous Five author.', a: 'Brian', alt: ['Brian Johnson'], category: '80s-rock' },
+      { q: 'The Boss — full first-and-last stage name of New Jersey\'s most famous rocker.', a: 'Bruce Springsteen', category: '80s-rock' },
+      { q: 'Iron Maiden\'s 1982 album with the satanic numerals — "The Number of the ___".', a: 'Beast', category: '80s-rock' },
+      { q: 'Iron Maiden vocalist who joined in 1981, surname Dickinson — first name.', a: 'Bruce', alt: ['Bruce Dickinson'], category: '80s-rock' },
+    ],
+    C: [
+      { q: 'Warrant\'s 1990 dessert-themed hit that crowned the hair-metal era.', a: 'Cherry Pie', category: '80s-rock' },
+      { q: 'Pennsylvania glam-metal quartet whose debut "Night Songs" went triple platinum.', a: 'Cinderella', category: '80s-rock' },
+      { q: 'Phil ___, the Genesis drummer-turned-frontman with a huge solo run in the 80s.', a: 'Collins', category: '80s-rock' },
+      { q: 'Whitesnake\'s 1987 frontman whose curls and white-suit videos were ubiquitous on MTV — surname David ___.', a: 'Coverdale', category: '80s-rock' },
+      { q: 'Metallica\'s tragically lost bassist whose final album was "Master of Puppets" — first name.', a: 'Cliff', alt: ['Cliff Burton'], category: '80s-rock' },
+    ],
+    D: [
+      { q: 'Sheffield band\'s 1987 multi-platinum monster album with songs like "Animal" and "Pour Some Sugar on Me".', a: 'Def Leppard', category: '80s-rock' },
+      { q: 'Diminutive metal singer who left Black Sabbath to front his own band, "Holy Diver" his signature track.', a: 'Dio', category: '80s-rock' },
+      { q: 'Mark Knopfler\'s laid-back rock band of "Money for Nothing" fame.', a: 'Dire Straits', category: '80s-rock' },
+      { q: 'Journey\'s most-streamed song ever, an arena-rock anthem about a small-town girl.', a: 'Don\'t Stop Believin\'', alt: ['Don\'t Stop Believing', 'Dont Stop Believin'], category: '80s-rock' },
+      { q: 'Bruce Springsteen single from "Born in the U.S.A." featuring a young Courteney Cox in the video.', a: 'Dancing in the Dark', category: '80s-rock' },
+      { q: 'Original Van Halen lead singer, famous for high kicks and a leopard-print wardrobe — full first-middle-last stage name.', a: 'David Lee Roth', category: '80s-rock' },
+    ],
+    E: [
+      { q: 'Survivor\'s 1982 boxing-movie theme that became a stadium staple.', a: 'Eye of the Tiger', category: '80s-rock' },
+      { q: 'Iconic Van Halen solo guitar showcase on the band\'s 1978 debut, finger-tapping fireworks.', a: 'Eruption', category: '80s-rock' },
+      { q: 'Iron Maiden\'s undead mascot who appears on every album cover — first name.', a: 'Eddie', category: '80s-rock' },
+      { q: 'ZZ Top\'s 1983 multi-platinum album famous for its red hot-rod car cover.', a: 'Eliminator', category: '80s-rock' },
+    ],
+    F: [
+      { q: '"Cold as Ice" and "I Want to Know What ___ Is" arena-rockers with a name suggesting outsiders.', a: 'Foreigner', category: '80s-rock' },
+      { q: 'Journey ballad of devotion on the road, the slow burner from "Frontiers" in 1983.', a: 'Faithfully', category: '80s-rock' },
+      { q: 'Tom Petty\'s 1989 solo hit from "Full Moon Fever" about a good girl who loves her mama and Jesus.', a: 'Free Fallin\'', alt: ['Free Fallin', 'Free Falling'], category: '80s-rock' },
+    ],
+    G: [
+      { q: 'L.A. band whose 1987 debut "Appetite for Destruction" sold 30+ million copies.', a: 'Guns N\' Roses', alt: ['Guns N Roses', 'Guns and Roses'], category: '80s-rock' },
+      { q: 'Phil Collins-fronted prog-turned-pop band that scored with "Invisible Touch".', a: 'Genesis', category: '80s-rock' },
+      { q: 'Springsteen E Street single nostalgic for high-school baseball heroes.', a: 'Glory Days', category: '80s-rock' },
+      { q: 'Pink Floyd guitarist whose soaring solos define "Comfortably Numb" — surname David ___.', a: 'Gilmour', alt: ['David Gilmour'], category: '80s-rock' },
+      { q: 'Les Paul guitar brand favored by Slash and Richie Sambora.', a: 'Gibson', category: '80s-rock' },
+    ],
+    H: [
+      { q: 'Sister-led rock band of Ann and Nancy Wilson, behind "Barracuda" and 80s smash "Alone".', a: 'Heart', category: '80s-rock' },
+      { q: 'AC/DC\'s 1979 title track that still wakes stadiums up — "___ to Hell".', a: 'Highway', category: '80s-rock' },
+      { q: 'San Francisco-based "News" frontman whose 1986 album "Fore!" gave us "Hip to Be Square" — full first-and-last name of the bandleader.', a: 'Huey Lewis', category: '80s-rock' },
+      { q: 'Def Leppard\'s 1987 album, ironically named given the year-plus delay drummer Rick Allen overcame.', a: 'Hysteria', category: '80s-rock' },
+      { q: 'Surname of INXS\'s charismatic frontman Michael, who died in 1997.', a: 'Hutchence', alt: ['Michael Hutchence'], category: '80s-rock' },
+      { q: 'Whitesnake\'s 1987 signature ballad starting with "I don\'t know where I\'m going" — "___ I Go Again".', a: 'Here', category: '80s-rock' },
+      { q: 'Dio\'s 1983 debut album and title track invoking a plunge of the sacred kind.', a: 'Holy Diver', category: '80s-rock' },
+    ],
+    I: [
+      { q: 'British metal band whose mascot Eddie haunts every album cover.', a: 'Iron Maiden', category: '80s-rock' },
+      { q: 'Australian band led by Michael Hutchence, behind "Need You Tonight" and "Never Tear Us Apart".', a: 'INXS', category: '80s-rock' },
+    ],
+    J: [
+      { q: 'San Francisco arena-rockers behind "Open Arms" and "Faithfully", fronted by Steve Perry.', a: 'Journey', category: '80s-rock' },
+      { q: 'Van Halen\'s 1984 chart-topper that opens with a synth riff and David Lee Roth\'s leap.', a: 'Jump', category: '80s-rock' },
+      { q: 'Birmingham metal band fronted by Rob Halford, leather and studs personified.', a: 'Judas Priest', category: '80s-rock' },
+      { q: 'Indiana heartland-rocker whose ballads include "Pink Houses" and "Small Town" — first name.', a: 'John', alt: ['John Mellencamp'], category: '80s-rock' },
+      { q: 'Metallica frontman and rhythm guitarist whose growl defines "Enter Sandman" — first name.', a: 'James', alt: ['James Hetfield'], category: '80s-rock' },
+    ],
+    K: [
+      { q: 'Iron Maiden\'s second studio album from 1981, also a noun for assassins.', a: 'Killers', category: '80s-rock' },
+      { q: 'Mr. Mister 1985 #1 single — Greek liturgical phrase meaning "Lord, have mercy".', a: 'Kyrie', category: '80s-rock' },
+      { q: 'Dire Straits frontman and lead guitarist Mark whose finger-style picking is unmistakeable — surname.', a: 'Knopfler', alt: ['Mark Knopfler'], category: '80s-rock' },
+      { q: '"Cum on Feel the Noize" frontman of Quiet Riot whose surname is DuBrow — first name.', a: 'Kevin', alt: ['Kevin DuBrow'], category: '80s-rock' },
+    ],
+    L: [
+      { q: 'Bon Jovi\'s 1986 anthem about working-class couple Tommy and Gina.', a: 'Livin\' on a Prayer', alt: ['Living on a Prayer', 'Livin on a Prayer'], category: '80s-rock' },
+      { q: 'Surname of the Mötley Crüe drummer Tommy, who famously married Pamela Anderson.', a: 'Lee', alt: ['Tommy Lee'], category: '80s-rock' },
+      { q: 'ZZ Top single from "Eliminator" celebrating long-limbed women.', a: 'Legs', category: '80s-rock' },
+    ],
+    M: [
+      { q: 'L.A. glam band of Vince Neil and Tommy Lee — umlauts mandatory.', a: 'Mötley Crüe', alt: ['Motley Crue'], category: '80s-rock' },
+      { q: 'Metallica\'s 1986 album widely called metal\'s greatest, with bassist Cliff Burton in his final studio year.', a: 'Master of Puppets', category: '80s-rock' },
+      { q: 'Bay Area thrash titans whose self-titled "Black Album" of 1991 followed "...And Justice for All".', a: 'Metallica', category: '80s-rock' },
+      { q: '"Broken Wings" 80s pop-rockers whose name is a courtesy title doubled.', a: 'Mr. Mister', alt: ['Mr Mister'], category: '80s-rock' },
+      { q: 'Dire Straits 1985 Brothers in Arms hit about MTV-era envy and microwave ovens.', a: 'Money for Nothing', category: '80s-rock' },
+      { q: 'Indiana heartland-rocker whose hits include "Pink Houses" and "Jack & Diane" — surname.', a: 'Mellencamp', alt: ['John Mellencamp'], category: '80s-rock' },
+    ],
+    N: [
+      { q: 'Epic 9-minute Guns N\' Roses piano ballad released in 1991 — Axl in a white kilt at a doomed wedding.', a: 'November Rain', category: '80s-rock' },
+      { q: 'Bon Jovi\'s 1988 album follow-up to "Slippery When Wet", named after the band\'s home state.', a: 'New Jersey', category: '80s-rock' },
+      { q: 'INXS hit from 1987 "Kick" album — slinky funk-rocker that begins "All you got is this moment".', a: 'Need You Tonight', category: '80s-rock' },
+    ],
+    O: [
+      { q: 'Madman of metal whose surname is Osbourne and who once bit the head off a dove — first name.', a: 'Ozzy', alt: ['Ozzy Osbourne'], category: '80s-rock' },
+      { q: 'Black Sabbath\'s mad-eyed first frontman who launched a huge solo career in the 80s — surname.', a: 'Osbourne', alt: ['Ozzy Osbourne'], category: '80s-rock' },
+      { q: 'Journey 1981 piano-led ballad whose title evokes outstretched welcoming limbs.', a: 'Open Arms', category: '80s-rock' },
+      { q: 'Yes\'s 1983 #1 single — "___ of a Lonely Heart" with the iconic stutter-cut intro.', a: 'Owner', category: '80s-rock' },
+    ],
+    P: [
+      { q: 'British prog-rock legends behind "The Wall" and "Comfortably Numb" — Roger Waters and David Gilmour\'s band.', a: 'Pink Floyd', category: '80s-rock' },
+      { q: 'Def Leppard radio staple from "Hysteria" — sugary, sticky, and number one in 1988.', a: 'Pour Some Sugar on Me', category: '80s-rock' },
+      { q: 'British trio of Sting, Andy Summers and Stewart Copeland who topped charts with "Every Breath You Take".', a: 'Police', alt: ['The Police'], category: '80s-rock' },
+      { q: 'Van Halen single named after a Central American canal country, screamed at the chorus.', a: 'Panama', category: '80s-rock' },
+      { q: 'Glam-metal band of Bret Michaels whose 1988 ballad warned every rose has its thorn.', a: 'Poison', category: '80s-rock' },
+      { q: 'Def Leppard hit about taking pictures — sister song to "Rock of Ages".', a: 'Photograph', category: '80s-rock' },
+      { q: 'Curly-haired powerhouse who sang "Hit Me with Your Best Shot" — surname.', a: 'Pat Benatar', alt: ['Benatar'], category: '80s-rock' },
+    ],
+    Q: [
+      { q: 'L.A. band whose 1983 "Metal Health" was the first heavy-metal album to top the Billboard 200.', a: 'Quiet Riot', category: '80s-rock' },
+      { q: 'Freddie Mercury\'s band that headlined Live Aid in 1985 with a 21-minute set still called the greatest live performance.', a: 'Queen', category: '80s-rock' },
+    ],
+    R: [
+      { q: 'Hollywood sleaze-rockers whose "Round and Round" was their MTV breakthrough — name is also a rodent plural with extra T.', a: 'Ratt', category: '80s-rock' },
+      { q: 'Athens, Georgia band of Michael Stipe and Peter Buck whose 1987 "Document" gave us "The One I Love".', a: 'R.E.M.', alt: ['REM'], category: '80s-rock' },
+      { q: 'Canadian prog-rock trio of Geddy Lee, Alex Lifeson and Neil Peart — name suggests being in a hurry.', a: 'Rush', category: '80s-rock' },
+      { q: 'Illinois band whose ballad "Can\'t Fight This Feeling" hit number one in 1985 — name starts with an acronym for a transport firm.', a: 'REO Speedwagon', alt: ['REO'], category: '80s-rock' },
+      { q: 'Billy Idol\'s explosive 1983 hit — "More! More! More!" — a defiant cry.', a: 'Rebel Yell', category: '80s-rock' },
+      { q: 'Pink Floyd founder and chief songwriter on "The Wall" — first name.', a: 'Roger', alt: ['Roger Waters'], category: '80s-rock' },
+    ],
+    S: [
+      { q: 'Guns N\' Roses ballad with Slash\'s iconic intro lick, written for Erin Everly — "___ Child o\' Mine".', a: 'Sweet', category: '80s-rock' },
+      { q: 'Cleveland band of Frankie Sullivan whose Rocky III theme is the ultimate training jam.', a: 'Survivor', category: '80s-rock' },
+      { q: 'U2 song from 1983 protesting violence in Northern Ireland — ends with a day-of-the-week.', a: 'Sunday Bloody Sunday', category: '80s-rock' },
+      { q: 'Sebastian Bach\'s glam-metal band, name suggests teenage delinquents.', a: 'Skid Row', category: '80s-rock' },
+      { q: 'Stage name of Gordon Sumner, bassist-singer of the Police.', a: 'Sting', category: '80s-rock' },
+      { q: 'Guns N\' Roses lead guitarist with top hat and Les Paul — single-word stage name.', a: 'Slash', category: '80s-rock' },
+    ],
+    T: [
+      { q: 'AC/DC\'s 1990 stadium-shaker that opens with a 12-bar guitar build before the drums hit.', a: 'Thunderstruck', category: '80s-rock' },
+      { q: 'Florida band of Mike Campbell and Benmont Tench, fronted by a famously skinny Floridian.', a: 'Tom Petty', alt: ['Tom Petty and the Heartbreakers'], category: '80s-rock' },
+      { q: 'Studio-musician supergroup behind "Africa" and "Rosanna" — palindrome name.', a: 'Toto', category: '80s-rock' },
+      { q: 'Dee Snider\'s anarchic glam-metal outfit, the "We\'re Not Gonna Take It" guys.', a: 'Twisted Sister', category: '80s-rock' },
+      { q: 'Mötley Crüe drummer with first-name shared by Hilfiger and Lee Jones — first name.', a: 'Tommy', alt: ['Tommy Lee'], category: '80s-rock' },
+    ],
+    U: [
+      { q: 'Irish band of Bono and The Edge whose "Joshua Tree" defined 1987.', a: 'U2', category: '80s-rock' },
+      { q: 'Metallica drummer and Danish-born co-founder Lars whose autobiographical surname begins with this letter.', a: 'Ulrich', alt: ['Lars Ulrich'], category: '80s-rock' },
+    ],
+    V: [
+      { q: 'California band of two brothers, named after themselves, whose "1984" album sold to the moon.', a: 'Van Halen', category: '80s-rock' },
+      { q: 'Mötley Crüe\'s lead singer through the band\'s 80s glory years, surname Neil — first name.', a: 'Vince', alt: ['Vince Neil'], category: '80s-rock' },
+    ],
+    W: [
+      { q: 'Opening track of "Appetite for Destruction" warning a newcomer about Los Angeles — its title greets you to the urban wilds.', a: 'Welcome to the Jungle', category: '80s-rock' },
+      { q: 'David Coverdale-led British/American band of "Here I Go Again" fame.', a: 'Whitesnake', category: '80s-rock' },
+      { q: 'Bon Jovi\'s acoustic-cowboy ballad with the line "I\'m a cowboy, on a steel horse I ride".', a: 'Wanted Dead or Alive', category: '80s-rock' },
+      { q: 'U2 ballad from "The Joshua Tree" featuring the Edge\'s ringing arpeggio and Bono\'s wail.', a: 'With or Without You', category: '80s-rock' },
+      { q: 'Pink Floyd\'s 1979 double-album rock opera with a famous schoolroom chorus — "Another Brick in the ___".', a: 'Wall', alt: ['The Wall'], category: '80s-rock' },
+      { q: 'U2 anthem opening "The Joshua Tree" whose title asks an unanswerable question about nameless avenues.', a: 'Where the Streets Have No Name', category: '80s-rock' },
+      { q: 'Pink Floyd bassist Roger\'s surname.', a: 'Waters', alt: ['Roger Waters'], category: '80s-rock' },
+      { q: 'Billy Idol\'s 1982 sneering punk-pop hit — "It\'s a nice day for a ___".', a: 'White Wedding', category: '80s-rock' },
+    ],
+    Y: [
+      { q: 'Bon Jovi\'s 1986 chart-topper that opens "Shot through the heart, and you\'re to blame".', a: 'You Give Love a Bad Name', category: '80s-rock' },
+      { q: 'British prog-rock veterans whose 1983 "90125" gave them their only US #1.', a: 'Yes', category: '80s-rock' },
+      { q: 'AC/DC guitarist surname for brothers Angus and Malcolm.', a: 'Young', category: '80s-rock' },
+    ],
+    Z: [
+      { q: 'Bearded Texas trio behind 1983\'s "Eliminator" — "Sharp Dressed Man" and "Legs".', a: 'ZZ Top', category: '80s-rock' },
+    ],
+  },
+};
