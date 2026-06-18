@@ -1914,6 +1914,36 @@ iframe.qcard-video {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+/* Active pack/category — visible at all times so players never lose track of
+   what they're playing. Sits at the top of the score-mid column. */
+.pack-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 22ch;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--ta) 18%, transparent),
+    color-mix(in srgb, var(--tb) 18%, transparent)
+  );
+  border: 1px solid var(--line-strong);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.pack-tag-emoji {
+  font-size: 1em;
+  line-height: 1;
+}
+.pack-tag-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 18ch;
+}
 /* VS gets its own distinct badge background blending both team colours. */
 .vs-badge {
   font-family: var(--font-display);
@@ -2315,6 +2345,16 @@ iframe.qcard-video {
   }
   .team-dir {
     display: none;
+  }
+  /* keep the category chip visible on phones — that's exactly where players
+     forget what they picked — just trim padding + width */
+  .pack-tag {
+    max-width: 14ch;
+    padding: 2px 8px;
+    font-size: 0.68rem;
+  }
+  .pack-tag-name {
+    max-width: 10ch;
   }
   .game-side {
     min-height: 0;

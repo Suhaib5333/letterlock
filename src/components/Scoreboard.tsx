@@ -5,6 +5,7 @@ interface Props {
   game: GameState;
   series: { A: number; B: number; gamesNeeded: number };
   mode: string;
+  pack: { name: string; emoji?: string };
   canSwitch?: boolean;
   onSwitchTurn?: () => void;
 }
@@ -56,11 +57,15 @@ function TeamPanel({
   );
 }
 
-export function Scoreboard({ teams, game, series, mode, canSwitch, onSwitchTurn }: Props) {
+export function Scoreboard({ teams, game, series, mode, pack, canSwitch, onSwitchTurn }: Props) {
   return (
     <div className="scoreboard">
       <TeamPanel team="A" teams={teams} game={game} series={series} />
       <div className="score-mid">
+        <span className="pack-tag" data-testid="pack-tag" title={pack.name}>
+          {pack.emoji && <span className="pack-tag-emoji" aria-hidden="true">{pack.emoji}</span>}
+          <span className="pack-tag-name">{pack.name}</span>
+        </span>
         <span className="mode-tag">{mode}</span>
         <span className="vs-badge">VS</span>
         {canSwitch && (

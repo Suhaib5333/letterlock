@@ -308,3 +308,31 @@ test('tutorial walkthrough is reachable and playable', async ({ page }) => {
   await page.getByTestId('tut-play').click();
   await expect(page.locator('.setup')).toBeVisible();
 });
+
+test('the chosen category is visible on the game screen', async ({ page }) => {
+  // default pack with no selection — should show "General Knowledge"
+  await startMatch(page);
+  const tag = page.getByTestId('pack-tag');
+  await expect(tag).toBeVisible();
+  await expect(tag).toContainText('General Knowledge');
+  // chip is laid out inside the scoreboard's middle column AND visible to the user
+  // (a 0-height / display:none chip would still match toBeVisible if it had children,
+  // so also assert a sane bounding box)
+  const box = await tag.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.width).toBeGreaterThan(40);
+  expect(box!.height).toBeGreaterThan(10);
+});
+
+test('switching to a different pack updates the category chip in-game', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'kids-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('start-match').click();
+  await expect(page.getByTestId('game-screen')).toBeVisible();
+  const tag = page.getByTestId('pack-tag');
+  await expect(tag).toBeVisible();
+  // The Kids & Family pack name should now appear (NOT the default GK label).
+  await expect(tag).toContainText(/Kids/i);
+  await expect(tag).not.toContainText(/General Knowledge/i);
+});

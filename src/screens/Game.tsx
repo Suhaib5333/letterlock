@@ -105,6 +105,7 @@ export function Game() {
           game={game}
           series={series}
           mode={MODE_LABEL[opts.mode]}
+          pack={{ name: opts.pack.name, emoji: opts.pack.emoji }}
           canSwitch={game.status === 'playing' && ui.phase === 'pick'}
           onSwitchTurn={() => {
             play('swap');
