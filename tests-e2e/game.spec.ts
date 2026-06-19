@@ -137,6 +137,26 @@ test('flags pack hides board letters (no first-letter hint) and shows a flag', a
   await expect(page.locator('.qcard-flag')).toHaveCount(1);
 });
 
+test('world-map pack shows a highlighted country svg + hides board letters', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'maps-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  // Letterless: no per-hex letters AND chess coords are drawn.
+  await expect(page.locator('.ll-board .hex-letter')).toHaveCount(0);
+  await expect(page.locator('.ll-board .ll-coord-col').first()).toBeVisible();
+  // Picking a hex serves a question rendered via the shared CountryMap (inline
+  // svg with one country highlighted in red, not a per-country image URL).
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  const map = page.getByTestId('qcard-map');
+  await expect(map).toBeVisible();
+  // Once the shared world.svg has loaded, an inline <svg> with the country
+  // paths is mounted inside the map container.
+  await expect(map.locator('svg')).toBeVisible({ timeout: 5000 });
+});
+
 test('letterless packs show chess-style coordinates (cols 1..N, rows A..N)', async ({ page }) => {
   await page.goto('/');
   await selectPack(page, 'flags-easy');

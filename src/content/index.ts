@@ -110,6 +110,8 @@ import { mythologyPack } from './mythology';
 import { animalKingdomPack } from './animalKingdom';
 import { historyEasyPack } from './historyEasy';
 import { historyMediumPack } from './historyMedium';
+// Round-14: world-map identification packs (a country highlighted on the map).
+import { mapsEasyPack, mapsMediumPack, mapsHardPack } from './maps';
 // Round-12 second pass — fill the last hard-letter shortfalls (Q/U/V/X/Y/Z).
 import { sitcomsHardGaps2 } from './sitcomsHardGaps2';
 import { moviesTvHardGaps2 } from './moviesTvHardGaps2';
@@ -258,7 +260,7 @@ export type PackGroup = (typeof PACK_GROUPS)[number];
 
 /** Map a pack id to its browse-menu group. */
 export function groupOf(id: string): PackGroup {
-  if (/^flags/.test(id)) return 'Flags';
+  if (/^flags|^maps/.test(id)) return 'Flags';
   if (/^logos/.test(id)) return 'Logos & Brands';
   if (/^sports/.test(id)) return 'Sports';
   if (/^charades/.test(id)) return 'Charades';
@@ -297,6 +299,10 @@ export const PACKS: QuestionPack[] = [
   // Round-13: new themed packs.
   mythologyPack,
   animalKingdomPack,
+  // Round-14: world-map identification packs.
+  mapsEasyPack,
+  mapsMediumPack,
+  mapsHardPack,
   // Regional packs (Bahrain + GCC).
   withExtra(bahrainPack, bahrainExtra, bahrainGaps),
   withExtra(saudiPack, saudiExtra, saudiExtra2, saudiArabiaGaps),

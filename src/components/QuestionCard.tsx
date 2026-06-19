@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { TeamConfig, TeamId } from '../core/models';
 import { duckMusic, play, speak } from '../services/audio';
 import type { Served } from '../state/types';
+import { CountryMap } from './CountryMap';
 import { QrCode } from './QrCode';
 
 /** URL the charade QR points to — opens the standalone secret-prompt page.
@@ -149,6 +150,23 @@ export function QuestionCard({
             <span>Only the acting player should look. Then act it out for your team — no talking!</span>
           </div>
         </div>
+      ) : served.question.mapIso ? (
+        mediaError ? (
+          mediaFallback('map')
+        ) : (
+          <div className="qcard-flag-wrap">
+            <CountryMap
+              key={`${served.question.id}-${reloadKey}`}
+              iso={served.question.mapIso}
+              onReady={onMediaPlay}
+              onError={() => {
+                setMediaError(true);
+                onMediaPlay();
+              }}
+              testId="qcard-map"
+            />
+          </div>
+        )
       ) : (
         served.question.image &&
         (mediaError ? (

@@ -11,6 +11,9 @@ export interface Question {
   audio?: string; // optional audio clip URL (e.g. guess-the-song)
   video?: string; // optional video clip URL (e.g. guess-the-movie)
   youtube?: string; // optional YouTube id — embedded trailer (e.g. guess-the-movie)
+  /** ISO 3166-1 alpha-2 code (lowercase). Renders the shared world map with
+   *  this single country highlighted (see CountryMap component). */
+  mapIso?: string;
 }
 
 export interface QuestionPack {

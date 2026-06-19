@@ -80,13 +80,13 @@ export function Game() {
   // A media clip can fail to load (region/network); always allow Skip when the question
   // carries a clip so a broken clip can never strand the game.
   const q = ui.served?.question;
-  const hasClip = !!(q && (q.image || q.audio || q.video));
+  const hasClip = !!(q && (q.image || q.audio || q.video || q.mapIso));
   // Media questions: the timer doesn't start until the asset is actually visible.
   // - Audio/video → first play (so watching/listening isn't on the clock).
   // - Image → first `onLoad` (so a slow/half-loaded image never burns the clock).
   //   If the image errors, the fallback shows AND the timer is allowed to start so the
   //   player isn't stranded with an indefinitely paused clock.
-  const needsPlayToStart = !!(q && (q.audio || q.video || q.image));
+  const needsPlayToStart = !!(q && (q.audio || q.video || q.image || q.mapIso));
   const timerActive = !needsPlayToStart || clipPlayed;
 
   return (
