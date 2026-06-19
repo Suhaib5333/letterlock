@@ -105,6 +105,17 @@ import { bahrainGaps } from './bahrainGaps';
 import { saudiArabiaGaps } from './saudiArabiaGaps';
 import { uaeGaps } from './uaeGaps';
 import { gulfCultureGaps } from './gulfCultureGaps';
+// Round-12 second pass — fill the last hard-letter shortfalls (Q/U/V/X/Y/Z).
+import { sitcomsHardGaps2 } from './sitcomsHardGaps2';
+import { moviesTvHardGaps2 } from './moviesTvHardGaps2';
+import { musicHardGaps2 } from './musicHardGaps2';
+import { music90sHipHopGaps2 } from './music90sHipHopGaps2';
+import { music90sAltGaps2 } from './music90sAltGaps2';
+import { music90sRnBGaps2 } from './music90sRnBGaps2';
+import { music00sHipHopGaps2 } from './music00sHipHopGaps2';
+import { music10sPopGaps2 } from './music10sPopGaps2';
+import { music10sHipHopGaps2 } from './music10sHipHopGaps2';
+import { historyGaps2 } from './historyGaps2';
 
 /**
  * Re-bucket every question under the letter its ANSWER actually starts with.
@@ -149,11 +160,11 @@ const fullKids = withExtra(kidsPack, extraKids);
 
 // Trivia packs expanded past 200 questions via authored extras.
 // Round-12: each non-letterless pack also merges in a *Gaps file so every
-// letter has ≥5 questions.
+// letter has ≥5 questions. A *Gaps2 file follows where round-1 ran short.
 const fullMovies = withExtra(moviesPack, moviesMediumExtra, moviesTvGaps);
-const fullMoviesHard = withExtra(moviesHardPack, moviesHardExtra, moviesTvHardGaps);
+const fullMoviesHard = withExtra(moviesHardPack, moviesHardExtra, moviesTvHardGaps, moviesTvHardGaps2);
 const fullMusic = withExtra(musicMediumPack, musicMediumExtra, musicGaps);
-const fullMusicHard = withExtra(musicHardPack, musicHardExtra, musicHardGaps);
+const fullMusicHard = withExtra(musicHardPack, musicHardExtra, musicHardGaps, musicHardGaps2);
 const fullSportsEasy = withExtra(sportsEasyPack, sportsEasyExtra, sportsEasyGaps);
 const fullSportsMedium = withExtra(sportsMediumPack, sportsMediumExtra, sportsMediumGaps);
 const fullFlagsEasy = withExtra(flagsEasyPack, flagsEasyExtra);
@@ -273,7 +284,7 @@ export const PACKS: QuestionPack[] = [
   fullMusicHard,
   withExtra(melodiesPack, melodiesExtra),
   withExtra(songsPack, songsExtra),
-  withExtra(historyPack, historyGaps),
+  withExtra(historyPack, historyGaps, historyGaps2),
   withExtra(spacePack, spaceCosmosGaps),
   withExtra(geniusPack, geniusExtremeGaps),
   // Regional packs (Bahrain + GCC).
@@ -290,18 +301,18 @@ export const PACKS: QuestionPack[] = [
   // Round-10: sitcoms (Movies & TV group) — easy → hard.
   withExtra(sitcomsEasyPack, sitcomsEasyGaps),
   withExtra(sitcomsMediumPack, sitcomsMediumGaps),
-  withExtra(sitcomsHardPack, sitcomsHardGaps),
+  withExtra(sitcomsHardPack, sitcomsHardGaps, sitcomsHardGaps2),
   // Round-10: era + genre music packs (round-11 extras + round-12 gaps merged in).
   withExtra(music80sPopPack, music80sPopExtra, music80sPopGaps),
   withExtra(music80sRockPack, music80sRockExtra, music80sRockGaps),
   withExtra(music90sPopPack, music90sPopExtra, music90sPopGaps),
-  withExtra(music90sHipHopPack, music90sHipHopExtra, music90sHipHopGaps),
-  withExtra(music90sAltPack, music90sAltExtra, music90sAltGaps),
-  withExtra(music90sRnBPack, music90sRnBExtra, music90sRnBGaps),
+  withExtra(music90sHipHopPack, music90sHipHopExtra, music90sHipHopGaps, music90sHipHopGaps2),
+  withExtra(music90sAltPack, music90sAltExtra, music90sAltGaps, music90sAltGaps2),
+  withExtra(music90sRnBPack, music90sRnBExtra, music90sRnBGaps, music90sRnBGaps2),
   withExtra(music00sPopPack, music00sPopExtra, music00sPopGaps),
-  withExtra(music00sHipHopPack, music00sHipHopExtra, music00sHipHopGaps),
-  withExtra(music10sPopPack, music10sPopExtra, music10sPopGaps),
-  withExtra(music10sHipHopPack, music10sHipHopGaps), // base already 208; gaps top up rare letters
+  withExtra(music00sHipHopPack, music00sHipHopExtra, music00sHipHopGaps, music00sHipHopGaps2),
+  withExtra(music10sPopPack, music10sPopExtra, music10sPopGaps, music10sPopGaps2),
+  withExtra(music10sHipHopPack, music10sHipHopGaps, music10sHipHopGaps2),
 ]
   .map((p) => ({ ...normalizePack(rebucketByAnswer(p)), group: groupOf(p.id) }))
   .sort((a, b) => DIFFICULTY_RANK[a.difficulty] - DIFFICULTY_RANK[b.difficulty]);
