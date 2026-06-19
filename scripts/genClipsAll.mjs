@@ -3,7 +3,7 @@
 //   - Music decades (80s..2010s × pop/rock/hiphop/alt/rnb) → iTunes song previews (.m4a)
 //
 // Each pack becomes letterless (hideBoardLetters: true), every question is
-// "Watch the clip — name the show." / "Listen to the clip — name the song.".
+// "Watch the clip — name the show." / "Listen to the clip — identify the song.".
 // Real previews are hotlinked from Apple's preview CDN — nothing copyrighted
 // is stored. Auto-error → AUTO_SKIP, same as the existing tv-clips pack.
 //
@@ -449,9 +449,9 @@ async function findTv(show) {
 }
 
 const sitcomRow = (title, url) =>
-  `      { q: 'Watch the clip — name the sitcom.', a: ${JSON.stringify(title)}, video: ${JSON.stringify(url)}, category: 'screen', difficulty: 2 },`;
+  `      { q: 'Watch the clip — identify the sitcom.', a: ${JSON.stringify(title)}, video: ${JSON.stringify(url)}, category: 'screen', difficulty: 2 },`;
 const songRow = (title, artist, url) =>
-  `      { q: 'Listen to the clip — name the song.', a: ${JSON.stringify(title)}, audio: ${JSON.stringify(url)}, alt: ${JSON.stringify([norm(`${title} ${artist}`)])}, category: 'music', difficulty: 2 },`;
+  `      { q: 'Listen to the clip — identify the song.', a: ${JSON.stringify(title)}, audio: ${JSON.stringify(url)}, alt: ${JSON.stringify([norm(`${title} ${artist}`)])}, category: 'music', difficulty: 2 },`;
 
 function packLiteral(varName, id, name, desc, emoji, accent, difficulty, rows) {
   return `export const ${varName}: RawPack = {

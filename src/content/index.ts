@@ -112,6 +112,15 @@ import { historyEasyPack } from './historyEasy';
 import { historyMediumPack } from './historyMedium';
 // Round-14: world-map identification packs (a country highlighted on the map).
 import { mapsEasyPack, mapsMediumPack, mapsHardPack } from './maps';
+// Round-15: clip extras — iTunes preview audio/video mixed into the existing
+// sitcom + music decade packs (so each pack ships a trivia/clip blend).
+import {
+  sitcomsEasyClipsExtra, sitcomsMediumClipsExtra, sitcomsHardClipsExtra,
+  music80sPopClipsExtra, music80sRockClipsExtra,
+  music90sPopClipsExtra, music90sHipHopClipsExtra, music90sAltClipsExtra, music90sRnBClipsExtra,
+  music00sPopClipsExtra, music00sHipHopClipsExtra,
+  music10sPopClipsExtra, music10sHipHopClipsExtra,
+} from './clipsExtras';
 // Round-12 second pass — fill the last hard-letter shortfalls (Q/U/V/X/Y/Z).
 import { sitcomsHardGaps2 } from './sitcomsHardGaps2';
 import { moviesTvHardGaps2 } from './moviesTvHardGaps2';
@@ -315,20 +324,21 @@ export const PACKS: QuestionPack[] = [
   withCharadeImages(withExtra(charadesActionsPack, charadesActionsExtra, charadesActions2, charadesActions3)),
   withCharadeImages(withExtra(charadesHardPack, charadesHardExtra, charadesHard2, charadesHard3)),
   // Round-10: sitcoms (Movies & TV group) — easy → hard.
-  withExtra(sitcomsEasyPack, sitcomsEasyGaps),
-  withExtra(sitcomsMediumPack, sitcomsMediumGaps),
-  withExtra(sitcomsHardPack, sitcomsHardGaps, sitcomsHardGaps2),
+  withExtra(sitcomsEasyPack, sitcomsEasyGaps, sitcomsEasyClipsExtra),
+  withExtra(sitcomsMediumPack, sitcomsMediumGaps, sitcomsMediumClipsExtra),
+  withExtra(sitcomsHardPack, sitcomsHardGaps, sitcomsHardGaps2, sitcomsHardClipsExtra),
   // Round-10: era + genre music packs (round-11 extras + round-12 gaps merged in).
-  withExtra(music80sPopPack, music80sPopExtra, music80sPopGaps),
-  withExtra(music80sRockPack, music80sRockExtra, music80sRockGaps),
-  withExtra(music90sPopPack, music90sPopExtra, music90sPopGaps),
-  withExtra(music90sHipHopPack, music90sHipHopExtra, music90sHipHopGaps, music90sHipHopGaps2),
-  withExtra(music90sAltPack, music90sAltExtra, music90sAltGaps, music90sAltGaps2),
-  withExtra(music90sRnBPack, music90sRnBExtra, music90sRnBGaps, music90sRnBGaps2),
-  withExtra(music00sPopPack, music00sPopExtra, music00sPopGaps),
-  withExtra(music00sHipHopPack, music00sHipHopExtra, music00sHipHopGaps, music00sHipHopGaps2),
-  withExtra(music10sPopPack, music10sPopExtra, music10sPopGaps, music10sPopGaps2),
-  withExtra(music10sHipHopPack, music10sHipHopGaps, music10sHipHopGaps2),
+  // Round-15 clip extras add iTunes preview audio clips into each music pack.
+  withExtra(music80sPopPack, music80sPopExtra, music80sPopGaps, music80sPopClipsExtra),
+  withExtra(music80sRockPack, music80sRockExtra, music80sRockGaps, music80sRockClipsExtra),
+  withExtra(music90sPopPack, music90sPopExtra, music90sPopGaps, music90sPopClipsExtra),
+  withExtra(music90sHipHopPack, music90sHipHopExtra, music90sHipHopGaps, music90sHipHopGaps2, music90sHipHopClipsExtra),
+  withExtra(music90sAltPack, music90sAltExtra, music90sAltGaps, music90sAltGaps2, music90sAltClipsExtra),
+  withExtra(music90sRnBPack, music90sRnBExtra, music90sRnBGaps, music90sRnBGaps2, music90sRnBClipsExtra),
+  withExtra(music00sPopPack, music00sPopExtra, music00sPopGaps, music00sPopClipsExtra),
+  withExtra(music00sHipHopPack, music00sHipHopExtra, music00sHipHopGaps, music00sHipHopGaps2, music00sHipHopClipsExtra),
+  withExtra(music10sPopPack, music10sPopExtra, music10sPopGaps, music10sPopGaps2, music10sPopClipsExtra),
+  withExtra(music10sHipHopPack, music10sHipHopGaps, music10sHipHopGaps2, music10sHipHopClipsExtra),
 ]
   .map((p) => ({ ...normalizePack(rebucketByAnswer(p)), group: groupOf(p.id) }))
   .sort((a, b) => DIFFICULTY_RANK[a.difficulty] - DIFFICULTY_RANK[b.difficulty]);
