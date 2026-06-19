@@ -137,6 +137,80 @@ test('flags pack hides board letters (no first-letter hint) and shows a flag', a
   await expect(page.locator('.qcard-flag')).toHaveCount(1);
 });
 
+test('world-map: no <title> in the rendered svg (hover would leak the country)', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'maps-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  const map = page.getByTestId('qcard-map');
+  await expect(map.locator('svg')).toBeVisible({ timeout: 5000 });
+  // The source BlankMap-World.svg ships <title> tags inside every country
+  // path → browsers render them as native tooltips on hover, giving the
+  // answer away. They're stripped both at build time (world.svg) and at
+  // render time (CountryMap) — verify nothing slipped through.
+  const titleCount = await map.locator('svg title').count();
+  expect(titleCount).toBe(0);
+});
+
+test('world-map: viewBox is zoomed in (not the whole-world default)', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'maps-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  const map = page.getByTestId('qcard-map');
+  await expect(map.locator('svg')).toBeVisible({ timeout: 5000 });
+  // The CountryMap effect retargets the SVG's viewBox to the highlighted
+  // country's bbox + context padding. So the live viewBox must DIFFER from
+  // the source default "0 0 2754 1398" — that's the binary "zoom happened"
+  // check, robust to whatever country gets served by the no-repeat cycle.
+  const vb = await map.locator('svg').evaluate((svg) => {
+    const v = (svg as SVGSVGElement).viewBox.baseVal;
+    return { x: v.x, y: v.y, w: v.width, h: v.height };
+  });
+  const isWholeWorld = vb.x === 0 && vb.y === 0 && vb.w === 2754 && vb.h === 1398;
+  expect(isWholeWorld).toBe(false);
+  // And the zoomed window covers at most ~90% of the world area — even
+  // for huge countries (USA, Russia) the bbox + pad still excludes large
+  // empty regions on the opposite side of the globe.
+  expect(vb.w * vb.h).toBeLessThan(2754 * 1398 * 0.95);
+});
+
+test('world-map: clicking the map opens fullscreen, ✕ closes it', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'maps-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('qcard-map').locator('svg')).toBeVisible({ timeout: 5000 });
+  // Tap the map → fullscreen overlay appears with its own svg + a close button.
+  await page.getByTestId('qcard-map-expand').click();
+  const fs = page.getByTestId('qcard-map-fullscreen');
+  await expect(fs).toBeVisible();
+  await expect(fs.locator('svg')).toBeVisible({ timeout: 5000 });
+  // ✕ closes the overlay.
+  await page.getByTestId('qcard-map-fs-close').click();
+  await expect(fs).toHaveCount(0);
+});
+
+test('world-map: pressing Escape closes the fullscreen overlay', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'maps-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('qcard-map').locator('svg')).toBeVisible({ timeout: 5000 });
+  await page.getByTestId('qcard-map-expand').click();
+  await expect(page.getByTestId('qcard-map-fullscreen')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('qcard-map-fullscreen')).toHaveCount(0);
+});
+
 // Verifies the world-map question fits its card at multiple device sizes:
 //  - the inline <svg> fills the qcard-map container exactly (no overflow / scrollbars)
 //  - the "Name the highlighted country" overlay sits on the map
