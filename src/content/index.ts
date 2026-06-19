@@ -66,6 +66,16 @@ import { music00sPopPack } from './music00sPop';
 import { music00sHipHopPack } from './music00sHipHop';
 import { music10sPopPack } from './music10sPop';
 import { music10sHipHopPack } from './music10sHipHop';
+// Round-11: each music pack expanded past 200 questions.
+import { music80sPopExtra } from './music80sPopExtra';
+import { music80sRockExtra } from './music80sRockExtra';
+import { music90sPopExtra } from './music90sPopExtra';
+import { music90sHipHopExtra } from './music90sHipHopExtra';
+import { music90sAltExtra } from './music90sAltExtra';
+import { music90sRnBExtra } from './music90sRnBExtra';
+import { music00sPopExtra } from './music00sPopExtra';
+import { music00sHipHopExtra } from './music00sHipHopExtra';
+import { music10sPopExtra } from './music10sPopExtra';
 
 /**
  * Re-bucket every question under the letter its ANSWER actually starts with.
@@ -250,17 +260,17 @@ export const PACKS: QuestionPack[] = [
   sitcomsEasyPack,
   sitcomsMediumPack,
   sitcomsHardPack,
-  // Round-10: era + genre music packs.
-  music80sPopPack,
-  music80sRockPack,
-  music90sPopPack,
-  music90sHipHopPack,
-  music90sAltPack,
-  music90sRnBPack,
-  music00sPopPack,
-  music00sHipHopPack,
-  music10sPopPack,
-  music10sHipHopPack,
+  // Round-10: era + genre music packs (round-11 extras merged in via withExtra).
+  withExtra(music80sPopPack, music80sPopExtra),
+  withExtra(music80sRockPack, music80sRockExtra),
+  withExtra(music90sPopPack, music90sPopExtra),
+  withExtra(music90sHipHopPack, music90sHipHopExtra),
+  withExtra(music90sAltPack, music90sAltExtra),
+  withExtra(music90sRnBPack, music90sRnBExtra),
+  withExtra(music00sPopPack, music00sPopExtra),
+  withExtra(music00sHipHopPack, music00sHipHopExtra),
+  withExtra(music10sPopPack, music10sPopExtra),
+  music10sHipHopPack, // already 208 — no extra needed
 ]
   .map((p) => ({ ...normalizePack(rebucketByAnswer(p)), group: groupOf(p.id) }))
   .sort((a, b) => DIFFICULTY_RANK[a.difficulty] - DIFFICULTY_RANK[b.difficulty]);
