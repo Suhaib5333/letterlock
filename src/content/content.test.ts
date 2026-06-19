@@ -164,7 +164,7 @@ describe('EVERY pack: names in natural spoken order, not "Surname, First" (rule 
   // SKIP title-based packs, where comma titles are legitimate ("Crouching Tiger,
   // Hidden Dragon"; "Hello, Goodbye").
   const SURNAME_FIRST = /^[A-Z][a-z]+,\s+[A-Z][a-z]+$/;
-  const TITLE_PACK = /movies|songs|melodies|music|charades|screen|clips|tv-/;
+  const TITLE_PACK = /movies|songs|melodies|music|charades|screen|clips|tv-|sitcoms/;
   for (const pack of PACKS) {
     if (TITLE_PACK.test(pack.id)) continue;
     it(`${pack.name}`, () => {

@@ -76,6 +76,35 @@ import { music90sRnBExtra } from './music90sRnBExtra';
 import { music00sPopExtra } from './music00sPopExtra';
 import { music00sHipHopExtra } from './music00sHipHopExtra';
 import { music10sPopExtra } from './music10sPopExtra';
+// Round-12: per-letter gap-fillers — every playable letter now has ≥5 questions.
+import { sportsEasyGaps } from './sportsEasyGaps';
+import { sportsMediumGaps } from './sportsMediumGaps';
+import { sitcomsEasyGaps } from './sitcomsEasyGaps';
+import { sitcomsMediumGaps } from './sitcomsMediumGaps';
+import { sitcomsHardGaps } from './sitcomsHardGaps';
+import { scienceNatureGaps } from './scienceNatureGaps';
+import { worldGeographyGaps } from './worldGeographyGaps';
+import { moviesTvGaps } from './moviesTvGaps';
+import { moviesTvHardGaps } from './moviesTvHardGaps';
+import { musicGaps } from './musicGaps';
+import { musicHardGaps } from './musicHardGaps';
+import { music80sPopGaps } from './music80sPopGaps';
+import { music80sRockGaps } from './music80sRockGaps';
+import { music90sPopGaps } from './music90sPopGaps';
+import { music90sHipHopGaps } from './music90sHipHopGaps';
+import { music90sAltGaps } from './music90sAltGaps';
+import { music90sRnBGaps } from './music90sRnBGaps';
+import { music00sPopGaps } from './music00sPopGaps';
+import { music00sHipHopGaps } from './music00sHipHopGaps';
+import { music10sPopGaps } from './music10sPopGaps';
+import { music10sHipHopGaps } from './music10sHipHopGaps';
+import { historyGaps } from './historyGaps';
+import { spaceCosmosGaps } from './spaceCosmosGaps';
+import { geniusExtremeGaps } from './geniusExtremeGaps';
+import { bahrainGaps } from './bahrainGaps';
+import { saudiArabiaGaps } from './saudiArabiaGaps';
+import { uaeGaps } from './uaeGaps';
+import { gulfCultureGaps } from './gulfCultureGaps';
 
 /**
  * Re-bucket every question under the letter its ANSWER actually starts with.
@@ -119,12 +148,14 @@ const fullGeneralKnowledge = withExtra(
 const fullKids = withExtra(kidsPack, extraKids);
 
 // Trivia packs expanded past 200 questions via authored extras.
-const fullMovies = withExtra(moviesPack, moviesMediumExtra);
-const fullMoviesHard = withExtra(moviesHardPack, moviesHardExtra);
-const fullMusic = withExtra(musicMediumPack, musicMediumExtra);
-const fullMusicHard = withExtra(musicHardPack, musicHardExtra);
-const fullSportsEasy = withExtra(sportsEasyPack, sportsEasyExtra);
-const fullSportsMedium = withExtra(sportsMediumPack, sportsMediumExtra);
+// Round-12: each non-letterless pack also merges in a *Gaps file so every
+// letter has ≥5 questions.
+const fullMovies = withExtra(moviesPack, moviesMediumExtra, moviesTvGaps);
+const fullMoviesHard = withExtra(moviesHardPack, moviesHardExtra, moviesTvHardGaps);
+const fullMusic = withExtra(musicMediumPack, musicMediumExtra, musicGaps);
+const fullMusicHard = withExtra(musicHardPack, musicHardExtra, musicHardGaps);
+const fullSportsEasy = withExtra(sportsEasyPack, sportsEasyExtra, sportsEasyGaps);
+const fullSportsMedium = withExtra(sportsMediumPack, sportsMediumExtra, sportsMediumGaps);
 const fullFlagsEasy = withExtra(flagsEasyPack, flagsEasyExtra);
 const fullFlagsMedium = withExtra(flagsMediumPack, flagsMediumExtra);
 const fullFlagsHard = withExtra(flagsHardPack, flagsHardExtra);
@@ -233,8 +264,8 @@ export const PACKS: QuestionPack[] = [
   withExtra(logosHardPack, logosHardExtra),
   fullSportsEasy,
   fullSportsMedium,
-  sciencePack,
-  worldPack,
+  withExtra(sciencePack, scienceNatureGaps),
+  withExtra(worldPack, worldGeographyGaps),
   fullTvClips,
   fullMovies,
   fullMoviesHard,
@@ -242,14 +273,14 @@ export const PACKS: QuestionPack[] = [
   fullMusicHard,
   withExtra(melodiesPack, melodiesExtra),
   withExtra(songsPack, songsExtra),
-  historyPack,
-  spacePack,
-  geniusPack,
+  withExtra(historyPack, historyGaps),
+  withExtra(spacePack, spaceCosmosGaps),
+  withExtra(geniusPack, geniusExtremeGaps),
   // Regional packs (Bahrain + GCC).
-  withExtra(bahrainPack, bahrainExtra),
-  withExtra(saudiPack, saudiExtra, saudiExtra2),
-  withExtra(uaePack, uaeExtra, uaeExtra2),
-  withExtra(gulfPack, gulfExtra, gulfExtra2),
+  withExtra(bahrainPack, bahrainExtra, bahrainGaps),
+  withExtra(saudiPack, saudiExtra, saudiExtra2, saudiArabiaGaps),
+  withExtra(uaePack, uaeExtra, uaeExtra2, uaeGaps),
+  withExtra(gulfPack, gulfExtra, gulfExtra2, gulfCultureGaps),
   // Charades (images attached for the QR secret-prompt page).
   withCharadeImages(withExtra(charadesEasyPack, charadesEasyExtra, charadesEasy2)),
   withCharadeImages(withExtra(charadesAnimalsPack, charadesAnimalsExtra, charadesAnimals2, charadesAnimals3)),
@@ -257,20 +288,20 @@ export const PACKS: QuestionPack[] = [
   withCharadeImages(withExtra(charadesActionsPack, charadesActionsExtra, charadesActions2, charadesActions3)),
   withCharadeImages(withExtra(charadesHardPack, charadesHardExtra, charadesHard2, charadesHard3)),
   // Round-10: sitcoms (Movies & TV group) — easy → hard.
-  sitcomsEasyPack,
-  sitcomsMediumPack,
-  sitcomsHardPack,
-  // Round-10: era + genre music packs (round-11 extras merged in via withExtra).
-  withExtra(music80sPopPack, music80sPopExtra),
-  withExtra(music80sRockPack, music80sRockExtra),
-  withExtra(music90sPopPack, music90sPopExtra),
-  withExtra(music90sHipHopPack, music90sHipHopExtra),
-  withExtra(music90sAltPack, music90sAltExtra),
-  withExtra(music90sRnBPack, music90sRnBExtra),
-  withExtra(music00sPopPack, music00sPopExtra),
-  withExtra(music00sHipHopPack, music00sHipHopExtra),
-  withExtra(music10sPopPack, music10sPopExtra),
-  music10sHipHopPack, // already 208 — no extra needed
+  withExtra(sitcomsEasyPack, sitcomsEasyGaps),
+  withExtra(sitcomsMediumPack, sitcomsMediumGaps),
+  withExtra(sitcomsHardPack, sitcomsHardGaps),
+  // Round-10: era + genre music packs (round-11 extras + round-12 gaps merged in).
+  withExtra(music80sPopPack, music80sPopExtra, music80sPopGaps),
+  withExtra(music80sRockPack, music80sRockExtra, music80sRockGaps),
+  withExtra(music90sPopPack, music90sPopExtra, music90sPopGaps),
+  withExtra(music90sHipHopPack, music90sHipHopExtra, music90sHipHopGaps),
+  withExtra(music90sAltPack, music90sAltExtra, music90sAltGaps),
+  withExtra(music90sRnBPack, music90sRnBExtra, music90sRnBGaps),
+  withExtra(music00sPopPack, music00sPopExtra, music00sPopGaps),
+  withExtra(music00sHipHopPack, music00sHipHopExtra, music00sHipHopGaps),
+  withExtra(music10sPopPack, music10sPopExtra, music10sPopGaps),
+  withExtra(music10sHipHopPack, music10sHipHopGaps), // base already 208; gaps top up rare letters
 ]
   .map((p) => ({ ...normalizePack(rebucketByAnswer(p)), group: groupOf(p.id) }))
   .sort((a, b) => DIFFICULTY_RANK[a.difficulty] - DIFFICULTY_RANK[b.difficulty]);
