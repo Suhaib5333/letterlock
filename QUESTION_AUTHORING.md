@@ -72,7 +72,17 @@ Don't repeat the same `q` string. Vary phrasing.
 
 ### 5. A pack must cover ≥16 distinct starting letters to be playable
 Spread answers across the alphabet. (The two fully-covered packs — General
-Knowledge and Kids — must cover **all 26**.)
+Knowledge and Kids — must cover **all 26**.) Every letter in the pack should
+also have **≥5 questions** so a board hex never lands on a near-empty bucket
+(top up genuinely scarce hard letters via a `*Gaps.ts` companion).
+
+### 5b. Every pack ships with ≥200 questions
+The pack lineup target is **at least 200 questions per pack** (the World Flags
+trio is the lone exception — only ~195 countries exist, so the cap is the
+source). For any new pack: author at least 210 in the source file, then top
+up via `*Extra.ts` until merged total ≥ 200. The shipping audit
+(`npx vite-node scripts/audit_letters.mjs`) and `npm test` content suite
+together enforce that no pack falls below the floor.
 
 ### 6. Answers must be the SPECIFIC named entity, never a generic category
 If the clue describes **one particular thing**, the answer must name *that thing*,

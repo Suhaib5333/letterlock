@@ -105,6 +105,11 @@ import { bahrainGaps } from './bahrainGaps';
 import { saudiArabiaGaps } from './saudiArabiaGaps';
 import { uaeGaps } from './uaeGaps';
 import { gulfCultureGaps } from './gulfCultureGaps';
+// Round-13: two new themed packs + history easy/medium tiers.
+import { mythologyPack } from './mythology';
+import { animalKingdomPack } from './animalKingdom';
+import { historyEasyPack } from './historyEasy';
+import { historyMediumPack } from './historyMedium';
 // Round-12 second pass — fill the last hard-letter shortfalls (Q/U/V/X/Y/Z).
 import { sitcomsHardGaps2 } from './sitcomsHardGaps2';
 import { moviesTvHardGaps2 } from './moviesTvHardGaps2';
@@ -284,9 +289,14 @@ export const PACKS: QuestionPack[] = [
   fullMusicHard,
   withExtra(melodiesPack, melodiesExtra),
   withExtra(songsPack, songsExtra),
+  historyEasyPack,
+  historyMediumPack,
   withExtra(historyPack, historyGaps, historyGaps2),
   withExtra(spacePack, spaceCosmosGaps),
   withExtra(geniusPack, geniusExtremeGaps),
+  // Round-13: new themed packs.
+  mythologyPack,
+  animalKingdomPack,
   // Regional packs (Bahrain + GCC).
   withExtra(bahrainPack, bahrainExtra, bahrainGaps),
   withExtra(saudiPack, saudiExtra, saudiExtra2, saudiArabiaGaps),
