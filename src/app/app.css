@@ -1423,6 +1423,59 @@
   background: #fff;
   padding: clamp(8px, 1.8vh, 16px);
 }
+
+/* World map question — inline SVG is responsive; the highlighted country
+   centres in the viewBox at every device size. An absolute overlay sits at
+   the top with the question prompt so the player always sees the goal. */
+.qcard-flag.qcard-map {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  /* aspect ratio matches the source viewBox 2754×1398 ≈ 1.97. We clamp the
+     HEIGHT so the map never grows taller than the available card area, and
+     let aspect-ratio derive the width. overflow:hidden kills any residual
+     horizontal scrollbar from the raw SVG. */
+  aspect-ratio: 2754 / 1398;
+  max-height: clamp(110px, 26vh, 240px);
+  padding: 0;
+  background: #0e1726; /* dark navy so the grey landmasses pop */
+  overflow: hidden;
+}
+.qcard-map-svg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qcard-map-svg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.qcard-map-overlay {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--t-xs);
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.qcard-map-loading {
+  background: #0e1726;
+  aspect-ratio: 2754 / 1398;
+  max-height: clamp(110px, 26vh, 240px);
+}
 /* ---------- Charade QR (secret prompt) ---------- */
 .qcard-charade {
   display: flex;

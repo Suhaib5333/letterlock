@@ -137,25 +137,68 @@ test('flags pack hides board letters (no first-letter hint) and shows a flag', a
   await expect(page.locator('.qcard-flag')).toHaveCount(1);
 });
 
-test('world-map pack shows a highlighted country svg + hides board letters', async ({ page }) => {
-  await page.goto('/');
-  await selectPack(page, 'maps-easy');
-  await page.getByTestId('play-button').click();
-  await page.getByTestId('mode-single').click();
-  await page.getByTestId('start-match').click();
-  // Letterless: no per-hex letters AND chess coords are drawn.
-  await expect(page.locator('.ll-board .hex-letter')).toHaveCount(0);
-  await expect(page.locator('.ll-board .ll-coord-col').first()).toBeVisible();
-  // Picking a hex serves a question rendered via the shared CountryMap (inline
-  // svg with one country highlighted in red, not a per-country image URL).
-  await page.locator('.ll-hex.claimable').first().click();
-  await expect(page.getByTestId('question-card')).toBeVisible();
-  const map = page.getByTestId('qcard-map');
-  await expect(map).toBeVisible();
-  // Once the shared world.svg has loaded, an inline <svg> with the country
-  // paths is mounted inside the map container.
-  await expect(map.locator('svg')).toBeVisible({ timeout: 5000 });
-});
+// Verifies the world-map question fits its card at multiple device sizes:
+//  - the inline <svg> fills the qcard-map container exactly (no overflow / scrollbars)
+//  - the "Name the highlighted country" overlay sits on the map
+//  - the highlighted country path is visible inside the rendered svg.
+for (const { name, w, h } of [
+  { name: 'iphone-portrait', w: 390, h: 844 },
+  { name: 'iphone-landscape', w: 844, h: 390 },
+  { name: 'desktop', w: 1440, h: 900 },
+]) {
+  test(`world-map question fits perfectly on ${name} (${w}×${h})`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await page.goto('/');
+    await selectPack(page, 'maps-easy');
+    await page.getByTestId('play-button').click();
+    await page.getByTestId('mode-single').click();
+    await page.getByTestId('start-match').click();
+    // Letterless: no per-hex letters AND chess coords are drawn.
+    await expect(page.locator('.ll-board .hex-letter')).toHaveCount(0);
+    await expect(page.locator('.ll-board .ll-coord-col').first()).toBeVisible();
+    await page.locator('.ll-hex.claimable').first().click();
+    await expect(page.getByTestId('question-card')).toBeVisible();
+
+    const map = page.getByTestId('qcard-map');
+    await expect(map).toBeVisible();
+    await expect(map.locator('svg')).toBeVisible({ timeout: 5000 });
+
+    // The overlay label always shows the prompt, so the player never needs to
+    // hunt for it. The duplicate question text below is hidden for map cards.
+    await expect(map.locator('.qcard-map-overlay')).toHaveText(/Name the highlighted country/i);
+    await expect(page.getByTestId('question-text')).toHaveCount(0);
+
+    // 1) The SVG must fit inside the container — its rendered width/height
+    //    can't exceed the container's. This catches the "horizontal scrollbar"
+    //    regression where the source SVG's fixed 2754×1398 dimensions blew
+    //    past the card on small screens.
+    const fit = await map.evaluate((el) => {
+      const svg = el.querySelector('svg');
+      if (!svg) return null;
+      const a = el.getBoundingClientRect();
+      const b = svg.getBoundingClientRect();
+      return {
+        cardW: a.width, cardH: a.height,
+        svgW: b.width, svgH: b.height,
+        scrollX: el.scrollWidth - el.clientWidth,
+        scrollY: el.scrollHeight - el.clientHeight,
+      };
+    });
+    expect(fit).not.toBeNull();
+    expect(fit!.svgW).toBeLessThanOrEqual(fit!.cardW + 1);
+    expect(fit!.svgH).toBeLessThanOrEqual(fit!.cardH + 1);
+    expect(fit!.scrollX).toBeLessThanOrEqual(0);
+    expect(fit!.scrollY).toBeLessThanOrEqual(0);
+
+    // 2) The whole game container also shouldn't scroll horizontally because
+    //    of this card (covers the case where the map pushes the row wider).
+    const docScroll = await page.evaluate(() => ({
+      x: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      y: document.documentElement.scrollHeight - document.documentElement.clientHeight,
+    }));
+    expect(docScroll.x).toBeLessThanOrEqual(0);
+  });
+}
 
 test('letterless packs show chess-style coordinates (cols 1..N, rows A..N)', async ({ page }) => {
   await page.goto('/');

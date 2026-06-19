@@ -47,10 +47,20 @@ export function CountryMap({ iso, onReady, onError, className = 'qcard-flag', te
     loadWorldSvg()
       .then((base) => {
         if (cancelled) return;
-        // Inject the per-country highlight rule just before </svg>. A high-
-        // specificity `#iso` rule overrides the default `.landxx` fill.
+        // Inject the per-country highlight rule just before </svg>, AND strip
+        // the source's fixed `width="2754" height="1398"` attributes so the
+        // map scales to fit its container instead of overflowing the card
+        // (the source dimensions were the reason the previous build showed
+        // horizontal scrollbars on small screens).
         const css = `<style>#${iso},.${iso}{fill:#ef4444!important;stroke:#b91c1c!important;stroke-width:0.8!important;}</style>`;
-        setMarkup(base.replace('</svg>', `${css}</svg>`));
+        const responsive = base
+          .replace(/\s(width|height)="[^"]+"/g, '') // drop fixed dims
+          .replace(
+            '<svg ',
+            '<svg viewBox="0 0 2754 1398" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block" ',
+          )
+          .replace('</svg>', `${css}</svg>`);
+        setMarkup(responsive);
         onReady?.();
       })
       .catch(() => {
@@ -68,18 +78,22 @@ export function CountryMap({ iso, onReady, onError, className = 'qcard-flag', te
     return null;
   }
   if (!markup) {
-    return <div className={`${className} qcard-map-loading`} aria-hidden="true" data-testid={testId} />;
+    return <div className={`${className} qcard-map qcard-map-loading`} aria-hidden="true" data-testid={testId} />;
   }
   // dangerouslySetInnerHTML is fine here: the markup is our own base SVG
   // plus a CSS rule built from an allowlisted iso pattern (we never write
   // user input into it).
   return (
     <div
-      className={className}
+      className={`${className} qcard-map`}
       role="img"
       aria-label="World map with highlighted country"
       data-testid={testId}
-      dangerouslySetInnerHTML={{ __html: markup }}
-    />
+    >
+      <div className="qcard-map-svg" dangerouslySetInnerHTML={{ __html: markup }} />
+      <div className="qcard-map-overlay" aria-hidden="true">
+        Name the highlighted country
+      </div>
+    </div>
   );
 }

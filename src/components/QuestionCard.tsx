@@ -259,9 +259,11 @@ export function QuestionCard({
           </div>
         ))}
 
-      <p className="qcard-q" data-testid="question-text">
-        {served.question.q}
-      </p>
+      {!served.question.mapIso && (
+        <p className="qcard-q" data-testid="question-text">
+          {served.question.q}
+        </p>
+      )}
 
       <div className="qcard-answer">
         {answerRevealed ? (
