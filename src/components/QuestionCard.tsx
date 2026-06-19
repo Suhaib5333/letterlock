@@ -57,9 +57,14 @@ export function QuestionCard({
   // Reveal/Skip buttons stay available so play always continues.
   const [mediaError, setMediaError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  // Charades render a QR code, not an image — so there's nothing to fire
+  // `onLoad`/`onPlay` and gate the timer. Track whether the host has tapped
+  // "Start" so the Start button can disable itself after firing.
+  const [charadeStarted, setCharadeStarted] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   useEffect(() => {
     setMediaError(false); // reset for each new question
+    setCharadeStarted(false);
   }, [served.question.id]);
   // The img element fires `onLoad` reliably when the asset finishes downloading, but
   // a CACHED image can already be `.complete` by the time React mounts and the onLoad
@@ -148,6 +153,23 @@ export function QuestionCard({
           <div className="qcard-charade-text">
             <strong>📱 Scan to get your word</strong>
             <span>Only the acting player should look. Then act it out for your team — no talking!</span>
+            <button
+              className="btn btn-primary sm charade-start"
+              data-testid="charade-start"
+              disabled={charadeStarted}
+              onClick={() => {
+                if (charadeStarted) return;
+                setCharadeStarted(true);
+                play('reveal');
+                // Charade questions still set `needsPlayToStart=true` (because
+                // they carry an image URL for the secret-prompt page), so the
+                // timer waits for this explicit tap rather than ticking down
+                // while players scan the QR.
+                onMediaPlay();
+              }}
+            >
+              {charadeStarted ? '⏱ Timer running…' : '▶ Start timer'}
+            </button>
           </div>
         </div>
       ) : served.question.mapIso ? (

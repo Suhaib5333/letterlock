@@ -363,6 +363,31 @@ test('charades pack shows a QR secret-prompt and the /img page renders the word'
   await expect(page.getByTestId('imgview-name')).toHaveText('Elephant');
 });
 
+test('charade questions show a Start-timer button that releases the held countdown', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'charades-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  const num = page.locator('.timer-num');
+  await expect(num).toBeVisible();
+  const before = await num.textContent();
+  // Before the Start tap the clock is HELD so players can scan the QR.
+  await page.waitForTimeout(1700);
+  await expect(num).toHaveText(before!);
+  const startBtn = page.getByTestId('charade-start');
+  await expect(startBtn).toBeVisible();
+  await expect(startBtn).toBeEnabled();
+  await startBtn.click();
+  // After tapping it disables (one-shot) and the countdown starts decrementing.
+  await expect(startBtn).toBeDisabled();
+  await page.waitForTimeout(1500);
+  const after = await num.textContent();
+  expect(parseInt(after!)).toBeLessThan(parseInt(before!));
+});
+
 test('an unreachable media clip AUTO-ADVANCES to another question on its own', async ({ page }) => {
   await page.goto('/');
   await selectPack(page, 'songs');
