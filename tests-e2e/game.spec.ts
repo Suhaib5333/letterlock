@@ -137,6 +137,31 @@ test('flags pack hides board letters (no first-letter hint) and shows a flag', a
   await expect(page.locator('.qcard-flag')).toHaveCount(1);
 });
 
+test('letterless packs show chess-style coordinates (cols 1..N, rows A..N)', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'flags-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('size-5').click();
+  await page.getByTestId('start-match').click();
+  // Per-hex letters are still hidden…
+  await expect(page.locator('.ll-board .hex-letter')).toHaveCount(0);
+  // …but the chess-coord layer is rendered with 5 column numbers + 5 row letters.
+  await expect(page.locator('.ll-board .ll-coord-col')).toHaveCount(5);
+  await expect(page.locator('.ll-board .ll-coord-row')).toHaveCount(5);
+  await expect(page.locator('.ll-board .ll-coord-col').nth(0)).toHaveText('1');
+  await expect(page.locator('.ll-board .ll-coord-col').nth(4)).toHaveText('5');
+  await expect(page.locator('.ll-board .ll-coord-row').nth(0)).toHaveText('A');
+  await expect(page.locator('.ll-board .ll-coord-row').nth(4)).toHaveText('E');
+});
+
+test('lettered packs do NOT render chess coords (avoid double-labelling)', async ({ page }) => {
+  await startMatch(page, { size: 5, mode: 'single' });
+  // Letters on hexes are visible — coords should NOT also be drawn.
+  await expect(page.locator('.ll-board .hex-letter').first()).toBeVisible();
+  await expect(page.locator('.ll-board .ll-coord-col')).toHaveCount(0);
+  await expect(page.locator('.ll-board .ll-coord-row')).toHaveCount(0);
+});
+
 test('melody pack plays a real audio clip and hides board letters', async ({ page }) => {
   await page.goto('/');
   await selectPack(page, 'melodies');

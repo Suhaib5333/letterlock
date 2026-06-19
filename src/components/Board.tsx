@@ -22,7 +22,14 @@ function BoardInner({
   onPick,
   hideLetters,
 }: BoardProps) {
-  const geo = useMemo(() => boardGeometry(game.size), [game.size]);
+  // Letterless packs (flags, logos, songs, melodies, charades, clips) hide the
+  // per-hex letters → players can't say "I'll take K" any more. Give them
+  // chess-style coordinates instead: column numbers on top, row letters on
+  // the side, so calls like "B3" or "D5" work the same way as chess notation.
+  const geo = useMemo(
+    () => boardGeometry(game.size, 40, 18, hideLetters ? 36 : 0),
+    [game.size, hideLetters],
+  );
   const winSet = useMemo(() => new Set(game.winningPath ?? []), [game.winningPath]);
   const tracePath = useMemo(
     () => (game.winningPath ? pathThroughCells(geo, game.winningPath) : ''),
@@ -83,6 +90,40 @@ function BoardInner({
           </feMerge>
         </filter>
       </defs>
+
+      {/* Chess-style coordinate labels for letterless packs (cols 1..N on top,
+          rows A..N on the left). Rendered before the edges so the frame draws
+          on top of nothing important. */}
+      {hideLetters && (
+        <g className="ll-coords" aria-hidden="true">
+          {geo.coords.cols.map((c) => (
+            <text
+              key={`col-${c.text}`}
+              className="ll-coord ll-coord-col"
+              x={c.x}
+              y={c.y}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize={geo.coords.fontSize}
+            >
+              {c.text}
+            </text>
+          ))}
+          {geo.coords.rows.map((r) => (
+            <text
+              key={`row-${r.text}`}
+              className="ll-coord ll-coord-row"
+              x={r.x}
+              y={r.y}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize={geo.coords.fontSize}
+            >
+              {r.text}
+            </text>
+          ))}
+        </g>
+      )}
 
       {/* colored edge frame */}
       <g className="ll-edges" strokeLinejoin="round" strokeLinecap="round" fill="none">

@@ -10,6 +10,12 @@ export interface HexCell {
   pointsAttr: string; // ready for an SVG <polygon points="…">
 }
 
+export interface CoordLabel {
+  text: string;
+  x: number;
+  y: number;
+}
+
 export interface BoardGeometry {
   size: number;
   hexSize: number;
@@ -18,6 +24,15 @@ export interface BoardGeometry {
   width: number;
   height: number;
   edges: Record<'top' | 'bottom' | 'left' | 'right', string>; // SVG polyline point strings
+  /** Chess-style coordinate labels — column numbers (1..N) along the top,
+   *  row letters (A..) down the left side. Used for letterless packs where
+   *  per-hex letters are hidden but players still need to reference cells.
+   *  Positions live in the (extended) viewBox; render only when needed. */
+  coords: {
+    cols: CoordLabel[];
+    rows: CoordLabel[];
+    fontSize: number;
+  };
 }
 
 const SQRT3 = Math.sqrt(3);
@@ -50,7 +65,14 @@ const round = (n: number) => Math.round(n * 100) / 100;
  * leaning right as rows descend). Pure + deterministic, so it can be unit-tested.
  * The SVG scales to any display size via the returned viewBox.
  */
-export function boardGeometry(size: number, hexSize = 40, margin = 18): BoardGeometry {
+export function boardGeometry(
+  size: number,
+  hexSize = 40,
+  margin = 18,
+  /** Extra padding (in SVG units) reserved on the top and left edges for
+   *  chess-style coordinate labels. Pass 0 to keep the old behaviour. */
+  labelPad = 0,
+): BoardGeometry {
   const cells: HexCell[] = [];
   let minX = Infinity;
   let minY = Infinity;
@@ -80,10 +102,10 @@ export function boardGeometry(size: number, hexSize = 40, margin = 18): BoardGeo
     });
   }
 
-  const x0 = minX - margin;
-  const y0 = minY - margin;
-  const width = maxX - minX + margin * 2;
-  const height = maxY - minY + margin * 2;
+  const x0 = minX - margin - labelPad;
+  const y0 = minY - margin - labelPad;
+  const width = maxX - minX + margin * 2 + labelPad;
+  const height = maxY - minY + margin * 2 + labelPad;
 
   const topRow = cells.filter((c) => c.row === 0);
   const bottomRow = cells.filter((c) => c.row === size - 1);
@@ -101,6 +123,31 @@ export function boardGeometry(size: number, hexSize = 40, margin = 18): BoardGeo
     right: polyline(rightCol, [0, 1, 2]),
   };
 
+  // Chess-style coordinate labels:
+  //   columns 1..N along the top, row letters A..Z down the left side.
+  // Numbers go on top because rows skew rightward as they descend — they
+  // visually mark each column the way ranks/files do in chess notation.
+  const labelOffset = hexSize * 0.55; // gap between hex edge and label
+  const fontSize = hexSize * 0.62;
+  const cols: CoordLabel[] = [];
+  const rows: CoordLabel[] = [];
+  for (let k = 0; k < size; k++) {
+    // Column header: above the top vertex of the row-0 cell in column k.
+    const top = cells.find((c) => c.row === 0 && c.col === k)!;
+    cols.push({
+      text: String(k + 1),
+      x: top.cx,
+      y: top.cy - hexSize - labelOffset,
+    });
+    // Row header: to the left of the LEFT vertex of the col-0 cell in row k.
+    const lefty = cells.find((c) => c.row === k && c.col === 0)!;
+    rows.push({
+      text: String.fromCharCode('A'.charCodeAt(0) + k),
+      x: lefty.cx - hexSize * (SQRT3 / 2) - labelOffset,
+      y: lefty.cy,
+    });
+  }
+
   return {
     size,
     hexSize,
@@ -109,6 +156,7 @@ export function boardGeometry(size: number, hexSize = 40, margin = 18): BoardGeo
     width,
     height,
     edges,
+    coords: { cols, rows, fontSize },
   };
 }
 

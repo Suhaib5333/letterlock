@@ -954,6 +954,20 @@
   user-select: none;
   transition: fill var(--dur-mid);
 }
+
+/* Chess-style coordinate labels (letterless packs only) — col numbers across
+   the top, row letters down the left. Scale with the SVG viewBox so they look
+   correct at every device size. */
+.ll-coords {
+  pointer-events: none;
+  user-select: none;
+}
+.ll-coords .ll-coord {
+  font-family: var(--font-display);
+  font-weight: 700;
+  fill: rgba(176, 192, 226, 0.7);
+  letter-spacing: 0.02em;
+}
 .ll-hex.claimable {
   cursor: pointer;
 }
