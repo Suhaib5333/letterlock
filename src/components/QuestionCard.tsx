@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { TeamConfig, TeamId } from '../core/models';
 import { duckMusic, play, speak } from '../services/audio';
 import type { Served } from '../state/types';
@@ -56,9 +56,19 @@ export function QuestionCard({
   // Reveal/Skip buttons stay available so play always continues.
   const [mediaError, setMediaError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const imgRef = useRef<HTMLImageElement>(null);
   useEffect(() => {
     setMediaError(false); // reset for each new question
   }, [served.question.id]);
+  // The img element fires `onLoad` reliably when the asset finishes downloading, but
+  // a CACHED image can already be `.complete` by the time React mounts and the onLoad
+  // event may not refire. Catch that case here so the timer is never blocked waiting
+  // for a load event that already happened.
+  useEffect(() => {
+    if (!served.question.image) return;
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth > 0) onMediaPlay();
+  }, [served.question.id, reloadKey, served.question.image, onMediaPlay]);
   const retryMedia = () => {
     setMediaError(false);
     setReloadKey((k) => k + 1);
@@ -146,12 +156,19 @@ export function QuestionCard({
         ) : (
           <div className="qcard-flag-wrap">
             <img
+              ref={imgRef}
               key={`${served.question.id}-${reloadKey}`}
               className="qcard-flag"
               src={served.question.image}
               alt="Image to identify"
               draggable={false}
-              onError={() => setMediaError(true)}
+              onLoad={onMediaPlay}
+              onError={() => {
+                setMediaError(true);
+                // Unblock the timer once the image is decided either way — the
+                // fallback now occupies the slot, so the question can proceed.
+                onMediaPlay();
+              }}
             />
           </div>
         ))

@@ -189,6 +189,47 @@ test('clip timer holds until the clip is first played, then counts down', async 
   expect(parseInt(after!)).toBeLessThan(parseInt(before!));
 });
 
+test('image timer holds until the image fully loads, then counts down', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  // Throttle ALL flag image requests so the image takes ~2.5s to start arriving.
+  // The timer must NOT decrement during that load window — the user's complaint was
+  // "the image still takes from the timer while it's loading". Flags are bundled
+  // locally at /flags/<code>.svg (see src/content/flags.ts).
+  await page.route('**/flags/*.svg', async (route) => {
+    await new Promise((r) => setTimeout(r, 2500));
+    await route.continue();
+  });
+  await page.goto('/');
+  await selectPack(page, 'flags-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  const num = page.locator('.timer-num');
+  await expect(num).toBeVisible();
+  const before = await num.textContent();
+  // While the image is still in flight (intercepted, hasn't fired onLoad yet) — the
+  // countdown must HOLD. Sample at 1.8s, well before the 2.5s release.
+  await page.waitForTimeout(1800);
+  await expect(num).toHaveText(before!);
+  // Wait for the image to actually finish loading…
+  await page
+    .locator('img.qcard-flag')
+    .evaluate(
+      (el: HTMLImageElement) =>
+        new Promise<void>((res) => {
+          if (el.complete && el.naturalWidth > 0) return res();
+          el.addEventListener('load', () => res(), { once: true });
+          el.addEventListener('error', () => res(), { once: true });
+        }),
+    );
+  // …then the timer should start decrementing.
+  await page.waitForTimeout(1500);
+  const after = await num.textContent();
+  expect(parseInt(after!)).toBeLessThan(parseInt(before!));
+});
+
 test('pie-rule prompt is an overlay that does not shrink the board, and swap works (no blank)', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await startMatch(page, { size: 5, mode: 'single' });
