@@ -46,28 +46,34 @@ export function Home() {
             <>
               <button
                 className="btn btn-ghost"
+                data-chip-label
+                aria-label="Leaderboard"
                 data-testid="open-leaderboard"
                 onClick={() => setShowLeaderboard(true)}
               >
-                🏆 Leaderboard
+                🏆<span className="chip-text"> Leaderboard</span>
               </button>
               {profile && (
                 <button
                   className="btn btn-ghost"
+                  data-chip-label
+                  aria-label="My packs"
                   data-testid="open-pack-editor"
                   onClick={() => setShowPackEditor(true)}
                   title="Author your own question pack"
                 >
-                  📦 My packs
+                  📦<span className="chip-text"> My packs</span>
                 </button>
               )}
               {isAdmin && (
                 <button
                   className="btn btn-ghost"
+                  data-chip-label
+                  aria-label="Admin dashboard"
                   data-testid="open-admin"
                   onClick={() => setShowAdmin(true)}
                 >
-                  🛠 Admin
+                  🛠<span className="chip-text"> Admin</span>
                 </button>
               )}
               <button
@@ -79,8 +85,13 @@ export function Home() {
               </button>
             </>
           )}
-          <button className="btn btn-ghost" onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'tutorial' })}>
-            How to play
+          <button
+            className="btn btn-ghost"
+            data-chip-label
+            aria-label="How to play"
+            onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'tutorial' })}
+          >
+            ❓<span className="chip-text"> How to play</span>
           </button>
           <button className="icon-btn" aria-label="Settings" data-testid="open-settings" onClick={() => setShowSettings(true)}>
             ⚙

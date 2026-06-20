@@ -105,14 +105,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
       return { ok: false, error: 'Enter a valid email address.' };
     }
+
+    // Preferred path: our Cloudflare Pages Function at /api/auth/send-otp.
+    // It calls Supabase Admin (service_role) to mint an OTP, then sends the
+    // email through Resend — bypassing Supabase's 2-emails-per-hour default
+    // mailer rate limit. The function is at `functions/api/auth/send-otp.ts`.
+    //
+    // If the function isn't deployed yet (the env vars are still being set
+    // up), fall back to Supabase's default signInWithOtp so sign-in still
+    // works at all.
+    try {
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: trimmed }),
+      });
+      if (res.ok) return { ok: true };
+      // 404 → function not deployed yet → fall through to direct supabase.
+      // Any other non-2xx → surface the function's error verbatim.
+      if (res.status !== 404) {
+        const data = (await res.json().catch(() => ({ error: 'Unknown error' }))) as {
+          error?: string;
+        };
+        return { ok: false, error: data.error ?? `Send failed (HTTP ${res.status}).` };
+      }
+    } catch {
+      // Network or no function deployed — fall through.
+    }
+
+    // Fallback: direct Supabase mailer (works, but rate-limited 2/hour).
     const emailRedirectTo =
       typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : undefined;
     const { error } = await supabase.auth.signInWithOtp({
       email: trimmed,
-      // Default `shouldCreateUser: true` — first sign-in creates the user.
       options: { emailRedirectTo },
     });
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+      const friendly =
+        /rate limit/i.test(error.message) || /429/.test(error.message)
+          ? 'Supabase’s built-in email is rate-limited to 2/hour. Set up Resend in the Cloudflare Pages env (RESEND_API + SUPABASE_SERVICE_ROLE_KEY) to lift this.'
+          : error.message;
+      return { ok: false, error: friendly };
+    }
     return { ok: true };
   };
 
