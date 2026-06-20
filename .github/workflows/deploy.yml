@@ -60,7 +60,9 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          RESEND_API_KEY: ${{ vars.RESEND_API_KEY }}
+          # Accept either RESEND_API_KEY (preferred name) or RESEND_API (the
+          # name the user originally used in their GH Variables). First non-empty wins.
+          RESEND_API_KEY: ${{ vars.RESEND_API_KEY || vars.RESEND_API }}
         run: |
           set -e
           missing=()
@@ -136,7 +138,9 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          RESEND_API_KEY: ${{ vars.RESEND_API_KEY }}
+          # Accept either RESEND_API_KEY (preferred name) or RESEND_API (the
+          # name the user originally used in their GH Variables). First non-empty wins.
+          RESEND_API_KEY: ${{ vars.RESEND_API_KEY || vars.RESEND_API }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           VITE_SUPABASE_URL_VALUE: ${{ vars.VITE_SUPABASE_URL || 'https://lkudntyvngwwlzuciocd.supabase.co' }}
           MAIL_FROM: ${{ vars.MAIL_FROM }}
