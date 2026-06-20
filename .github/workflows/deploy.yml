@@ -98,13 +98,33 @@ jobs:
       - run: npm ci
 
       - name: Build app (Vite)
-        # VITE_* vars get baked into the static client bundle here. The
-        # service_role and Resend keys NEVER ship to the client — they go
-        # only to Cloudflare Pages env (next step).
-        env:
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://lkudntyvngwwlzuciocd.supabase.co' }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
-        run: npm run build
+        # The public VITE_* keys (URL + anon) ONLY come from the committed
+        # `.env.production` file. We deliberately do NOT honor GH Variables
+        # or Secrets for VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY because:
+        #   - The values are public-safe (anon keys are designed for the
+        #     client bundle; security is enforced server-side via RLS).
+        #   - The file is committed and version-controlled.
+        #   - Letting `vars.X` / `secrets.X` override it lets a typo (e.g.
+        #     pasting the dashboard URL instead of the .supabase.co URL)
+        #     silently break prod.
+        # Vite reads `.env.production` by default for `vite build`. This step
+        # just runs the build + smoke-checks that the URL actually got baked
+        # into the bundle — if it didn't, the .env file is missing or wrong.
+        run: |
+          set -e
+          npm run build
+          BUNDLE=$(ls dist/assets/index-*.js | head -1)
+          # Look for the project subdomain — this string appears ONLY when
+          # Vite successfully substituted import.meta.env.VITE_SUPABASE_URL
+          # with the .env.production value. The literal phrase
+          # 'VITE_SUPABASE_URL' is in the source code (the env-warning UI
+          # message), so grepping for it gives false positives — we look
+          # for the project ref instead.
+          if ! grep -q "lkudntyvngwwlzuciocd" "$BUNDLE"; then
+            echo "::error ::Built bundle does not contain the Supabase project ref. Check that .env.production is committed and has VITE_SUPABASE_URL set."
+            exit 1
+          fi
+          echo "✓ Bundle built; Supabase URL baked in (project ref present)"
 
       - name: Ensure Pages project exists
         # Idempotent — `project create` errors if it already exists; we
