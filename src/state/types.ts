@@ -2,7 +2,15 @@ import type { BoardSize, MatchMode } from '../core/models';
 import type { Question } from '../core/packs';
 import type { TopologyKind } from '../core/topology';
 
-export type Screen = 'home' | 'setup' | 'game' | 'victory' | 'tutorial';
+export type Screen =
+  | 'home'
+  | 'mode-select'
+  | 'setup'
+  | 'game'
+  | 'victory'
+  | 'tutorial'
+  | 'lobby-host'
+  | 'lobby-join';
 
 export interface Settings {
   sound: boolean;

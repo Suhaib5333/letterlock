@@ -125,7 +125,10 @@ export function Home() {
             data-testid="play-button"
             onClick={() => {
               play('pick');
-              dispatch({ type: 'SET_SCREEN', screen: 'setup' });
+              // Go through the mode picker so Couch vs Online is an explicit
+              // choice — even when Supabase isn't configured the card is shown
+              // (disabled) so people know the feature exists.
+              dispatch({ type: 'SET_SCREEN', screen: 'mode-select' });
             }}
           >
             Play ▸

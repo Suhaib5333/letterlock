@@ -1,0 +1,455 @@
+/* =====================================================================
+   Mode Select + Online Lobby + Player Controller styles
+   ===================================================================== */
+
+/* --- Mode Select ---------------------------------------------------- */
+.mode-select {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: var(--s-3);
+  gap: var(--s-3);
+  overflow: hidden;
+}
+.mode-grid {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--s-3);
+  align-content: center;
+  align-items: stretch;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-2);
+}
+.mode-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-1);
+  padding: clamp(18px, 3vw, 28px);
+  background: linear-gradient(160deg, color-mix(in oklab, var(--accent) 14%, var(--surface)), var(--surface));
+  border: 1.5px solid var(--surface-border);
+  border-radius: 18px;
+  cursor: pointer;
+  text-align: left;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  color: inherit;
+  font: inherit;
+  min-height: 180px;
+  position: relative;
+  overflow: hidden;
+}
+.mode-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(140% 80% at 20% 0%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 60%);
+  pointer-events: none;
+  opacity: 0.7;
+}
+.mode-card:hover:not(:disabled) {
+  border-color: var(--accent);
+  box-shadow: 0 12px 32px -16px color-mix(in oklab, var(--accent) 50%, transparent);
+}
+.mode-card:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.mode-card-emoji {
+  font-size: clamp(36px, 5vw, 52px);
+  line-height: 1;
+  position: relative;
+}
+.mode-card-name {
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  position: relative;
+}
+.mode-card-tag {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: color-mix(in oklab, var(--ink) 65%, transparent);
+  position: relative;
+}
+.mode-card-desc {
+  font-size: 15px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--ink) 80%, transparent);
+  position: relative;
+}
+
+/* --- Online Lobby (host) -------------------------------------------- */
+.lobby {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: var(--s-3);
+  gap: var(--s-3);
+  overflow: hidden;
+}
+.lobby-error {
+  background: color-mix(in oklab, #b91c1c 18%, var(--surface));
+  border: 1px solid color-mix(in oklab, #b91c1c 40%, transparent);
+  border-radius: 12px;
+  padding: var(--s-2);
+}
+.lobby-error strong { display: block; margin-bottom: 4px; }
+.lobby-error p { margin: 0; font-size: 14px; opacity: 0.9; }
+.lobby-body {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) 1fr;
+  gap: var(--s-3);
+  min-height: 0;
+  overflow: auto;
+}
+@media (max-width: 780px) {
+  .lobby-body { grid-template-columns: 1fr; }
+}
+.lobby-code-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  background: linear-gradient(160deg, color-mix(in oklab, var(--accent) 14%, var(--surface)), var(--surface));
+  border: 1.5px solid var(--surface-border);
+  border-radius: 16px;
+  text-align: center;
+}
+.lobby-code-label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: color-mix(in oklab, var(--ink) 65%, transparent);
+}
+.lobby-code {
+  display: flex;
+  gap: clamp(4px, 1vw, 10px);
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+.lobby-code-ch {
+  display: inline-grid;
+  place-items: center;
+  width: clamp(34px, 6.5vw, 56px);
+  height: clamp(44px, 8vw, 70px);
+  font-size: clamp(28px, 5vw, 44px);
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  color: var(--ink);
+  box-shadow: 0 4px 0 0 color-mix(in oklab, var(--accent) 40%, transparent);
+}
+.lobby-copy {
+  font-size: 13px;
+  padding: 6px 12px;
+}
+.lobby-qr {
+  background: white;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border);
+}
+.lobby-qr-hint {
+  font-size: 12px;
+  opacity: 0.7;
+  word-break: break-all;
+}
+.lobby-qr-hint code {
+  font-size: 11px;
+  background: color-mix(in oklab, var(--ink) 8%, transparent);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.lobby-roster {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  padding: var(--s-3);
+  gap: var(--s-2);
+  min-height: 0;
+  overflow: hidden;
+}
+.lobby-roster-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.lobby-roster-count {
+  font-weight: 700;
+  color: var(--accent);
+}
+.lobby-empty {
+  color: color-mix(in oklab, var(--ink) 60%, transparent);
+  font-size: 14px;
+  margin: var(--s-2) 0 0 0;
+}
+.lobby-teams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2);
+  min-height: 0;
+  overflow: auto;
+}
+.lobby-team {
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: var(--s-2);
+  background: color-mix(in oklab, var(--accent) 6%, var(--surface));
+  min-height: 120px;
+}
+.lobby-team header {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+.lobby-team ul,
+.lobby-unassigned ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lobby-team li,
+.lobby-unassigned li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+.lobby-empty-team {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.6;
+}
+.lobby-unassigned {
+  grid-column: 1 / -1;
+  background: color-mix(in oklab, var(--ink) 8%, var(--surface));
+  border-radius: 12px;
+  padding: var(--s-2);
+}
+.lobby-unassigned header {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+.lobby-assign {
+  display: flex;
+  gap: 6px;
+}
+.lobby-assign button {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  cursor: pointer;
+  color: inherit;
+}
+.lobby-assign button:hover {
+  border-color: var(--accent);
+}
+.lobby-kick {
+  background: transparent;
+  border: none;
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0 6px;
+}
+.lobby-kick:hover {
+  color: #ef4444;
+}
+.lobby-start {
+  flex: 0 0 auto;
+}
+
+/* --- Online Lobby (join — code entry) ------------------------------- */
+.lobby-join {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: var(--s-3);
+  gap: var(--s-3);
+}
+.join-card {
+  align-self: center;
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  background: var(--surface);
+  border: 1.5px solid var(--surface-border);
+  border-radius: 16px;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+.join-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.join-field > span {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: color-mix(in oklab, var(--ink) 65%, transparent);
+}
+.join-field input {
+  padding: 14px 14px;
+  background: color-mix(in oklab, var(--ink) 4%, var(--surface));
+  border: 1.5px solid var(--surface-border);
+  border-radius: 10px;
+  color: inherit;
+  font-size: 18px;
+  font-weight: 600;
+}
+.join-field input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+.join-error {
+  color: #ef4444;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* --- Player Controller (phone view) --------------------------------- */
+.controller {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  width: 100%;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+  background: var(--bg);
+  color: var(--ink);
+  overflow: hidden;
+}
+.controller-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px var(--s-3);
+  background: linear-gradient(90deg, var(--team-a, var(--accent)), var(--team-b, var(--accent)));
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.controller[data-team="A"] .controller-head { background: var(--team-a); }
+.controller[data-team="B"] .controller-head { background: var(--team-b); }
+.controller-room strong {
+  margin-left: 6px;
+  letter-spacing: 0.2em;
+}
+.controller-team {
+  font-size: 14px;
+  text-transform: uppercase;
+}
+.controller-wait,
+.controller-done,
+.controller-feedback,
+.controller-error {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  text-align: center;
+}
+.controller-error {
+  background: color-mix(in oklab, #b91c1c 14%, var(--bg));
+}
+.controller-feedback {
+  font-size: 20px;
+  font-weight: 600;
+}
+.controller-question {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  overflow-y: auto;
+}
+.controller-letter {
+  font-size: clamp(44px, 12vw, 72px);
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--team-a), var(--team-b));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.controller-prompt {
+  font-size: clamp(18px, 4.6vw, 22px);
+  line-height: 1.4;
+  text-align: center;
+  font-weight: 500;
+}
+.controller-media {
+  width: 100%;
+  max-height: 30vh;
+  border-radius: 12px;
+  object-fit: contain;
+  background: black;
+}
+.controller-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+}
+.controller-answer span {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: color-mix(in oklab, var(--ink) 65%, transparent);
+}
+.controller-answer input {
+  padding: 16px 14px;
+  font-size: 18px;
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  color: inherit;
+  width: 100%;
+}
+.controller-answer input:focus {
+  outline: 3px solid color-mix(in oklab, var(--accent) 40%, transparent);
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 4px solid color-mix(in oklab, var(--ink) 12%, transparent);
+  border-top-color: var(--accent);
+  animation: ll-spin 1s linear infinite;
+}
+@keyframes ll-spin {
+  to { transform: rotate(360deg); }
+}

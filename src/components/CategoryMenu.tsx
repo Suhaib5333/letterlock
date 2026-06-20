@@ -9,7 +9,11 @@ import { remaining } from '../state/progress';
 // `sitcoms-medium`, `sitcoms-hard` all collapse to `sitcoms`). The browser
 // renders one card per stem and exposes a tier picker when 2+ tiers exist.
 const TIER_SUFFIX = /-(kids|easy|medium|hard|extreme)$/;
-const TIER_ORDER = ['kids', 'easy', 'medium', 'hard', 'extreme'] as const;
+// `expert` is a legitimate difficulty (some flag packs use it) — without it
+// here, `TIER_ORDER.indexOf('expert')` returns -1 which sorts the expert pack
+// *first*, so the stem card surfaces hard/expert instead of easy. Keep it in
+// the order between hard and extreme so easiest-first stays easiest-first.
+const TIER_ORDER = ['kids', 'easy', 'medium', 'hard', 'expert', 'extreme'] as const;
 
 interface PackGroup {
   stem: string;

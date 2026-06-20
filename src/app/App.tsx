@@ -9,6 +9,9 @@ import { Setup } from '../screens/Setup';
 import { Game } from '../screens/Game';
 import { Victory } from '../screens/Victory';
 import { Tutorial } from '../screens/Tutorial';
+import { ModeSelect } from '../screens/ModeSelect';
+import { LobbyHost } from '../screens/LobbyHost';
+import { LobbyJoin } from '../screens/LobbyJoin';
 
 /** Test-only seam: `?__crashtest=1` throws during render so the ErrorBoundary can be
  *  verified to show the recovery card (never a blank screen). Inert otherwise. */
@@ -85,6 +88,9 @@ export function App() {
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
             {screen === 'home' && <Home />}
+            {screen === 'mode-select' && <ModeSelect />}
+            {screen === 'lobby-host' && <LobbyHost />}
+            {screen === 'lobby-join' && <LobbyJoin />}
             {screen === 'setup' && <Setup />}
             {screen === 'game' && <Game />}
             {screen === 'victory' && <Victory />}

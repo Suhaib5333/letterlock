@@ -6,6 +6,7 @@ async function startMatch(
 ) {
   await page.goto('/');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   if (opts?.mode) await page.getByTestId(`mode-${opts.mode}`).click();
   if (opts?.size) await page.getByTestId(`size-${opts.size}`).click();
   await page.getByTestId('start-match').click();
@@ -31,6 +32,7 @@ test('home → setup → board renders with both teams', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByTestId('open-categories')).toBeVisible();
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('swatch-a-teal').click();
   await page.getByTestId('swatch-b-rose').click();
   // team name follows the chosen colour (not typable)
@@ -112,6 +114,7 @@ test('exit uses an in-UI modal, not a browser dialog', async ({ page }) => {
 test('teams can pick colors and it carries into the match', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('swatch-a-teal').click();
   await page.getByTestId('swatch-b-violet').click();
   await page.getByTestId('start-match').click();
@@ -127,6 +130,7 @@ test('flags pack hides board letters (no first-letter hint) and shows a flag', a
   await page.goto('/');
   await selectPack(page, 'flags-easy');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   // No letter glyphs rendered on the board.
@@ -141,6 +145,7 @@ test('world-map: no <title> in the rendered svg (hover would leak the country)',
   await page.goto('/');
   await selectPack(page, 'maps-easy');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   await page.locator('.ll-hex.claimable').first().click();
@@ -158,6 +163,7 @@ test('world-map: viewBox is zoomed in (not the whole-world default)', async ({ p
   await page.goto('/');
   await selectPack(page, 'maps-easy');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   await page.locator('.ll-hex.claimable').first().click();
@@ -183,6 +189,7 @@ test('world-map: clicking the map opens fullscreen, ✕ closes it', async ({ pag
   await page.goto('/');
   await selectPack(page, 'maps-easy');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   await page.locator('.ll-hex.claimable').first().click();
@@ -201,6 +208,7 @@ test('world-map: pressing Escape closes the fullscreen overlay', async ({ page }
   await page.goto('/');
   await selectPack(page, 'maps-easy');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   await page.locator('.ll-hex.claimable').first().click();
@@ -225,6 +233,7 @@ for (const { name, w, h } of [
     await page.goto('/');
     await selectPack(page, 'maps-easy');
     await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
     await page.getByTestId('mode-single').click();
     await page.getByTestId('start-match').click();
     // Letterless: no per-hex letters AND chess coords are drawn.
@@ -278,6 +287,7 @@ test('letterless packs show chess-style coordinates (cols 1..N, rows A..N)', asy
   await page.goto('/');
   await selectPack(page, 'flags-easy');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('size-5').click();
   await page.getByTestId('start-match').click();
   // Per-hex letters are still hidden…
@@ -303,6 +313,7 @@ test('melody pack plays a real audio clip and hides board letters', async ({ pag
   await page.goto('/');
   await selectPack(page, 'melodies');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   await expect(page.locator('.ll-board .hex-letter')).toHaveCount(0); // letters hidden
@@ -319,6 +330,7 @@ test('tv-clips pack plays a real episode video clip and hides board letters', as
   await page.goto('/');
   await selectPack(page, 'tv-clips');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   await expect(page.locator('.ll-board .hex-letter')).toHaveCount(0); // letters hidden
@@ -335,6 +347,7 @@ test('clip timer holds until the clip is first played, then counts down', async 
   await page.goto('/');
   await selectPack(page, 'tv-clips');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   await page.locator('.ll-hex.claimable').first().click();
@@ -364,6 +377,7 @@ test('image timer holds until the image fully loads, then counts down', async ({
   await page.goto('/');
   await selectPack(page, 'flags-easy');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   await page.locator('.ll-hex.claimable').first().click();
@@ -466,6 +480,7 @@ test('charades pack shows a QR secret-prompt and the /img page renders the word'
   await page.goto('/');
   await selectPack(page, 'charades-easy');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   await page.locator('.ll-hex.claimable').first().click();
@@ -484,6 +499,7 @@ test('charade questions show a Start-timer button that releases the held countdo
   await page.goto('/');
   await selectPack(page, 'charades-easy');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   await page.locator('.ll-hex.claimable').first().click();
@@ -509,6 +525,7 @@ test('an unreachable media clip AUTO-ADVANCES to another question on its own', a
   await page.goto('/');
   await selectPack(page, 'songs');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
   await page.getByTestId('start-match').click();
   await page.locator('.ll-hex.claimable').first().click();
@@ -587,6 +604,7 @@ test('switching to a different pack updates the category chip in-game', async ({
   await page.goto('/');
   await selectPack(page, 'kids-easy');
   await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
   await page.getByTestId('start-match').click();
   await expect(page.getByTestId('game-screen')).toBeVisible();
   const tag = page.getByTestId('pack-tag');
@@ -594,4 +612,68 @@ test('switching to a different pack updates the category chip in-game', async ({
   // The Kids & Family pack name should now appear (NOT the default GK label).
   await expect(tag).toContainText(/Kids/i);
   await expect(tag).not.toContainText(/General Knowledge/i);
+});
+
+// ============================================================================
+// Mode select + Online lobby + Player controller
+// ============================================================================
+
+test('mode-select shows Couch and Online cards', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('play-button').click();
+  await expect(page.getByTestId('mode-select')).toBeVisible();
+  await expect(page.getByTestId('mode-couch')).toBeVisible();
+  await expect(page.getByTestId('mode-online')).toBeVisible();
+  await expect(page.getByTestId('mode-join')).toBeVisible();
+});
+
+test('couch mode jumps straight into match setup', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
+  await expect(page.getByTestId('mode-badge')).toContainText(/Couch/i);
+  await expect(page.getByTestId('start-match')).toBeVisible();
+});
+
+test('online host lobby renders a 6-char code, QR and Copy button', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-online').click();
+  await expect(page.getByTestId('lobby-host')).toBeVisible();
+  const code = page.getByTestId('lobby-code');
+  await expect(code).toBeVisible();
+  // 6 character cells inside the code container
+  await expect(code.locator('.lobby-code-ch')).toHaveCount(6);
+  await expect(page.getByTestId('lobby-copy')).toBeVisible();
+  // QR image renders (data URL produced by qrcode.js)
+  await expect(page.locator('.lobby-qr img.qr-img')).toBeVisible();
+});
+
+test('online join screen validates code length + name', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-join').click();
+  await expect(page.getByTestId('lobby-join')).toBeVisible();
+  const submit = page.getByTestId('join-submit');
+  await expect(submit).toBeDisabled();
+  await page.getByTestId('join-name').fill('Suhaib');
+  await page.getByTestId('join-code').fill('ab12'); // too short
+  await expect(submit).toBeDisabled();
+  await page.getByTestId('join-code').fill('abc123'); // 6 valid chars
+  await expect(submit).toBeEnabled();
+});
+
+test('controller URL renders the phone view with the room code', async ({ page }) => {
+  await page.goto('/?view=controller&room=ABC123&name=Tester');
+  await expect(page.getByTestId('controller')).toBeVisible();
+  await expect(page.getByTestId('controller')).toContainText('ABC123');
+  // It does not show the regular app shell (no play-button on this page)
+  await expect(page.getByTestId('play-button')).toHaveCount(0);
+});
+
+test('mode-select back returns home', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-back').click();
+  await expect(page.getByTestId('play-button')).toBeVisible();
 });
