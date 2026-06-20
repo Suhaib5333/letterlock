@@ -163,18 +163,20 @@ export function replay(log: GameLog): GameState {
   return state;
 }
 
-/** Undo the last host action: truncate the log and replay (trivially correct). */
+/**
+ * Roll back the log by exactly ONE event.
+ *
+ * Earlier this dropped any trailing bookkeeping (QuestionServed/Skipped) AND
+ * the last visible action together, so one Undo erased a whole pick → claim
+ * cycle. Players asked for finer control: now each Undo drops a single
+ * event. Two presses undo a claim (drops HexClaimed → drops the
+ * QuestionServed that brought the card up); a third returns to "no hex
+ * selected". GameStarted is preserved (log never collapses below length 1).
+ */
 export function undoLast(log: GameLog): { log: GameLog; state: GameState } {
   if (log.length <= 1) {
     return { log: log.slice(0, 1), state: replay(log.slice(0, 1)) };
   }
-  const isAction = (e: GameEvent) =>
-    e.type === 'HexClaimed' || e.type === 'TurnPassed' || e.type === 'PieSwapped';
-  let cut = log.length;
-  // Drop any trailing bookkeeping (QuestionServed/Skipped)…
-  while (cut > 1 && !isAction(log[cut - 1])) cut--;
-  // …then the single last visible action itself.
-  if (cut > 1) cut--;
-  const trimmed = log.slice(0, cut);
+  const trimmed = log.slice(0, -1);
   return { log: trimmed, state: replay(trimmed) };
 }

@@ -89,18 +89,12 @@ export function Home() {
         </div>
 
         <div className="hero-cta">
-          {hasSavedGame && (
-            <button
-              className="btn btn-secondary"
-              data-testid="resume-game"
-              onClick={() => {
-                play('pick');
-                resumeSavedGame(dispatch);
-              }}
-            >
-              ⏵ Resume game
-            </button>
-          )}
+          {/* Play is the primary forward action — kept on top so the most
+              important CTA is the most prominent on every screen size. The
+              Resume affordance sits underneath as a secondary "↻ Continue"
+              option when a saved game exists. (Earlier the order was
+              flipped and Resume used a `⏵` glyph that read as a back arrow
+              on some devices — confusing.) */}
           <button
             className="btn btn-primary btn-lg"
             data-testid="play-button"
@@ -111,6 +105,18 @@ export function Home() {
           >
             Play ▸
           </button>
+          {hasSavedGame && (
+            <button
+              className="btn btn-secondary"
+              data-testid="resume-game"
+              onClick={() => {
+                play('pick');
+                resumeSavedGame(dispatch);
+              }}
+            >
+              ↻ Resume saved game
+            </button>
+          )}
         </div>
       </section>
 

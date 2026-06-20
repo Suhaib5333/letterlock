@@ -69,7 +69,14 @@ export function Setup() {
         <button className="btn btn-ghost" onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'home' })}>
           ‹ Back
         </button>
-        <h1>Match setup</h1>
+        <div className="sub-head-title">
+          <h1>Match setup</h1>
+          {/* "Couch Mode" = the in-person, single-screen rules — same room,
+              one device, host adjudicates. Online (Kahoot-style with phones
+              as buzzers) is the next mode. The badge makes the distinction
+              visible the moment players pick Play. */}
+          <span className="mode-badge" data-testid="mode-badge">🛋 Couch Mode</span>
+        </div>
         <div className="pack-pill">
           <span>{pack.emoji}</span> {pack.name}
         </div>

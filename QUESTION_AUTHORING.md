@@ -2,7 +2,9 @@
 
 > The single source of truth for writing trivia questions. Every rule here is
 > **enforced by `src/content/content.test.ts`** — if you break one, the build fails.
-> Read this before adding or editing any pack.
+> Read this before adding or editing any pack. For **where** the pack lives in
+> the home-screen browser (groupings, tier collapsing, naming conventions),
+> see [`CATEGORIES.md`](./CATEGORIES.md).
 
 ## The core mechanic
 

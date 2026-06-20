@@ -187,17 +187,27 @@ describe('undo — full end-to-end behaviour across every action type', () => {
     expect(state.moveCount).toBe(0);
   });
 
-  it('undo after a skip removes the whole pick (both serves + the skip)', () => {
+  it('undo drops exactly one event at a time — finer control for the host', () => {
+    // Single-event undo (changed from the old "drop all trailing bookkeeping"
+    // collapse) so an accidental skip can be rolled back without also
+    // un-picking the hex.
     const log: GameLog = [
       start(5) as never,
       { type: 'QuestionServed', cell: 6, letter: 'A', questionId: 'A-1' },
       { type: 'QuestionSkipped', letter: 'A', questionId: 'A-1' },
       { type: 'QuestionServed', cell: 6, letter: 'A', questionId: 'A-2' },
     ];
-    const { log: trimmed, state } = undoLast(log);
-    expect(trimmed).toHaveLength(1); // all three bookkeeping events dropped
-    expect(state.owners.every((o) => o === null)).toBe(true);
-    expect(state.turn).toBe('A');
+    // 1st undo: drops the second serve → back to "skip just happened".
+    const r1 = undoLast(log);
+    expect(r1.log).toHaveLength(3);
+    // 2nd undo: drops the skip → back to "first question shown".
+    const r2 = undoLast(r1.log);
+    expect(r2.log).toHaveLength(2);
+    // 3rd undo: drops the first serve → no hex selected.
+    const r3 = undoLast(r2.log);
+    expect(r3.log).toHaveLength(1);
+    expect(r3.state.owners.every((o) => o === null)).toBe(true);
+    expect(r3.state.turn).toBe('A');
   });
 
   it('undo of a pie swap restores the pre-swap board and re-opens the swap window', () => {
