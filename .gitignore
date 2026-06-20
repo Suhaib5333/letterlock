@@ -36,6 +36,12 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+# .env.production is committed on purpose — the only values it holds are the
+# Supabase ANON key + URL, which are public-safe by design (already in the
+# client bundle anyone can view-source) and enforced via RLS server-side.
+# This is what lets the Cloudflare build pick them up without dashboard env
+# wiring. NEVER add a service_role key or DB password here.
+!.env.production
 
 verify-shots/
 .env.local
