@@ -2,9 +2,13 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 import { PACKS, packById } from '../content';
 import { totalQuestions } from '../core/packs';
+import { AuthModal } from '../components/AuthModal';
 import { CategoryMenu } from '../components/CategoryMenu';
+import { Leaderboard } from '../components/Leaderboard';
 import { Logo, Wordmark } from '../components/Logo';
 import { SettingsModal } from '../components/SettingsModal';
+import { useAuth } from '../lib/auth';
+import { isSupabaseConfigured } from '../lib/supabase';
 import { play } from '../services/audio';
 import { remaining } from '../state/progress';
 import { resumeSavedGame, useStore } from '../state/store';
@@ -19,6 +23,9 @@ export function Home() {
   const { state, dispatch, hasSavedGame } = useStore();
   const [showSettings, setShowSettings] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const { profile } = useAuth();
   const selectedPack = packById(state.setup.packId);
   const total = totalQuestions(selectedPack);
   const left = remaining(selectedPack.id, total);
@@ -31,6 +38,24 @@ export function Home() {
           <Wordmark />
         </div>
         <div className="home-top-actions">
+          {isSupabaseConfigured() && (
+            <>
+              <button
+                className="btn btn-ghost"
+                data-testid="open-leaderboard"
+                onClick={() => setShowLeaderboard(true)}
+              >
+                🏆 Leaderboard
+              </button>
+              <button
+                className="btn btn-ghost"
+                data-testid="open-auth"
+                onClick={() => setShowAuth(true)}
+              >
+                {profile ? `@${profile.username}` : 'Sign in'}
+              </button>
+            </>
+          )}
           <button className="btn btn-ghost" onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'tutorial' })}>
             How to play
           </button>
@@ -124,6 +149,8 @@ export function Home() {
         <span>Best on a TV or tablet · colorblind-safe · keyboard friendly</span>
       </footer>
 
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+      {showLeaderboard && <Leaderboard onClose={() => setShowLeaderboard(false)} />}
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       {showCategories && (
         <CategoryMenu

@@ -527,6 +527,22 @@ test('an unreachable media clip AUTO-ADVANCES to another question on its own', a
   await expect(page.getByTestId('question-card')).toBeVisible();
 });
 
+test('auth modal opens with Google sign-in CTA (Supabase configured)', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('open-auth').click();
+  await expect(page.getByTestId('auth-modal')).toBeVisible();
+  await expect(page.getByTestId('signin-google')).toBeVisible();
+  await expect(page.getByTestId('auth-cancel')).toBeVisible();
+});
+
+test('leaderboard modal opens, shows the pack filter and loading state', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('open-leaderboard').click();
+  await expect(page.getByTestId('leaderboard-modal')).toBeVisible();
+  await expect(page.getByTestId('lb-pack')).toBeVisible();
+  await expect(page.getByTestId('lb-list')).toBeVisible();
+});
+
 test('category browser collapses tier siblings under one card with a picker', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('open-categories').click();

@@ -6,6 +6,7 @@ import { HostPad } from '../components/HostPad';
 import { QuestionCard } from '../components/QuestionCard';
 import { Scoreboard } from '../components/Scoreboard';
 import { Timer } from '../components/Timer';
+import { submitScore } from '../components/Leaderboard';
 import type { TeamId } from '../core/models';
 import { haptic, play } from '../services/audio';
 import { colorById } from '../state/palette';
@@ -33,6 +34,8 @@ export function Game() {
   const timer = state.setup.timer;
   const reducedMotion = state.settings.motion === 'reduced';
   const lastPulse = useRef(0);
+  const matchStartedAt = useRef(Date.now());
+  const submittedScore = useRef(false);
   const [blockToast, setBlockToast] = useState(false);
   const [confirmingExit, setConfirmingExit] = useState(false);
   const [pieDismissed, setPieDismissed] = useState(false);
@@ -59,6 +62,20 @@ export function Game() {
       haptic(40);
       if (!reducedMotion) fireConfetti(game.winner, teams[game.winner].colorId);
       clearSavedGame();
+      // Push the match result to the global leaderboard. No-ops cleanly when
+      // Supabase is unconfigured OR no user is signed in. Guard so a re-render
+      // (StrictMode double-fire, pulse bump) doesn't double-submit.
+      if (!submittedScore.current && opts) {
+        submittedScore.current = true;
+        submitScore({
+          packId: opts.pack.id,
+          score: (series[game.winner] ?? 0) + 1,
+          moves: game.moveCount,
+          durationMs: Date.now() - matchStartedAt.current,
+        }).catch(() => {
+          /* fail silent — never block the celebration */
+        });
+      }
     } else if (ui.lastClaimCell !== null) {
       play(ui.blockHint ? 'block' : 'claim');
       haptic(ui.blockHint ? 22 : 12);

@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App';
+import { AuthProvider } from './lib/auth';
 import { ImgView } from './screens/ImgView';
 import { StoreProvider } from './state/store';
 import './theme.css';
@@ -20,9 +21,11 @@ createRoot(document.getElementById('root')!).render(
     {isImgView ? (
       <ImgView />
     ) : (
-      <StoreProvider>
-        <App />
-      </StoreProvider>
+      <AuthProvider>
+        <StoreProvider>
+          <App />
+        </StoreProvider>
+      </AuthProvider>
     )}
   </StrictMode>,
 );
