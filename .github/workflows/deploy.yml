@@ -1,0 +1,110 @@
+# Cloudflare Pages deploy — driven by GitHub Actions instead of the CF
+# GitHub integration. Why: this is the only way to inject env vars from
+# GitHub Actions Variables / Secrets into Cloudflare Pages (Functions and
+# the build) without you ever touching the CF dashboard.
+#
+# ONE-TIME SETUP (5 minutes total):
+#   1. <https://dash.cloudflare.com/profile/api-tokens> → "Create Token"
+#      → "Edit Cloudflare Workers" template → restrict Account to your
+#      account → restrict Resources to "letterlock" Pages → Create →
+#      copy token.
+#   2. <https://dash.cloudflare.com/> → right sidebar → "Account ID" → copy.
+#   3. <https://github.com/Suhaib5333/letterlock/settings/secrets/actions>
+#      → New repository secret. Add ALL of:
+#        - CLOUDFLARE_API_TOKEN              (from step 1)
+#        - CLOUDFLARE_ACCOUNT_ID             (from step 2)
+#        - SUPABASE_SERVICE_ROLE_KEY         (from Supabase → Settings → API → service_role)
+#   4. <https://github.com/Suhaib5333/letterlock/settings/variables/actions>
+#      → New repository variable. Add:
+#        - RESEND_API_KEY                    (your Resend key, already there)
+#        - (optional) MAIL_FROM              (e.g. 'Letterlock <no-reply@raltech.dev>'
+#                                              once your Resend sending domain is verified;
+#                                              defaults to onboarding@resend.dev otherwise)
+#   5. Disable the Cloudflare → Pages → letterlock → Settings → Builds →
+#      "Connect to Git" integration (so CF doesn't ALSO try to build on
+#      every push). The GH Actions workflow becomes the sole deploy path.
+#   6. Push anything to main — this workflow runs end-to-end: build →
+#      push secrets to CF → deploy. After it finishes you'll have a
+#      working production with Resend + service_role + the Pages Function.
+#
+# Re-running the workflow re-pushes the secrets, so rotating the Resend
+# key is just "edit the GH Variable + Actions → re-run latest".
+
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Build app (Vite)
+        # VITE_* vars get baked into the static client bundle here. The
+        # service_role and Resend keys are NOT exposed to the client — they
+        # only go to Cloudflare Pages secrets in the next step.
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://lkudntyvngwwlzuciocd.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+        run: npm run build
+
+      - name: Push Cloudflare Pages env (Functions runtime + build)
+        # `wrangler pages secret put` is idempotent — repeat invocations
+        # overwrite. We pass values via stdin so they never appear in the
+        # action logs. The function reads them at request time.
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -e
+          push() {
+            local name="$1"
+            local value="$2"
+            if [ -z "$value" ]; then
+              echo "::warning ::Skipping $name — value is empty in GH Variables/Secrets."
+              return 0
+            fi
+            printf '%s' "$value" | npx -y wrangler@^3 pages secret put "$name" \
+              --project-name=letterlock || {
+                echo "::error ::wrangler pages secret put $name failed"
+                exit 1
+              }
+          }
+          push RESEND_API_KEY            "${{ vars.RESEND_API_KEY }}"
+          push SUPABASE_SERVICE_ROLE_KEY "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"
+          push VITE_SUPABASE_URL         "${{ vars.VITE_SUPABASE_URL || 'https://lkudntyvngwwlzuciocd.supabase.co' }}"
+          push MAIL_FROM                 "${{ vars.MAIL_FROM }}"
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=letterlock --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print deployment URL
+        env:
+          URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: echo "🚀 Deployed: $URL"
