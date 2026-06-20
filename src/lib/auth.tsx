@@ -12,7 +12,11 @@ interface AuthState {
   isAdmin: boolean;
   isModerator: boolean;
   isBanned: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: () => Promise<{ ok: boolean; error?: string }>;
+  // Email magic-link — works out of the box on Supabase (default email
+  // provider, no SMTP config needed) so users can sign in even when Google
+  // OAuth isn't enabled in the dashboard yet.
+  signInWithEmail: (email: string) => Promise<{ ok: boolean; error?: string }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -70,11 +74,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [user]);
 
-  const signInWithGoogle = async () => {
-    if (!supabase) throw new Error('Supabase not configured');
+  const signInWithGoogle = async (): Promise<{ ok: boolean; error?: string }> => {
+    if (!supabase) return { ok: false, error: 'Supabase not configured.' };
     const redirectTo =
       typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : undefined;
-    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo },
+    });
+    if (error) {
+      // The most common failure mode is "Unsupported provider: provider is not
+      // enabled" — Supabase returns this until Google OAuth is toggled on in
+      // the dashboard. Surface a hint instead of crashing.
+      const msg = /provider is not enabled/i.test(error.message)
+        ? 'Google sign-in is not enabled in this project yet. Use the email option below — it works out of the box.'
+        : error.message;
+      return { ok: false, error: msg };
+    }
+    return { ok: true };
+  };
+
+  const signInWithEmail = async (email: string): Promise<{ ok: boolean; error?: string }> => {
+    if (!supabase) return { ok: false, error: 'Supabase not configured.' };
+    const trimmed = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      return { ok: false, error: 'Enter a valid email address.' };
+    }
+    const emailRedirectTo =
+      typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : undefined;
+    const { error } = await supabase.auth.signInWithOtp({
+      email: trimmed,
+      // Default `shouldCreateUser: true` — first sign-in creates the user.
+      options: { emailRedirectTo },
+    });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
   };
 
   const signOut = async () => {
@@ -104,6 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isModerator,
         isBanned,
         signInWithGoogle,
+        signInWithEmail,
         signOut,
         refreshProfile,
       }}
@@ -127,7 +162,8 @@ export function useAuth(): AuthState {
       isAdmin: false,
       isModerator: false,
       isBanned: false,
-      signInWithGoogle: async () => {},
+      signInWithGoogle: async () => ({ ok: false, error: 'Auth not initialised.' }),
+      signInWithEmail: async () => ({ ok: false, error: 'Auth not initialised.' }),
       signOut: async () => {},
       refreshProfile: async () => {},
     };

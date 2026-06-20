@@ -13,7 +13,7 @@ import { play } from '../services/audio';
  *  - Signed in + has username: shows the profile + sign-out button.
  */
 export function AuthModal({ onClose }: { onClose: () => void }) {
-  const { user, profile, loading, signInWithGoogle, signOut, refreshProfile } = useAuth();
+  const { user, profile, loading, signInWithGoogle, signInWithEmail, signOut, refreshProfile } = useAuth();
   const needsUsername = !!user && !profile;
 
   return (
@@ -39,7 +39,11 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
           {loading ? (
             <p className="go-sub">Loading…</p>
           ) : !user ? (
-            <SignInView onSignInGoogle={signInWithGoogle} onClose={onClose} />
+            <SignInView
+              onSignInGoogle={signInWithGoogle}
+              onSignInEmail={signInWithEmail}
+              onClose={onClose}
+            />
           ) : needsUsername ? (
             <UsernameView userId={user.id} onClaimed={refreshProfile} />
           ) : (
@@ -61,11 +65,38 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
 
 function SignInView({
   onSignInGoogle,
+  onSignInEmail,
   onClose,
 }: {
-  onSignInGoogle: () => Promise<void>;
+  onSignInGoogle: () => Promise<{ ok: boolean; error?: string }>;
+  onSignInEmail: (email: string) => Promise<{ ok: boolean; error?: string }>;
   onClose: () => void;
 }) {
+  const [email, setEmail] = useState('');
+  const [busy, setBusy] = useState<'google' | 'email' | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+
+  const handleGoogle = async () => {
+    play('pick');
+    setError(null);
+    setBusy('google');
+    const res = await onSignInGoogle();
+    setBusy(null);
+    if (!res.ok) setError(res.error ?? 'Google sign-in failed.');
+    // On success the page navigates away — no further UI needed.
+  };
+
+  const handleEmail = async () => {
+    play('pick');
+    setError(null);
+    setBusy('email');
+    const res = await onSignInEmail(email);
+    setBusy(null);
+    if (res.ok) setSent(true);
+    else setError(res.error ?? 'Could not send the magic link.');
+  };
+
   return (
     <>
       <h2>Sign in</h2>
@@ -77,16 +108,68 @@ function SignInView({
         <button
           className="btn btn-primary btn-lg block google-signin"
           data-testid="signin-google"
-          onClick={() => {
-            play('pick');
-            onSignInGoogle();
-          }}
+          disabled={busy !== null}
+          onClick={handleGoogle}
         >
-          <span className="g-mark" aria-hidden="true">
-            G
-          </span>{' '}
-          Continue with Google
+          <span className="g-mark" aria-hidden="true">G</span>{' '}
+          {busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
         </button>
+
+        <div className="auth-divider"><span>or</span></div>
+
+        {sent ? (
+          <div className="auth-sent" data-testid="auth-email-sent">
+            <strong>✓ Check your inbox</strong>
+            <p>
+              We just sent a magic link to <strong>{email}</strong>. Click it on this device to
+              sign in.
+            </p>
+            <button
+              className="btn btn-ghost"
+              onClick={() => {
+                setSent(false);
+                setEmail('');
+              }}
+            >
+              Use a different email
+            </button>
+          </div>
+        ) : (
+          <>
+            <label className="auth-field">
+              <span>Email</span>
+              <input
+                type="email"
+                className="auth-input"
+                data-testid="signin-email-input"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && email.trim()) handleEmail();
+                }}
+                autoComplete="email"
+                disabled={busy !== null}
+              />
+            </label>
+            <button
+              className="btn btn-secondary btn-lg block"
+              data-testid="signin-email"
+              disabled={!email.trim() || busy !== null}
+              onClick={handleEmail}
+            >
+              {busy === 'email' ? 'Sending…' : '✉ Send magic link'}
+            </button>
+          </>
+        )}
+
+        {error && (
+          <p className="auth-error" data-testid="auth-error" role="alert">{error}</p>
+        )}
+
         <button className="btn btn-ghost" data-testid="auth-cancel" onClick={onClose}>
           Skip — play locally
         </button>

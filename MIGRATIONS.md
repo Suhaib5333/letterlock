@@ -20,7 +20,7 @@ Recommended for the first run. Just paste both files into the SQL editor:
 1. Open **<https://supabase.com/dashboard/project/lkudntyvngwwlzuciocd/sql/new>**
 2. Copy the entire contents of `supabase/migrations/0001_initial_schema.sql`, paste, click **Run**.
 3. Repeat for `supabase/migrations/0002_roles_admin.sql`.
-4. Sign in once with Google in the app so `auth.users` has your row (`srajab@bdb-bh.com`), then re-run the **bottom `do $$` block of 0002** (or paste it again) — that's the bit that promotes you to `admin` once your `auth.users` row exists.
+4. Sign in once with Google in the app so `auth.users` has your row (`suhaibrajabo@gmail.com`), then re-run the **bottom `do $$` block of 0002** (or paste it again) — that's the bit that promotes you to `admin` once your `auth.users` row exists.
 
 Verify:
 
@@ -57,9 +57,9 @@ npm run db:pull     # pull a snapshot from the live DB as a new migration
 
 ## After running 0002 — the admin seed
 
-The bootstrap `do $$ ... end $$` block at the bottom of `0002_roles_admin.sql` looks for `auth.users.email = 'srajab@bdb-bh.com'` and sets that row's profile to `role = 'admin'`. It's idempotent — safe to re-run.
+The bootstrap `do $$ ... end $$` block at the bottom of `0002_roles_admin.sql` looks for `auth.users.email = 'suhaibrajabo@gmail.com'` and sets that row's profile to `role = 'admin'`. It's idempotent — safe to re-run.
 
-If the block prints `Bootstrap admin email srajab@bdb-bh.com not in auth.users yet`, you haven't signed in once yet. Sign in via the Google SSO on the live app, claim your username, then re-run the block (the easiest way is to paste it again in the SQL editor).
+If the block prints `Bootstrap admin email suhaibrajabo@gmail.com not in auth.users yet`, you haven't signed in once yet. Sign in via the Google SSO on the live app, claim your username, then re-run the block (the easiest way is to paste it again in the SQL editor).
 
 ---
 

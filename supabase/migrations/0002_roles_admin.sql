@@ -14,7 +14,7 @@
 --   - custom_packs table — user-authored question packs (RLS: owner edits,
 --     moderator+admin can publish/unpublish, everyone reads published packs)
 --
--- Seeds the FIRST admin: srajab@bdb-bh.com (whenever that auth.users row
+-- Seeds the FIRST admin: suhaibrajabo@gmail.com (whenever that auth.users row
 -- exists). Idempotent — re-running won't grant a second time.
 -- ============================================================================
 
@@ -191,13 +191,13 @@ create policy "custom_packs delete own or staff" on public.custom_packs
   for delete using (auth.uid() = owner_id or public.is_moderator_or_admin());
 
 -- --------------------------------------------------------------------------
--- 6. Seed the bootstrap admin — srajab@bdb-bh.com
+-- 6. Seed the bootstrap admin — suhaibrajabo@gmail.com
 --    Runs lazily: if the user hasn't signed in yet there's nothing to seed.
 --    Re-running is a no-op (idempotent UPDATE).
 -- --------------------------------------------------------------------------
 do $$
 declare
-  bootstrap_email constant text := 'srajab@bdb-bh.com';
+  bootstrap_email constant text := 'suhaibrajabo@gmail.com';
   uid uuid;
 begin
   select id into uid from auth.users where lower(email) = lower(bootstrap_email) limit 1;

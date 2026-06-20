@@ -356,3 +356,57 @@
   color: #6ee7b7;
   font-weight: 600;
 }
+
+/* --- AuthModal: email magic-link controls -------------------------- */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: color-mix(in oklab, var(--ink) 55%, transparent);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin: 8px 0 4px 0;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: color-mix(in oklab, var(--ink) 14%, transparent);
+}
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+.auth-field > span {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: color-mix(in oklab, var(--ink) 65%, transparent);
+}
+.auth-sent {
+  text-align: center;
+  padding: var(--s-2);
+  background: color-mix(in oklab, #10b981 12%, transparent);
+  border: 1px solid color-mix(in oklab, #10b981 40%, transparent);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+.auth-sent strong { color: #6ee7b7; font-size: 16px; }
+.auth-sent p { margin: 0; font-size: 14px; line-height: 1.4; }
+.auth-error {
+  color: #fca5a5;
+  background: color-mix(in oklab, #b91c1c 14%, transparent);
+  border: 1px solid color-mix(in oklab, #b91c1c 36%, transparent);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.4;
+}
