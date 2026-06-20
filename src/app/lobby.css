@@ -453,3 +453,43 @@
 @keyframes ll-spin {
   to { transform: rotate(360deg); }
 }
+
+/* --- Home: signed-in chip + env warning banner --------------------- */
+.hero-signed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 14px;
+  background: color-mix(in oklab, var(--accent) 14%, var(--surface));
+  border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--ink) 85%, transparent);
+}
+.hero-signed strong {
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+.env-warning {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  max-width: min(560px, calc(100vw - 24px));
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  background: color-mix(in oklab, #b91c1c 18%, var(--surface));
+  border: 1px solid color-mix(in oklab, #b91c1c 50%, transparent);
+  border-radius: 10px;
+  color: var(--ink);
+  font-size: 13px;
+  text-align: center;
+  box-shadow: 0 12px 28px -16px rgba(0, 0, 0, 0.6);
+}
+.env-warning strong {
+  font-size: 14px;
+  color: #fca5a5;
+}

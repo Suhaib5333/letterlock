@@ -1,0 +1,17 @@
+# Supabase CLI project config — links this folder to the hosted project so
+# `supabase db push` applies the SQL in ./migrations/ in order.
+#
+# To run migrations against the live project:
+#   1.  npm i -g supabase   (or use `npx supabase` everywhere)
+#   2.  Open https://supabase.com/dashboard/account/tokens → "Generate new
+#       access token". Save it locally to .env.local as SUPABASE_ACCESS_TOKEN
+#       (gitignored).
+#   3.  npm run db:link  (one-time — prompts for the DB password from the
+#       project's Settings → Database page)
+#   4.  npm run db:push  (applies every migration in ./migrations/ that isn't
+#       already recorded as applied)
+#
+# Or, if you'd rather not install the CLI, paste each migration into the
+# dashboard SQL editor at:
+#   https://supabase.com/dashboard/project/lkudntyvngwwlzuciocd/sql/new
+project_id = "lkudntyvngwwlzuciocd"

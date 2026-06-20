@@ -2,10 +2,12 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 import { PACKS, packById } from '../content';
 import { totalQuestions } from '../core/packs';
+import { AdminPanel } from '../components/AdminPanel';
 import { AuthModal } from '../components/AuthModal';
 import { CategoryMenu } from '../components/CategoryMenu';
 import { Leaderboard } from '../components/Leaderboard';
 import { Logo, Wordmark } from '../components/Logo';
+import { PackEditor } from '../components/PackEditor';
 import { SettingsModal } from '../components/SettingsModal';
 import { useAuth } from '../lib/auth';
 import { isSupabaseConfigured } from '../lib/supabase';
@@ -25,7 +27,9 @@ export function Home() {
   const [showCategories, setShowCategories] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const { profile } = useAuth();
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [showPackEditor, setShowPackEditor] = useState(false);
+  const { profile, isAdmin } = useAuth();
   const selectedPack = packById(state.setup.packId);
   const total = totalQuestions(selectedPack);
   const left = remaining(selectedPack.id, total);
@@ -47,6 +51,25 @@ export function Home() {
               >
                 🏆 Leaderboard
               </button>
+              {profile && (
+                <button
+                  className="btn btn-ghost"
+                  data-testid="open-pack-editor"
+                  onClick={() => setShowPackEditor(true)}
+                  title="Author your own question pack"
+                >
+                  📦 My packs
+                </button>
+              )}
+              {isAdmin && (
+                <button
+                  className="btn btn-ghost"
+                  data-testid="open-admin"
+                  onClick={() => setShowAdmin(true)}
+                >
+                  🛠 Admin
+                </button>
+              )}
               <button
                 className="btn btn-ghost"
                 data-testid="open-auth"
@@ -145,6 +168,27 @@ export function Home() {
               ↻ Resume saved game
             </button>
           )}
+          {/* Sign-in CTA on the hero — the top-right button is easy to miss
+              (especially on mobile where the row wraps onto two lines).
+              Repeated here below Play so anyone landing on Home sees it
+              immediately. Hidden once the user is signed in. */}
+          {isSupabaseConfigured() && !profile && (
+            <button
+              className="btn btn-secondary"
+              data-testid="hero-signin"
+              onClick={() => {
+                play('pick');
+                setShowAuth(true);
+              }}
+            >
+              🔐 Sign in with Google
+            </button>
+          )}
+          {isSupabaseConfigured() && profile && (
+            <span className="hero-signed" data-testid="hero-signed">
+              ✓ Signed in as <strong>@{profile.username}</strong>
+            </span>
+          )}
         </div>
       </section>
 
@@ -152,8 +196,25 @@ export function Home() {
         <span>Best on a TV or tablet · colorblind-safe · keyboard friendly</span>
       </footer>
 
+      {/* Loud, dismiss-not-allowed warning on Home when the Supabase env vars
+          are missing in the live build. Without this the auth/leaderboard
+          features silently disappear — that's how a Cloudflare deploy that
+          didn't carry over the env vars looked totally fine on localhost and
+          totally broken on prod. Now there's a visible breadcrumb. */}
+      {!isSupabaseConfigured() && (
+        <div className="env-warning" data-testid="env-warning" role="alert">
+          <strong>⚠ Online features disabled</strong>
+          <span>
+            VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are not set in this build.
+            On Cloudflare Pages → Settings → Environment variables.
+          </span>
+        </div>
+      )}
+
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
       {showLeaderboard && <Leaderboard onClose={() => setShowLeaderboard(false)} />}
+      {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
+      {showPackEditor && <PackEditor onClose={() => setShowPackEditor(false)} />}
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       {showCategories && (
         <CategoryMenu

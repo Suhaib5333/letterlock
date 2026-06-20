@@ -14,7 +14,12 @@
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
     "e2e": "playwright test",
-    "e2e:headed": "playwright test --headed"
+    "e2e:headed": "playwright test --headed",
+    "db:link": "npx -y supabase@^2 link --project-ref lkudntyvngwwlzuciocd",
+    "db:push": "npx -y supabase@^2 db push",
+    "db:pull": "npx -y supabase@^2 db pull",
+    "db:diff": "npx -y supabase@^2 db diff",
+    "db:status": "npx -y supabase@^2 migration list"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",

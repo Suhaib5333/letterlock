@@ -25,12 +25,40 @@ export function isSupabaseConfigured(): boolean {
   return supabase !== null;
 }
 
+export type UserRole = 'player' | 'moderator' | 'admin';
+
 export type Profile = {
   id: string; // matches auth.users.id
   username: string; // unique, lowercase, 3-20 chars
   display_name: string | null;
   avatar_url: string | null;
+  role: UserRole; // populated by migration 0002 (default 'player')
+  banned_at: string | null; // ISO timestamp when a user is banned
   created_at: string;
+};
+
+export type AdminUserRow = {
+  id: string;
+  username: string;
+  display_name: string | null;
+  email: string | null;
+  role: UserRole;
+  banned_at: string | null;
+  created_at: string;
+};
+
+export type CustomPack = {
+  id: string;
+  owner_id: string;
+  name: string;
+  description: string | null;
+  emoji: string;
+  difficulty: 'kids' | 'easy' | 'medium' | 'hard' | 'expert' | 'extreme';
+  body: { letters: Record<string, { q: string; a: string; id?: string }[]> };
+  published: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type LeaderboardRow = {

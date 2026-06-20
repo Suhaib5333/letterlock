@@ -7,6 +7,11 @@ interface AuthState {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  // Convenience role flags derived from `profile.role` — guarded against banned
+  // accounts so a banned admin loses their button immediately on next reload.
+  isAdmin: boolean;
+  isModerator: boolean;
+  isBanned: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -84,9 +89,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile((data as Profile) ?? null);
   };
 
+  const isBanned = !!profile?.banned_at;
+  const isAdmin = !isBanned && profile?.role === 'admin';
+  const isModerator = !isBanned && (profile?.role === 'moderator' || profile?.role === 'admin');
+
   return (
     <AuthCtx.Provider
-      value={{ user, session, profile, loading, signInWithGoogle, signOut, refreshProfile }}
+      value={{
+        user,
+        session,
+        profile,
+        loading,
+        isAdmin,
+        isModerator,
+        isBanned,
+        signInWithGoogle,
+        signOut,
+        refreshProfile,
+      }}
     >
       {children}
     </AuthCtx.Provider>
@@ -104,6 +124,9 @@ export function useAuth(): AuthState {
       session: null,
       profile: null,
       loading: false,
+      isAdmin: false,
+      isModerator: false,
+      isBanned: false,
       signInWithGoogle: async () => {},
       signOut: async () => {},
       refreshProfile: async () => {},

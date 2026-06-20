@@ -8,6 +8,7 @@ import { StoreProvider } from './state/store';
 import './theme.css';
 import './app/app.css';
 import './app/lobby.css';
+import './app/admin.css';
 
 const splash = document.getElementById('boot-splash');
 if (splash) {
