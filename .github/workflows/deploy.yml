@@ -50,6 +50,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Pre-flight — verify required GitHub Secrets exist
+        # Catch the 'Not logged in' / empty-env-var failures upfront with a
+        # clear, actionable message instead of a Wrangler stack trace 4 steps
+        # into the run. Each ENV is either populated or known-good-default —
+        # if any is empty here, the user hasn't completed the one-time setup
+        # at the top of this file.
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ vars.RESEND_API_KEY }}
+        run: |
+          set -e
+          missing=()
+          [ -z "$CLOUDFLARE_API_TOKEN" ]      && missing+=("CLOUDFLARE_API_TOKEN (Repository → Secrets)")
+          [ -z "$CLOUDFLARE_ACCOUNT_ID" ]     && missing+=("CLOUDFLARE_ACCOUNT_ID (Repository → Secrets)")
+          [ -z "$SUPABASE_SERVICE_ROLE_KEY" ] && missing+=("SUPABASE_SERVICE_ROLE_KEY (Repository → Secrets)")
+          [ -z "$RESEND_API_KEY" ]            && missing+=("RESEND_API_KEY (Repository → Variables)")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error ::Missing required GitHub secrets/variables — finish the one-time setup."
+            echo ""
+            echo "❌ Missing:"
+            for m in "${missing[@]}"; do echo "   • $m"; done
+            echo ""
+            echo "Add SECRETS at: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            echo "Add VARIABLES at: https://github.com/${{ github.repository }}/settings/variables/actions"
+            echo ""
+            echo "Where each value comes from:"
+            echo "  CLOUDFLARE_API_TOKEN      → https://dash.cloudflare.com/profile/api-tokens"
+            echo "                              (Create Token → 'Edit Cloudflare Workers' template,"
+            echo "                              scope Resources to your letterlock Pages project)"
+            echo "  CLOUDFLARE_ACCOUNT_ID     → dash.cloudflare.com sidebar → 'Account ID'"
+            echo "  SUPABASE_SERVICE_ROLE_KEY → https://supabase.com/dashboard/project/lkudntyvngwwlzuciocd/settings/api"
+            echo "  RESEND_API_KEY            → Resend → API Keys (you said this is already set)"
+            exit 1
+          fi
+          echo "✓ All required secrets and variables are populated"
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -68,16 +106,21 @@ jobs:
 
       - name: Ensure Pages project exists
         # Idempotent — `project create` errors if it already exists; we
-        # swallow that case and only fail on real errors.
+        # swallow that case and only fail on real errors. Sets BOTH the
+        # canonical CLOUDFLARE_* env vars AND the legacy CF_* aliases so
+        # every Wrangler code path resolves the same credentials.
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set +e
           OUT=$(npx --yes wrangler@${{ env.WRANGLER_VERSION }} pages project create "${{ env.PROJECT_NAME }}" --production-branch=main 2>&1)
           EC=$?
           set -e
           if [ $EC -ne 0 ] && ! echo "$OUT" | grep -qi "already exists"; then
+            echo "::error ::wrangler pages project create failed"
             echo "$OUT"
             exit $EC
           fi
@@ -91,6 +134,8 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           RESEND_API_KEY: ${{ vars.RESEND_API_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           VITE_SUPABASE_URL_VALUE: ${{ vars.VITE_SUPABASE_URL || 'https://lkudntyvngwwlzuciocd.supabase.co' }}
