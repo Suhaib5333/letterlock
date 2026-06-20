@@ -527,6 +527,21 @@ test('an unreachable media clip AUTO-ADVANCES to another question on its own', a
   await expect(page.getByTestId('question-card')).toBeVisible();
 });
 
+test('category browser collapses tier siblings under one card with a picker', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('open-categories').click();
+  // Sitcoms easy/medium/hard share the `sitcoms` stem — the browser should
+  // render ONE card with three tier buttons (one per difficulty) rather than
+  // three near-identical full cards. Tier buttons carry deterministic ids.
+  await expect(page.locator('[data-testid="pack-tier-sitcoms-easy"]')).toBeVisible();
+  await expect(page.locator('[data-testid="pack-tier-sitcoms-medium"]')).toBeVisible();
+  await expect(page.locator('[data-testid="pack-tier-sitcoms-hard"]')).toBeVisible();
+  // Tapping a tier updates the card's selected state.
+  await page.locator('[data-testid="pack-tier-sitcoms-medium"]').click();
+  await expect(page.locator('[data-testid="pack-tier-sitcoms-medium"]')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('[data-testid="pack-tier-sitcoms-easy"]')).toHaveAttribute('aria-selected', 'false');
+});
+
 test('tutorial walkthrough is reachable and playable', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'How to play' }).click();

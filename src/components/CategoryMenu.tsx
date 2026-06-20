@@ -1,9 +1,44 @@
 import { motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import { PACK_GROUPS, PACKS } from '../content';
-import { totalQuestions } from '../core/packs';
+import { type QuestionPack, totalQuestions } from '../core/packs';
 import { play } from '../services/audio';
 import { remaining } from '../state/progress';
+
+// Difficulty-tier siblings of a topic share a stem id (e.g. `sitcoms-easy`,
+// `sitcoms-medium`, `sitcoms-hard` all collapse to `sitcoms`). The browser
+// renders one card per stem and exposes a tier picker when 2+ tiers exist.
+const TIER_SUFFIX = /-(kids|easy|medium|hard|extreme)$/;
+const TIER_ORDER = ['kids', 'easy', 'medium', 'hard', 'extreme'] as const;
+
+interface PackGroup {
+  stem: string;
+  primary: QuestionPack; // the card's headline pack (chosen tier, or only)
+  tiers: QuestionPack[]; // tier siblings in difficulty order; length 1 = no picker
+}
+
+function bucketByStem(packs: QuestionPack[]): PackGroup[] {
+  const stems = new Map<string, QuestionPack[]>();
+  for (const p of packs) {
+    const stem = p.id.replace(TIER_SUFFIX, '');
+    if (!stems.has(stem)) stems.set(stem, []);
+    stems.get(stem)!.push(p);
+  }
+  return Array.from(stems.entries()).map(([stem, tiers]) => {
+    const sorted = tiers.slice().sort(
+      (a, b) =>
+        TIER_ORDER.indexOf(a.difficulty as (typeof TIER_ORDER)[number]) -
+        TIER_ORDER.indexOf(b.difficulty as (typeof TIER_ORDER)[number]),
+    );
+    return { stem, primary: sorted[0], tiers: sorted };
+  });
+}
+
+// Strip " · Easy" / " · Medium" / "·" tier markers from the displayed name when
+// the card represents multiple tiers. e.g. "World Flags · Easy" → "World Flags".
+function stemName(name: string): string {
+  return name.replace(/\s*·\s*(Kids|Easy|Medium|Hard|Expert|Extreme).*$/i, '').trim();
+}
 
 // Regional packs show a real (bundled) flag image — emoji flags render as letter
 // placeholders on Windows. Mirrors the map in Home.tsx.
@@ -50,12 +85,20 @@ export function CategoryMenu({
     [q, group],
   );
 
-  // Group order, only groups that have matches.
+  // Each user has a tier preference per stem — clicking a tier button on a
+  // multi-tier card sticks for that browser session so the player can shuffle
+  // through them without the choice resetting.
+  const [tierPick, setTierPick] = useState<Record<string, string>>({});
+
+  // Group order: only groups that have matches. Within each group, packs are
+  // collapsed by stem so e.g. Sitcoms Easy/Medium/Hard render as ONE card
+  // with a tier picker, instead of three near-identical cards.
   const sections = useMemo(
     () =>
-      PACK_GROUPS.map((g) => ({ group: g, packs: filtered.filter((p) => p.group === g) })).filter(
-        (s) => s.packs.length > 0,
-      ),
+      PACK_GROUPS.map((g) => ({
+        group: g,
+        packs: bucketByStem(filtered.filter((p) => p.group === g)),
+      })).filter((s) => s.packs.length > 0),
     [filtered],
   );
 
@@ -131,39 +174,74 @@ export function CategoryMenu({
                 {g} <span className="cat-section-count">{packs.length}</span>
               </h3>
               <div className="cat-grid">
-                {packs.map((pack) => {
+                {packs.map(({ stem, primary, tiers }) => {
+                  // Which tier shows on this multi-tier card. Default = the
+                  // currently-selected pack if it's in this group, else the
+                  // session-pick, else the easiest tier.
+                  const selectedInGroup = tiers.find((t) => t.id === selectedPack);
+                  const pickId =
+                    selectedInGroup?.id ?? tierPick[stem] ?? primary.id;
+                  const pack = tiers.find((t) => t.id === pickId) ?? primary;
                   const total = totalQuestions(pack);
                   const left = remaining(pack.id, total);
                   const seenSome = left < total;
                   const active = pack.id === selectedPack;
+                  const hasTiers = tiers.length > 1;
                   return (
-                    <button
-                      key={pack.id}
-                      className={`cat-card ${active ? 'active' : ''}`}
-                      data-testid={`pack-${pack.id}`}
+                    <div
+                      key={stem}
+                      className={`cat-card ${active ? 'active' : ''} ${hasTiers ? 'has-tiers' : ''}`}
                       style={{ '--accent': pack.accent } as React.CSSProperties}
-                      onClick={() => {
-                        play('pick');
-                        onSelect(pack.id);
-                        onClose();
-                      }}
+                      data-testid={`pack-${pack.id}`}
                     >
-                      {PACK_FLAG[pack.id] ? (
-                        <img className="cat-card-flag" src={`/flags/${PACK_FLAG[pack.id]}.svg`} alt="" aria-hidden="true" draggable={false} />
-                      ) : (
-                        <div className="cat-card-emoji">{pack.emoji}</div>
-                      )}
-                      <div className="cat-card-body">
-                        <div className="cat-card-name">{pack.name}</div>
-                        {pack.description && <div className="cat-card-desc">{pack.description}</div>}
-                        <div className="cat-card-meta">
-                          <span className={`chip diff-${pack.difficulty}`}>{DIFF_LABEL[pack.difficulty] ?? pack.difficulty}</span>
-                          <span className="chip ghost">{total} Qs</span>
-                          {seenSome && <span className="chip ghost">↻ {left} left</span>}
+                      <button
+                        className="cat-card-main"
+                        onClick={() => {
+                          play('pick');
+                          onSelect(pack.id);
+                          onClose();
+                        }}
+                        aria-label={`Play ${pack.name}`}
+                      >
+                        {PACK_FLAG[pack.id] ? (
+                          <img className="cat-card-flag" src={`/flags/${PACK_FLAG[pack.id]}.svg`} alt="" aria-hidden="true" draggable={false} />
+                        ) : (
+                          <div className="cat-card-emoji">{pack.emoji}</div>
+                        )}
+                        <div className="cat-card-body">
+                          <div className="cat-card-name">
+                            {hasTiers ? stemName(pack.name) : pack.name}
+                          </div>
+                          {pack.description && <div className="cat-card-desc">{pack.description}</div>}
+                          <div className="cat-card-meta">
+                            <span className={`chip diff-${pack.difficulty}`}>{DIFF_LABEL[pack.difficulty] ?? pack.difficulty}</span>
+                            <span className="chip ghost">{total} Qs</span>
+                            {seenSome && <span className="chip ghost">↻ {left} left</span>}
+                          </div>
                         </div>
-                      </div>
-                      {active && <div className="cat-card-check" aria-label="Selected">✓</div>}
-                    </button>
+                        {active && <div className="cat-card-check" aria-label="Selected">✓</div>}
+                      </button>
+                      {hasTiers && (
+                        <div className="cat-card-tiers" role="tablist" aria-label="Choose difficulty">
+                          {tiers.map((t) => (
+                            <button
+                              key={t.id}
+                              role="tab"
+                              aria-selected={t.id === pack.id}
+                              data-testid={`pack-tier-${t.id}`}
+                              className={`cat-tier ${t.id === pack.id ? 'active' : ''} diff-${t.difficulty}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                play('tap');
+                                setTierPick((s) => ({ ...s, [stem]: t.id }));
+                              }}
+                            >
+                              {DIFF_LABEL[t.difficulty] ?? t.difficulty}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
