@@ -410,3 +410,30 @@
   margin: 0;
   line-height: 1.4;
 }
+.auth-otp {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  padding: 14px 12px;
+}
+.auth-resend {
+  text-align: center;
+  margin: 4px 0 0 0;
+}
+.auth-link {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.auth-link:disabled {
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  cursor: not-allowed;
+}
+.auth-link:not(:disabled):hover { text-decoration: underline; }

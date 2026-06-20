@@ -13,7 +13,16 @@ import { play } from '../services/audio';
  *  - Signed in + has username: shows the profile + sign-out button.
  */
 export function AuthModal({ onClose }: { onClose: () => void }) {
-  const { user, profile, loading, signInWithGoogle, signInWithEmail, signOut, refreshProfile } = useAuth();
+  const {
+    user,
+    profile,
+    loading,
+    signInWithGoogle,
+    signInWithEmail,
+    verifyEmailOtp,
+    signOut,
+    refreshProfile,
+  } = useAuth();
   const needsUsername = !!user && !profile;
 
   return (
@@ -42,6 +51,7 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
             <SignInView
               onSignInGoogle={signInWithGoogle}
               onSignInEmail={signInWithEmail}
+              onVerifyOtp={verifyEmailOtp}
               onClose={onClose}
             />
           ) : needsUsername ? (
@@ -66,16 +76,28 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
 function SignInView({
   onSignInGoogle,
   onSignInEmail,
+  onVerifyOtp,
   onClose,
 }: {
   onSignInGoogle: () => Promise<{ ok: boolean; error?: string }>;
   onSignInEmail: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  onVerifyOtp: (email: string, code: string) => Promise<{ ok: boolean; error?: string }>;
   onClose: () => void;
 }) {
+  // Two-step: email → 6-digit code (mirrors palmandplate admin flow).
+  const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
-  const [busy, setBusy] = useState<'google' | 'email' | null>(null);
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState<'google' | 'email' | 'verify' | 'resend' | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  // Resend cooldown — 60s after every send (Supabase rate-limits anyway).
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [cooldown]);
 
   const handleGoogle = async () => {
     play('pick');
@@ -84,58 +106,65 @@ function SignInView({
     const res = await onSignInGoogle();
     setBusy(null);
     if (!res.ok) setError(res.error ?? 'Google sign-in failed.');
-    // On success the page navigates away — no further UI needed.
   };
 
-  const handleEmail = async () => {
+  const sendEmail = async (kind: 'email' | 'resend') => {
     play('pick');
     setError(null);
-    setBusy('email');
+    setBusy(kind);
     const res = await onSignInEmail(email);
     setBusy(null);
-    if (res.ok) setSent(true);
-    else setError(res.error ?? 'Could not send the magic link.');
+    if (res.ok) {
+      setStep('code');
+      setCooldown(60);
+    } else {
+      setError(res.error ?? 'Could not send the sign-in code.');
+    }
+  };
+
+  const handleVerify = async () => {
+    if (code.length !== 6) return;
+    play('pick');
+    setError(null);
+    setBusy('verify');
+    const res = await onVerifyOtp(email, code);
+    setBusy(null);
+    if (!res.ok) setError(res.error ?? 'That code is wrong or expired.');
+    // On success, the AuthProvider session listener kicks in and the modal
+    // re-renders to the username-claim view automatically.
   };
 
   return (
     <>
-      <h2>Sign in</h2>
+      <h2>{step === 'email' ? 'Sign in' : 'Enter the code'}</h2>
       <p className="go-sub">
-        Save your scores, get on the global leaderboard, and host online matches with phones as
-        buzzers.
-      </p>
-      <div className="auth-actions">
-        <button
-          className="btn btn-primary btn-lg block google-signin"
-          data-testid="signin-google"
-          disabled={busy !== null}
-          onClick={handleGoogle}
-        >
-          <span className="g-mark" aria-hidden="true">G</span>{' '}
-          {busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
-        </button>
-
-        <div className="auth-divider"><span>or</span></div>
-
-        {sent ? (
-          <div className="auth-sent" data-testid="auth-email-sent">
-            <strong>✓ Check your inbox</strong>
-            <p>
-              We just sent a magic link to <strong>{email}</strong>. Click it on this device to
-              sign in.
-            </p>
-            <button
-              className="btn btn-ghost"
-              onClick={() => {
-                setSent(false);
-                setEmail('');
-              }}
-            >
-              Use a different email
-            </button>
-          </div>
+        {step === 'email' ? (
+          <>
+            Save your scores, get on the global leaderboard, and host online matches with phones as
+            buzzers.
+          </>
         ) : (
           <>
+            We sent a 6-digit code to <strong>{email}</strong>. It's good for 60 minutes.
+          </>
+        )}
+      </p>
+
+      <div className="auth-actions">
+        {step === 'email' ? (
+          <>
+            <button
+              className="btn btn-primary btn-lg block google-signin"
+              data-testid="signin-google"
+              disabled={busy !== null}
+              onClick={handleGoogle}
+            >
+              <span className="g-mark" aria-hidden="true">G</span>{' '}
+              {busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
+            </button>
+
+            <div className="auth-divider"><span>or sign in with email</span></div>
+
             <label className="auth-field">
               <span>Email</span>
               <input
@@ -149,9 +178,10 @@ function SignInView({
                   setError(null);
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && email.trim()) handleEmail();
+                  if (e.key === 'Enter' && email.trim()) sendEmail('email');
                 }}
                 autoComplete="email"
+                autoFocus
                 disabled={busy !== null}
               />
             </label>
@@ -159,9 +189,74 @@ function SignInView({
               className="btn btn-secondary btn-lg block"
               data-testid="signin-email"
               disabled={!email.trim() || busy !== null}
-              onClick={handleEmail}
+              onClick={() => sendEmail('email')}
             >
-              {busy === 'email' ? 'Sending…' : '✉ Send magic link'}
+              {busy === 'email' ? 'Sending…' : '✉ Send sign-in code'}
+            </button>
+          </>
+        ) : (
+          <>
+            <label className="auth-field">
+              <span>6-digit code</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                className="auth-input auth-otp"
+                data-testid="signin-otp-input"
+                placeholder="123456"
+                maxLength={6}
+                value={code}
+                onChange={(e) => {
+                  const v = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  setCode(v);
+                  setError(null);
+                  if (v.length === 6) {
+                    // Auto-submit on full 6-digit entry (parity with palmandplate)
+                    setTimeout(() => handleVerify(), 50);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && code.length === 6) handleVerify();
+                }}
+                autoFocus
+                disabled={busy === 'verify'}
+              />
+            </label>
+            <button
+              className="btn btn-primary btn-lg block"
+              data-testid="signin-otp-verify"
+              disabled={code.length !== 6 || busy === 'verify'}
+              onClick={handleVerify}
+            >
+              {busy === 'verify' ? 'Verifying…' : 'Verify & sign in'}
+            </button>
+            <div className="auth-resend">
+              <button
+                type="button"
+                className="auth-link"
+                data-testid="signin-otp-resend"
+                disabled={cooldown > 0 || busy !== null}
+                onClick={() => sendEmail('resend')}
+              >
+                {busy === 'resend'
+                  ? 'Sending…'
+                  : cooldown > 0
+                    ? `Resend code in ${cooldown}s`
+                    : 'Didn’t get it? Resend code'}
+              </button>
+            </div>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              data-testid="signin-otp-back"
+              onClick={() => {
+                setStep('email');
+                setCode('');
+                setError(null);
+              }}
+            >
+              ‹ Use a different email
             </button>
           </>
         )}
@@ -170,9 +265,11 @@ function SignInView({
           <p className="auth-error" data-testid="auth-error" role="alert">{error}</p>
         )}
 
-        <button className="btn btn-ghost" data-testid="auth-cancel" onClick={onClose}>
-          Skip — play locally
-        </button>
+        {step === 'email' && (
+          <button className="btn btn-ghost" data-testid="auth-cancel" onClick={onClose}>
+            Skip — play locally
+          </button>
+        )}
       </div>
     </>
   );

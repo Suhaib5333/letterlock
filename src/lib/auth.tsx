@@ -13,10 +13,15 @@ interface AuthState {
   isModerator: boolean;
   isBanned: boolean;
   signInWithGoogle: () => Promise<{ ok: boolean; error?: string }>;
-  // Email magic-link — works out of the box on Supabase (default email
-  // provider, no SMTP config needed) so users can sign in even when Google
-  // OAuth isn't enabled in the dashboard yet.
+  // Email OTP — works out of the box on Supabase (default email provider,
+  // no SMTP / dashboard config needed) so users can sign in even when Google
+  // OAuth isn't enabled in the dashboard yet. The email contains both a
+  // magic-link AND a 6-digit code; we expose both flows.
   signInWithEmail: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  verifyEmailOtp: (
+    email: string,
+    code: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -111,6 +116,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: true };
   };
 
+  const verifyEmailOtp = async (
+    email: string,
+    code: string,
+  ): Promise<{ ok: boolean; error?: string }> => {
+    if (!supabase) return { ok: false, error: 'Supabase not configured.' };
+    const trimmedCode = code.trim();
+    if (!/^\d{6}$/.test(trimmedCode)) {
+      return { ok: false, error: 'Enter the 6-digit code from your email.' };
+    }
+    const { error } = await supabase.auth.verifyOtp({
+      email: email.trim(),
+      token: trimmedCode,
+      type: 'email',
+    });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  };
+
   const signOut = async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
@@ -139,6 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isBanned,
         signInWithGoogle,
         signInWithEmail,
+        verifyEmailOtp,
         signOut,
         refreshProfile,
       }}
@@ -164,6 +188,7 @@ export function useAuth(): AuthState {
       isBanned: false,
       signInWithGoogle: async () => ({ ok: false, error: 'Auth not initialised.' }),
       signInWithEmail: async () => ({ ok: false, error: 'Auth not initialised.' }),
+      verifyEmailOtp: async () => ({ ok: false, error: 'Auth not initialised.' }),
       signOut: async () => {},
       refreshProfile: async () => {},
     };
