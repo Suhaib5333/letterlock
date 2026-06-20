@@ -112,6 +112,13 @@ import { historyEasyPack } from './historyEasy';
 import { historyMediumPack } from './historyMedium';
 // Round-14: world-map identification packs (a country highlighted on the map).
 import { mapsEasyPack, mapsMediumPack, mapsHardPack } from './maps';
+// Round-16: genre-based Guess-the-Song packs (iTunes audio previews).
+import {
+  songsRockPack,
+  songsPopPack,
+  songsHiphopPack,
+  songsRnbPack,
+} from './songsByGenre';
 // Round-15: clip extras — iTunes preview audio/video mixed into the existing
 // sitcom + music decade packs (so each pack ships a trivia/clip blend).
 import {
@@ -300,6 +307,11 @@ export const PACKS: QuestionPack[] = [
   fullMusicHard,
   withExtra(melodiesPack, melodiesExtra),
   withExtra(songsPack, songsExtra),
+  // Genre-based song clip packs (iTunes 30-second previews).
+  songsRockPack,
+  songsPopPack,
+  songsHiphopPack,
+  songsRnbPack,
   historyEasyPack,
   historyMediumPack,
   withExtra(historyPack, historyGaps, historyGaps2),
