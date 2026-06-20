@@ -128,11 +128,13 @@ jobs:
           fi
           echo "✓ Project ${{ env.PROJECT_NAME }} ready"
 
-      - name: Push Cloudflare Pages secrets (bulk, non-interactive)
-        # `wrangler pages secret bulk` reads a JSON file of {"KEY":"VALUE"}
-        # and uploads them atomically. Values pass through a one-shot file
-        # in $RUNNER_TEMP that the action runner cleans up automatically;
-        # they never appear in logs.
+      - name: Push Cloudflare Pages secrets (one-by-one, non-interactive)
+        # `wrangler pages secret bulk` exists but its failure output is opaque
+        # in CI and it interacts oddly with the JSON-file positional. Loop of
+        # individual `secret put` calls is verbose, idempotent, and tells us
+        # which specific key failed if one does.
+        # Stdin pipe avoids the interactive prompt. NO_COLOR + WRANGLER_LOG=info
+        # ensure the action log is readable. Values themselves never get echoed.
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -144,25 +146,29 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           VITE_SUPABASE_URL_VALUE: ${{ vars.VITE_SUPABASE_URL || 'https://lkudntyvngwwlzuciocd.supabase.co' }}
           MAIL_FROM: ${{ vars.MAIL_FROM }}
+          NO_COLOR: "1"
         run: |
           set -e
-          FILE="$RUNNER_TEMP/cf-pages-secrets.json"
-
-          # Build the JSON via node so values are JSON-encoded safely
-          # (handles quotes, backslashes, newlines).
-          node -e '
-            const out = {};
-            const add = (k, v) => { if (v) out[k] = v; };
-            add("RESEND_API_KEY", process.env.RESEND_API_KEY);
-            add("SUPABASE_SERVICE_ROLE_KEY", process.env.SUPABASE_SERVICE_ROLE_KEY);
-            add("VITE_SUPABASE_URL", process.env.VITE_SUPABASE_URL_VALUE);
-            if (process.env.MAIL_FROM) add("MAIL_FROM", process.env.MAIL_FROM);
-            require("fs").writeFileSync(process.env.OUT_FILE, JSON.stringify(out));
-            console.log("Will push keys:", Object.keys(out).join(", "));
-          ' OUT_FILE="$FILE"
-
-          npx --yes wrangler@${{ env.WRANGLER_VERSION }} pages secret bulk \
-            "$FILE" --project-name="${{ env.PROJECT_NAME }}"
+          put() {
+            local name="$1"
+            local value="$2"
+            if [ -z "$value" ]; then
+              echo "  · $name — skipped (empty value)"
+              return 0
+            fi
+            # Print only the name + value length to the log, never the value itself.
+            echo "  → $name (${#value} chars)"
+            printf '%s' "$value" | npx --yes wrangler@${{ env.WRANGLER_VERSION }} \
+              pages secret put "$name" \
+              --project-name="${{ env.PROJECT_NAME }}" \
+              2>&1 | sed 's/^/      /'
+          }
+          echo "Pushing Pages secrets to '${{ env.PROJECT_NAME }}':"
+          put RESEND_API_KEY            "$RESEND_API_KEY"
+          put SUPABASE_SERVICE_ROLE_KEY "$SUPABASE_SERVICE_ROLE_KEY"
+          put VITE_SUPABASE_URL         "$VITE_SUPABASE_URL_VALUE"
+          put MAIL_FROM                 "$MAIL_FROM"
+          echo "✓ Pages secrets pushed"
 
       - name: Deploy to Cloudflare Pages
         id: deploy
