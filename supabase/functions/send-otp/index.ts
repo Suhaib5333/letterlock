@@ -134,7 +134,12 @@ Deno.serve(async (req) => {
   // SUPABASE_URL is automatically injected into every Edge Function by the
   // runtime — see https://supabase.com/docs/guides/functions/secrets
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  const mailFrom = Deno.env.get('MAIL_FROM') ?? 'Letterlock <onboarding@resend.dev>';
+  // Default to the user's verified raltech.dev sender; falls back to Resend's
+  // sandbox sender if the GH Variable is set to empty. If mail.raltech.dev
+  // ever fails verification, set MAIL_FROM='Letterlock <onboarding@resend.dev>'
+  // in GH Variables to switch back.
+  const mailFrom =
+    Deno.env.get('MAIL_FROM') || 'Letterlock <reminders@mail.raltech.dev>';
 
   if (!supabaseUrl || !serviceRole || !resendKey) {
     const missing: string[] = [];
