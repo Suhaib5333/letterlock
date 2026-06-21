@@ -185,61 +185,25 @@ jobs:
           done
           echo "✓ All migrations applied"
 
-      - name: Set Supabase Edge Function secrets (Management API)
-        # Push RESEND_API_KEY + SUPABASE_SERVICE_ROLE_KEY + MAIL_FROM as
-        # project secrets so the send-otp edge function can read them via
-        # Deno.env. Uses Management API PATCH /v1/projects/{ref}/secrets
-        # (idempotent — POSTing an existing name overwrites).
+      - name: Deploy Supabase Edge Functions + set secrets
+        # Single step does both via the Supabase CLI (more reliable than
+        # hand-rolled Management API curl — the API endpoint for setting
+        # project secrets isn't publicly documented and PATCH/POST shapes
+        # differ across Supabase versions).
+        #
+        # `supabase secrets set` and `functions deploy --use-api` both pick
+        # up SUPABASE_ACCESS_TOKEN from env, so no `supabase login` needed
+        # and no Docker on the runner.
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           PROJECT_REF: lkudntyvngwwlzuciocd
           RESEND_API_KEY: ${{ vars.RESEND_API_KEY || vars.RESEND_API }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY_VALUE: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           MAIL_FROM: ${{ vars.MAIL_FROM }}
         run: |
           set -e
           if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
-            echo "::warning ::Skipping Edge Function secrets — SUPABASE_ACCESS_TOKEN not set."
-            exit 0
-          fi
-          # Build the JSON payload via node so values JSON-encode safely.
-          BODY=$(node -e '
-            const out = [];
-            const add = (name, v) => { if (v) out.push({ name, value: v }); };
-            add("RESEND_API_KEY", process.env.RESEND_API_KEY);
-            add("SUPABASE_SERVICE_ROLE_KEY", process.env.SUPABASE_SERVICE_ROLE_KEY);
-            if (process.env.MAIL_FROM) add("MAIL_FROM", process.env.MAIL_FROM);
-            process.stdout.write(JSON.stringify(out));
-            console.error("Will set:", out.map(x => x.name).join(", "));
-          ')
-          RESPONSE=$(printf '%s' "$BODY" | curl -sS -w "\n%{http_code}" -X POST \
-            "https://api.supabase.com/v1/projects/$PROJECT_REF/secrets" \
-            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data-binary @-)
-          HTTP_CODE=$(printf '%s' "$RESPONSE" | tail -n1)
-          HTTP_BODY=$(printf '%s' "$RESPONSE" | sed '$d')
-          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "204" ]; then
-            echo "✓ Edge Function secrets set (HTTP $HTTP_CODE)"
-          else
-            echo "::error ::Setting Edge Function secrets failed (HTTP $HTTP_CODE)"
-            echo "  Response: $HTTP_BODY"
-            exit 1
-          fi
-
-      - name: Deploy Supabase Edge Functions
-        # Deploys every function in supabase/functions/*/index.ts. Uses
-        # --no-verify-jwt because the send-otp function is intentionally
-        # public (it generates an OTP for a brand-new email that has no JWT
-        # yet). The function still rate-limits via Supabase's own admin API.
-        # --use-api avoids needing Docker on the CI runner.
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          PROJECT_REF: lkudntyvngwwlzuciocd
-        run: |
-          set -e
-          if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
-            echo "::warning ::Skipping Edge Function deploy — SUPABASE_ACCESS_TOKEN not set."
+            echo "::warning ::Skipping Edge Functions — SUPABASE_ACCESS_TOKEN not set."
             exit 0
           fi
           shopt -s nullglob
@@ -248,8 +212,26 @@ jobs:
             echo "No Edge Functions found in supabase/functions/ — skipping"
             exit 0
           fi
-          # Pin the CLI version to keep the deploy reproducible.
+
+          echo "▸ Installing Supabase CLI"
+          # The npm package name is 'supabase'; install pinned version.
           npm install -g supabase@1.219.0 2>&1 | tail -3
+          supabase --version
+
+          # Write secrets to a temp .env file so values never appear on the
+          # command line (and so they JSON-encode safely if they contain
+          # special chars). Using --env-file is the idiomatic Supabase way.
+          ENV_FILE="$RUNNER_TEMP/edge-fn.env"
+          # Use a heredoc with quoted EOF — no variable expansion inside.
+          {
+            [ -n "$RESEND_API_KEY" ] && printf 'RESEND_API_KEY=%s\n' "$RESEND_API_KEY"
+            [ -n "$SUPABASE_SERVICE_ROLE_KEY_VALUE" ] && printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY_VALUE"
+            [ -n "$MAIL_FROM" ] && printf 'MAIL_FROM=%s\n' "$MAIL_FROM"
+          } > "$ENV_FILE"
+          echo "▸ Setting function secrets (keys: $(grep -oE '^[A-Z_]+' "$ENV_FILE" | tr '\n' ' '))"
+          supabase secrets set --env-file "$ENV_FILE" --project-ref "$PROJECT_REF" 2>&1 | sed 's/^/  /'
+          rm -f "$ENV_FILE"
+
           for f in "${FUNCS[@]}"; do
             name=$(basename "$(dirname "$f")")
             echo "▸ Deploying function '$name'"
@@ -258,7 +240,7 @@ jobs:
               --no-verify-jwt \
               --use-api 2>&1 | sed 's/^/  /'
           done
-          echo "✓ Edge Functions deployed"
+          echo "✓ Edge Functions deployed and secrets set"
 
       - name: Ensure Pages project exists
         # Idempotent — `project create` errors if it already exists; we
