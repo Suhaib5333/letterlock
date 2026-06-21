@@ -122,8 +122,12 @@ function SignInView({
     }
   };
 
+  // Supabase OTPs are project-configurable 6–10 digits. We treat anything
+  // 6+ as valid client-side and let supabase.auth.verifyOtp decide for sure.
+  const codeReady = /^\d{6,10}$/.test(code);
+
   const handleVerify = async () => {
-    if (code.length !== 6) return;
+    if (!codeReady) return;
     play('pick');
     setError(null);
     setBusy('verify');
@@ -197,27 +201,25 @@ function SignInView({
         ) : (
           <>
             <label className="auth-field">
-              <span>6-digit code</span>
+              <span>Code from email</span>
               <input
                 type="text"
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 className="auth-input auth-otp"
                 data-testid="signin-otp-input"
-                placeholder="123456"
-                maxLength={6}
+                placeholder="Paste your code"
+                // 10 is Supabase's maximum OTP length. The frontend handles
+                // 6–10 because mailer_otp_length is project-configurable.
+                maxLength={10}
                 value={code}
                 onChange={(e) => {
-                  const v = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  const v = e.target.value.replace(/\D/g, '').slice(0, 10);
                   setCode(v);
                   setError(null);
-                  if (v.length === 6) {
-                    // Auto-submit on full 6-digit entry (parity with palmandplate)
-                    setTimeout(() => handleVerify(), 50);
-                  }
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && code.length === 6) handleVerify();
+                  if (e.key === 'Enter' && codeReady) handleVerify();
                 }}
                 autoFocus
                 disabled={busy === 'verify'}
@@ -226,7 +228,7 @@ function SignInView({
             <button
               className="btn btn-primary btn-lg block"
               data-testid="signin-otp-verify"
-              disabled={code.length !== 6 || busy === 'verify'}
+              disabled={!codeReady || busy === 'verify'}
               onClick={handleVerify}
             >
               {busy === 'verify' ? 'Verifying…' : 'Verify & sign in'}

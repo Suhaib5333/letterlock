@@ -167,8 +167,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ): Promise<{ ok: boolean; error?: string }> => {
     if (!supabase) return { ok: false, error: 'Supabase not configured.' };
     const trimmedCode = code.trim();
-    if (!/^\d{6}$/.test(trimmedCode)) {
-      return { ok: false, error: 'Enter the 6-digit code from your email.' };
+    // Supabase OTP length is project-configurable (6–10 digits). The workflow
+    // patches it to 6, but accepting any length in that range keeps the UI
+    // working if the project setting drifts or someone reconfigures it.
+    if (!/^\d{6,10}$/.test(trimmedCode)) {
+      return { ok: false, error: 'Enter the digits from your email.' };
     }
     const { error } = await supabase.auth.verifyOtp({
       email: email.trim(),
