@@ -215,7 +215,7 @@ jobs:
 
           echo "▸ Installing Supabase CLI"
           # The npm package name is 'supabase'; install pinned version.
-          npm install -g supabase@1.219.0 2>&1 | tail -3
+          npm install -g supabase@2.107.0 2>&1 | tail -3
           supabase --version
 
           # Write secrets to a temp .env file so values never appear on the
