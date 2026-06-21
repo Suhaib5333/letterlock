@@ -59,66 +59,75 @@ function isEmail(s: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 }
 
-function emailHtml(otp: string, magicLink: string): string {
+// Email design notes — every choice here is for deliverability + UX:
+//   • Light-themed HTML (not dark) — dark emails score worse on most spam
+//     filters and look wrong in users' default light-mode clients.
+//   • Single semantic <table> layout, no images, no remote assets — every
+//     external fetch costs spam-score points.
+//   • NO clickable magic link (per user request — code only). Fewer links
+//     also means a much better spam score.
+//   • Plain-text version mirrors the HTML 1:1 so spam filters don't flag
+//     the text/HTML mismatch (a classic spam signal).
+//   • Code presented in a way mail.app/Gmail iOS recognise as a one-time
+//     code (the digits sit clearly in a code block, the subject contains
+//     "code", and the iOS quick-fill heuristic picks them up).
+function emailHtml(otp: string): string {
   const code = otp.replace(/(\d{3})(\d{3})/, '$1 $2');
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Your Letterlock sign-in code</title>
+  <title>Your Letterlock verification code is ${otp}</title>
 </head>
-<body style="margin:0;padding:0;background:#0b1020;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e6e8ef;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0b1020;padding:40px 12px;">
+<body style="margin:0;padding:0;background:#f5f6fa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a2240;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f6fa;padding:32px 12px;">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background:#11172b;border:1px solid #1f2742;border-radius:18px;overflow:hidden;">
-        <tr><td style="padding:32px 32px 8px 32px;text-align:center;">
-          <div style="font-size:30px;font-weight:800;letter-spacing:-0.01em;color:#e6e8ef;">
-            Letterlock <span style="color:#7b8cff;">🔒</span>
-          </div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;background:#ffffff;border:1px solid #e3e6f0;border-radius:12px;">
+        <tr><td style="padding:32px 32px 8px 32px;">
+          <div style="font-size:22px;font-weight:700;color:#1a2240;">Letterlock</div>
         </td></tr>
-        <tr><td style="padding:8px 32px 24px 32px;">
-          <h1 style="font-size:20px;font-weight:700;margin:16px 0 8px 0;color:#e6e8ef;">Your sign-in code</h1>
-          <p style="font-size:15px;line-height:1.55;color:#aab0c4;margin:0 0 24px 0;">Enter this code in the Letterlock app to sign in:</p>
-          <div style="background:#0b1020;border:1px solid #1f2742;border-radius:14px;padding:22px;text-align:center;margin:0 0 24px 0;">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:#7a83a3;margin-bottom:10px;">Verification code</div>
-            <div style="font-size:42px;font-weight:800;letter-spacing:0.22em;color:#e6e8ef;font-variant-numeric:tabular-nums;">${code}</div>
-            <div style="font-size:12px;color:#7a83a3;margin-top:10px;">Expires in 60 minutes · single-use</div>
-          </div>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td align="center">
-              <a href="${magicLink}" target="_blank" rel="noopener" style="display:inline-block;padding:14px 28px;background:#7b8cff;color:#0b1020;text-decoration:none;border-radius:12px;font-weight:700;font-size:15px;">Or click here to sign in</a>
-            </td></tr>
-          </table>
-          <p style="font-size:12px;color:#6b738f;margin:24px 0 0 0;line-height:1.5;">
-            Didn’t request this? Ignore the email — nothing happens without the code.
+        <tr><td style="padding:8px 32px 28px 32px;">
+          <p style="font-size:15px;line-height:1.55;color:#1a2240;margin:0 0 12px 0;">
+            Hi,
+          </p>
+          <p style="font-size:15px;line-height:1.55;color:#1a2240;margin:0 0 20px 0;">
+            Use the verification code below to sign in to your Letterlock account.
+            The code expires in 60 minutes and can only be used once.
+          </p>
+          <div style="font-size:13px;color:#5a6280;margin-bottom:6px;">Verification code:</div>
+          <div style="font-size:34px;font-weight:700;letter-spacing:0.18em;color:#1a2240;font-variant-numeric:tabular-nums;margin:0 0 20px 0;">${code}</div>
+          <p style="font-size:13px;line-height:1.5;color:#5a6280;margin:0;">
+            If you didn’t try to sign in, you can safely ignore this email — nothing happens without the code.
+          </p>
+        </td></tr>
+        <tr><td style="padding:0 32px 24px 32px;border-top:1px solid #e3e6f0;padding-top:16px;">
+          <p style="font-size:12px;color:#7a83a3;margin:0;">
+            Letterlock — letterlock.raltech.dev
           </p>
         </td></tr>
       </table>
-      <p style="font-size:11px;color:#5a6280;margin:16px 0 0 0;text-align:center;">
-        Letterlock · connect your edges ·
-        <a href="https://letterlock.raltech.dev" style="color:#7b8cff;text-decoration:none;">letterlock.raltech.dev</a>
-      </p>
     </td></tr>
   </table>
 </body>
 </html>`;
 }
 
-function emailText(otp: string, magicLink: string): string {
-  return `Your Letterlock sign-in code
+function emailText(otp: string): string {
+  return `Letterlock
 
-Enter this code in the app to sign in:
+Hi,
 
-   ${otp}
+Use the verification code below to sign in to your Letterlock account.
+The code expires in 60 minutes and can only be used once.
 
-(Expires in 60 minutes — single use.)
+Verification code: ${otp}
 
-Or click this link instead: ${magicLink}
+If you didn't try to sign in, you can safely ignore this email — nothing
+happens without the code.
 
-Didn’t request this? Ignore the email.
-
-— Letterlock`;
+— Letterlock
+letterlock.raltech.dev`;
 }
 
 Deno.serve(async (req) => {
@@ -193,8 +202,9 @@ Deno.serve(async (req) => {
   }
   const generated = (await genLinkResp.json()) as GenerateLinkResponse;
   const otp = generated.properties?.email_otp ?? generated.email_otp;
-  const magicLink = generated.properties?.action_link ?? generated.action_link ?? origin;
-
+  // We mint the magic link too (Supabase always returns one) but no longer
+  // include it in the email — user requested code-only emails for clarity
+  // and better deliverability (every link costs spam score).
   if (!otp) {
     console.error('[send-otp] no email_otp in generate_link response', generated);
     return jsonResponse(
@@ -203,7 +213,16 @@ Deno.serve(async (req) => {
     );
   }
 
-  // 2. Send via Resend.
+  // 2. Send via Resend — with deliverability tuning (Context7-verified against
+  // resend.com/docs/api-reference/emails/send-batch-emails):
+  //   • subject contains the code → Gmail/iOS Mail auto-fill heuristic
+  //     recognises it as a one-time code and offers it as suggested keyboard
+  //     input on the OTP entry screen.
+  //   • reply_to set to a real, monitored address (or a no-reply alias on
+  //     the verified domain) so the message doesn't look "blackhole-sender".
+  //   • tags so we can filter in the Resend dashboard.
+  //   • headers.X-Entity-Ref-ID for Gmail's transactional-mail signal.
+  const replyTo = Deno.env.get('MAIL_REPLY_TO') ?? 'support@mail.raltech.dev';
   const resendResp = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -213,9 +232,18 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       from: mailFrom,
       to: [email],
-      subject: 'Your Letterlock sign-in code',
-      html: emailHtml(otp, magicLink),
-      text: emailText(otp, magicLink),
+      reply_to: replyTo,
+      subject: `Your Letterlock verification code is ${otp}`,
+      html: emailHtml(otp),
+      text: emailText(otp),
+      headers: {
+        // Helps Gmail classify this as transactional rather than bulk/marketing.
+        'X-Entity-Ref-ID': `letterlock-otp-${crypto.randomUUID()}`,
+      },
+      tags: [
+        { name: 'category', value: 'auth' },
+        { name: 'kind', value: 'otp' },
+      ],
     }),
   });
 
