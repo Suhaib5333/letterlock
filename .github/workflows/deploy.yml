@@ -127,43 +127,63 @@ jobs:
           echo "✓ Bundle built; Supabase URL baked in (project ref present)"
 
       - name: Apply Supabase database migrations
-        # Optional step — runs only when SUPABASE_ACCESS_TOKEN AND
-        # SUPABASE_DB_PASSWORD are both set as GitHub Secrets. The Supabase
-        # CLI tracks applied migrations in supabase_migrations.schema_migrations,
-        # so this is idempotent: only new files in supabase/migrations/ run.
+        # Optional step — runs only when SUPABASE_ACCESS_TOKEN is set as a
+        # GitHub Secret. Uses Supabase's Management API
+        # (POST /v1/projects/{ref}/database/query) to execute each SQL
+        # migration file directly. NO DB PASSWORD NEEDED — the access token
+        # is the only credential.
         #
-        # If either secret is missing the step prints how to add them and
-        # exits 0 — the rest of the deploy still succeeds; you can apply
-        # migrations by pasting the SQL files into the dashboard SQL editor
-        # at any time.
+        # The migration files in supabase/migrations/ are intentionally
+        # idempotent: they use CREATE TABLE IF NOT EXISTS, CREATE OR REPLACE,
+        # ADD COLUMN IF NOT EXISTS, INSERT ... ON CONFLICT DO UPDATE, etc.
+        # So re-running them on every push is safe — already-applied DDL
+        # is a no-op.
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PROJECT_REF: lkudntyvngwwlzuciocd
         run: |
           set -e
-          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_DB_PASSWORD" ]; then
-            echo "::warning ::Skipping migrations — need SUPABASE_ACCESS_TOKEN + SUPABASE_DB_PASSWORD as GitHub Secrets."
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo "::warning ::Skipping migrations — set SUPABASE_ACCESS_TOKEN as a GitHub Secret to enable."
             echo ""
-            echo "  Access token: https://supabase.com/dashboard/account/tokens (Generate new)"
-            echo "  DB password:  https://supabase.com/dashboard/project/lkudntyvngwwlzuciocd/settings/database"
-            echo "                → 'Database password' (use 'Reset database password' if you forgot it)"
+            echo "  Get one at: https://supabase.com/dashboard/account/tokens (Generate new)"
+            echo "  Add at:     https://github.com/${{ github.repository }}/settings/secrets/actions"
             echo ""
-            echo "  Add both at: https://github.com/${{ github.repository }}/settings/secrets/actions"
-            echo "  Until then, paste supabase/migrations/*.sql into the dashboard SQL editor by hand."
+            echo "  Until then, paste supabase/migrations/*.sql into the dashboard SQL editor."
             exit 0
           fi
-          echo "▸ Installing Supabase CLI"
-          # Pin to a known-good version — keeps CI reproducible.
-          npm install -g supabase@1.219.0
-          echo "▸ Linking project (lkudntyvngwwlzuciocd)"
-          supabase link --project-ref lkudntyvngwwlzuciocd --password "$SUPABASE_DB_PASSWORD" 2>&1 | sed 's/^/  /'
-          echo "▸ Pushing migrations (only new files apply)"
-          # `--include-all` makes the CLI ignore the local migration-history
-          # gap that exists when this is the first ever push (it tries to
-          # only show the diff otherwise). Idempotent — already-applied
-          # migrations are skipped.
-          supabase db push --include-all --password "$SUPABASE_DB_PASSWORD" 2>&1 | sed 's/^/  /'
-          echo "✓ Database migrations applied"
+          shopt -s nullglob
+          MIGRATIONS=(supabase/migrations/*.sql)
+          if [ ${#MIGRATIONS[@]} -eq 0 ]; then
+            echo "No migrations found in supabase/migrations/ — nothing to apply"
+            exit 0
+          fi
+          echo "Applying ${#MIGRATIONS[@]} migration file(s) to project $PROJECT_REF…"
+          for f in "${MIGRATIONS[@]}"; do
+            echo "▸ $(basename "$f")"
+            # Build the JSON body via node so the SQL (which contains quotes,
+            # newlines, backslashes, dollar-quoted strings) is escaped safely.
+            BODY=$(node -e '
+              const sql = require("fs").readFileSync(process.argv[1], "utf8");
+              process.stdout.write(JSON.stringify({ query: sql }));
+            ' "$f")
+            # Capture HTTP code + body separately.
+            RESPONSE=$(printf '%s' "$BODY" | curl -sS -w "\n%{http_code}" -X POST \
+              "https://api.supabase.com/v1/projects/$PROJECT_REF/database/query" \
+              -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data-binary @-)
+            HTTP_CODE=$(printf '%s' "$RESPONSE" | tail -n1)
+            HTTP_BODY=$(printf '%s' "$RESPONSE" | sed '$d')
+            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ]; then
+              echo "  ✓ applied (HTTP $HTTP_CODE)"
+            else
+              echo "::error ::Migration $(basename "$f") failed with HTTP $HTTP_CODE"
+              echo "  Response: $HTTP_BODY" | sed 's/^/  /'
+              exit 1
+            fi
+          done
+          echo "✓ All migrations applied"
 
       - name: Ensure Pages project exists
         # Idempotent — `project create` errors if it already exists; we
