@@ -213,16 +213,6 @@ Deno.serve(async (req) => {
     );
   }
 
-  // Debug mode (CI E2E test): if the caller authenticated with service_role,
-  // skip Resend entirely and just return the OTP. This lets the GH Actions
-  // workflow verify the FULL mint→verify chain without burning a real email
-  // send and without needing a valid recipient address.
-  const authHeader = req.headers.get('authorization') ?? '';
-  const isServiceRoleCall = authHeader === `Bearer ${serviceRole}`;
-  if (isServiceRoleCall) {
-    return jsonResponse({ ok: true, debug: { otp } });
-  }
-
   // 2. Send via Resend — with deliverability tuning (Context7-verified against
   // resend.com/docs/api-reference/emails/send-batch-emails):
   //   • subject contains the code → Gmail/iOS Mail auto-fill heuristic

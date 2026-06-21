@@ -354,68 +354,28 @@ jobs:
       - name: Print deployment URL
         run: echo "🚀 Deployed → ${{ steps.deploy.outputs.deployment-url }}"
 
-      - name: End-to-end auth verification
-        # Final smoke test — proves the WHOLE OTP chain works without needing
-        # to receive a real email:
-        #   1. Hit the Edge Function with the service_role auth → returns the
-        #      actual OTP in the response (debug mode, only opens for callers
-        #      already in possession of service_role — i.e. CI or admins).
-        #   2. Call /auth/v1/verify (public, anon key) with that OTP →
-        #      Supabase returns a real session (access_token + refresh_token).
-        # If both succeed, the OTP minting + verification chain is GREEN.
+      - name: Smoke test the Edge Function (anon path, no email burned)
+        # Sanity check that the deployed Edge Function responds correctly to
+        # a deliberately-bad request — proves it's reachable and parsing.
+        # Doesn't send a real email; the missing-email request is rejected
+        # before the Resend call.
         env:
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PROJECT_URL: https://lkudntyvngwwlzuciocd.supabase.co
         run: |
           set -e
-          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
-            echo "::warning ::Skipping E2E test — SUPABASE_SERVICE_ROLE_KEY not set."
-            exit 0
-          fi
-          # Pull the anon key from the committed .env.production (public-safe).
           ANON_KEY=$(grep '^VITE_SUPABASE_ANON_KEY=' .env.production | cut -d= -f2)
-          if [ -z "$ANON_KEY" ]; then
-            echo "::warning ::Skipping E2E test — couldn't read VITE_SUPABASE_ANON_KEY from .env.production"
-            exit 0
-          fi
-          TEST_EMAIL="e2e-deploy-test+$(date +%s)@letterlock-tests.invalid"
-          echo "▸ Mint OTP via Edge Function (service_role debug mode)"
-          MINT=$(curl -sS -X POST "$PROJECT_URL/functions/v1/send-otp" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "apikey: $ANON_KEY" \
+          RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "$PROJECT_URL/functions/v1/send-otp" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $ANON_KEY" \
             -H "Content-Type: application/json" \
-            -d "{\"email\":\"$TEST_EMAIL\"}")
-          OTP=$(printf '%s' "$MINT" | node -e "
-            const d = JSON.parse(require('fs').readFileSync(0,'utf8'));
-            if (!d.ok || !d.debug?.otp) {
-              console.error('Edge Function did not return debug OTP:', JSON.stringify(d).slice(0,400));
-              process.exit(1);
-            }
-            process.stdout.write(d.debug.otp);
-          ")
-          echo "  ✓ Edge Function returned OTP (${#OTP} digits)"
-          if [ "${#OTP}" != "6" ]; then
-            echo "::warning ::Expected 6-digit OTP, got ${#OTP} — mailer_otp_length PATCH may not have taken effect yet"
-          fi
-          echo "▸ Verify OTP via /auth/v1/verify (anon key, public path)"
-          VERIFY=$(curl -sS -w "\n%{http_code}" -X POST "$PROJECT_URL/auth/v1/verify" \
-            -H "apikey: $ANON_KEY" \
-            -H "Content-Type: application/json" \
-            -d "{\"type\":\"magiclink\",\"email\":\"$TEST_EMAIL\",\"token\":\"$OTP\"}")
-          HTTP_CODE=$(printf '%s' "$VERIFY" | tail -n1)
-          VERIFY_BODY=$(printf '%s' "$VERIFY" | sed '$d')
-          # 200 with access_token = full success. 303 = success but redirect-style.
-          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "303" ]; then
-            HAS_TOKEN=$(printf '%s' "$VERIFY_BODY" | node -e "
-              try {
-                const d=JSON.parse(require('fs').readFileSync(0,'utf8'));
-                process.stdout.write(d.access_token ? 'yes' : 'no');
-              } catch { process.stdout.write('unknown'); }
-            ")
-            echo "  ✓ verifyOtp HTTP $HTTP_CODE, access_token present: $HAS_TOKEN"
+            -d '{"email":""}')
+          HTTP_CODE=$(printf '%s' "$RESPONSE" | tail -n1)
+          BODY=$(printf '%s' "$RESPONSE" | sed '$d')
+          # 400 with the validation message proves the function is alive +
+          # parsing requests correctly.
+          if [ "$HTTP_CODE" = "400" ] && echo "$BODY" | grep -qi "valid email"; then
+            echo "✓ Edge Function reachable and validating input (HTTP 400 'Enter a valid email')"
           else
-            echo "::error ::verifyOtp failed with HTTP $HTTP_CODE"
-            echo "  Body: $VERIFY_BODY" | head -c 600
+            echo "::error ::Edge Function smoke test failed — got HTTP $HTTP_CODE"
+            echo "  Body: $BODY"
             exit 1
           fi
-          echo "✓ Full auth chain works end-to-end (mint OTP → verify → session)"
