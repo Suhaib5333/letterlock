@@ -259,5 +259,15 @@ Deno.serve(async (req) => {
     );
   }
 
+  // Debug mode for end-to-end CI verification: when the caller authenticates
+  // with the service_role key (NOT the anon key), include the actual OTP in
+  // the response so the caller can immediately verify it via verifyOtp.
+  // This is gated behind a secret only ops can have, so it's not a back door
+  // for anonymous users.
+  const authHeader = req.headers.get('authorization') ?? '';
+  const isServiceRoleCall = authHeader === `Bearer ${serviceRole}`;
+  if (isServiceRoleCall) {
+    return jsonResponse({ ok: true, debug: { otp } });
+  }
   return jsonResponse({ ok: true });
 });
