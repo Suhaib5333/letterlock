@@ -106,31 +106,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: false, error: 'Enter a valid email address.' };
     }
 
-    // Preferred path: our Cloudflare Pages Function at /api/auth/send-otp.
+    // Preferred path: our Supabase Edge Function at /functions/v1/send-otp.
     // It calls Supabase Admin (service_role) to mint an OTP, then sends the
-    // email through Resend — bypassing Supabase's 2-emails-per-hour default
-    // mailer rate limit. The function is at `functions/api/auth/send-otp.ts`.
+    // email via Resend — bypassing Supabase's 2-emails-per-hour default
+    // mailer rate limit AND avoiding Cloudflare in the email path entirely.
+    // The function source is at `supabase/functions/send-otp/index.ts`.
     //
-    // If the function isn't deployed yet (the env vars are still being set
-    // up), fall back to Supabase's default signInWithOtp so sign-in still
-    // works at all.
-    try {
-      const res = await fetch('/api/auth/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: trimmed }),
-      });
-      if (res.ok) return { ok: true };
-      // 404 → function not deployed yet → fall through to direct supabase.
-      // Any other non-2xx → surface the function's error verbatim.
-      if (res.status !== 404) {
-        const data = (await res.json().catch(() => ({ error: 'Unknown error' }))) as {
-          error?: string;
-        };
-        return { ok: false, error: data.error ?? `Send failed (HTTP ${res.status}).` };
+    // If the function isn't deployed yet (or returns 404), fall back to
+    // Supabase's default signInWithOtp so sign-in still works at all.
+    const supabaseUrl = (supabase as unknown as { supabaseUrl?: string }).supabaseUrl
+      ?? (import.meta.env.VITE_SUPABASE_URL as string | undefined);
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+    if (supabaseUrl && anonKey) {
+      try {
+        const res = await fetch(`${supabaseUrl}/functions/v1/send-otp`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // Edge Functions accept the anon key in the apikey header. Even
+            // with --no-verify-jwt this is good practice; some Supabase
+            // gateways enforce it.
+            apikey: anonKey,
+            Authorization: `Bearer ${anonKey}`,
+          },
+          body: JSON.stringify({ email: trimmed }),
+        });
+        if (res.ok) return { ok: true };
+        // 404 → function not deployed yet → fall through to direct supabase.
+        if (res.status !== 404) {
+          const data = (await res.json().catch(() => ({ error: 'Unknown error' }))) as {
+            error?: string;
+          };
+          return { ok: false, error: data.error ?? `Send failed (HTTP ${res.status}).` };
+        }
+      } catch {
+        // Network failure — fall through.
       }
-    } catch {
-      // Network or no function deployed — fall through.
     }
 
     // Fallback: direct Supabase mailer (works, but rate-limited 2/hour).
