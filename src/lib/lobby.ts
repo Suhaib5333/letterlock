@@ -52,6 +52,9 @@ export type LobbyEvent =
       type: 'question_served';
       cell: number;
       letter: string;
+      // The team whose turn it is — they answer FIRST; the other team is locked
+      // until the steal window opens.
+      picker?: PlayerTeam;
       // For letterless packs the prompt carries audio/video/image URLs; players
       // see the prompt text + media right on their phone.
       prompt: string;
@@ -76,6 +79,15 @@ export type LobbyEvent =
   | { type: 'game_over'; winner: PlayerTeam | null }
   // team === null un-assigns the player (host "×" / kick back to the pool).
   | { type: 'team_assigned'; playerId: string; team: PlayerTeam | null }
+  // The colour-NAMES of each team (e.g. "Teal" / "Rose") so player phones show
+  // the colour instead of a generic "Team A/B".
+  | { type: 'team_labels'; A: string; B: string }
+  // A (re)connecting phone asks the host to resend the current state (used after
+  // the tab is backgrounded and the socket goes stale).
+  | { type: 'request_state'; playerId: string }
+  // Sent by the host when the picking team's time is up → the OTHER team may now
+  // answer (steal window). cell scopes it to the current question.
+  | { type: 'steal_open'; cell: number }
   | { type: 'match_started' }
   | { type: 'host_left' };
 

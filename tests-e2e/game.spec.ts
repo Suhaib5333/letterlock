@@ -643,6 +643,9 @@ test('online host lobby renders a 6-char code, QR and Copy button', async ({ pag
   await page.goto('/');
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-online').click();
+  // Online does Setup first (colours/pack), THEN mints the room code.
+  await expect(page.getByTestId('start-match')).toBeVisible();
+  await page.getByTestId('start-match').click();
   await expect(page.getByTestId('lobby-host')).toBeVisible();
   const code = page.getByTestId('lobby-code');
   await expect(code).toBeVisible();
@@ -707,6 +710,7 @@ test('online host join URL targets the controller view', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-online').click();
+  await page.getByTestId('start-match').click(); // Online: Setup → Create room
   await expect(page.getByTestId('lobby-host')).toBeVisible();
   // The advertised join link must include view=controller or the QR loads the
   // full app (Home) instead of the phone controller.
@@ -734,20 +738,22 @@ test('online end-to-end: host question reaches a player who answers, host sees i
   await host.goto('/');
   await host.getByTestId('play-button').click();
   await host.getByTestId('mode-online').click();
+  // Online does Setup first, then "Create room ▸" mints the code.
+  await host.getByTestId('start-match').click();
   await expect(host.getByTestId('lobby-host')).toBeVisible();
   await expect(host.getByTestId('lobby-start')).toBeEnabled({ timeout: 20000 });
   const code = (await host.getByTestId('lobby-code').innerText()).replace(/[^A-Z0-9]/gi, '');
 
   const playerCtx = await browser.newContext();
   const player = await playerCtx.newPage();
+  // name in the URL auto-joins (skips the name-entry screen).
   await player.goto(`/?room=${code}&view=controller&name=Tester`);
   await expect(player.getByTestId('controller-lobby')).toBeVisible({ timeout: 20000 });
 
-  // Host sees the player, assigns to Blue, starts.
+  // Host sees the player, assigns to Blue (= Team A = first picker), starts.
   await expect(host.getByTestId('lobby-count')).toContainText('1 connected', { timeout: 20000 });
   await host.locator('.lobby-unassigned button', { hasText: 'Blue' }).first().click();
   await host.getByTestId('lobby-start').click();
-  await host.getByTestId('start-match').click();
   await expect(host.getByTestId('game-screen')).toBeVisible();
 
   // Host serves a question → it must reach the player's phone.
@@ -755,10 +761,12 @@ test('online end-to-end: host question reaches a player who answers, host sees i
   await expect(host.getByTestId('question-card')).toBeVisible();
   await expect(player.getByTestId('controller-question')).toBeVisible({ timeout: 20000 });
 
-  // Player answers → host must see the submission.
-  await player.getByTestId('controller-input').fill('Banana');
+  // Player (the picking team) answers → host reveals → must see the submission.
+  await player.getByTestId('controller-input').fill('Zzxqyw'); // gibberish: won't auto-grade
   await player.getByTestId('controller-submit').click();
-  await expect(host.getByTestId('online-answers')).toContainText('Banana', { timeout: 20000 });
+  await expect(host.getByTestId('online-show-answers')).toBeVisible({ timeout: 20000 });
+  await host.getByTestId('online-show-answers').click();
+  await expect(host.getByTestId('online-answers')).toContainText('Zzxqyw', { timeout: 20000 });
 
   await playerCtx.close();
   await hostCtx.close();

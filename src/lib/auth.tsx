@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
+import { configureProgress } from '../state/progress';
 import { supabase, type Profile } from './supabase';
 
 interface AuthState {
@@ -61,6 +62,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sub.subscription.unsubscribe();
     };
   }, []);
+
+  // Point the question-progress tracker at the current identity: signed-in users
+  // load their saved no-repeat cycle from the DB; guests get a fresh cycle each
+  // session. Runs once loading settles and whenever the user switches.
+  useEffect(() => {
+    if (loading) return;
+    void configureProgress(user?.id ?? null);
+  }, [user?.id, loading]);
 
   // Load the profile row whenever the user changes — drives the username
   // gate (a fresh Google sign-in has no profile until they claim a name).

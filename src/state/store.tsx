@@ -44,6 +44,9 @@ export interface StoreState {
   log: GameLog;
   game: GameState;
   ui: UiState;
+  // True when the player chose Online Mode: Setup is done first, THEN the lobby
+  // code is shown (so team colours are picked before sharing the room).
+  online: boolean;
 }
 
 const EMPTY_UI: UiState = {
@@ -86,6 +89,7 @@ const PLACEHOLDER_GAME = replay([
 
 type Action =
   | { type: 'SET_SCREEN'; screen: Screen }
+  | { type: 'SET_ONLINE'; value: boolean }
   | { type: 'UPDATE_SETTINGS'; patch: Partial<Settings> }
   | { type: 'UPDATE_SETUP'; patch: Partial<SetupForm> }
   | { type: 'START_MATCH' }
@@ -199,6 +203,9 @@ function reducer(state: StoreState, action: Action): StoreState {
   switch (action.type) {
     case 'SET_SCREEN':
       return { ...state, screen: action.screen };
+
+    case 'SET_ONLINE':
+      return { ...state, online: action.value };
 
     case 'UPDATE_SETTINGS':
       return { ...state, settings: { ...state.settings, ...action.patch } };
@@ -346,6 +353,28 @@ function reducer(state: StoreState, action: Action): StoreState {
 
     case 'UNDO': {
       const { log, state: game } = undoLast(state.log);
+      // "Half-question" undo: if the move we just reverted was an adjudication
+      // (so the now-last event is the QuestionServed it resolved), restore the
+      // question view and re-show the SAME question — the host can re-judge it
+      // without burning a new question. Any other undo returns to the pick phase.
+      const last = log[log.length - 1];
+      if (last && last.type === 'QuestionServed' && state.opts) {
+        const q = allQuestions(state.opts.pack as QuestionPack).find((x) => x.id === last.questionId);
+        if (q) {
+          return {
+            ...state,
+            log,
+            game,
+            ui: {
+              ...EMPTY_UI,
+              phase: 'question',
+              selectedCell: last.cell,
+              served: { question: q, letter: last.letter, cell: last.cell },
+              pulse: state.ui.pulse + 1,
+            },
+          };
+        }
+      }
       return { ...state, log, game, ui: { ...EMPTY_UI, pulse: state.ui.pulse + 1 } };
     }
 
@@ -386,7 +415,7 @@ function reducer(state: StoreState, action: Action): StoreState {
     }
 
     case 'EXIT_HOME':
-      return { ...state, screen: 'home' };
+      return { ...state, screen: 'home', online: false };
 
     case 'HYDRATE':
       return { ...state, ...action.payload };
@@ -402,6 +431,7 @@ const initialState: StoreState = {
   log: [],
   game: PLACEHOLDER_GAME,
   ui: { ...EMPTY_UI },
+  online: false,
 };
 
 interface StoreApi {

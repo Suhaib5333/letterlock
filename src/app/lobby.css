@@ -30,8 +30,13 @@
   gap: var(--s-1);
   padding: clamp(18px, 3vw, 28px);
   background: linear-gradient(160deg, color-mix(in oklab, var(--accent) 14%, var(--surface)), var(--surface));
-  border: 1.5px solid var(--surface-border);
+  /* A clearly-visible bordered box with resting elevation — reads as a distinct
+     tappable card, not flat text on the background. */
+  border: 2px solid color-mix(in oklab, var(--accent) 30%, var(--line-strong));
   border-radius: 18px;
+  box-shadow:
+    0 14px 34px -20px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   cursor: pointer;
   text-align: left;
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
@@ -51,7 +56,9 @@
 }
 .mode-card:hover:not(:disabled) {
   border-color: var(--accent);
-  box-shadow: 0 12px 32px -16px color-mix(in oklab, var(--accent) 50%, transparent);
+  box-shadow:
+    0 18px 40px -18px color-mix(in oklab, var(--accent) 55%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .mode-card:disabled {
   opacity: 0.45;
@@ -497,13 +504,21 @@
 /* ── Online Mode: host-side panel of player-submitted answers (Game.tsx) ── */
 .online-answers {
   width: 100%;
+  /* A capped, shrinkable, internally-scrolling panel so it never pushes the
+     host pad off-screen on short phones — it shares the question-zone height
+     with the question card (which also scrolls). */
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 30vh;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--surface-border);
   border-radius: var(--r-md);
   background: color-mix(in oklab, var(--accent) 5%, var(--surface));
   padding: 10px 12px;
-  margin-bottom: var(--s-2);
 }
 .online-answers-head {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -537,7 +552,8 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  max-height: 30vh;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 }
 .online-answers li {
@@ -581,5 +597,142 @@
   border: 1px solid color-mix(in oklab, var(--amber) 40%, transparent);
   color: var(--ink);
   font-size: var(--t-sm);
+  text-align: center;
+}
+
+/* ── Landscape phones (short height): the host lobby must fit with no clipping.
+   Keep code + QR + roster side-by-side and shrink the big elements so the
+   whole thing fits ~360px tall without scrolling off the edges. ── */
+@media (orientation: landscape) and (max-height: 560px) {
+  .lobby {
+    padding: var(--s-2);
+    gap: var(--s-2);
+  }
+  .lobby-body {
+    grid-template-columns: minmax(200px, 280px) 1fr; /* override the ≤780px 1-col */
+    gap: var(--s-2);
+    overflow: hidden;
+  }
+  .lobby-code-card {
+    padding: var(--s-2);
+    gap: 6px;
+    overflow: auto;
+    min-height: 0;
+  }
+  .lobby-code-ch {
+    width: 28px;
+    height: 34px;
+    font-size: 20px;
+    box-shadow: 0 3px 0 0 color-mix(in oklab, var(--accent) 40%, transparent);
+  }
+  .lobby-qr {
+    padding: 6px;
+  }
+  .lobby-qr .qr-img {
+    width: 96px !important;
+    height: 96px !important;
+  }
+  /* The full join URL is long; on a short landscape screen the code + QR are
+     enough — hide the URL line so it never overflows the card edge. */
+  .lobby-qr-hint {
+    display: none;
+  }
+  .lobby-roster {
+    padding: var(--s-2);
+    overflow: hidden;
+  }
+  .lobby-roster .lobby-teams,
+  .lobby-roster ul {
+    overflow-y: auto;
+    min-height: 0;
+  }
+}
+
+/* ── Online auto-grade countdown overlay (over the board) ── */
+.auto-award {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  background: radial-gradient(circle at 50% 45%, color-mix(in oklab, var(--bg) 70%, transparent), color-mix(in oklab, var(--bg) 92%, transparent));
+  backdrop-filter: blur(2px);
+  text-align: center;
+  padding: var(--s-3);
+}
+.auto-award-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.4rem, 5vw, 2.4rem);
+  letter-spacing: -0.01em;
+}
+.auto-award-count {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(3.5rem, 16vw, 7rem);
+  line-height: 1;
+  color: var(--ink);
+  animation: autoAwardPop 0.4s var(--ease-back);
+}
+@keyframes autoAwardPop {
+  0% { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+html[data-motion='reduced'] .auto-award-count { animation: none; }
+
+.online-answers-reveal {
+  margin-top: 2px;
+}
+.online-answer-rank {
+  flex: none;
+  width: 18px;
+  text-align: center;
+  font-size: var(--t-xs);
+  font-weight: 800;
+  color: var(--text-faint);
+}
+.online-answer-first {
+  flex: none;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  border: 1px solid color-mix(in oklab, var(--accent) 50%, transparent);
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+
+/* ── Controller: name-entry (Kahoot-style join) + answer lock states ── */
+.controller-join {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-3);
+  max-width: 460px;
+  width: 100%;
+  margin: 0 auto;
+}
+.controller-join h2 {
+  margin: 0;
+  font-size: clamp(1.4rem, 6vw, 2rem);
+}
+.controller-join p {
+  margin: 0;
+  color: var(--text-dim);
+}
+.controller-locked {
+  margin: 10px 0 0;
+  padding: 14px;
+  border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--ink) 6%, transparent);
+  border: 1px solid var(--surface-border);
+  color: var(--ink);
+  font-size: var(--t-body);
   text-align: center;
 }

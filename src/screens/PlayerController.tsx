@@ -69,11 +69,19 @@ export function PlayerController() {
   const initialName = (params.get('name') ?? '').slice(0, 20);
 
   const [name, setName] = useState(initialName);
+  // Kahoot-style: scanning the QR lands here with no name → type it, then Join.
+  // Arriving from the in-app Join form (which already has a name) auto-joins.
+  const [joined, setJoined] = useState(() => !!initialName.trim());
+  const [nameDraft, setNameDraft] = useState(initialName);
   const [team, setTeam] = useState<PlayerTeam | null>(null);
+  const [labels, setLabels] = useState<{ A: string; B: string }>({ A: 'Team A', B: 'Team B' });
   const [phase, setPhase] = useState<Phase>('waiting');
   const [status, setStatus] = useState<'connecting' | 'open' | 'error'>('connecting');
   const [error, setError] = useState<string | null>(null);
   const [served, setServed] = useState<ServedPrompt | null>(null);
+  const [pickerTeam, setPickerTeam] = useState<PlayerTeam | null>(null);
+  const [stealOpen, setStealOpen] = useState(false);
+  const [teammateAnswered, setTeammateAnswered] = useState(false);
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
   const [winner, setWinner] = useState<PlayerTeam | null>(null);
@@ -90,8 +98,9 @@ export function PlayerController() {
     servedRef.current = served;
   }, [served]);
 
-  // Bootstrap channel + presence
+  // Bootstrap channel + presence — only AFTER the player has joined (entered a name).
   useEffect(() => {
+    if (!joined) return;
     if (!room || room.length !== 6) {
       setStatus('error');
       setError('Missing or invalid room code in URL.');
@@ -105,7 +114,7 @@ export function PlayerController() {
 
     const existing = loadSave(room);
     const playerId = existing?.playerId ?? generatePlayerId();
-    const displayName = (existing?.name ?? initialName ?? 'Player').trim() || 'Player';
+    const displayName = (name || existing?.name || initialName || 'Player').trim() || 'Player';
     const savedTeam = existing?.team ?? null;
     if (!name) setName(displayName);
     if (savedTeam) {
@@ -171,7 +180,22 @@ export function PlayerController() {
       handleRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room]);
+  }, [room, joined]);
+
+  // Reconnect after the tab is backgrounded (mobile Safari drops the websocket):
+  // on return, re-announce presence + ask the host to resend the current state so
+  // answering works again instead of silently hanging.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      const h = handleRef.current;
+      if (!h) return;
+      h.channel.track({ ...h.self, team: teamRef.current }).catch(() => {});
+      h.broadcast({ type: 'request_state', playerId: h.self.id }).catch(() => {});
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
 
   // Stable across the channel's lifetime — reads live values from refs so the
   // once-registered listener never works off a stale `team`/`served`.
@@ -186,6 +210,9 @@ export function PlayerController() {
           if (h) h.channel.track({ ...h.self, team: event.team }).catch(() => {});
         }
         break;
+      case 'team_labels':
+        setLabels({ A: event.A, B: event.B });
+        break;
       case 'question_served':
         setServed({
           cell: event.cell,
@@ -197,9 +224,23 @@ export function PlayerController() {
           image: event.image,
           youtube: event.youtube,
         });
+        setPickerTeam(event.picker ?? null);
+        setStealOpen(false);
+        setTeammateAnswered(false);
         setAnswer('');
         setFeedback(null);
         setPhase('question');
+        break;
+      case 'steal_open':
+        // The picking team's time is up — the other team may now answer.
+        setStealOpen(true);
+        break;
+      case 'answer_submitted':
+        // Lock out the rest of our team once a teammate has answered (only the
+        // first player from each team gets to answer).
+        if (event.playerId !== myId && event.team === teamRef.current) {
+          setTeammateAnswered(true);
+        }
         break;
       case 'answer_revealed':
         setFeedback(`Answer: ${event.answer}`);
@@ -249,8 +290,21 @@ export function PlayerController() {
     setPhase('submitted');
   }, [answer, name]);
 
-  const teamLabel =
-    team === 'A' ? 'Team A' : team === 'B' ? 'Team B' : 'Unassigned';
+  const join = useCallback(() => {
+    const n = nameDraft.trim().slice(0, 20);
+    if (!n) return;
+    setName(n);
+    setJoined(true);
+  }, [nameDraft]);
+
+  const teamLabel = team === 'A' ? labels.A : team === 'B' ? labels.B : 'Unassigned';
+  // Answer-gating: only the picking team answers first; the other team waits for
+  // the steal window; and only the first player from a team may answer.
+  const isPicker = team !== null && pickerTeam !== null && team === pickerTeam;
+  const lockReason: null | 'teammate' | 'waiting-picker' =
+    teammateAnswered ? 'teammate' : !isPicker && !stealOpen && pickerTeam !== null ? 'waiting-picker' : null;
+  const canAnswerNow = !!team && lockReason === null;
+  const pickerLabel = pickerTeam === 'A' ? labels.A : pickerTeam === 'B' ? labels.B : 'the other team';
 
   return (
     <div
@@ -264,18 +318,48 @@ export function PlayerController() {
           Room <strong>{room}</strong>
         </div>
         <div className="controller-team" data-testid="controller-team">
-          {teamLabel}
+          {joined ? teamLabel : ''}
         </div>
       </header>
 
-      {status === 'error' && (
+      {!joined && (
+        <div className="controller-join" data-testid="controller-join">
+          <h2>Join the game</h2>
+          <p>Enter a name so the host can see you.</p>
+          <label className="controller-answer">
+            <span>Your name</span>
+            <input
+              type="text"
+              data-testid="controller-join-name"
+              value={nameDraft}
+              maxLength={20}
+              placeholder="e.g. Suhaib"
+              autoFocus
+              onChange={(e) => setNameDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') join();
+              }}
+            />
+          </label>
+          <button
+            className="btn btn-primary btn-lg block"
+            data-testid="controller-join-submit"
+            disabled={!nameDraft.trim()}
+            onClick={join}
+          >
+            Join room ▸
+          </button>
+        </div>
+      )}
+
+      {joined && status === 'error' && (
         <div className="controller-error" data-testid="controller-error">
           <strong>Disconnected</strong>
           <p>{error}</p>
         </div>
       )}
 
-      {status === 'connecting' && (
+      {joined && status === 'connecting' && (
         <div className="controller-wait">
           <div className="spinner" />
           <p>Connecting to the host…</p>
@@ -317,10 +401,14 @@ export function PlayerController() {
           )}
           {served.audio && <audio controls src={served.audio} className="controller-media" />}
           {served.video && <video controls src={served.video} className="controller-media" />}
-          {team ? (
+          {!team ? (
+            <p className="controller-noteam" data-testid="controller-noteam">
+              You're not on a team yet — ask the host to add you, then you can answer.
+            </p>
+          ) : canAnswerNow ? (
             <>
               <label className="controller-answer">
-                <span>Your answer</span>
+                <span>Your answer{stealOpen && !isPicker ? ' (steal!)' : ''}</span>
                 <input
                   type="text"
                   data-testid="controller-input"
@@ -343,8 +431,10 @@ export function PlayerController() {
               </button>
             </>
           ) : (
-            <p className="controller-noteam" data-testid="controller-noteam">
-              You're not on a team yet — ask the host to add you, then you can answer.
+            <p className="controller-locked" data-testid="controller-locked">
+              {lockReason === 'teammate'
+                ? '🔒 A teammate is answering for your team.'
+                : `⏳ ${pickerLabel} answers first — get ready to steal if they miss!`}
             </p>
           )}
         </div>
@@ -366,7 +456,16 @@ export function PlayerController() {
       {phase === 'done' && (
         <div className="controller-done" data-testid="controller-done">
           <h2>🏆 Game over</h2>
-          <p>Winner: {winner === team ? 'Your team!' : `Team ${winner ?? '—'}`}</p>
+          <p>
+            Winner:{' '}
+            {winner === team
+              ? 'Your team!'
+              : winner === 'A'
+                ? labels.A
+                : winner === 'B'
+                  ? labels.B
+                  : '—'}
+          </p>
         </div>
       )}
     </div>

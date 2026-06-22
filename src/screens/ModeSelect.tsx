@@ -44,6 +44,7 @@ export function ModeSelect() {
           whileTap={{ scale: 0.98 }}
           onClick={() => {
             play('pick');
+            dispatch({ type: 'SET_ONLINE', value: false });
             dispatch({ type: 'SET_SCREEN', screen: 'setup' });
           }}
         >
@@ -68,7 +69,10 @@ export function ModeSelect() {
           onClick={() => {
             if (!online) return;
             play('pick');
-            dispatch({ type: 'SET_SCREEN', screen: 'lobby-host' });
+            // Online sets up the match FIRST (colours/pack/mode), THEN shows the
+            // room code — so the lobby + player phones know the real team colours.
+            dispatch({ type: 'SET_ONLINE', value: true });
+            dispatch({ type: 'SET_SCREEN', screen: 'setup' });
           }}
         >
           <span className="mode-card-emoji" aria-hidden="true">🛜</span>

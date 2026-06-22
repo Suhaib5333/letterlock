@@ -68,8 +68,10 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
             <UsernameView userId={user.id} onClaimed={refreshProfile} />
           ) : (
             <ProfileView
+              userId={user.id}
               username={profile!.username}
               email={user.email}
+              onUpdated={refreshProfile}
               onSignOut={() => {
                 signOut();
                 onClose();
@@ -379,16 +381,123 @@ function UsernameView({ userId, onClaimed }: { userId: string; onClaimed: () => 
 }
 
 function ProfileView({
+  userId,
   username,
   email,
+  onUpdated,
   onSignOut,
   onClose,
 }: {
+  userId: string;
   username: string;
   email: string | undefined;
+  onUpdated: () => void;
   onSignOut: () => void;
   onClose: () => void;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(username);
+  const [status, setStatus] = useState<'idle' | 'checking' | 'taken' | 'ok' | 'invalid'>('idle');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const valid = /^[a-z0-9_]{3,20}$/.test(name);
+  const unchanged = name === username;
+
+  // Live availability check (debounced), skipping the user's own current name.
+  useEffect(() => {
+    if (!editing) return;
+    if (unchanged) return setStatus('idle');
+    if (!valid) return setStatus('invalid');
+    setStatus('checking');
+    const t = setTimeout(async () => {
+      if (!supabase) return;
+      const { data } = await supabase.rpc('username_available', { name });
+      setStatus(data === true ? 'ok' : 'taken');
+    }, 350);
+    return () => clearTimeout(t);
+  }, [name, valid, editing, unchanged]);
+
+  const save = async () => {
+    if (!supabase || status !== 'ok' || busy) return;
+    setBusy(true);
+    setError(null);
+    // Updating profiles.username cascades to this user's leaderboard rows via the
+    // sync_leaderboard_username trigger (migration 0005) — keyed by user_id — so
+    // their existing scores show the new name immediately.
+    const { error: e } = await supabase.from('profiles').update({ username: name }).eq('id', userId);
+    setBusy(false);
+    if (!e) {
+      setEditing(false);
+      onUpdated();
+      return;
+    }
+    if (e.code === '23505' || /duplicate|unique/i.test(e.message)) {
+      setStatus('taken');
+      setError('That username was just taken — pick another.');
+    } else {
+      setError(e.message || 'Could not update username.');
+    }
+  };
+
+  if (editing) {
+    return (
+      <>
+        <h2>Edit username</h2>
+        <p className="go-sub">
+          3–20 chars, lowercase letters/digits/underscores. Your leaderboard scores update to the
+          new name automatically.
+        </p>
+        <input
+          type="text"
+          className="auth-input"
+          data-testid="username-edit-input"
+          value={name}
+          autoFocus
+          maxLength={20}
+          onChange={(e) => {
+            setName(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''));
+            setError(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && status === 'ok') save();
+          }}
+        />
+        <div className="auth-hint" data-testid="username-edit-status" data-status={status}>
+          {unchanged && <>This is already your username.</>}
+          {!unchanged && status === 'invalid' && <>Use 3–20 lowercase letters, digits, underscores.</>}
+          {!unchanged && status === 'checking' && <>Checking…</>}
+          {!unchanged && status === 'taken' && <>That username is already taken.</>}
+          {!unchanged && status === 'ok' && <>✓ Available</>}
+        </div>
+        {error && (
+          <p className="auth-error" data-testid="username-edit-error" role="alert">{error}</p>
+        )}
+        <div className="auth-actions">
+          <button
+            className="btn btn-primary btn-lg block"
+            data-testid="username-save"
+            disabled={status !== 'ok' || busy}
+            onClick={save}
+          >
+            {busy ? 'Saving…' : 'Save username'}
+          </button>
+          <button
+            className="btn btn-ghost"
+            data-testid="username-edit-cancel"
+            onClick={() => {
+              setEditing(false);
+              setName(username);
+              setError(null);
+              setStatus('idle');
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <h2>Signed in</h2>
@@ -397,6 +506,17 @@ function ProfileView({
       </p>
       {email && <p className="go-sub">{email}</p>}
       <div className="auth-actions">
+        <button
+          className="btn btn-secondary"
+          data-testid="username-edit"
+          onClick={() => {
+            play('pick');
+            setName(username);
+            setEditing(true);
+          }}
+        >
+          ✎ Edit username
+        </button>
         <button className="btn btn-secondary" data-testid="signout" onClick={onSignOut}>
           Sign out
         </button>

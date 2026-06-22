@@ -49,6 +49,7 @@ function OptionRow<T extends string | number>({
 export function Setup() {
   const { state, dispatch } = useStore();
   const f = state.setup;
+  const online = state.online;
   const set = (patch: Partial<SetupForm>) => dispatch({ type: 'UPDATE_SETUP', patch });
   const pack = packById(f.packId);
 
@@ -66,16 +67,16 @@ export function Setup() {
   return (
     <div className="setup">
       <header className="sub-head">
-        <button className="btn btn-ghost" onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'home' })}>
+        <button className="btn btn-ghost" onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'mode-select' })}>
           ‹ Back
         </button>
         <div className="sub-head-title">
           <h1>Match setup</h1>
-          {/* "Couch Mode" = the in-person, single-screen rules — same room,
-              one device, host adjudicates. Online (Kahoot-style with phones
-              as buzzers) is the next mode. The badge makes the distinction
-              visible the moment players pick Play. */}
-          <span className="mode-badge" data-testid="mode-badge">🛋 Couch Mode</span>
+          {/* Couch = in-person single-screen; Online = Kahoot-style with phones
+              as buzzers. Online does setup FIRST, then mints the room code. */}
+          <span className="mode-badge" data-testid="mode-badge">
+            {online ? '🛜 Online Mode' : '🛋 Couch Mode'}
+          </span>
         </div>
         <div className="pack-pill">
           <span>{pack.emoji}</span> {pack.name}
@@ -186,10 +187,16 @@ export function Setup() {
         data-testid="start-match"
         onClick={() => {
           play('pick');
-          dispatch({ type: 'START_MATCH' });
+          // Online: go to the lobby to share the code (match starts from there).
+          // Couch: start the match immediately.
+          if (online) {
+            dispatch({ type: 'SET_SCREEN', screen: 'lobby-host' });
+          } else {
+            dispatch({ type: 'START_MATCH' });
+          }
         }}
       >
-        Start match ▸
+        {online ? 'Create room ▸' : 'Start match ▸'}
       </button>
     </div>
   );

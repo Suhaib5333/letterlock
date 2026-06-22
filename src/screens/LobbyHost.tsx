@@ -80,10 +80,24 @@ export function LobbyHost() {
           role: 'host',
           joinedAt: Date.now(),
         };
+        const labels = () => ({
+          A: colorById(state.setup.colorA).name,
+          B: colorById(state.setup.colorB).name,
+        });
         const h = await openRoom(code, self, {
           onRoster: (players) => {
             if (cancelled) return;
             setRoster(players);
+            // Tell phones the team COLOUR names so they show "Teal"/"Rose"
+            // instead of "Team A/B" (idempotent; cheap; covers late joiners).
+            handleRef.current?.broadcast({ type: 'team_labels', ...labels() }).catch(() => {});
+          },
+          onEvent: (event) => {
+            // A reconnecting phone (e.g. back from a backgrounded tab) asks for
+            // the current state — re-send the colour labels.
+            if (event.type === 'request_state') {
+              handleRef.current?.broadcast({ type: 'team_labels', ...labels() }).catch(() => {});
+            }
           },
         });
         if (cancelled) {
@@ -135,9 +149,10 @@ export function LobbyHost() {
     if (!h) return;
     play('pick');
     h.broadcast({ type: 'match_started' }).catch(() => {});
-    // Hand off to the existing Couch-Mode flow — Setup → Game. The host's
-    // screen is the source of truth; player phones just see prompts.
-    dispatch({ type: 'SET_SCREEN', screen: 'setup' });
+    // Setup is already done (Online does setup BEFORE the lobby), so start the
+    // match engine now and go straight to the board. The host is authoritative;
+    // player phones receive prompts via the live channel.
+    dispatch({ type: 'START_MATCH' });
   }, [dispatch]);
 
   const exit = useCallback(async () => {
@@ -275,7 +290,7 @@ export function LobbyHost() {
         disabled={status !== 'open'}
         onClick={startMatch}
       >
-        {status === 'open' ? 'Continue to setup ▸' : 'Connecting…'}
+        {status === 'open' ? 'Start match ▸' : 'Connecting…'}
       </button>
     </div>
   );

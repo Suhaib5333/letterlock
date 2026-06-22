@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PACKS, packById } from '../content';
 import { totalQuestions } from '../core/packs';
 import { AdminPanel } from '../components/AdminPanel';
@@ -12,7 +12,7 @@ import { SettingsModal } from '../components/SettingsModal';
 import { useAuth } from '../lib/auth';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { play } from '../services/audio';
-import { remaining } from '../state/progress';
+import { remaining, subscribeProgress } from '../state/progress';
 import { resumeSavedGame, useStore } from '../state/store';
 
 // Regional packs use a real (bundled) flag image — flag EMOJIS (🇧🇭) render as
@@ -30,6 +30,10 @@ export function Home() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showPackEditor, setShowPackEditor] = useState(false);
   const { profile, isAdmin } = useAuth();
+  // Re-render when question progress changes (e.g. async DB hydration on sign-in,
+  // or a guest reset) so the "N unique left" badge stays accurate.
+  const [, setProgressTick] = useState(0);
+  useEffect(() => subscribeProgress(() => setProgressTick((t) => t + 1)), []);
   const selectedPack = packById(state.setup.packId);
   const total = totalQuestions(selectedPack);
   const left = remaining(selectedPack.id, total);

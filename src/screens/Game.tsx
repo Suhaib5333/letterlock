@@ -8,6 +8,7 @@ import { Scoreboard } from '../components/Scoreboard';
 import { Timer } from '../components/Timer';
 import { submitScore } from '../components/Leaderboard';
 import type { TeamId } from '../core/models';
+import { isAnswerCorrect } from '../core/fuzzyMatch';
 import { useOnlineHost } from '../lib/useOnlineHost';
 import { haptic, play } from '../services/audio';
 import { colorById } from '../state/palette';
@@ -41,6 +42,13 @@ export function Game() {
   const [confirmingExit, setConfirmingExit] = useState(false);
   const [pieDismissed, setPieDismissed] = useState(false);
   const [clipPlayed, setClipPlayed] = useState(false);
+  // Online: host gates the player-answers list behind a button (so the screen
+  // doesn't reveal everyone's guesses until the host chooses to show them).
+  const [showAnswers, setShowAnswers] = useState(false);
+  // Online auto-grade: a "{Colour} 3-2-1" countdown before auto-awarding a
+  // fuzzily-correct answer. null = no countdown running.
+  const [autoAward, setAutoAward] = useState<{ team: TeamId; name: string; n: number } | null>(null);
+  const autoAwardedKeys = useRef<Set<string>>(new Set());
 
   // Reset the dismiss flag once the swap window closes (so a new game can offer it).
   useEffect(() => {
@@ -52,6 +60,8 @@ export function Game() {
   const servedId = state.ui.served?.question.id;
   useEffect(() => {
     setClipPlayed(false);
+    setShowAnswers(false); // re-hide player answers for each new question
+    setAutoAward(null); // cancel any pending auto-award countdown
   }, [servedId]);
 
   // Hero-moment audio + haptics driven by the reducer's pulse counter.
@@ -104,7 +114,25 @@ export function Game() {
     gameOver: ui.gameOver,
     winner: game.winner,
     hideLetters,
+    teamNames: { A: teams.A.name, B: teams.B.name },
+    picker,
   });
+  // Test-only seam: `?__onlinepanel=1` force-renders the host answers panel with
+  // sample submissions so the responsive/no-scroll checker can verify the ONLINE
+  // in-game layout (which otherwise needs two live clients). Inert in normal use.
+  const forceOnlinePanel =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).has('__onlinepanel');
+  const showOnlineAnswers = online.online || forceOnlinePanel;
+  const onlineSubs = online.online
+    ? online.submissions
+    : forceOnlinePanel
+      ? [
+          { playerId: 'm1', playerName: 'Alice', team: 'A' as const, answer: 'Quebec' },
+          { playerId: 'm2', playerName: 'Mohammed', team: 'B' as const, answer: 'A long sample answer to test wrapping and clipping' },
+          { playerId: 'm3', playerName: 'Sara', team: 'A' as const, answer: 'Copenhagen' },
+        ]
+      : [];
   // A media clip can fail to load (region/network); always allow Skip when the question
   // carries a clip so a broken clip can never strand the game.
   const q = ui.served?.question;
@@ -116,6 +144,41 @@ export function Game() {
   //   player isn't stranded with an indefinitely paused clock.
   const needsPlayToStart = !!(q && (q.audio || q.video || q.image || q.mapIso));
   const timerActive = !needsPlayToStart || clipPlayed;
+
+  // ── Online auto-grade: when a player's typed answer fuzzily matches the correct
+  // one, start a "{Colour} 3-2-1" countdown, then auto-award with confetti. Fires
+  // at most once per question (key-guarded) so a half-question undo lets the host
+  // re-judge manually instead of instantly re-awarding the same answer.
+  useEffect(() => {
+    if (!online.online || !ui.served || !q || autoAward) return;
+    const key = `${ui.served.cell}:${ui.served.question.id}`;
+    if (autoAwardedKeys.current.has(key)) return;
+    const hit = online.submissions.find((s) => isAnswerCorrect(s.answer, q.a));
+    if (hit) {
+      autoAwardedKeys.current.add(key);
+      setAutoAward({ team: hit.team, name: teams[hit.team].name, n: 3 });
+    }
+  }, [online.online, online.submissions, q, ui.served, autoAward, teams]);
+
+  // Countdown runner: 3 → 2 → 1 → award (+ confetti + broadcast).
+  useEffect(() => {
+    if (!autoAward) return;
+    if (autoAward.n <= 0) {
+      const team = autoAward.team;
+      const cell = ui.selectedCell;
+      setAutoAward(null);
+      if (cell !== null) {
+        play('claim');
+        haptic(16);
+        if (!reducedMotion) fireConfetti(team, teams[team].colorId);
+        online.broadcastAdjudicated(team, cell);
+        dispatch({ type: 'ADJUDICATE', team });
+      }
+      return;
+    }
+    const t = setTimeout(() => setAutoAward((a) => (a ? { ...a, n: a.n - 1 } : a)), 850);
+    return () => clearTimeout(t);
+  }, [autoAward, ui.selectedCell, teams, reducedMotion, online, dispatch]);
 
   return (
     <div className="game" data-testid="game-screen">
@@ -206,6 +269,36 @@ export function Game() {
             )}
           </AnimatePresence>
 
+          {/* Online auto-grade countdown: "{Colour} … 3-2-1" before auto-awarding a
+              correct answer. The host can cancel to judge manually instead. */}
+          <AnimatePresence>
+            {autoAward && (
+              <motion.div
+                className="auto-award"
+                data-testid="auto-award"
+                data-team={autoAward.team}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+              >
+                <div className="auto-award-name" style={{ color: `var(--t${autoAward.team === 'A' ? 'a' : 'b'})` }}>
+                  {autoAward.name} got it!
+                </div>
+                <div className="auto-award-count" key={autoAward.n}>{autoAward.n}</div>
+                <button
+                  className="btn btn-ghost sm"
+                  data-testid="auto-award-cancel"
+                  onClick={() => {
+                    play('tap');
+                    setAutoAward(null);
+                  }}
+                >
+                  ✕ Cancel — I'll judge
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="board-stage">
             <Board
               game={game}
@@ -256,6 +349,11 @@ export function Game() {
                     active={timerActive}
                     pickerName={teams[picker].name}
                     otherName={teams[other].name}
+                    // Online: when the picker's time runs out, open the steal
+                    // window so the OTHER team's phones can answer.
+                    onPhase={(p) => {
+                      if (p === 'steal' && online.online) online.broadcastStealOpen();
+                    }}
                   />
                 )}
                 <div className="qcard-scroll">
@@ -275,21 +373,37 @@ export function Game() {
                     onMediaPlay={() => setClipPlayed(true)}
                   />
                 </div>
-                {online.online && (
+                {showOnlineAnswers && (
                   <div className="online-answers" data-testid="online-answers">
                     <header className="online-answers-head">
                       <span>📱 Player answers</span>
-                      <span className="online-answers-count">{online.submissions.length}</span>
+                      <span className="online-answers-count">{onlineSubs.length}</span>
                     </header>
-                    {online.submissions.length === 0 ? (
+                    {onlineSubs.length === 0 ? (
                       <p className="online-answers-empty">Waiting for players to submit…</p>
+                    ) : !showAnswers ? (
+                      // Keep guesses hidden until the host chooses to reveal them.
+                      <button
+                        className="btn btn-secondary block online-answers-reveal"
+                        data-testid="online-show-answers"
+                        onClick={() => {
+                          play('tap');
+                          setShowAnswers(true);
+                        }}
+                      >
+                        👁 Show {onlineSubs.length} answer{onlineSubs.length === 1 ? '' : 's'}
+                      </button>
                     ) : (
                       <ul>
-                        {online.submissions.map((s) => (
+                        {onlineSubs.map((s, i) => (
                           <li key={s.playerId} data-testid={`online-answer-${s.playerId}`}>
+                            <span className="online-answer-rank" aria-hidden="true">
+                              {i === 0 ? '⚡' : i + 1}
+                            </span>
                             <span className="online-answer-dot" data-team={s.team} aria-hidden="true" />
                             <span className="online-answer-name">{s.playerName}</span>
                             <span className="online-answer-text">{s.answer}</span>
+                            {i === 0 && <span className="online-answer-first">1st</span>}
                           </li>
                         ))}
                       </ul>
@@ -305,6 +419,7 @@ export function Game() {
                   onAward={(team) => {
                     const stolen = team !== picker;
                     play(stolen ? 'steal' : 'claim');
+                    if (!reducedMotion) fireConfetti(team, teams[team].colorId);
                     if (ui.selectedCell !== null) online.broadcastAdjudicated(team, ui.selectedCell);
                     dispatch({ type: 'ADJUDICATE', team });
                   }}

@@ -135,11 +135,14 @@ for (const vp of VIEWPORTS) {
   await sleep(300);
   rows.push(['mode-select', await overflow(page)]);
 
-  // Online lobby (host) — new screen. lobby-back returns to HOME.
+  // Online flow: mode-online → Setup (colours first) → Create room → lobby-host.
   await page.getByTestId('mode-online').click().catch(() => {});
-  await sleep(700);
+  await sleep(250);
+  rows.push(['setup-online', await overflow(page)]);
+  await page.getByTestId('start-match').click().catch(() => {});
+  await sleep(800);
   rows.push(['lobby-host', await overflow(page)]);
-  await page.getByTestId('lobby-back').click().catch(() => {});
+  await page.getByTestId('lobby-back').click().catch(() => {}); // → HOME
   await sleep(300);
 
   // Join screen — re-enter from home; join-back returns to mode-select.
@@ -186,6 +189,27 @@ for (const vp of VIEWPORTS) {
     await sleep(600);
     rows.push(['victory', await overflow(page)]);
   }
+
+  // Online in-game layout (host's "Player answers" panel) — forced via the
+  // ?__onlinepanel=1 test seam so we verify it without two live clients. This is
+  // the screen the host sees during an online match; it must not overflow.
+  await page.goto(`${BASE}/?__onlinepanel=1`);
+  await sleep(200);
+  await page.getByTestId('play-button').click().catch(() => {});
+  await page.getByTestId('mode-couch').click().catch(() => {});
+  await page.getByTestId('mode-single').click().catch(() => {});
+  await page.getByTestId('start-match').click().catch(() => {});
+  await page.getByTestId('game-screen').waitFor().catch(() => {});
+  await page.locator('.ll-hex.claimable').first().click().catch(() => {});
+  await page.getByTestId('question-card').waitFor().catch(() => {});
+  await page.getByTestId('reveal-answer').click().catch(() => {});
+  await sleep(300);
+  rows.push(['game-online', await overflow(page)]);
+
+  // Phone-as-controller name-entry (scanned QR, no name yet — Kahoot-style).
+  await page.goto(`${BASE}/?room=TESTAB&view=controller`);
+  await sleep(400);
+  rows.push(['controller-join', await overflow(page)]);
 
   // Phone-as-controller (its own standalone page) — the lobby/waiting layout.
   await page.goto(`${BASE}/?room=TESTAB&view=controller&name=Tester`);

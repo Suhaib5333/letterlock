@@ -31,6 +31,8 @@ interface OnlineHostState {
   submissions: Submission[];
   /** Broadcast a host ruling + clear that cell's collected answers. */
   broadcastAdjudicated: (winner: TeamId | null, cell: number) => void;
+  /** Open the steal window — the non-picking team may now answer. */
+  broadcastStealOpen: () => void;
 }
 
 export function useOnlineHost(args: {
@@ -39,8 +41,10 @@ export function useOnlineHost(args: {
   gameOver: boolean;
   winner: TeamId | null;
   hideLetters: boolean;
+  teamNames: { A: string; B: string };
+  picker: TeamId;
 }): OnlineHostState {
-  const { served, answerRevealed, gameOver, winner, hideLetters } = args;
+  const { served, answerRevealed, gameOver, winner, hideLetters, teamNames, picker } = args;
 
   // Resolve the lobby once. It only ever exists on the host's device.
   const lobbyRef = useRef<typeof window.__lobby>(undefined);
@@ -62,16 +66,28 @@ export function useOnlineHost(args: {
   hideRef.current = hideLetters;
   const knownPlayers = useRef<Set<string>>(new Set());
 
+  const namesRef = useRef(teamNames);
+  namesRef.current = teamNames;
+  const pickerRef = useRef(picker);
+  pickerRef.current = picker;
+  // Cells where the host has opened the steal window — re-sent on reconnect.
+  const stealOpenCells = useRef<Set<number>>(new Set());
+
   const reBroadcastCurrent = useCallback(() => {
     const lobby = lobbyRef.current;
+    if (!lobby) return;
+    // Always (re)send the team colour labels so a late joiner shows "Teal"/"Rose"
+    // rather than a generic "Team A/B".
+    lobby.broadcast({ type: 'team_labels', A: namesRef.current.A, B: namesRef.current.B }).catch(() => {});
     const s = servedRef.current;
-    if (!lobby || !s) return;
+    if (!s) return;
     const q = s.question;
     lobby
       .broadcast({
         type: 'question_served',
         cell: s.cell,
         letter: s.letter,
+        picker: pickerRef.current as PlayerTeam,
         prompt: q.q,
         hideLetter: hideRef.current,
         audio: q.audio,
@@ -80,6 +96,9 @@ export function useOnlineHost(args: {
         youtube: q.youtube,
       })
       .catch(() => {});
+    if (stealOpenCells.current.has(s.cell)) {
+      lobby.broadcast({ type: 'steal_open', cell: s.cell }).catch(() => {});
+    }
     if (revealRef.current) {
       lobby.broadcast({ type: 'answer_revealed', answer: q.a }).catch(() => {});
     }
@@ -91,19 +110,28 @@ export function useOnlineHost(args: {
     if (!lobby || lobby.self.role !== 'host') return;
     lobby.setHandlers({
       onEvent: (event: LobbyEvent) => {
+        // A reconnecting phone (back from a backgrounded tab) asks for state.
+        if (event.type === 'request_state') {
+          reBroadcastCurrent();
+          return;
+        }
         if (event.type !== 'answer_submitted') return;
         let bucket = byCell.current.get(event.cell);
         if (!bucket) {
           bucket = new Map();
           byCell.current.set(event.cell, bucket);
         }
-        bucket.set(event.playerId, {
-          playerId: event.playerId,
-          playerName: event.playerName,
-          team: event.team,
-          answer: event.answer,
-        });
-        bump((v) => v + 1);
+        // Keep only the FIRST submission per player; Map preserves arrival order
+        // so the host can see who answered first.
+        if (!bucket.has(event.playerId)) {
+          bucket.set(event.playerId, {
+            playerId: event.playerId,
+            playerName: event.playerName,
+            team: event.team,
+            answer: event.answer,
+          });
+          bump((v) => v + 1);
+        }
       },
       // When a NEW player appears (first join or a reconnect/resubscribe), push
       // the current question to them so nobody is ever stranded on "waiting".
@@ -118,6 +146,8 @@ export function useOnlineHost(args: {
         if (isNew) reBroadcastCurrent();
       },
     });
+    // Push the colour labels to anyone already connected when the match screen mounts.
+    lobby.broadcast({ type: 'team_labels', A: namesRef.current.A, B: namesRef.current.B }).catch(() => {});
   }, [online, reBroadcastCurrent]);
 
   // Broadcast a freshly served question (covers pick / skip / auto-skip uniformly).
@@ -128,12 +158,14 @@ export function useOnlineHost(args: {
     const key = `${served.cell}:${served.question.id}`;
     if (lastServed.current === key) return;
     lastServed.current = key;
+    stealOpenCells.current.clear(); // a fresh question closes any prior steal window
     const q = served.question;
     lobby
       .broadcast({
         type: 'question_served',
         cell: served.cell,
         letter: served.letter,
+        picker: picker as PlayerTeam,
         prompt: q.q,
         hideLetter: hideLetters,
         audio: q.audio,
@@ -142,7 +174,7 @@ export function useOnlineHost(args: {
         youtube: q.youtube,
       })
       .catch(() => {});
-  }, [online, served, hideLetters]);
+  }, [online, served, hideLetters, picker]);
 
   // Broadcast the answer reveal once per served question.
   const revealedFor = useRef<string | null>(null);
@@ -178,7 +210,16 @@ export function useOnlineHost(args: {
     [online],
   );
 
+  const broadcastStealOpen = useCallback(() => {
+    const lobby = lobbyRef.current;
+    const s = servedRef.current;
+    if (!s) return;
+    stealOpenCells.current.add(s.cell);
+    if (!online || !lobby) return;
+    lobby.broadcast({ type: 'steal_open', cell: s.cell }).catch(() => {});
+  }, [online]);
+
   const submissions = served ? [...(byCell.current.get(served.cell)?.values() ?? [])] : [];
 
-  return { online, submissions, broadcastAdjudicated };
+  return { online, submissions, broadcastAdjudicated, broadcastStealOpen };
 }

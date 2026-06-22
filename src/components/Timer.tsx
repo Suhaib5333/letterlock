@@ -15,12 +15,16 @@ export function Timer({
   active,
   pickerName,
   otherName,
+  onPhase,
 }: {
   seconds: number;
   resetKey: string;
   active: boolean;
   pickerName: string;
   otherName: string;
+  /** Fires when the countdown transitions to the steal phase / finishes — lets
+   *  Online Mode open the steal window to the other team's phones. */
+  onPhase?: (phase: 'steal' | 'done') => void;
 }) {
   const [phase, setPhase] = useState<Phase>('main');
   const [remaining, setRemaining] = useState(seconds);
@@ -63,12 +67,14 @@ export function Timer({
           startRef.current = now;
           tickRef.current = 0;
           play('steal');
+          onPhase?.('steal');
           rafId = requestAnimationFrame(loop);
           return;
         }
         phaseRef.current = 'done';
         setPhase('done');
         play('wrong');
+        onPhase?.('done');
         return;
       }
       rafId = requestAnimationFrame(loop);
