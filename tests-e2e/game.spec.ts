@@ -170,19 +170,23 @@ test('world-map: viewBox is zoomed in (not the whole-world default)', async ({ p
   const map = page.getByTestId('qcard-map');
   await expect(map.locator('svg')).toBeVisible({ timeout: 5000 });
   // The CountryMap effect retargets the SVG's viewBox to the highlighted
-  // country's bbox + context padding. So the live viewBox must DIFFER from
-  // the source default "0 0 2754 1398" — that's the binary "zoom happened"
-  // check, robust to whatever country gets served by the no-repeat cycle.
-  const vb = await map.locator('svg').evaluate((svg) => {
-    const v = (svg as SVGSVGElement).viewBox.baseVal;
-    return { x: v.x, y: v.y, w: v.width, h: v.height };
-  });
-  const isWholeWorld = vb.x === 0 && vb.y === 0 && vb.w === 2754 && vb.h === 1398;
-  expect(isWholeWorld).toBe(false);
-  // And the zoomed window covers at most ~90% of the world area — even
-  // for huge countries (USA, Russia) the bbox + pad still excludes large
-  // empty regions on the opposite side of the globe.
-  expect(vb.w * vb.h).toBeLessThan(2754 * 1398 * 0.95);
+  // country's bbox + context padding ON A LATER FRAME (getBBox needs layout, so
+  // it's applied via requestAnimationFrame). POLL until it differs from the
+  // source default "0 0 2754 1398" rather than reading once and racing the zoom.
+  // POLL until the viewBox differs from the source default "0 0 2754 1398" — the
+  // binary "zoom-to-fit ran" check, robust to WHICH country the no-repeat cycle
+  // serves. (We don't assert an area upper-bound: huge countries like Russia /
+  // Canada legitimately zoom to ~the whole world, which is correct behaviour.)
+  await expect
+    .poll(
+      () =>
+        map.locator('svg').evaluate((svg) => {
+          const v = (svg as SVGSVGElement).viewBox.baseVal;
+          return v.x === 0 && v.y === 0 && v.width === 2754 && v.height === 1398;
+        }),
+      { timeout: 6000 },
+    )
+    .toBe(false);
 });
 
 test('world-map: clicking the map opens fullscreen, ✕ closes it', async ({ page }) => {
@@ -676,4 +680,86 @@ test('mode-select back returns home', async ({ page }) => {
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-back').click();
   await expect(page.getByTestId('play-button')).toBeVisible();
+});
+
+// ── Regression guards for the 2026-06-22 fix pass ──────────────────────────
+
+test('mode-select cards have a real surface (token aliases defined)', async ({ page }) => {
+  // Guards the theme-token regression where lobby.css/admin.css referenced
+  // undefined vars (--ink/--accent/--surface-border) and the cards rendered
+  // with no background/border.
+  await page.goto('/');
+  await page.getByTestId('play-button').click();
+  const style = await page
+    .getByTestId('mode-couch')
+    .evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { bgImage: s.backgroundImage, border: s.borderTopColor };
+    });
+  // The card surface is a color-mix gradient built on --accent/--surface; if the
+  // tokens were undefined the color-mix is invalid and the gradient collapses to
+  // 'none'. A resolved gradient proves the aliases are defined.
+  expect(style.bgImage).toContain('gradient');
+  expect(style.border).not.toBe('rgba(0, 0, 0, 0)');
+});
+
+test('online host join URL targets the controller view', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-online').click();
+  await expect(page.getByTestId('lobby-host')).toBeVisible();
+  // The advertised join link must include view=controller or the QR loads the
+  // full app (Home) instead of the phone controller.
+  await expect(page.locator('.lobby-qr-hint code')).toContainText('view=controller');
+});
+
+test('settings modal closes on Escape', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('open-settings').click().catch(async () => {
+    // fall back to the gear by aria-label if no testid
+    await page.getByRole('button', { name: /settings/i }).first().click();
+  });
+  const dialog = page.getByRole('dialog', { name: /settings/i });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+});
+
+test('online end-to-end: host question reaches a player who answers, host sees it', async ({
+  browser,
+}) => {
+  test.setTimeout(60000);
+  const hostCtx = await browser.newContext();
+  const host = await hostCtx.newPage();
+  await host.goto('/');
+  await host.getByTestId('play-button').click();
+  await host.getByTestId('mode-online').click();
+  await expect(host.getByTestId('lobby-host')).toBeVisible();
+  await expect(host.getByTestId('lobby-start')).toBeEnabled({ timeout: 20000 });
+  const code = (await host.getByTestId('lobby-code').innerText()).replace(/[^A-Z0-9]/gi, '');
+
+  const playerCtx = await browser.newContext();
+  const player = await playerCtx.newPage();
+  await player.goto(`/?room=${code}&view=controller&name=Tester`);
+  await expect(player.getByTestId('controller-lobby')).toBeVisible({ timeout: 20000 });
+
+  // Host sees the player, assigns to Blue, starts.
+  await expect(host.getByTestId('lobby-count')).toContainText('1 connected', { timeout: 20000 });
+  await host.locator('.lobby-unassigned button', { hasText: 'Blue' }).first().click();
+  await host.getByTestId('lobby-start').click();
+  await host.getByTestId('start-match').click();
+  await expect(host.getByTestId('game-screen')).toBeVisible();
+
+  // Host serves a question → it must reach the player's phone.
+  await host.locator('.ll-hex.claimable').first().click();
+  await expect(host.getByTestId('question-card')).toBeVisible();
+  await expect(player.getByTestId('controller-question')).toBeVisible({ timeout: 20000 });
+
+  // Player answers → host must see the submission.
+  await player.getByTestId('controller-input').fill('Banana');
+  await player.getByTestId('controller-submit').click();
+  await expect(host.getByTestId('online-answers')).toContainText('Banana', { timeout: 20000 });
+
+  await playerCtx.close();
+  await hostCtx.close();
 });

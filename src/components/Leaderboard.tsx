@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { PACKS } from '../content';
+import { useModalDismiss } from '../lib/useModalDismiss';
 import { supabase, type LeaderboardRow } from '../lib/supabase';
 
 export function Leaderboard({ onClose }: { onClose: () => void }) {
@@ -8,6 +9,8 @@ export function Leaderboard({ onClose }: { onClose: () => void }) {
   const [packId, setPackId] = useState<string>('all');
   const [rows, setRows] = useState<LeaderboardRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useModalDismiss(dialogRef, onClose);
 
   useEffect(() => {
     if (!supabase) {
@@ -50,6 +53,7 @@ export function Leaderboard({ onClose }: { onClose: () => void }) {
         onClick={onClose}
       >
         <motion.div
+          ref={dialogRef}
           className="modal leaderboard"
           role="dialog"
           aria-label="Global leaderboard"
@@ -127,12 +131,24 @@ export async function submitScore(args: {
     .eq('id', user.id)
     .maybeSingle();
   if (!profile?.username) return;
-  await supabase.from('leaderboard').insert({
-    user_id: user.id,
-    username: profile.username,
-    pack_id: args.packId,
-    score: args.score,
-    moves: args.moves,
-    duration_ms: args.durationMs,
+  // Preferred path: the SECURITY DEFINER RPC (migration 0004) — derives the
+  // username server-side, blocks banned users, and bounds the metrics so the
+  // board can't be forged. Falls back to the legacy direct insert only if the
+  // RPC isn't deployed yet (PGRST202 = function not found).
+  const { error } = await supabase.rpc('submit_score', {
+    p_pack_id: args.packId,
+    p_score: args.score,
+    p_moves: args.moves,
+    p_duration_ms: args.durationMs,
   });
+  if (error && (error.code === 'PGRST202' || /could not find the function/i.test(error.message))) {
+    await supabase.from('leaderboard').insert({
+      user_id: user.id,
+      username: profile.username,
+      pack_id: args.packId,
+      score: args.score,
+      moves: args.moves,
+      duration_ms: args.durationMs,
+    });
+  }
 }

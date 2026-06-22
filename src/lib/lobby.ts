@@ -55,16 +55,27 @@ export type LobbyEvent =
       // For letterless packs the prompt carries audio/video/image URLs; players
       // see the prompt text + media right on their phone.
       prompt: string;
+      hideLetter?: boolean;
       audio?: string;
       video?: string;
       image?: string;
       youtube?: string;
     }
   | { type: 'answer_revealed'; answer: string }
-  | { type: 'answer_submitted'; playerId: string; playerName: string; team: PlayerTeam; answer: string }
+  | {
+      type: 'answer_submitted';
+      playerId: string;
+      playerName: string;
+      team: PlayerTeam;
+      answer: string;
+      // The board cell this answer is for — lets the host bucket submissions per
+      // question so stale answers never bleed across turns.
+      cell: number;
+    }
   | { type: 'adjudicated'; winner: PlayerTeam | null; cell: number }
   | { type: 'game_over'; winner: PlayerTeam | null }
-  | { type: 'team_assigned'; playerId: string; team: PlayerTeam }
+  // team === null un-assigns the player (host "×" / kick back to the pool).
+  | { type: 'team_assigned'; playerId: string; team: PlayerTeam | null }
   | { type: 'match_started' }
   | { type: 'host_left' };
 
@@ -78,6 +89,9 @@ export interface LobbyHandle {
   code: string;
   self: PresencePlayer;
   broadcast: (event: LobbyEvent) => Promise<void>;
+  /** Patch the live handlers (e.g. the host attaches an answer listener once the
+   *  match starts, without tearing down + re-subscribing the channel). */
+  setHandlers: (patch: LobbyHandlers) => void;
   leave: () => Promise<void>;
 }
 
@@ -95,12 +109,28 @@ export async function openRoom(
 ): Promise<LobbyHandle> {
   if (!supabase) throw new Error('Online features require Supabase configuration.');
 
-  const channel = supabase.channel(`lobby:${code}`, {
+  // Handlers are mutable so the host can attach an in-match listener later
+  // (setHandlers) without re-subscribing the channel.
+  const live: LobbyHandlers = { ...handlers };
+
+  // CRITICAL: supabase-js caches a channel per topic. If one already exists for
+  // this room (e.g. a React StrictMode double-mount, or a navigate-away-and-back),
+  // calling `.on(...)` on it again AFTER it has subscribed throws
+  // "cannot add presence callbacks ... after subscribe()". Remove any stale
+  // channel for this topic first so we always wire listeners on a fresh one.
+  const topic = `lobby:${code}`;
+  for (const existing of supabase.getChannels()) {
+    if (existing.topic === topic || existing.topic === `realtime:${topic}`) {
+      await supabase.removeChannel(existing);
+    }
+  }
+
+  const channel = supabase.channel(topic, {
     config: { broadcast: { self: false, ack: false }, presence: { key: self.id } },
   });
 
   channel.on('presence', { event: 'sync' }, () => {
-    if (!handlers.onRoster) return;
+    if (!live.onRoster) return;
     const state = channel.presenceState() as Record<string, PresencePlayer[]>;
     const players: PresencePlayer[] = [];
     for (const [, presences] of Object.entries(state)) {
@@ -110,11 +140,11 @@ export async function openRoom(
       players.push(newest);
     }
     players.sort((a, b) => a.joinedAt - b.joinedAt);
-    handlers.onRoster(players);
+    live.onRoster(players);
   });
 
   channel.on('broadcast', { event: 'lobby' }, (msg) => {
-    handlers.onEvent?.(msg.payload as LobbyEvent);
+    live.onEvent?.(msg.payload as LobbyEvent);
   });
 
   await new Promise<void>((resolve, reject) => {
@@ -131,15 +161,33 @@ export async function openRoom(
     });
   });
 
+  // A host that closes/refreshes the tab should still tell players it's gone.
+  let onUnload: (() => void) | null = null;
+  if (self.role === 'host' && typeof window !== 'undefined') {
+    onUnload = () => {
+      // send() is best-effort during unload; the payload is tiny so it usually lands.
+      channel.send({ type: 'broadcast', event: 'lobby', payload: { type: 'host_left' } });
+    };
+    window.addEventListener('beforeunload', onUnload);
+  }
+
   return {
     channel,
     code,
     self,
+    setHandlers: (patch) => {
+      Object.assign(live, patch);
+    },
     broadcast: async (event) => {
-      await channel.send({ type: 'broadcast', event: 'lobby', payload: event });
+      try {
+        await channel.send({ type: 'broadcast', event: 'lobby', payload: event });
+      } catch {
+        /* channel may be closing — never let a dropped broadcast crash the game */
+      }
     },
     leave: async () => {
       try {
+        if (onUnload) window.removeEventListener('beforeunload', onUnload);
         if (self.role === 'host') {
           await channel.send({ type: 'broadcast', event: 'lobby', payload: { type: 'host_left' } });
         }

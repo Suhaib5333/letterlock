@@ -174,6 +174,25 @@ Deno.serve(async (req) => {
 
   const origin = req.headers.get('origin') ?? 'https://letterlock.raltech.dev';
 
+  // 0. Ensure the user exists. generate_link(type:'magiclink') only mints a code
+  //    for an EXISTING user when signups are restricted — so a brand-new email
+  //    would get no verifiable OTP ("invalid or expired" for every code). Create
+  //    the user first (idempotent: a 422 "already registered" is fine to ignore).
+  const createResp = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${serviceRole}`,
+      apikey: serviceRole,
+    },
+    body: JSON.stringify({ email, email_confirm: true }),
+  });
+  if (!createResp.ok && createResp.status !== 422) {
+    const errText = await createResp.text().catch(() => '');
+    console.error('[send-otp] admin create user failed', createResp.status, errText);
+    // Non-fatal: fall through and let generate_link try anyway.
+  }
+
   // 1. Mint magic link + OTP via Supabase Admin Auth API.
   const genLinkResp = await fetch(`${supabaseUrl}/auth/v1/admin/generate_link`, {
     method: 'POST',

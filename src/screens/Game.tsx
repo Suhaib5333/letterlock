@@ -8,6 +8,7 @@ import { Scoreboard } from '../components/Scoreboard';
 import { Timer } from '../components/Timer';
 import { submitScore } from '../components/Leaderboard';
 import type { TeamId } from '../core/models';
+import { useOnlineHost } from '../lib/useOnlineHost';
 import { haptic, play } from '../services/audio';
 import { colorById } from '../state/palette';
 import { clearSavedGame, useStore } from '../state/store';
@@ -94,6 +95,16 @@ export function Game() {
   const canUndo = state.log.length > 1;
   const inQuestion = ui.phase === 'question' && ui.served;
   const hideLetters = !!opts.pack.hideBoardLetters;
+
+  // Online Mode: mirror the live match to player phones + collect their typed
+  // answers. No-ops entirely in Couch Mode (no lobby channel open).
+  const online = useOnlineHost({
+    served: ui.served,
+    answerRevealed: ui.answerRevealed,
+    gameOver: ui.gameOver,
+    winner: game.winner,
+    hideLetters,
+  });
   // A media clip can fail to load (region/network); always allow Skip when the question
   // carries a clip so a broken clip can never strand the game.
   const q = ui.served?.question;
@@ -264,6 +275,27 @@ export function Game() {
                     onMediaPlay={() => setClipPlayed(true)}
                   />
                 </div>
+                {online.online && (
+                  <div className="online-answers" data-testid="online-answers">
+                    <header className="online-answers-head">
+                      <span>📱 Player answers</span>
+                      <span className="online-answers-count">{online.submissions.length}</span>
+                    </header>
+                    {online.submissions.length === 0 ? (
+                      <p className="online-answers-empty">Waiting for players to submit…</p>
+                    ) : (
+                      <ul>
+                        {online.submissions.map((s) => (
+                          <li key={s.playerId} data-testid={`online-answer-${s.playerId}`}>
+                            <span className="online-answer-dot" data-team={s.team} aria-hidden="true" />
+                            <span className="online-answer-name">{s.playerName}</span>
+                            <span className="online-answer-text">{s.answer}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
                 <HostPad
                   teams={teams}
                   picker={picker}
@@ -273,10 +305,12 @@ export function Game() {
                   onAward={(team) => {
                     const stolen = team !== picker;
                     play(stolen ? 'steal' : 'claim');
+                    if (ui.selectedCell !== null) online.broadcastAdjudicated(team, ui.selectedCell);
                     dispatch({ type: 'ADJUDICATE', team });
                   }}
                   onNoOne={() => {
                     play('pass');
+                    if (ui.selectedCell !== null) online.broadcastAdjudicated(null, ui.selectedCell);
                     dispatch({ type: 'ADJUDICATE', team: null });
                   }}
                   onUndo={() => {

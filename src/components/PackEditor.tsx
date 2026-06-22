@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../lib/auth';
+import { useModalDismiss } from '../lib/useModalDismiss';
 import { supabase, type CustomPack } from '../lib/supabase';
 import { play } from '../services/audio';
 
@@ -97,6 +98,8 @@ export function PackEditor({ onClose }: { onClose: () => void }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedNote, setSavedNote] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useModalDismiss(dialogRef, onClose);
 
   // Load my drafts on mount (and after saves) so the user sees their pack list.
   const loadMine = useCallback(async () => {
@@ -227,6 +230,7 @@ export function PackEditor({ onClose }: { onClose: () => void }) {
         onClick={onClose}
       >
         <motion.div
+          ref={dialogRef}
           className="modal pack-editor"
           role="dialog"
           aria-label="Custom pack editor"

@@ -61,6 +61,10 @@
 .btn-primary:hover {
   box-shadow: 0 12px 32px rgba(10, 132, 255, 0.55);
 }
+/* Press compresses the glow so the button physically "sinks" — tactile feel. */
+.btn-primary:active {
+  box-shadow: 0 3px 10px rgba(10, 132, 255, 0.4);
+}
 .btn-secondary {
   background: var(--surface-2);
   border-color: var(--line-strong);
@@ -1826,93 +1830,6 @@
   justify-content: center;
   margin-bottom: var(--s-3);
 }
-/* YouTube trailer embed (guess-the-movie) — 16:9, capped to the panel height.
-   The stage holds the size + spoiler overlays; the IFrame API injects an <iframe>
-   inside .qcard-yt-host (which fills the stage). */
-iframe.qcard-video {
-  width: min(100%, 46vh * 1.78);
-  aspect-ratio: 16 / 9;
-  max-height: clamp(120px, 30vh, 280px);
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-}
-.qcard-yt-stage {
-  position: relative;
-  width: min(100%, 46vh * 1.78);
-  aspect-ratio: 16 / 9;
-  max-height: clamp(120px, 30vh, 280px);
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  overflow: hidden;
-  background: #000;
-}
-.qcard-yt-host,
-.qcard-yt-host iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-}
-/* Transparent click-shield over the whole player — blocks ALL interaction with the
-   YouTube iframe (no click-through to youtube.com, no pause, no hover chrome). */
-.qcard-yt-shield {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background: transparent;
-  cursor: default;
-}
-/* Mask the YouTube title bar (the title flashes top-left for a few seconds at start). */
-.qcard-yt-mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: clamp(42px, 26%, 64px);
-  background: linear-gradient(to bottom, #000 0%, #000 45%, rgba(0, 0, 0, 0.92) 70%, transparent 100%);
-  pointer-events: none;
-  z-index: 3;
-}
-/* Spoiler cover over the poster/title (before play) and the end-screen (after end). */
-.qcard-yt-cover {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  background: radial-gradient(circle at 50% 42%, var(--surface), #05060a);
-  color: var(--text);
-  cursor: pointer;
-  text-align: center;
-}
-.qcard-yt-cover:disabled {
-  cursor: default;
-  opacity: 0.85;
-}
-.qcard-yt-cover-icon {
-  font-size: 2.2rem;
-  line-height: 1;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: grid;
-  place-content: center;
-  background: var(--blue);
-  color: #fff;
-  box-shadow: var(--shadow-2);
-}
-.qcard-yt-cover-text {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.05rem;
-}
-.qcard-yt-cover-hint {
-  font-size: var(--t-xs);
-  color: var(--text-dim);
-}
 .qcard-video {
   width: auto;
   max-width: 100%;
@@ -2702,6 +2619,33 @@ iframe.qcard-video {
   .tut-body {
     grid-template-columns: 1fr;
     gap: clamp(12px, 3vh, 32px);
+  }
+}
+
+/* Short landscape phones (e.g. 740×360, 844×390): the stacked 1-column tutorial
+   is too tall. Keep it 2-column + compact so board and text sit side-by-side and
+   fit the height; an internal scroll is the safety net if it's still tight. */
+@media (orientation: landscape) and (max-height: 480px) {
+  .tut-body {
+    grid-template-columns: 1.05fr 1fr;
+    gap: var(--s-3);
+    align-items: center;
+    overflow-y: auto;
+    min-height: 0;
+  }
+  .tut-board .ll-board {
+    max-height: 74vh;
+    max-width: min(360px, 42vh);
+  }
+  .tut-text h2 {
+    font-size: 1.2rem;
+    margin: 4px 0;
+  }
+  .tut-text p {
+    font-size: var(--t-sm);
+  }
+  .tut-nav {
+    margin-top: var(--s-2);
   }
 }
 

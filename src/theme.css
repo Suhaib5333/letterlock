@@ -45,6 +45,16 @@
   --text-dim: #aeb9d8;
   --text-faint: #6b769a;
 
+  /* ---- Aliases consumed by lobby.css / admin.css (online, join, controller,
+     admin, pack-editor, auth-email UI). Without these the card surfaces,
+     borders and accents on those screens collapse to invalid/transparent. ---- */
+  --ink: var(--text);
+  --bg: var(--bg-0);
+  --surface-border: var(--line-strong);
+  --accent: var(--blue);
+  --team-a: var(--ta);
+  --team-b: var(--tb);
+
   /* ---- Type ---- */
   --font-display: 'Bricolage Grotesque', 'Sora', system-ui, sans-serif;
   --font-body: 'Sora', system-ui, -apple-system, sans-serif;

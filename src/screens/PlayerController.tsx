@@ -22,12 +22,13 @@ import {
  *   5. On `adjudicated` / `answer_revealed` / `game_over` show feedback.
  */
 
-type Phase = 'waiting' | 'lobby' | 'question' | 'submitted' | 'reveal' | 'done';
+type Phase = 'waiting' | 'lobby' | 'ready' | 'question' | 'submitted' | 'reveal' | 'done';
 
 interface ServedPrompt {
   cell: number;
   letter: string;
   prompt: string;
+  hideLetter?: boolean;
   audio?: string;
   video?: string;
   image?: string;
@@ -40,6 +41,7 @@ interface ControllerSave {
   playerId: string;
   name: string;
   room: string;
+  team?: PlayerTeam | null;
 }
 
 function loadSave(room: string): ControllerSave | null {
@@ -76,6 +78,17 @@ export function PlayerController() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [winner, setWinner] = useState<PlayerTeam | null>(null);
   const handleRef = useRef<LobbyHandle | null>(null);
+  // Refs so the channel's once-registered callbacks always read fresh values
+  // (avoids the stale-closure bug where adjudicated feedback compared an old team).
+  const teamRef = useRef<PlayerTeam | null>(team);
+  const servedRef = useRef<ServedPrompt | null>(served);
+  const sawHostRef = useRef(false);
+  useEffect(() => {
+    teamRef.current = team;
+  }, [team]);
+  useEffect(() => {
+    servedRef.current = served;
+  }, [served]);
 
   // Bootstrap channel + presence
   useEffect(() => {
@@ -93,26 +106,39 @@ export function PlayerController() {
     const existing = loadSave(room);
     const playerId = existing?.playerId ?? generatePlayerId();
     const displayName = (existing?.name ?? initialName ?? 'Player').trim() || 'Player';
+    const savedTeam = existing?.team ?? null;
     if (!name) setName(displayName);
-    persistSave({ playerId, name: displayName, room });
+    if (savedTeam) {
+      setTeam(savedTeam);
+      teamRef.current = savedTeam;
+    }
+    persistSave({ playerId, name: displayName, room, team: savedTeam });
 
     let cancelled = false;
+    let notFoundTimer: ReturnType<typeof setTimeout> | undefined;
 
     (async () => {
       try {
         const self: PresencePlayer = {
           id: playerId,
           name: displayName,
-          team: null,
+          team: savedTeam,
           role: 'player',
           joinedAt: Date.now(),
         };
         const h = await openRoom(room, self, {
           onEvent: (event) => onEvent(event, playerId),
           onRoster: (players) => {
-            // Track our own team assignment as the host updates it.
+            if (players.some((p) => p.role === 'host')) sawHostRef.current = true;
+            // Adopt a team from presence only as an UPGRADE (null → A/B). Explicit
+            // un-assignment arrives via the team_assigned event; presence is
+            // eventually-consistent and must never spuriously revert us to null.
             const me = players.find((p) => p.id === playerId);
-            if (me && me.team !== team) setTeam(me.team);
+            if (me && me.team && me.team !== teamRef.current) {
+              setTeam(me.team);
+              teamRef.current = me.team;
+              persistSave({ playerId, name: displayName, room, team: me.team });
+            }
           },
         });
         if (cancelled) {
@@ -122,6 +148,14 @@ export function PlayerController() {
         handleRef.current = h;
         setStatus('open');
         setPhase('lobby');
+        // A code typed for a room that doesn't exist still "connects" (presence
+        // channels are created on demand). If no host ever shows up, surface it.
+        notFoundTimer = setTimeout(() => {
+          if (!cancelled && !sawHostRef.current) {
+            setStatus('error');
+            setError("Couldn't find that room. Double-check the code with the host.");
+          }
+        }, 8000);
       } catch (e) {
         if (cancelled) return;
         setStatus('error');
@@ -131,6 +165,7 @@ export function PlayerController() {
 
     return () => {
       cancelled = true;
+      if (notFoundTimer) clearTimeout(notFoundTimer);
       const h = handleRef.current;
       if (h) h.leave().catch(() => {});
       handleRef.current = null;
@@ -138,79 +173,81 @@ export function PlayerController() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room]);
 
-  const onEvent = useCallback(
-    (event: LobbyEvent, myId: string) => {
-      switch (event.type) {
-        case 'team_assigned':
-          if (event.playerId === myId) {
-            setTeam(event.team);
-            // Re-track our own presence with the new team
-            const h = handleRef.current;
-            if (h) {
-              h.channel
-                .track({ ...h.self, team: event.team })
-                .catch(() => {});
-            }
-          }
-          break;
-        case 'question_served':
-          setServed({
-            cell: event.cell,
-            letter: event.letter,
-            prompt: event.prompt,
-            audio: event.audio,
-            video: event.video,
-            image: event.image,
-            youtube: event.youtube,
-          });
-          setAnswer('');
-          setFeedback(null);
-          setPhase('question');
-          break;
-        case 'answer_revealed':
-          setFeedback(`Answer: ${event.answer}`);
-          setPhase('reveal');
-          break;
-        case 'adjudicated':
-          if (event.winner === null) {
-            setFeedback('No one got it — it stays open!');
-          } else if (event.winner === team) {
-            setFeedback('🏆 Your team got it!');
-          } else {
-            setFeedback('Other team scored this one.');
-          }
-          setPhase('reveal');
-          break;
-        case 'game_over':
-          setWinner(event.winner);
-          setPhase('done');
-          break;
-        case 'host_left':
-          setError('Host left the room. The game has ended.');
-          setStatus('error');
-          break;
-        case 'match_started':
-          setPhase('lobby');
-          break;
-        default:
-          break;
-      }
-    },
-    [team],
-  );
+  // Stable across the channel's lifetime — reads live values from refs so the
+  // once-registered listener never works off a stale `team`/`served`.
+  const onEvent = useCallback((event: LobbyEvent, myId: string) => {
+    switch (event.type) {
+      case 'team_assigned':
+        if (event.playerId === myId) {
+          setTeam(event.team);
+          teamRef.current = event.team;
+          // Re-track our own presence with the new team (or null = back to pool).
+          const h = handleRef.current;
+          if (h) h.channel.track({ ...h.self, team: event.team }).catch(() => {});
+        }
+        break;
+      case 'question_served':
+        setServed({
+          cell: event.cell,
+          letter: event.letter,
+          prompt: event.prompt,
+          hideLetter: event.hideLetter,
+          audio: event.audio,
+          video: event.video,
+          image: event.image,
+          youtube: event.youtube,
+        });
+        setAnswer('');
+        setFeedback(null);
+        setPhase('question');
+        break;
+      case 'answer_revealed':
+        setFeedback(`Answer: ${event.answer}`);
+        setPhase('reveal');
+        break;
+      case 'adjudicated':
+        if (event.winner === null) {
+          setFeedback('No one got it — it stays open!');
+        } else if (event.winner === teamRef.current) {
+          setFeedback('🏆 Your team got it!');
+        } else {
+          setFeedback('Other team scored this one.');
+        }
+        setPhase('reveal');
+        break;
+      case 'game_over':
+        setWinner(event.winner);
+        setPhase('done');
+        break;
+      case 'host_left':
+        setError('The host left and the game has ended.');
+        setStatus('error');
+        break;
+      case 'match_started':
+        setServed(null);
+        setFeedback(null);
+        setPhase('ready');
+        break;
+      default:
+        break;
+    }
+  }, []);
 
   const submit = useCallback(() => {
     const h = handleRef.current;
-    if (!h || !served || !answer.trim()) return;
+    const s = servedRef.current;
+    const t = teamRef.current;
+    if (!h || !s || !t || !answer.trim()) return; // must be on a team to answer
     h.broadcast({
       type: 'answer_submitted',
       playerId: h.self.id,
       playerName: name,
-      team: team ?? 'A',
+      team: t,
       answer: answer.trim(),
+      cell: s.cell,
     }).catch(() => {});
     setPhase('submitted');
-  }, [answer, name, served, team]);
+  }, [answer, name]);
 
   const teamLabel =
     team === 'A' ? 'Team A' : team === 'B' ? 'Team B' : 'Unassigned';
@@ -249,39 +286,67 @@ export function PlayerController() {
         <div className="controller-wait" data-testid="controller-lobby">
           <h2>You're in! 🎉</h2>
           <p>Welcome, <strong>{name}</strong>.</p>
-          <p>Waiting for the host to start the match…</p>
+          <p>
+            {team
+              ? `You're on ${teamLabel}. Waiting for the host to start…`
+              : 'Waiting for the host to put you on a team and start the match…'}
+          </p>
+        </div>
+      )}
+
+      {phase === 'ready' && status === 'open' && (
+        <div className="controller-wait" data-testid="controller-ready">
+          <h2>Match starting! 🎬</h2>
+          <p>Eyes on the big screen — your question will appear here when it's live.</p>
         </div>
       )}
 
       {phase === 'question' && served && (
         <div className="controller-question" data-testid="controller-question">
-          <div className="controller-letter" aria-hidden="true">{served.letter}</div>
+          {!served.hideLetter && (
+            <div className="controller-letter" aria-hidden="true">{served.letter}</div>
+          )}
           <div className="controller-prompt">{served.prompt}</div>
-          {served.image && <img src={served.image} alt="" className="controller-media" />}
+          {served.image && (
+            <img
+              src={served.image}
+              alt=""
+              className="controller-media"
+              onError={(e) => ((e.currentTarget.style.display = 'none'))}
+            />
+          )}
           {served.audio && <audio controls src={served.audio} className="controller-media" />}
           {served.video && <video controls src={served.video} className="controller-media" />}
-          <label className="controller-answer">
-            <span>Your answer</span>
-            <input
-              type="text"
-              data-testid="controller-input"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Type your answer…"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') submit();
-              }}
-              autoFocus
-            />
-          </label>
-          <button
-            className="btn btn-primary btn-lg block"
-            data-testid="controller-submit"
-            disabled={!answer.trim()}
-            onClick={submit}
-          >
-            Submit ▸
-          </button>
+          {team ? (
+            <>
+              <label className="controller-answer">
+                <span>Your answer</span>
+                <input
+                  type="text"
+                  data-testid="controller-input"
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  placeholder="Type your answer…"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submit();
+                  }}
+                  autoFocus
+                />
+              </label>
+              <button
+                className="btn btn-primary btn-lg block"
+                data-testid="controller-submit"
+                disabled={!answer.trim()}
+                onClick={submit}
+              >
+                Submit ▸
+              </button>
+            </>
+          ) : (
+            <p className="controller-noteam" data-testid="controller-noteam">
+              You're not on a team yet — ask the host to add you, then you can answer.
+            </p>
+          )}
         </div>
       )}
 

@@ -29,9 +29,25 @@ declare global {
   }
 }
 
+/** Keep the room code stable across StrictMode remounts / re-renders within a
+ *  session, so the QR + channel never orphan under a regenerated code. */
+function useSessionRoomCode(): string {
+  return useState(() => {
+    try {
+      const existing = sessionStorage.getItem('letterlock.lobby.code');
+      if (existing && existing.length === 6) return existing;
+      const fresh = generateRoomCode();
+      sessionStorage.setItem('letterlock.lobby.code', fresh);
+      return fresh;
+    } catch {
+      return generateRoomCode();
+    }
+  })[0];
+}
+
 export function LobbyHost() {
   const { state, dispatch } = useStore();
-  const [code] = useState(() => generateRoomCode());
+  const code = useSessionRoomCode();
   const [roster, setRoster] = useState<PresencePlayer[]>([]);
   const [status, setStatus] = useState<'connecting' | 'open' | 'error'>('connecting');
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +56,9 @@ export function LobbyHost() {
 
   const joinUrl = useMemo(() => {
     const u = new URL(window.location.href);
-    u.search = `?room=${code}`;
+    // `view=controller` is REQUIRED — without it the link loads the full game
+    // app (Home) instead of the phone controller (see main.tsx routing).
+    u.search = `?room=${code}&view=controller`;
     u.hash = '';
     return u.toString();
   }, [code]);
@@ -105,9 +123,9 @@ export function LobbyHost() {
       if (!player) return;
       // Optimistic local update so the host UI feels instant
       setRoster((rs) => rs.map((p) => (p.id === playerId ? { ...p, team } : p)));
-      // Player respects the broadcast and re-tracks their own presence with
-      // the new team — see PlayerController.tsx
-      if (team) h.broadcast({ type: 'team_assigned', playerId, team }).catch(() => {});
+      // Player respects the broadcast and re-tracks their own presence with the
+      // new team (or back to the pool when team === null) — see PlayerController.
+      h.broadcast({ type: 'team_assigned', playerId, team }).catch(() => {});
     },
     [players],
   );
@@ -132,6 +150,11 @@ export function LobbyHost() {
       }
       window.__lobby = undefined;
       handleRef.current = null;
+    }
+    try {
+      sessionStorage.removeItem('letterlock.lobby.code');
+    } catch {
+      /* ignore */
     }
     dispatch({ type: 'SET_SCREEN', screen: 'home' });
   }, [dispatch]);

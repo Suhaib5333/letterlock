@@ -86,13 +86,73 @@ for (const vp of VIEWPORTS) {
   await sleep(400);
   rows.push(['home', await overflow(page)]);
 
+  // ── Modals (overlay the current screen; we catch clipped controls) ──
+  await page.getByTestId('open-settings').click().catch(() => {});
+  await sleep(250);
+  rows.push(['modal-settings', await overflow(page)]);
+  await page.keyboard.press('Escape');
+  await sleep(200);
+
+  await page.getByTestId('open-categories').click().catch(() => {});
+  await sleep(250);
+  rows.push(['modal-category', await overflow(page)]);
+  await page.keyboard.press('Escape');
+  await sleep(200);
+
+  await page.getByTestId('open-leaderboard').click().catch(() => {});
+  await sleep(300);
+  rows.push(['modal-leaderboard', await overflow(page)]);
+  await page.keyboard.press('Escape');
+  await sleep(200);
+
+  await page.getByTestId('open-auth').click().catch(() => {});
+  await sleep(250);
+  rows.push(['modal-auth', await overflow(page)]);
+  await page.keyboard.press('Escape');
+  await sleep(200);
+
+  // ── Tutorial ──
+  await page.getByRole('button', { name: /how to play/i }).click().catch(() => {});
+  await sleep(350);
+  rows.push(['tutorial', await overflow(page)]);
+
+  // ── Image/charade secret-prompt standalone page ──
+  await page.goto(`${BASE}/?view=img&w=Elephant&h=Act+it+out`);
+  await sleep(300);
+  rows.push(['imgview', await overflow(page)]);
+
   if (PACK) {
+    await page.goto(BASE);
     await page.getByTestId('open-categories').click().catch(() => {});
     await sleep(150);
     await page.getByTestId(`pack-${PACK}`).click().catch(() => {});
     await sleep(150);
+  } else {
+    await page.goto(BASE);
+    await sleep(200);
   }
   await page.getByTestId('play-button').click();
+  await sleep(300);
+  rows.push(['mode-select', await overflow(page)]);
+
+  // Online lobby (host) — new screen. lobby-back returns to HOME.
+  await page.getByTestId('mode-online').click().catch(() => {});
+  await sleep(700);
+  rows.push(['lobby-host', await overflow(page)]);
+  await page.getByTestId('lobby-back').click().catch(() => {});
+  await sleep(300);
+
+  // Join screen — re-enter from home; join-back returns to mode-select.
+  await page.getByTestId('play-button').click().catch(() => {});
+  await sleep(200);
+  await page.getByTestId('mode-join').click().catch(() => {});
+  await sleep(250);
+  rows.push(['lobby-join', await overflow(page)]);
+  await page.getByTestId('join-back').click().catch(() => {});
+  await sleep(250);
+
+  // Couch mode → setup (now on mode-select after join-back).
+  await page.getByTestId('mode-couch').click().catch(() => {});
   await page.getByTestId('mode-single').click().catch(() => {});
   await sleep(350);
   rows.push(['setup', await overflow(page)]);
@@ -107,6 +167,30 @@ for (const vp of VIEWPORTS) {
   await page.getByTestId('reveal-answer').click().catch(() => {});
   await sleep(300);
   rows.push(['game-question', await overflow(page)]);
+
+  // ── Win the (single) game: claim row 3 (cells 10–14) for Team A → game-over
+  //    overlay → continue → victory. The game-question step above left a question
+  //    OPEN (so the board isn't pickable) — clear it first by awarding it. ──
+  await page.getByTestId('award-A').click({ timeout: 2000 }).catch(() => {});
+  await sleep(150);
+  for (const cell of [10, 11, 12, 13, 14]) {
+    const hex = page.locator(`.ll-hex.claimable[data-cell="${cell}"]`);
+    await hex.click({ timeout: 2500 }).catch(() => {});
+    await page.getByTestId('award-A').click({ timeout: 2500 }).catch(() => {});
+    await sleep(120);
+  }
+  await sleep(500);
+  if (await page.getByTestId('game-over').count()) {
+    rows.push(['game-over', await overflow(page)]);
+    await page.getByTestId('continue-after-game').click().catch(() => {});
+    await sleep(600);
+    rows.push(['victory', await overflow(page)]);
+  }
+
+  // Phone-as-controller (its own standalone page) — the lobby/waiting layout.
+  await page.goto(`${BASE}/?room=TESTAB&view=controller&name=Tester`);
+  await sleep(500);
+  rows.push(['controller', await overflow(page)]);
 
   for (const [screen, o] of rows) {
     const bad = o.v > 2 || o.h > 2 || o.offBottom > 2 || o.offSide > 2 || o.regionOver > 2;

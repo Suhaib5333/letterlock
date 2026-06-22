@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { useModalDismiss } from '../lib/useModalDismiss';
 import { PACK_GROUPS, PACKS } from '../content';
 import { type QuestionPack, totalQuestions } from '../core/packs';
 import { play } from '../services/audio';
@@ -93,6 +94,8 @@ export function CategoryMenu({
   // multi-tier card sticks for that browser session so the player can shuffle
   // through them without the choice resetting.
   const [tierPick, setTierPick] = useState<Record<string, string>>({});
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useModalDismiss(dialogRef, onClose);
 
   // Group order: only groups that have matches. Within each group, packs are
   // collapsed by stem so e.g. Sitcoms Easy/Medium/Hard render as ONE card
@@ -116,6 +119,7 @@ export function CategoryMenu({
       onClick={onClose}
     >
       <motion.div
+        ref={dialogRef}
         className="cat-panel"
         role="dialog"
         aria-label="Choose a category"

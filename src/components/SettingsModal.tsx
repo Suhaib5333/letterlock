@@ -1,4 +1,6 @@
 import { motion } from 'motion/react';
+import { useRef } from 'react';
+import { useModalDismiss } from '../lib/useModalDismiss';
 import { play } from '../services/audio';
 import { useStore } from '../state/store';
 import type { Settings } from '../state/types';
@@ -75,10 +77,13 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const { state, dispatch } = useStore();
   const s = state.settings;
   const set = (patch: Partial<Settings>) => dispatch({ type: 'UPDATE_SETTINGS', patch });
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useModalDismiss(dialogRef, onClose);
 
   return (
     <div className="modal-scrim" onClick={onClose}>
       <motion.div
+        ref={dialogRef}
         className="modal"
         onClick={(e) => e.stopPropagation()}
         initial={{ scale: 0.92, opacity: 0, y: 20 }}

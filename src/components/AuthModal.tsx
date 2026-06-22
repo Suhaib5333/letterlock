@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../lib/auth';
+import { useModalDismiss } from '../lib/useModalDismiss';
 import { supabase } from '../lib/supabase';
 import { play } from '../services/audio';
 
@@ -17,13 +18,19 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
     user,
     profile,
     loading,
+    profileLoading,
     signInWithGoogle,
     signInWithEmail,
     verifyEmailOtp,
     signOut,
     refreshProfile,
   } = useAuth();
-  const needsUsername = !!user && !profile;
+  // Only gate on the username AFTER the profile fetch settles — otherwise an
+  // existing user briefly sees the "choose a username" view on every sign-in.
+  const needsUsername = !!user && !profile && !profileLoading;
+  const dialogRef = useRef<HTMLDivElement>(null);
+  // The username-claim gate is mandatory — don't let Escape dismiss it.
+  useModalDismiss(dialogRef, onClose, { closeOnEscape: !needsUsername });
 
   return (
     <AnimatePresence>
@@ -36,6 +43,7 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
         onClick={needsUsername ? undefined : onClose}
       >
         <motion.div
+          ref={dialogRef}
           className="modal auth-dialog"
           role="dialog"
           aria-label="Sign in"
@@ -54,6 +62,8 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
               onVerifyOtp={verifyEmailOtp}
               onClose={onClose}
             />
+          ) : !profile && profileLoading ? (
+            <p className="go-sub">Loading your profile…</p>
           ) : needsUsername ? (
             <UsernameView userId={user.id} onClaimed={refreshProfile} />
           ) : (
@@ -281,6 +291,7 @@ function UsernameView({ userId, onClaimed }: { userId: string; onClaimed: () => 
   const [name, setName] = useState('');
   const [status, setStatus] = useState<'idle' | 'checking' | 'taken' | 'ok' | 'invalid'>('idle');
   const [busy, setBusy] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
   const valid = /^[a-z0-9_]{3,20}$/.test(name);
 
   // Live availability check (debounced).
@@ -299,11 +310,23 @@ function UsernameView({ userId, onClaimed }: { userId: string; onClaimed: () => 
   const submit = async () => {
     if (!supabase || status !== 'ok' || busy) return;
     setBusy(true);
+    setClaimError(null);
     const { error } = await supabase
       .from('profiles')
       .insert({ id: userId, username: name });
     setBusy(false);
-    if (!error) onClaimed();
+    if (!error) {
+      onClaimed();
+      return;
+    }
+    // 23505 = unique_violation → someone claimed it between the availability
+    // check and now (TOCTOU). Re-flag it as taken; otherwise show the raw error.
+    if (error.code === '23505' || /duplicate|unique/i.test(error.message)) {
+      setStatus('taken');
+      setClaimError('That username was just taken — pick another.');
+    } else {
+      setClaimError(error.message || 'Could not claim that username. Try again.');
+    }
   };
 
   return (
@@ -321,7 +344,10 @@ function UsernameView({ userId, onClaimed }: { userId: string; onClaimed: () => 
         value={name}
         autoFocus
         maxLength={20}
-        onChange={(e) => setName(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+        onChange={(e) => {
+          setName(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''));
+          setClaimError(null);
+        }}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && status === 'ok') submit();
         }}
@@ -335,6 +361,11 @@ function UsernameView({ userId, onClaimed }: { userId: string; onClaimed: () => 
         {status === 'taken' && <>That username is already taken.</>}
         {status === 'ok' && <>✓ Available</>}
       </div>
+      {claimError && (
+        <p className="auth-error" data-testid="username-error" role="alert">
+          {claimError}
+        </p>
+      )}
       <button
         className="btn btn-primary btn-lg block"
         data-testid="username-claim"

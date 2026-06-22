@@ -12,6 +12,9 @@ interface AuthState {
   isAdmin: boolean;
   isModerator: boolean;
   isBanned: boolean;
+  // True while the profile row for the current user is still being fetched — lets
+  // the UI avoid flashing the "choose a username" gate at an existing user.
+  profileLoading: boolean;
   signInWithGoogle: () => Promise<{ ok: boolean; error?: string }>;
   // Email OTP — works out of the box on Supabase (default email provider,
   // no SMTP / dashboard config needed) so users can sign in even when Google
@@ -33,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   // Bootstrap: rehydrate the session from localStorage (supabase-js does
   // this internally when persistSession=true) then listen for changes.
@@ -63,16 +67,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user || !supabase) {
       setProfile(null);
+      setProfileLoading(false);
       return;
     }
     let cancelled = false;
+    setProfileLoading(true);
     supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .maybeSingle()
       .then(({ data }) => {
-        if (!cancelled) setProfile((data as Profile) ?? null);
+        if (cancelled) return;
+        setProfile((data as Profile) ?? null);
+        setProfileLoading(false);
       });
     return () => {
       cancelled = true;
@@ -132,8 +140,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify({ email: trimmed }),
         });
         if (res.ok) return { ok: true };
-        // 404 → function not deployed yet → fall through to direct supabase.
-        if (res.status !== 404) {
+        // 404 (function not deployed) OR 5xx (function misconfigured — e.g. the
+        // Resend/service-role secrets live on a different backend) → fall through
+        // to Supabase's built-in mailer so sign-in still works. Only a 4xx that
+        // isn't 404 (a real client error like a bad email) is surfaced.
+        if (res.status !== 404 && res.status < 500) {
           const data = (await res.json().catch(() => ({ error: 'Unknown error' }))) as {
             error?: string;
           };
@@ -145,11 +156,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Fallback: direct Supabase mailer (works, but rate-limited 2/hour).
+    // shouldCreateUser:true so a brand-new email actually gets an account +
+    // a verifiable code (otherwise first-time sign-in silently mints no OTP).
     const emailRedirectTo =
       typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : undefined;
     const { error } = await supabase.auth.signInWithOtp({
       email: trimmed,
-      options: { emailRedirectTo },
+      options: { emailRedirectTo, shouldCreateUser: true },
     });
     if (error) {
       const friendly =
@@ -208,6 +221,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin,
         isModerator,
         isBanned,
+        profileLoading,
         signInWithGoogle,
         signInWithEmail,
         verifyEmailOtp,
@@ -234,6 +248,7 @@ export function useAuth(): AuthState {
       isAdmin: false,
       isModerator: false,
       isBanned: false,
+      profileLoading: false,
       signInWithGoogle: async () => ({ ok: false, error: 'Auth not initialised.' }),
       signInWithEmail: async () => ({ ok: false, error: 'Auth not initialised.' }),
       verifyEmailOtp: async () => ({ ok: false, error: 'Auth not initialised.' }),

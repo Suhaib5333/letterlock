@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../lib/auth';
+import { useModalDismiss } from '../lib/useModalDismiss';
 import { supabase, type AdminUserRow, type CustomPack, type UserRole } from '../lib/supabase';
 import { play } from '../services/audio';
 
@@ -21,6 +22,8 @@ import { play } from '../services/audio';
 export function AdminPanel({ onClose }: { onClose: () => void }) {
   const { isAdmin, profile } = useAuth();
   const [tab, setTab] = useState<'users' | 'packs'>('users');
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useModalDismiss(dialogRef, onClose);
 
   if (!isAdmin) return null;
 
@@ -35,6 +38,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
         onClick={onClose}
       >
         <motion.div
+          ref={dialogRef}
           className="modal admin-modal"
           role="dialog"
           aria-label="Admin dashboard"

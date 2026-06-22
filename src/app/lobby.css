@@ -493,3 +493,93 @@
   font-size: 14px;
   color: #fca5a5;
 }
+
+/* ── Online Mode: host-side panel of player-submitted answers (Game.tsx) ── */
+.online-answers {
+  width: 100%;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--accent) 5%, var(--surface));
+  padding: 10px 12px;
+  margin-bottom: var(--s-2);
+}
+.online-answers-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+  margin-bottom: 6px;
+}
+.online-answers-count {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.online-answers-empty {
+  margin: 2px 0;
+  font-size: var(--t-sm);
+  color: var(--text-faint);
+}
+.online-answers ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 30vh;
+  overflow-y: auto;
+}
+.online-answers li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
+  background: color-mix(in oklab, var(--ink) 5%, transparent);
+}
+.online-answer-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--text-faint);
+}
+.online-answer-dot[data-team='A'] { background: var(--team-a); }
+.online-answer-dot[data-team='B'] { background: var(--team-b); }
+.online-answer-name {
+  flex: none;
+  max-width: 30%;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: color-mix(in oklab, var(--ink) 75%, transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.online-answer-text {
+  flex: 1;
+  font-size: var(--t-sm);
+  color: var(--ink);
+  word-break: break-word;
+}
+.controller-noteam {
+  margin: 10px 0 0;
+  padding: 12px;
+  border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--amber) 12%, var(--surface));
+  border: 1px solid color-mix(in oklab, var(--amber) 40%, transparent);
+  color: var(--ink);
+  font-size: var(--t-sm);
+  text-align: center;
+}

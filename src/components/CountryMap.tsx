@@ -64,7 +64,10 @@ export function CountryMap({ iso, onReady, onError, className = 'qcard-flag', te
         // map scales to fit its container instead of overflowing the card
         // (the source dimensions were the reason the previous build showed
         // horizontal scrollbars on small screens).
-        const css = `<style>#${iso},.${iso}{fill:#ef4444!important;stroke:#b91c1c!important;stroke-width:0.8!important;}</style>`;
+        // Highlight in gold (NOT red) — red/green is the worst pair for the ~8%
+        // of players with colour-vision deficiency, and this is a gameplay
+        // signal on a map (plan §7.3 colourblind-safe mandate).
+        const css = `<style>#${iso},.${iso}{fill:#ffcf5a!important;stroke:#e69100!important;stroke-width:0.8!important;}</style>`;
         const responsive = base
           // CRITICAL: BlankMap-World ships a `<title>Country Name</title>`
           // tag inside every country path → browsers render the name as a
@@ -111,16 +114,16 @@ export function CountryMap({ iso, onReady, onError, className = 'qcard-flag', te
   // just this country (plus surrounding context). This is the "zoom-to-fit"
   // step the player actually wants — without it the world map renders at
   // global scale and the highlighted country is a barely-visible dot.
-  const zoomTo = (host: HTMLElement | null, fullscreen: boolean) => {
-    if (!host) return;
+  const zoomTo = (host: HTMLElement | null, fullscreen: boolean): boolean => {
+    if (!host) return false;
     const svg = host.querySelector('svg');
-    if (!svg) return;
+    if (!svg) return false;
     // Country paths in BlankMap-World can be split across multiple elements
     // (e.g. `fr`, `fr-`, `fr_` for territories). Combine all that match.
     const escapedIso = iso.replace(/[^a-z0-9-]/gi, '');
     const sel = `#${escapedIso}, [id^="${escapedIso}-"], [id^="${escapedIso}_"], .${escapedIso}`;
     const nodes = Array.from(svg.querySelectorAll<SVGGraphicsElement>(sel));
-    if (nodes.length === 0) return;
+    if (nodes.length === 0) return false;
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
@@ -137,7 +140,7 @@ export function CountryMap({ iso, onReady, onError, className = 'qcard-flag', te
         // ignore
       }
     }
-    if (!isFinite(minX)) return;
+    if (!isFinite(minX)) return false;
     const bw = maxX - minX;
     const bh = maxY - minY;
     // Slightly more padding in the small card; less in the fullscreen view
@@ -166,15 +169,47 @@ export function CountryMap({ iso, onReady, onError, className = 'qcard-flag', te
     if (vx + vw > WORLD_VB.x + WORLD_VB.w) vx = WORLD_VB.x + WORLD_VB.w - vw;
     if (vy + vh > WORLD_VB.y + WORLD_VB.h) vy = WORLD_VB.y + WORLD_VB.h - vh;
     svg.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
+    return true;
+  };
+
+  // getBBox() can return 0 before the inline SVG has laid out, which would make
+  // zoomTo() bail and leave the map at whole-world scale. Retry across a few
+  // animation frames until the bbox is real (or we give up), so the zoom-to-fit
+  // is reliable on every load — not just when layout happens to be ready.
+  const zoomWithRetry = (host: HTMLElement | null, fullscreen: boolean) => {
+    let raf = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
+    // The base SVG is large (~850 KB inline) so getBBox can stay 0 for well over
+    // 100 ms — especially under parallel load. Keep retrying against a wall-clock
+    // deadline (not a fixed frame count) so the zoom-to-fit always lands.
+    const deadline = 3000;
+    const start = performance.now();
+    const attempt = () => {
+      if (cancelled) return;
+      if (zoomTo(host, fullscreen)) return;
+      if (performance.now() - start > deadline) return;
+      // Alternate rAF (fast once laid out) with a short timeout (covers the case
+      // where rAF fires before layout/paint completes).
+      raf = requestAnimationFrame(() => {
+        timer = setTimeout(attempt, 60);
+      });
+    };
+    attempt();
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      if (timer) clearTimeout(timer);
+    };
   };
 
   useEffect(() => {
-    zoomTo(containerRef.current, false);
+    return zoomWithRetry(containerRef.current, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [markup, iso]);
 
   useEffect(() => {
-    if (expanded) zoomTo(fullscreenRef.current, true);
+    if (expanded) return zoomWithRetry(fullscreenRef.current, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expanded, markup, iso]);
 

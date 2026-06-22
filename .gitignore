@@ -45,3 +45,9 @@ Thumbs.db
 
 verify-shots/
 .env.local
+
+# Local secret notes (never committed)
+*.secret.md
+
+# Playwright MCP scratch (screenshots/snapshots)
+.playwright-mcp/

@@ -61,6 +61,22 @@ export function App() {
     window.scrollTo(0, 0);
   }, [screen]);
 
+  // Online-lobby teardown: when the host lands back on Home, close the Realtime
+  // channel (tells players "host_left") and free the session room code so the
+  // next online match mints a fresh one. No-op for Couch Mode (no __lobby).
+  useEffect(() => {
+    if (screen !== 'home') return;
+    const lobby = window.__lobby;
+    if (!lobby) return;
+    window.__lobby = undefined;
+    lobby.leave().catch(() => {});
+    try {
+      sessionStorage.removeItem('letterlock.lobby.code');
+    } catch {
+      /* ignore */
+    }
+  }, [screen]);
+
   // Music plays quieter during a match, fuller in menus.
   useEffect(() => {
     setMusicContext(screen === 'game' ? 'game' : 'menu');
