@@ -111,6 +111,22 @@ for (const vp of VIEWPORTS) {
   await page.keyboard.press('Escape');
   await sleep(200);
 
+  // ── Admin dashboard + pack editor (via the ?__devscreens seam) ──
+  await page.goto(`${BASE}/?__devscreens=1`);
+  await sleep(300);
+  await page.getByTestId('open-admin').click().catch(() => {});
+  await sleep(350);
+  rows.push(['modal-admin', await overflow(page)]);
+  await page.keyboard.press('Escape');
+  await sleep(200);
+  await page.getByTestId('open-pack-editor').click().catch(() => {});
+  await sleep(350);
+  rows.push(['modal-packeditor', await overflow(page)]);
+  await page.keyboard.press('Escape');
+  await sleep(200);
+  await page.goto(BASE);
+  await sleep(200);
+
   // ── Tutorial ──
   await page.getByRole('button', { name: /how to play/i }).click().catch(() => {});
   await sleep(350);

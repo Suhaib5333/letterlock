@@ -61,7 +61,21 @@ export function QuestionCard({
   // `onLoad`/`onPlay` and gate the timer. Track whether the host has tapped
   // "Start" so the Start button can disable itself after firing.
   const [charadeStarted, setCharadeStarted] = useState(false);
+  const [imgFull, setImgFull] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  // Close the fullscreen image on Escape; also auto-close when the question changes.
+  useEffect(() => {
+    if (!imgFull) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setImgFull(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [imgFull]);
+  useEffect(() => {
+    setImgFull(false);
+  }, [served.question.id]);
   useEffect(() => {
     setMediaError(false); // reset for each new question
     setCharadeStarted(false);
@@ -202,6 +216,8 @@ export function QuestionCard({
               src={served.question.image}
               alt="Image to identify"
               draggable={false}
+              onClick={() => setImgFull(true)}
+              style={{ cursor: 'zoom-in' }}
               onLoad={onMediaPlay}
               onError={() => {
                 setMediaError(true);
@@ -210,8 +226,39 @@ export function QuestionCard({
                 onMediaPlay();
               }}
             />
+            <button
+              type="button"
+              className="qcard-flag-fs-btn"
+              data-testid="qcard-img-fullscreen"
+              onClick={() => setImgFull(true)}
+            >
+              ⛶ Fullscreen
+            </button>
           </div>
         ))
+      )}
+
+      {/* Fullscreen image overlay (flags/logos) — tap the image or button to open,
+          ✕ or Escape to close. Reuses the map fullscreen styling. */}
+      {imgFull && served.question.image && !mediaError && (
+        <div
+          className="qcard-map-fs-scrim"
+          data-testid="qcard-img-fs"
+          onClick={() => setImgFull(false)}
+        >
+          <div className="qcard-map-fs-card qcard-img-fs-card" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="qcard-map-fs-close"
+              data-testid="qcard-img-fs-close"
+              aria-label="Close fullscreen"
+              onClick={() => setImgFull(false)}
+            >
+              ✕
+            </button>
+            <img className="qcard-img-fs-img" src={served.question.image} alt="Image to identify" draggable={false} />
+          </div>
+        </div>
       )}
 
       {served.question.audio &&
@@ -276,6 +323,11 @@ export function QuestionCard({
           >
             <span className="answer-label">Answer</span>
             <span className="answer-value">{served.question.a}</span>
+            {served.question.artist && (
+              <span className="answer-artist" data-testid="answer-artist">
+                by {served.question.artist}
+              </span>
+            )}
             {charade && served.question.image && !mediaError && (
               <img className="answer-charade-img" src={served.question.image} alt={served.question.a} draggable={false} onError={() => setMediaError(true)} />
             )}

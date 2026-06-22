@@ -9,6 +9,7 @@ export interface Question {
   alt?: string[]; // accepted alternative answers
   image?: string; // optional image URL (e.g. a flag/logo to identify)
   audio?: string; // optional audio clip URL (e.g. guess-the-song)
+  artist?: string; // optional performing artist/band (e.g. guess-the-song) — shown on reveal
   video?: string; // optional video clip URL (e.g. guess-the-movie)
   youtube?: string; // optional YouTube id — embedded trailer (e.g. guess-the-movie)
   /** ISO 3166-1 alpha-2 code (lowercase). Renders the shared world map with

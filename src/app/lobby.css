@@ -736,3 +736,58 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
   font-size: var(--t-body);
   text-align: center;
 }
+
+/* ── Controller live view: mini board + turn banner + synced timer ── */
+.mini-board {
+  width: 100%;
+  max-width: 320px;
+  max-height: 34vh;
+  margin: 0 auto 4px;
+  display: block;
+}
+.controller-turn {
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1rem, 4.5vw, 1.3rem);
+  padding: 8px 12px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--surface-border);
+}
+.controller-turn.go {
+  background: color-mix(in oklab, #16a34a 22%, var(--surface));
+  border-color: color-mix(in oklab, #16a34a 55%, transparent);
+}
+.controller-turn.wait {
+  background: color-mix(in oklab, var(--accent) 10%, var(--surface));
+  color: color-mix(in oklab, var(--ink) 80%, transparent);
+}
+.controller-timer {
+  position: relative;
+  width: 100%;
+  height: 26px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ink) 8%, transparent);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.controller-timer-bar {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--accent), color-mix(in oklab, var(--accent) 60%, #fff));
+  transition: transform 0.25s linear;
+}
+.controller-timer.urgent .controller-timer-bar {
+  background: linear-gradient(90deg, var(--amber), var(--amber-glow));
+}
+.controller-timer-num {
+  position: relative;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}

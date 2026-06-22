@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { MiniBoard } from '../components/MiniBoard';
 import { isSupabaseConfigured } from '../lib/supabase';
 import {
   generatePlayerId,
@@ -85,6 +86,16 @@ export function PlayerController() {
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
   const [winner, setWinner] = useState<PlayerTeam | null>(null);
+  const [colors, setColors] = useState<{ A: string; B: string }>({ A: '#0a84ff', B: '#ff9f0a' });
+  const [boardSnap, setBoardSnap] = useState<{
+    owners: (PlayerTeam | null)[];
+    size: number;
+    turn: PlayerTeam | null;
+    winner: PlayerTeam | null;
+  } | null>(null);
+  // Synced answer countdown: { total seconds, startedAt ms }. Drives the phone bar.
+  const [timerState, setTimerState] = useState<{ total: number; startedAt: number } | null>(null);
+  const [now, setNow] = useState(() => performance.now());
   const handleRef = useRef<LobbyHandle | null>(null);
   // Refs so the channel's once-registered callbacks always read fresh values
   // (avoids the stale-closure bug where adjudicated feedback compared an old team).
@@ -197,6 +208,13 @@ export function PlayerController() {
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, []);
 
+  // Tick the synced countdown while a timer is running.
+  useEffect(() => {
+    if (!timerState) return;
+    const id = setInterval(() => setNow(performance.now()), 250);
+    return () => clearInterval(id);
+  }, [timerState]);
+
   // Stable across the channel's lifetime — reads live values from refs so the
   // once-registered listener never works off a stale `team`/`served`.
   const onEvent = useCallback((event: LobbyEvent, myId: string) => {
@@ -212,6 +230,10 @@ export function PlayerController() {
         break;
       case 'team_labels':
         setLabels({ A: event.A, B: event.B });
+        if (event.aColor && event.bColor) setColors({ A: event.aColor, B: event.bColor });
+        break;
+      case 'board_state':
+        setBoardSnap({ owners: event.owners, size: event.size, turn: event.turn, winner: event.winner });
         break;
       case 'question_served':
         setServed({
@@ -230,10 +252,12 @@ export function PlayerController() {
         setAnswer('');
         setFeedback(null);
         setPhase('question');
+        setTimerState(event.timerSeconds ? { total: event.timerSeconds, startedAt: performance.now() } : null);
         break;
       case 'steal_open':
         // The picking team's time is up — the other team may now answer.
         setStealOpen(true);
+        if (event.stealSeconds) setTimerState({ total: event.stealSeconds, startedAt: performance.now() });
         break;
       case 'answer_submitted':
         // Lock out the rest of our team once a teammate has answered (only the
@@ -305,6 +329,10 @@ export function PlayerController() {
     teammateAnswered ? 'teammate' : !isPicker && !stealOpen && pickerTeam !== null ? 'waiting-picker' : null;
   const canAnswerNow = !!team && lockReason === null;
   const pickerLabel = pickerTeam === 'A' ? labels.A : pickerTeam === 'B' ? labels.B : 'the other team';
+  const remaining = timerState
+    ? Math.max(0, timerState.total - (now - timerState.startedAt) / 1000)
+    : null;
+  const timerPct = timerState ? Math.max(0, Math.min(1, (remaining ?? 0) / timerState.total)) : 0;
 
   return (
     <div
@@ -387,6 +415,30 @@ export function PlayerController() {
 
       {phase === 'question' && served && (
         <div className="controller-question" data-testid="controller-question">
+          {boardSnap && (
+            <MiniBoard owners={boardSnap.owners} size={boardSnap.size} colorA={colors.A} colorB={colors.B} />
+          )}
+          {/* Clear "whose turn" banner + synced countdown. */}
+          <div
+            className={`controller-turn ${canAnswerNow ? 'go' : 'wait'}`}
+            data-testid="controller-turn"
+          >
+            {!team
+              ? 'Not on a team'
+              : canAnswerNow
+                ? stealOpen && !isPicker
+                  ? '⚡ STEAL — answer now!'
+                  : '✅ Your turn — type your answer!'
+                : lockReason === 'teammate'
+                  ? '🔒 Teammate is answering'
+                  : `⏳ ${pickerLabel} answers first`}
+          </div>
+          {remaining !== null && (
+            <div className={`controller-timer ${remaining <= 5 ? 'urgent' : ''}`} data-testid="controller-timer">
+              <div className="controller-timer-bar" style={{ transform: `scaleX(${timerPct})` }} />
+              <span className="controller-timer-num">{Math.ceil(remaining)}s</span>
+            </div>
+          )}
           {!served.hideLetter && (
             <div className="controller-letter" aria-hidden="true">{served.letter}</div>
           )}
@@ -431,10 +483,11 @@ export function PlayerController() {
               </button>
             </>
           ) : (
+            // Locked — the turn banner above already explains why; show a hint.
             <p className="controller-locked" data-testid="controller-locked">
               {lockReason === 'teammate'
-                ? '🔒 A teammate is answering for your team.'
-                : `⏳ ${pickerLabel} answers first — get ready to steal if they miss!`}
+                ? 'Your teammate is answering for the team.'
+                : 'Eyes on the screen — be ready to steal if they miss!'}
             </p>
           )}
         </div>

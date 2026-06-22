@@ -42,9 +42,13 @@ export function useOnlineHost(args: {
   winner: TeamId | null;
   hideLetters: boolean;
   teamNames: { A: string; B: string };
+  teamColors: { A: string; B: string };
   picker: TeamId;
+  timerSeconds: number;
+  board: { owners: (TeamId | null)[]; size: number; turn: TeamId | null };
 }): OnlineHostState {
-  const { served, answerRevealed, gameOver, winner, hideLetters, teamNames, picker } = args;
+  const { served, answerRevealed, gameOver, winner, hideLetters, teamNames, teamColors, picker, timerSeconds, board } =
+    args;
 
   // Resolve the lobby once. It only ever exists on the host's device.
   const lobbyRef = useRef<typeof window.__lobby>(undefined);
@@ -68,17 +72,50 @@ export function useOnlineHost(args: {
 
   const namesRef = useRef(teamNames);
   namesRef.current = teamNames;
+  const colorsRef = useRef(teamColors);
+  colorsRef.current = teamColors;
   const pickerRef = useRef(picker);
   pickerRef.current = picker;
+  const timerRef = useRef(timerSeconds);
+  timerRef.current = timerSeconds;
+  const boardRef = useRef(board);
+  boardRef.current = board;
   // Cells where the host has opened the steal window — re-sent on reconnect.
   const stealOpenCells = useRef<Set<number>>(new Set());
+
+  const sendLabels = () => {
+    lobbyRef.current
+      ?.broadcast({
+        type: 'team_labels',
+        A: namesRef.current.A,
+        B: namesRef.current.B,
+        aColor: colorsRef.current.A,
+        bColor: colorsRef.current.B,
+      })
+      .catch(() => {});
+  };
+  const sendBoard = () => {
+    const b = boardRef.current;
+    lobbyRef.current
+      ?.broadcast({
+        type: 'board_state',
+        owners: b.owners as (PlayerTeam | null)[],
+        size: b.size,
+        turn: b.turn as PlayerTeam | null,
+        winner: (winnerRef.current as PlayerTeam | null) ?? null,
+      })
+      .catch(() => {});
+  };
+  const winnerRef = useRef(winner);
+  winnerRef.current = winner;
 
   const reBroadcastCurrent = useCallback(() => {
     const lobby = lobbyRef.current;
     if (!lobby) return;
-    // Always (re)send the team colour labels so a late joiner shows "Teal"/"Rose"
-    // rather than a generic "Team A/B".
-    lobby.broadcast({ type: 'team_labels', A: namesRef.current.A, B: namesRef.current.B }).catch(() => {});
+    // Always (re)send the team labels + live board so a late/reconnecting phone
+    // shows the right colours and mirrors the current board.
+    sendLabels();
+    sendBoard();
     const s = servedRef.current;
     if (!s) return;
     const q = s.question;
@@ -88,6 +125,7 @@ export function useOnlineHost(args: {
         cell: s.cell,
         letter: s.letter,
         picker: pickerRef.current as PlayerTeam,
+        timerSeconds: timerRef.current,
         prompt: q.q,
         hideLetter: hideRef.current,
         audio: q.audio,
@@ -97,10 +135,10 @@ export function useOnlineHost(args: {
       })
       .catch(() => {});
     if (stealOpenCells.current.has(s.cell)) {
-      lobby.broadcast({ type: 'steal_open', cell: s.cell }).catch(() => {});
+      lobby.broadcast({ type: 'steal_open', cell: s.cell, stealSeconds: Math.ceil(timerRef.current / 2) }).catch(() => {});
     }
     if (revealRef.current) {
-      lobby.broadcast({ type: 'answer_revealed', answer: q.a }).catch(() => {});
+      lobby.broadcast({ type: 'answer_revealed', answer: q.artist ? `${q.a} (by ${q.artist})` : q.a }).catch(() => {});
     }
   }, []);
 
@@ -146,9 +184,19 @@ export function useOnlineHost(args: {
         if (isNew) reBroadcastCurrent();
       },
     });
-    // Push the colour labels to anyone already connected when the match screen mounts.
-    lobby.broadcast({ type: 'team_labels', A: namesRef.current.A, B: namesRef.current.B }).catch(() => {});
+    // Push the colour labels + board to anyone already connected on mount.
+    sendLabels();
+    sendBoard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [online, reBroadcastCurrent]);
+
+  // Mirror the live board to phones whenever ownership / turn / winner changes.
+  const boardKey = `${board.owners.join('')}|${board.turn}|${winner}`;
+  useEffect(() => {
+    if (!online) return;
+    sendBoard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [online, boardKey]);
 
   // Broadcast a freshly served question (covers pick / skip / auto-skip uniformly).
   const lastServed = useRef<string | null>(null);
@@ -166,6 +214,7 @@ export function useOnlineHost(args: {
         cell: served.cell,
         letter: served.letter,
         picker: picker as PlayerTeam,
+        timerSeconds,
         prompt: q.q,
         hideLetter: hideLetters,
         audio: q.audio,
@@ -174,7 +223,7 @@ export function useOnlineHost(args: {
         youtube: q.youtube,
       })
       .catch(() => {});
-  }, [online, served, hideLetters, picker]);
+  }, [online, served, hideLetters, picker, timerSeconds]);
 
   // Broadcast the answer reveal once per served question.
   const revealedFor = useRef<string | null>(null);
@@ -184,7 +233,10 @@ export function useOnlineHost(args: {
     const key = `${served.cell}:${served.question.id}`;
     if (revealedFor.current === key) return;
     revealedFor.current = key;
-    lobby.broadcast({ type: 'answer_revealed', answer: served.question.a }).catch(() => {});
+    const ans = served.question.artist
+      ? `${served.question.a} (by ${served.question.artist})`
+      : served.question.a;
+    lobby.broadcast({ type: 'answer_revealed', answer: ans }).catch(() => {});
   }, [online, served, answerRevealed]);
 
   // Broadcast game over once.
@@ -216,7 +268,7 @@ export function useOnlineHost(args: {
     if (!s) return;
     stealOpenCells.current.add(s.cell);
     if (!online || !lobby) return;
-    lobby.broadcast({ type: 'steal_open', cell: s.cell }).catch(() => {});
+    lobby.broadcast({ type: 'steal_open', cell: s.cell, stealSeconds: Math.ceil(timerRef.current / 2) }).catch(() => {});
   }, [online]);
 
   const submissions = served ? [...(byCell.current.get(served.cell)?.values() ?? [])] : [];

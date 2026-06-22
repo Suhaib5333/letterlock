@@ -115,7 +115,10 @@ export function Game() {
     winner: game.winner,
     hideLetters,
     teamNames: { A: teams.A.name, B: teams.B.name },
+    teamColors: { A: colorById(teams.A.colorId).base, B: colorById(teams.B.colorId).base },
     picker,
+    timerSeconds: timer,
+    board: { owners: game.owners, size: game.size, turn: game.turn },
   });
   // Test-only seam: `?__onlinepanel=1` force-renders the host answers panel with
   // sample submissions so the responsive/no-scroll checker can verify the ONLINE

@@ -30,6 +30,10 @@ export function Home() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showPackEditor, setShowPackEditor] = useState(false);
   const { profile, isAdmin } = useAuth();
+  // Dev/QA seam: `?__devscreens=1` surfaces the admin + pack-editor buttons even
+  // when signed-out so their responsive layout can be checked. Inert otherwise.
+  const devScreens =
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('__devscreens');
   // Re-render when question progress changes (e.g. async DB hydration on sign-in,
   // or a guest reset) so the "N unique left" badge stays accurate.
   const [, setProgressTick] = useState(0);
@@ -57,7 +61,7 @@ export function Home() {
               >
                 🏆<span className="chip-text"> Leaderboard</span>
               </button>
-              {profile && (
+              {(profile || devScreens) && (
                 <button
                   className="btn btn-ghost"
                   data-chip-label
@@ -69,7 +73,7 @@ export function Home() {
                   📦<span className="chip-text"> My packs</span>
                 </button>
               )}
-              {isAdmin && (
+              {(isAdmin || devScreens) && (
                 <button
                   className="btn btn-ghost"
                   data-chip-label
@@ -82,10 +86,12 @@ export function Home() {
               )}
               <button
                 className="btn btn-ghost"
+                data-chip-label
+                aria-label={profile ? `Account: ${profile.username}` : 'Sign in'}
                 data-testid="open-auth"
                 onClick={() => setShowAuth(true)}
               >
-                {profile ? `@${profile.username}` : 'Sign in'}
+                👤<span className="chip-text"> {profile ? `@${profile.username}` : 'Sign in'}</span>
               </button>
             </>
           )}

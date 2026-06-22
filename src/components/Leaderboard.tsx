@@ -9,6 +9,7 @@ export function Leaderboard({ onClose }: { onClose: () => void }) {
   const [packId, setPackId] = useState<string>('all');
   const [rows, setRows] = useState<LeaderboardRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   useModalDismiss(dialogRef, onClose);
 
@@ -68,41 +69,98 @@ export function Leaderboard({ onClose }: { onClose: () => void }) {
               ✕
             </button>
           </div>
-          <select
-            className="lb-pack"
-            data-testid="lb-pack"
-            value={packId}
-            onChange={(e) => setPackId(e.target.value)}
-            aria-label="Filter by pack"
-          >
-            <option value="all">All packs</option>
-            {PACKS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
+
+          {/* Custom pack filter — a styled, in-DOM dropdown (not a native <select>,
+              which renders an OS popup with poor dark-theme contrast that also
+              doesn't appear when screen-casting). */}
+          <div className="lb-filter">
+            <button
+              className="lb-pack"
+              data-testid="lb-pack"
+              aria-haspopup="listbox"
+              aria-expanded={pickerOpen}
+              onClick={() => setPickerOpen((o) => !o)}
+            >
+              <span className="lb-pack-label">{packLabel}</span>
+              <span className="lb-pack-caret" aria-hidden="true">{pickerOpen ? '▴' : '▾'}</span>
+            </button>
+            {pickerOpen && (
+              <>
+                <div className="lb-pack-backdrop" onClick={() => setPickerOpen(false)} />
+                <ul className="lb-pack-menu" role="listbox" data-testid="lb-pack-menu">
+                  <li>
+                    <button
+                      className={packId === 'all' ? 'active' : ''}
+                      role="option"
+                      aria-selected={packId === 'all'}
+                      onClick={() => {
+                        setPackId('all');
+                        setPickerOpen(false);
+                      }}
+                    >
+                      🌐 All packs
+                    </button>
+                  </li>
+                  {PACKS.map((p) => (
+                    <li key={p.id}>
+                      <button
+                        className={packId === p.id ? 'active' : ''}
+                        role="option"
+                        aria-selected={packId === p.id}
+                        onClick={() => {
+                          setPackId(p.id);
+                          setPickerOpen(false);
+                        }}
+                      >
+                        <span className="lb-pack-emoji">{p.emoji}</span> {p.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
 
           <div className="lb-list" data-testid="lb-list" data-pack={packLabel}>
             {error && <p className="lb-error">{error}</p>}
             {!error && rows === null && <p className="go-sub">Loading…</p>}
             {!error && rows?.length === 0 && (
-              <p className="go-sub">No scores yet — be the first to set one!</p>
+              <p className="go-sub">No scores yet — be the first to set one! 🥇</p>
             )}
             {rows && rows.length > 0 && (
-              <ol className="lb-rows">
-                {rows.map((r, i) => (
-                  <li key={r.id} className="lb-row">
-                    <span className="lb-rank">{i + 1}</span>
-                    <span className="lb-user">@{r.username}</span>
-                    <span className="lb-meta">
-                      <span title="Games won">{r.score}🏆</span>
-                      <span title="Moves to win">{r.moves}🎯</span>
-                      <span title="Duration">{Math.round(r.duration_ms / 1000)}s</span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
+              <>
+                {/* Podium for the top 3. */}
+                <div className="lb-podium">
+                  {rows.slice(0, 3).map((r, i) => (
+                    <div key={r.id} className={`lb-podium-card rank-${i + 1}`}>
+                      <div className="lb-medal" aria-hidden="true">
+                        {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
+                      </div>
+                      <div className="lb-podium-user">@{r.username}</div>
+                      <div className="lb-podium-score">{r.score} 🏆</div>
+                      <div className="lb-podium-sub">
+                        {r.moves} moves · {Math.round(r.duration_ms / 1000)}s
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Remaining ranks. */}
+                {rows.length > 3 && (
+                  <ol className="lb-rows" start={4}>
+                    {rows.slice(3).map((r, i) => (
+                      <li key={r.id} className="lb-row">
+                        <span className="lb-rank">{i + 4}</span>
+                        <span className="lb-user">@{r.username}</span>
+                        <span className="lb-meta">
+                          <span title="Games won">{r.score}🏆</span>
+                          <span title="Moves to win">{r.moves}🎯</span>
+                          <span title="Duration">{Math.round(r.duration_ms / 1000)}s</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </>
             )}
           </div>
         </motion.div>

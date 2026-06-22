@@ -141,6 +141,27 @@ test('flags pack hides board letters (no first-letter hint) and shows a flag', a
   await expect(page.locator('.qcard-flag')).toHaveCount(1);
 });
 
+test('flag question: fullscreen button opens an overlay, ✕ closes it', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'flags-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  await expect(page.getByTestId('qcard-img-fullscreen')).toBeVisible();
+  await page.getByTestId('qcard-img-fullscreen').click();
+  await expect(page.getByTestId('qcard-img-fs')).toBeVisible();
+  await page.getByTestId('qcard-img-fs-close').click();
+  await expect(page.getByTestId('qcard-img-fs')).toHaveCount(0);
+  // Escape also closes it.
+  await page.getByTestId('qcard-img-fullscreen').click();
+  await expect(page.getByTestId('qcard-img-fs')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('qcard-img-fs')).toHaveCount(0);
+});
+
 test('world-map: no <title> in the rendered svg (hover would leak the country)', async ({ page }) => {
   await page.goto('/');
   await selectPack(page, 'maps-easy');
