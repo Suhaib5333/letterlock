@@ -706,6 +706,19 @@ test('controller URL renders the phone view with the room code', async ({ page }
   await expect(page.getByTestId('play-button')).toHaveCount(0);
 });
 
+test('friends modal opens with Friends/Requests/Add tabs', async ({ page }) => {
+  // Use the dev seam to surface the Friends button when signed out.
+  await page.goto('/?__devscreens=1');
+  await page.getByTestId('open-friends').click();
+  await expect(page.getByTestId('friends-modal')).toBeVisible();
+  await expect(page.getByTestId('friends-tab-friends')).toBeVisible();
+  await expect(page.getByTestId('friends-tab-requests')).toBeVisible();
+  await page.getByTestId('friends-tab-add').click();
+  await expect(page.getByTestId('friends-search')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('friends-modal')).toHaveCount(0);
+});
+
 test('guest gating: 5×5/7×7 + bo5 are locked at Setup (no unlock seam)', async ({ page }) => {
   // This test deliberately does NOT set the unlock seam, so it sees the real
   // guest gates (4×4 only; single/bo3 only).

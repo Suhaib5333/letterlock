@@ -1,6 +1,9 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ErrorBoundary } from './ErrorBoundary';
+import { useAuth } from '../lib/auth';
+import { startSocial, stopSocial, type Notification } from '../lib/friends';
+import { play } from '../services/audio';
 import { initAudio, setAudioEnabled, setMusicContext, startMusic, stopMusic } from '../services/audio';
 import { applyTeamColors } from '../state/palette';
 import { useStore } from '../state/store';
@@ -24,6 +27,30 @@ function CrashProbe() {
 
 export function App() {
   const { state } = useStore();
+  const { user, profile } = useAuth();
+  const [notif, setNotif] = useState<Notification | null>(null);
+
+  // Start presence + the notification inbox while signed in; tear down on sign-out.
+  useEffect(() => {
+    if (!user || !profile) {
+      void stopSocial();
+      return;
+    }
+    void startSocial(user.id, profile.username, (n) => {
+      setNotif(n);
+      play('select');
+    });
+    return () => {
+      void stopSocial();
+    };
+  }, [user?.id, profile?.username]);
+
+  // Auto-dismiss notifications.
+  useEffect(() => {
+    if (!notif) return;
+    const t = setTimeout(() => setNotif(null), 8000);
+    return () => clearTimeout(t);
+  }, [notif]);
 
   // Initialise audio on the first user gesture (browser autoplay policy).
   useEffect(() => {
@@ -92,6 +119,47 @@ export function App() {
 
   return (
     <div className="ll-app" data-screen={screen}>
+      <AnimatePresence>
+        {notif && (
+          <motion.div
+            className="notif-toast"
+            data-testid="notif-toast"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+          >
+            <span className="notif-icon" aria-hidden="true">
+              {notif.type === 'room_invite' ? '🎮' : notif.type === 'friend_accepted' ? '🎉' : '👋'}
+            </span>
+            <span className="notif-text">
+              {notif.type === 'friend_request' && (
+                <><strong>@{notif.fromName}</strong> sent you a friend request.</>
+              )}
+              {notif.type === 'friend_accepted' && (
+                <><strong>@{notif.fromName}</strong> accepted your friend request!</>
+              )}
+              {notif.type === 'room_invite' && (
+                <><strong>@{notif.fromName}</strong> invited you to room <strong>{notif.code}</strong>.</>
+              )}
+            </span>
+            {notif.type === 'room_invite' && (
+              <button
+                className="btn btn-primary sm"
+                data-testid="notif-join"
+                onClick={() => {
+                  const u = new URL(window.location.href);
+                  u.search = `?room=${notif.code}&view=controller${profile ? `&name=${encodeURIComponent(profile.username)}` : ''}`;
+                  window.location.href = u.toString();
+                }}
+              >
+                Join ▸
+              </button>
+            )}
+            <button className="notif-close" aria-label="Dismiss" onClick={() => setNotif(null)}>✕</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <ErrorBoundary>
         <CrashProbe />
         <AnimatePresence mode="wait">

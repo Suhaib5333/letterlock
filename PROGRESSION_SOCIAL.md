@@ -136,16 +136,21 @@ level/prestige badge per friend.
 
 ## 7. Build phases
 
-- [ ] **P1** `core/progression.ts` (pure: xp→level/prestige, tiers, unlock checks) + unit tests
-- [ ] **P2** migration `0007_progression_social.sql` (profiles cols + friendships + RPCs + RLS)
-- [ ] **P3** award XP (game end + room join) via `award_xp` RPC; seed row on username claim
-- [ ] **P4** unlock-gating in Setup/Category (locked 🔒 + "Unlocks at…") + server check
-- [ ] **P5** login-incentive nudge before play/host/join
-- [ ] **P6** rank badge component; show on leaderboard + home + lobby
-- [ ] **P7** Friends modal (list/requests/add/remove/block) + presence + invite/notif popups
-- [ ] **P8** Admin: level/prestige/XP + full-access toggle + grant/reset
-- [ ] **P9** cosmetic unlocks (themes/skins/name glow) tied to level/prestige
-- [ ] **P10** UI/UX polish pass (context7 + frontend-design), iterate
-- [ ] **P11** device-matrix Playwright pass (see TESTING.md) — every new screen, all sizes
+- [x] **P1** `core/progression.ts` (pure: xp→level/prestige, tiers, unlock checks) + 15 unit tests
+- [x] **P2** migration `0007_progression_social.sql` (profiles cols + friendships + RPCs + RLS) — DEPLOYED
+- [x] **P3** award XP on game completion via `award_xp` RPC + level-up toast; row seeds via column defaults
+- [x] **P4** unlock-gating in Setup (board size + match mode; 🔒 + "Lv N"; clamps; guest=base set) + guest-gating test
+- [x] **P5** login-incentive nudge on Mode Select (signed-out)
+- [x] **P6** RankBadge + RankBar; leaderboard podium/rows + profile + friends list
+- [x] **P7** Friends modal (list/requests/add/remove/block) + presence + invite/notif popups
+- [x] **P8** Admin: rank column + full-access toggle + grant/reset XP (RPCs)
+- [~] **P9** cosmetic unlocks: prestige stars/tier colours on the rank badge (fuller skins/themes = future)
+- [~] **P10** UI polish: bordered cards, leaderboard podium, rank palettes (ongoing)
+- [x] **P11** device-matrix pass: noscroll covers all new screens (mode-select nudge, friends, admin progression) — ALL CLEAR ×17
+
+### Notes / follow-ups
+- Category-difficulty gating (lock hard/extreme packs in the menu) — Setup gates board/mode; pack-difficulty lock TBD.
+- Controller (phone player) XP — players on the anonymous controller page don't earn XP yet (needs controller auth).
+- award_xp is clamped [0,200]/call; a determined client could repeat it — acceptable for a party game; admin can reset.
 
 > See `TESTING.md` for the Playwright device matrix every new screen must pass.

@@ -51,6 +51,11 @@ export type AdminUserRow = {
   role: UserRole;
   banned_at: string | null;
   created_at: string;
+  // Progression (admin_list_users extended in migration 0007).
+  level: number;
+  prestige: number;
+  total_xp: number;
+  full_access: boolean;
 };
 
 export type CustomPack = {

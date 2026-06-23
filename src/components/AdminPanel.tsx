@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth';
 import { useModalDismiss } from '../lib/useModalDismiss';
 import { supabase, type AdminUserRow, type CustomPack, type UserRole } from '../lib/supabase';
 import { play } from '../services/audio';
+import { RankBadge } from './RankBadge';
 
 /**
  * Admin dashboard — gated on `useAuth().isAdmin`. Two tabs:
@@ -169,6 +170,48 @@ function UsersTab() {
     );
   };
 
+  const toggleFullAccess = async (row: AdminUserRow) => {
+    if (!supabase) return;
+    const value = !row.full_access;
+    setBusy(row.id);
+    const { error } = await supabase.rpc('admin_set_full_access', { target_id: row.id, value });
+    setBusy(null);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setRows((rs) => rs?.map((r) => (r.id === row.id ? { ...r, full_access: value } : r)) ?? null);
+  };
+
+  const grantXp = async (row: AdminUserRow) => {
+    if (!supabase) return;
+    const raw = prompt(`Grant XP to @${row.username} (negative to remove):`, '100');
+    if (raw === null) return;
+    const amount = parseInt(raw, 10);
+    if (!Number.isFinite(amount)) return;
+    setBusy(row.id);
+    const { error } = await supabase.rpc('admin_grant_xp', { target_id: row.id, amount });
+    setBusy(null);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    await load();
+  };
+
+  const resetProgression = async (row: AdminUserRow) => {
+    if (!supabase) return;
+    if (!confirm(`Reset @${row.username} to Level 1, Prestige 0, 0 XP?`)) return;
+    setBusy(row.id);
+    const { error } = await supabase.rpc('admin_reset_progression', { target_id: row.id });
+    setBusy(null);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    await load();
+  };
+
   return (
     <div className="admin-users" data-testid="admin-users">
       <div className="admin-toolbar">
@@ -193,8 +236,9 @@ function UsersTab() {
               <th>User</th>
               <th>Email</th>
               <th>Role</th>
+              <th>Rank</th>
+              <th>Full access</th>
               <th>Status</th>
-              <th>Joined</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -220,22 +264,42 @@ function UsersTab() {
                   </select>
                 </td>
                 <td>
+                  <RankBadge level={r.level ?? 1} prestige={r.prestige ?? 0} />
+                  <div className="admin-muted" style={{ fontSize: '0.7rem' }}>{(r.total_xp ?? 0).toLocaleString()} XP</div>
+                </td>
+                <td>
+                  <button
+                    className={`switch ${r.full_access ? 'on' : ''}`}
+                    role="switch"
+                    aria-checked={r.full_access}
+                    data-testid={`admin-fullaccess-${r.username}`}
+                    disabled={busy === r.id}
+                    onClick={() => toggleFullAccess(r)}
+                    title="Unlock all boards/categories/modes for this user"
+                  >
+                    <span className="knob" />
+                  </button>
+                </td>
+                <td>
                   {r.banned_at ? (
                     <span className="admin-chip danger">banned</span>
                   ) : (
                     <span className="admin-chip ok">active</span>
                   )}
                 </td>
-                <td className="admin-muted">{new Date(r.created_at).toLocaleDateString()}</td>
                 <td>
-                  <button
-                    className={`btn btn-ghost ${r.banned_at ? '' : 'btn-danger'}`}
-                    data-testid={`admin-ban-${r.username}`}
-                    disabled={busy === r.id || r.id === profile?.id}
-                    onClick={() => toggleBan(r)}
-                  >
-                    {r.banned_at ? 'Unban' : 'Ban'}
-                  </button>
+                  <div className="admin-actions">
+                    <button
+                      className={`btn btn-ghost ${r.banned_at ? '' : 'btn-danger'}`}
+                      data-testid={`admin-ban-${r.username}`}
+                      disabled={busy === r.id || r.id === profile?.id}
+                      onClick={() => toggleBan(r)}
+                    >
+                      {r.banned_at ? 'Unban' : 'Ban'}
+                    </button>
+                    <button className="btn btn-ghost sm" data-testid={`admin-grantxp-${r.username}`} disabled={busy === r.id} onClick={() => grantXp(r)}>+XP</button>
+                    <button className="btn btn-ghost sm" disabled={busy === r.id} onClick={() => resetProgression(r)}>Reset</button>
+                  </div>
                 </td>
               </tr>
             ))}

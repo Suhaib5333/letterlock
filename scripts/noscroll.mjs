@@ -126,6 +126,11 @@ for (const vp of VIEWPORTS) {
   rows.push(['modal-packeditor', await overflow(page)]);
   await page.keyboard.press('Escape');
   await sleep(200);
+  await page.getByTestId('open-friends').click().catch(() => {});
+  await sleep(350);
+  rows.push(['modal-friends', await overflow(page)]);
+  await page.keyboard.press('Escape');
+  await sleep(200);
   await page.goto(BASE);
   await sleep(200);
 

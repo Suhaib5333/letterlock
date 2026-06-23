@@ -5,6 +5,7 @@ import { totalQuestions } from '../core/packs';
 import { AdminPanel } from '../components/AdminPanel';
 import { AuthModal } from '../components/AuthModal';
 import { CategoryMenu } from '../components/CategoryMenu';
+import { FriendsModal } from '../components/FriendsModal';
 import { Leaderboard } from '../components/Leaderboard';
 import { Logo, Wordmark } from '../components/Logo';
 import { PackEditor } from '../components/PackEditor';
@@ -29,6 +30,7 @@ export function Home() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showPackEditor, setShowPackEditor] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);
   const { profile, isAdmin } = useAuth();
   // Dev/QA seam: `?__devscreens=1` surfaces the admin + pack-editor buttons even
   // when signed-out so their responsive layout can be checked. Inert otherwise.
@@ -61,6 +63,17 @@ export function Home() {
               >
                 🏆<span className="chip-text"> Leaderboard</span>
               </button>
+              {(profile || devScreens) && (
+                <button
+                  className="btn btn-ghost"
+                  data-chip-label
+                  aria-label="Friends"
+                  data-testid="open-friends"
+                  onClick={() => setShowFriends(true)}
+                >
+                  👥<span className="chip-text"> Friends</span>
+                </button>
+              )}
               {(profile || devScreens) && (
                 <button
                   className="btn btn-ghost"
@@ -236,6 +249,9 @@ export function Home() {
       {showLeaderboard && <Leaderboard onClose={() => setShowLeaderboard(false)} />}
       {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
       {showPackEditor && <PackEditor onClose={() => setShowPackEditor(false)} />}
+      {showFriends && (
+        <FriendsModal myName={profile?.username ?? 'player'} onClose={() => setShowFriends(false)} />
+      )}
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       {showCategories && (
         <CategoryMenu

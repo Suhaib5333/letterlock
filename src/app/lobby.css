@@ -826,3 +826,88 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
   .mode-card-desc { display: none; }
   .login-nudge { font-size: var(--t-xs); padding: 6px 10px; }
 }
+
+/* ── Friends modal + notification toast (social) ── */
+.friends-modal {
+  width: min(520px, 96vw);
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.friends-head { display: flex; align-items: center; justify-content: space-between; }
+.friends-head h2 { margin: 0; }
+.friends-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--surface-border); }
+.friends-tabs button {
+  flex: 1;
+  padding: 9px 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.friends-tabs button.active { color: var(--ink); border-bottom-color: var(--accent); }
+.friends-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 0.7rem;
+}
+.friends-count.alert { background: var(--amber); color: #1a1200; }
+.friends-body { overflow-y: auto; flex: 1; min-height: 80px; }
+.friends-note { color: var(--accent); font-size: var(--t-sm); margin: 2px 0 8px; }
+.friends-sub { font-size: var(--t-xs); text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin: 10px 0 4px; }
+.friends-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.friends-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--line);
+}
+.friend-dot { flex: none; width: 9px; height: 9px; border-radius: 999px; background: var(--text-faint); }
+.friend-dot.on { background: #16a34a; box-shadow: 0 0 6px #16a34a; }
+.friend-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.friend-actions { margin-left: auto; display: flex; gap: 6px; flex: none; }
+.friend-pending { margin-left: auto; color: var(--text-dim); font-size: var(--t-xs); }
+.friends-add { display: flex; flex-direction: column; gap: var(--s-2); }
+.friends-found {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px; border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--accent) 8%, var(--surface));
+  border: 1px solid var(--surface-border);
+}
+
+.notif-toast {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(440px, calc(100vw - 24px));
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--accent);
+  box-shadow: var(--shadow-3);
+  color: var(--ink);
+  font-size: var(--t-sm);
+}
+.notif-icon { font-size: 1.2rem; }
+.notif-text { flex: 1; min-width: 0; }
+.notif-close {
+  flex: none; background: transparent; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 1rem; padding: 2px 4px;
+}

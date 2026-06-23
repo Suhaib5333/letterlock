@@ -437,3 +437,6 @@
   cursor: not-allowed;
 }
 .auth-link:not(:disabled):hover { text-decoration: underline; }
+
+/* Admin row actions — wrap so the table stays narrow on small screens. */
+.admin-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
