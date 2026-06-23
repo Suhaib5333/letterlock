@@ -9,6 +9,9 @@ import { Timer } from '../components/Timer';
 import { submitScore } from '../components/Leaderboard';
 import type { TeamId } from '../core/models';
 import { isAnswerCorrect } from '../core/fuzzyMatch';
+import { useAuth } from '../lib/auth';
+import { awardXp } from '../lib/progressionClient';
+import { XP } from '../core/progression';
 import { useOnlineHost } from '../lib/useOnlineHost';
 import { haptic, play } from '../services/audio';
 import { colorById } from '../state/palette';
@@ -35,9 +38,12 @@ export function Game() {
   const teams = opts!.teams;
   const timer = state.setup.timer;
   const reducedMotion = state.settings.motion === 'reduced';
+  const { refreshProfile } = useAuth();
   const lastPulse = useRef(0);
   const matchStartedAt = useRef(Date.now());
   const submittedScore = useRef(false);
+  const awardedGameOver = useRef(false);
+  const [levelUp, setLevelUp] = useState<{ level: number } | null>(null);
   const [blockToast, setBlockToast] = useState(false);
   const [confirmingExit, setConfirmingExit] = useState(false);
   const [pieDismissed, setPieDismissed] = useState(false);
@@ -54,6 +60,18 @@ export function Game() {
   useEffect(() => {
     if (!canPieSwap) setPieDismissed(false);
   }, [canPieSwap]);
+
+  // Re-arm the per-game XP award when a new game begins.
+  useEffect(() => {
+    if (!ui.gameOver) awardedGameOver.current = false;
+  }, [ui.gameOver]);
+
+  // Auto-dismiss the level-up toast.
+  useEffect(() => {
+    if (!levelUp) return;
+    const t = setTimeout(() => setLevelUp(null), 3200);
+    return () => clearTimeout(t);
+  }, [levelUp]);
 
   // Reset the "clip played" gate whenever a new question is served (so each
   // audio/video question waits for its own first play before the timer starts).
@@ -86,6 +104,18 @@ export function Game() {
         }).catch(() => {
           /* fail silent — never block the celebration */
         });
+      }
+      // Award XP for completing a game (signed-in user only; no-ops for guests).
+      // Once per game-over so a bo3 awards per game, not per re-render.
+      if (!awardedGameOver.current) {
+        awardedGameOver.current = true;
+        awardXp(XP.WIN)
+          .then((r) => {
+            if (!r) return;
+            void refreshProfile();
+            if (r.leveled_up) setLevelUp({ level: r.level });
+          })
+          .catch(() => {});
       }
     } else if (ui.lastClaimCell !== null) {
       play(ui.blockHint ? 'block' : 'claim');
@@ -298,6 +328,21 @@ export function Game() {
                 >
                   ✕ Cancel — I'll judge
                 </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {levelUp && (
+              <motion.div
+                className="levelup-toast"
+                data-testid="levelup-toast"
+                initial={{ opacity: 0, y: -16, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+              >
+                ⭐ Level Up! <strong>Level {levelUp.level}</strong>
               </motion.div>
             )}
           </AnimatePresence>

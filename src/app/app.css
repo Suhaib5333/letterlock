@@ -3301,3 +3301,85 @@
   border-radius: 8px;
   box-shadow: var(--shadow-3);
 }
+
+/* Level-up toast (XP progression) */
+.levelup-toast {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 7;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--gold), #ffb43a);
+  color: #1a1200;
+  font-family: var(--font-display);
+  font-weight: 800;
+  box-shadow: var(--shadow-2);
+  white-space: nowrap;
+}
+
+/* ── Rank badges + XP bar (progression) ── */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  line-height: 1.4;
+  border: 1px solid var(--tier-edge, var(--line-strong));
+  background: var(--tier-bg, rgba(255,255,255,0.06));
+  color: var(--tier-fg, var(--text));
+  white-space: nowrap;
+}
+.rank-sm { font-size: 0.7rem; }
+.rank-md { font-size: 0.82rem; padding: 4px 12px; }
+.rank-prestige { font-weight: 800; color: var(--gold); }
+.rank-tier { opacity: 0.92; }
+.rank-sm .rank-tier { display: none; } /* compact: level only on tiny badges */
+
+/* Tier palettes (colourblind-distinct by brightness + label). */
+.tier-bronze      { --tier-bg: rgba(176,114,68,0.22);  --tier-edge: rgba(176,114,68,0.6);  --tier-fg: #e6b894; }
+.tier-silver      { --tier-bg: rgba(203,213,225,0.20);  --tier-edge: rgba(203,213,225,0.55); --tier-fg: #e7edf5; }
+.tier-gold        { --tier-bg: rgba(250,204,21,0.20);   --tier-edge: rgba(250,204,21,0.6);   --tier-fg: #ffe07a; }
+.tier-platinum    { --tier-bg: rgba(94,234,212,0.18);   --tier-edge: rgba(94,234,212,0.55);  --tier-fg: #aef6ea; }
+.tier-diamond     { --tier-bg: rgba(56,189,248,0.20);   --tier-edge: rgba(56,189,248,0.6);   --tier-fg: #bde8ff; }
+.tier-master      { --tier-bg: rgba(167,139,250,0.22);  --tier-edge: rgba(167,139,250,0.6);  --tier-fg: #d6c8ff; }
+.tier-grandmaster { --tier-bg: rgba(244,114,182,0.22);  --tier-edge: rgba(244,114,182,0.65); --tier-fg: #ffc6e6; }
+
+.rank-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+.rank-bar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.rank-bar-xp { font-size: var(--t-xs); color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.rank-bar-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.rank-bar-fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--tier-edge, var(--accent)), var(--tier-fg, #fff));
+  transition: transform 0.5s var(--ease-out);
+}
+
+/* Locked setup choice (progression gating) */
+.choice.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+.choice.locked .choice-sub { color: var(--gold); font-weight: 700; }

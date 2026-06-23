@@ -69,6 +69,7 @@ let problems = 0;
 let checked = 0;
 for (const vp of VIEWPORTS) {
   const ctx = await browser.newContext({ viewport: { width: vp.w, height: vp.h }, deviceScaleFactor: 1 });
+  await ctx.addInitScript(() => localStorage.setItem('letterlock.unlockall', '1'));
   const page = await ctx.newPage();
   for (const id of ids) {
     try {

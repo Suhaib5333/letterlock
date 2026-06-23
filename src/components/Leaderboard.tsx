@@ -3,11 +3,15 @@ import { AnimatePresence, motion } from 'motion/react';
 import { PACKS } from '../content';
 import { useModalDismiss } from '../lib/useModalDismiss';
 import { supabase, type LeaderboardRow } from '../lib/supabase';
+import { RankBadge } from './RankBadge';
+
+type Rank = { level: number; prestige: number };
 
 export function Leaderboard({ onClose }: { onClose: () => void }) {
   // Pack scope — default to "all packs" but let the player drill in.
   const [packId, setPackId] = useState<string>('all');
   const [rows, setRows] = useState<LeaderboardRow[] | null>(null);
+  const [ranks, setRanks] = useState<Record<string, Rank>>({});
   const [error, setError] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -28,10 +32,29 @@ export function Leaderboard({ onClose }: { onClose: () => void }) {
       .order('moves', { ascending: true })
       .order('duration_ms', { ascending: true })
       .limit(50);
-    (packId === 'all' ? q : q.eq('pack_id', packId)).then(({ data, error }) => {
+    (packId === 'all' ? q : q.eq('pack_id', packId)).then(async ({ data, error }) => {
       if (cancelled) return;
-      if (error) setError(error.message);
-      else setRows((data as LeaderboardRow[]) ?? []);
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      const list = (data as LeaderboardRow[]) ?? [];
+      setRows(list);
+      // Overlay each player's rank (level/prestige) by id.
+      const ids = [...new Set(list.map((r) => r.user_id))];
+      if (ids.length && supabase) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('id, level, prestige')
+          .in('id', ids);
+        if (!cancelled && profs) {
+          const map: Record<string, Rank> = {};
+          for (const p of profs as { id: string; level: number; prestige: number }[]) {
+            map[p.id] = { level: p.level ?? 1, prestige: p.prestige ?? 0 };
+          }
+          setRanks(map);
+        }
+      }
     });
     return () => {
       cancelled = true;
@@ -137,6 +160,9 @@ export function Leaderboard({ onClose }: { onClose: () => void }) {
                         {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
                       </div>
                       <div className="lb-podium-user">@{r.username}</div>
+                      {ranks[r.user_id] && (
+                        <RankBadge level={ranks[r.user_id].level} prestige={ranks[r.user_id].prestige} />
+                      )}
                       <div className="lb-podium-score">{r.score} 🏆</div>
                       <div className="lb-podium-sub">
                         {r.moves} moves · {Math.round(r.duration_ms / 1000)}s
@@ -150,7 +176,12 @@ export function Leaderboard({ onClose }: { onClose: () => void }) {
                     {rows.slice(3).map((r, i) => (
                       <li key={r.id} className="lb-row">
                         <span className="lb-rank">{i + 4}</span>
-                        <span className="lb-user">@{r.username}</span>
+                        <span className="lb-user">
+                          @{r.username}
+                          {ranks[r.user_id] && (
+                            <RankBadge level={ranks[r.user_id].level} prestige={ranks[r.user_id].prestige} />
+                          )}
+                        </span>
                         <span className="lb-meta">
                           <span title="Games won">{r.score}🏆</span>
                           <span title="Moves to win">{r.moves}🎯</span>

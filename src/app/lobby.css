@@ -17,7 +17,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--s-3);
-  align-content: center;
+  /* `safe center` so when the nudge + cards exceed the height, content aligns to
+     START instead of clipping the top card off-screen (it became unclickable on
+     short phones). */
+  align-content: safe center;
   align-items: stretch;
   min-height: 0;
   overflow-y: auto;
@@ -790,4 +793,36 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
   font-variant-numeric: tabular-nums;
   color: var(--ink);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Login incentive nudge on Mode Select */
+.login-nudge {
+  margin: 0 auto var(--s-2);
+  max-width: 720px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--accent) 12%, var(--surface));
+  border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+  color: var(--ink);
+  font-size: var(--t-sm);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Short landscape phones: compact Mode Select so the nudge + 3 cards fit one
+   screen (no internal scroll → cards are immediately stable/clickable). */
+@media (orientation: landscape) and (max-height: 480px) {
+  .mode-select { padding: var(--s-2); gap: var(--s-2); }
+  .mode-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-2);
+    overflow: hidden;
+    padding: 0;
+  }
+  .mode-card { min-height: 0; padding: 12px; gap: 2px; }
+  .mode-card-emoji { font-size: 28px; }
+  .mode-card-name { font-size: 1.05rem; }
+  .mode-card-desc { display: none; }
+  .login-nudge { font-size: var(--t-xs); padding: 6px 10px; }
 }

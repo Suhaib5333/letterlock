@@ -1,5 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
 
+// Most tests play as a guest but need the full board-size/mode/pack set, which is
+// now gated by progression. Grant the test-only "unlock all" seam to every page.
+// (The real guest-gating is verified in its own dedicated test below.)
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('letterlock.unlockall', '1'));
+});
+
 async function startMatch(
   page: Page,
   opts?: { size?: 4 | 5 | 7; mode?: 'single' | 'bo3' | 'bo5' },
@@ -697,6 +704,20 @@ test('controller URL renders the phone view with the room code', async ({ page }
   await expect(page.getByTestId('controller')).toContainText('ABC123');
   // It does not show the regular app shell (no play-button on this page)
   await expect(page.getByTestId('play-button')).toHaveCount(0);
+});
+
+test('guest gating: 5×5/7×7 + bo5 are locked at Setup (no unlock seam)', async ({ page }) => {
+  // This test deliberately does NOT set the unlock seam, so it sees the real
+  // guest gates (4×4 only; single/bo3 only).
+  await page.addInitScript(() => localStorage.removeItem('letterlock.unlockall'));
+  await page.goto('/');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
+  await expect(page.getByTestId('size-4')).toBeEnabled();
+  await expect(page.getByTestId('size-5')).toBeDisabled();
+  await expect(page.getByTestId('size-7')).toBeDisabled();
+  await expect(page.getByTestId('mode-bo5')).toBeDisabled();
+  await expect(page.getByTestId('mode-single')).toBeEnabled();
 });
 
 test('mode-select back returns home', async ({ page }) => {

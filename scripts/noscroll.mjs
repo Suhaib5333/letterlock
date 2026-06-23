@@ -71,6 +71,8 @@ const browser = await chromium.launch();
 let problems = 0;
 for (const vp of VIEWPORTS) {
   const ctx = await browser.newContext({ viewport: { width: vp.w, height: vp.h }, deviceScaleFactor: 1 });
+  // Unlock all gated content so the checker can reach 5×5/7×7/bo5/hard packs.
+  await ctx.addInitScript(() => localStorage.setItem('letterlock.unlockall', '1'));
   if (SCALE) {
     await ctx.addInitScript((scale) => {
       localStorage.setItem(

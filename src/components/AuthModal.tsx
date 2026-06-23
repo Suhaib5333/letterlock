@@ -4,6 +4,9 @@ import { useAuth } from '../lib/auth';
 import { useModalDismiss } from '../lib/useModalDismiss';
 import { supabase } from '../lib/supabase';
 import { play } from '../services/audio';
+import { RankBar } from './RankBadge';
+import { canPrestige } from '../core/progression';
+import { prestigeUp } from '../lib/progressionClient';
 
 /**
  * One-stop auth dialog:
@@ -71,6 +74,9 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
               userId={user.id}
               username={profile!.username}
               email={user.email}
+              level={profile!.level ?? 1}
+              prestige={profile!.prestige ?? 0}
+              xp={profile!.xp ?? 0}
               onUpdated={refreshProfile}
               onSignOut={() => {
                 signOut();
@@ -384,6 +390,9 @@ function ProfileView({
   userId,
   username,
   email,
+  level,
+  prestige,
+  xp,
   onUpdated,
   onSignOut,
   onClose,
@@ -391,11 +400,15 @@ function ProfileView({
   userId: string;
   username: string;
   email: string | undefined;
+  level: number;
+  prestige: number;
+  xp: number;
   onUpdated: () => void;
   onSignOut: () => void;
   onClose: () => void;
 }) {
   const [editing, setEditing] = useState(false);
+  const [prestiging, setPrestiging] = useState(false);
   const [name, setName] = useState(username);
   const [status, setStatus] = useState<'idle' | 'checking' | 'taken' | 'ok' | 'invalid'>('idle');
   const [busy, setBusy] = useState(false);
@@ -505,6 +518,23 @@ function ProfileView({
         @{username}
       </p>
       {email && <p className="go-sub">{email}</p>}
+      <RankBar xp={xp} level={level} prestige={prestige} />
+      {canPrestige(prestige, level) && (
+        <button
+          className="btn btn-primary block"
+          data-testid="prestige-btn"
+          disabled={prestiging}
+          onClick={async () => {
+            play('win');
+            setPrestiging(true);
+            const r = await prestigeUp();
+            setPrestiging(false);
+            if (r) onUpdated();
+          }}
+        >
+          {prestiging ? 'Prestiging…' : '⭐ Prestige — reset to Level 1, gain a star'}
+        </button>
+      )}
       <div className="auth-actions">
         <button
           className="btn btn-secondary"

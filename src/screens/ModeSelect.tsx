@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { useAuth } from '../lib/auth';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { play } from '../services/audio';
 import { useStore } from '../state/store';
@@ -15,7 +16,9 @@ import { useStore } from '../state/store';
  */
 export function ModeSelect() {
   const { dispatch } = useStore();
+  const { user } = useAuth();
   const online = isSupabaseConfigured();
+  const signedOut = online && !user;
 
   return (
     <div className="mode-select" data-testid="mode-select">
@@ -32,6 +35,14 @@ export function ModeSelect() {
         </div>
         <div />
       </header>
+
+      {signedOut && (
+        <div className="login-nudge" data-testid="login-nudge">
+          💡 <strong>Sign in</strong> (on the home screen) to earn <strong>XP</strong>, level up,
+          unlock bigger boards &amp; harder packs, add friends, and climb the leaderboard. You can
+          still play as a guest.
+        </div>
+      )}
 
       <div className="mode-grid">
         <motion.button

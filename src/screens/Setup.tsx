@@ -1,5 +1,14 @@
+import { useEffect } from 'react';
 import { packById } from '../content';
 import type { BoardSize, MatchMode } from '../core/models';
+import {
+  boardSizeUnlocked,
+  boardUnlockLevel,
+  modeUnlocked,
+  modeUnlockLevel,
+} from '../core/progression';
+import { useAuth } from '../lib/auth';
+import { accessFromProfile } from '../lib/progressionClient';
 import { play } from '../services/audio';
 import { colorById, TEAM_COLORS } from '../state/palette';
 import { useStore } from '../state/store';
@@ -12,6 +21,7 @@ function OptionRow<T extends string | number>({
   value,
   onChange,
   testId,
+  lockLevelFor,
 }: {
   label: string;
   hint?: string;
@@ -19,6 +29,8 @@ function OptionRow<T extends string | number>({
   value: T;
   onChange: (v: T) => void;
   testId?: string;
+  /** Returns the level an option unlocks at, or null if it's unlocked. */
+  lockLevelFor?: (v: T) => number | null;
 }) {
   return (
     <div className="setup-row">
@@ -27,20 +39,31 @@ function OptionRow<T extends string | number>({
         {hint && <span className="setup-hint">{hint}</span>}
       </div>
       <div className="choice-grid" data-testid={testId}>
-        {options.map((o) => (
-          <button
-            key={String(o.value)}
-            className={`choice ${value === o.value ? 'active' : ''}`}
-            data-testid={testId ? `${testId}-${o.value}` : undefined}
-            onClick={() => {
-              play('tap');
-              onChange(o.value);
-            }}
-          >
-            <span className="choice-label">{o.label}</span>
-            {o.sub && <span className="choice-sub">{o.sub}</span>}
-          </button>
-        ))}
+        {options.map((o) => {
+          const lockLevel = lockLevelFor?.(o.value) ?? null;
+          const locked = lockLevel !== null;
+          return (
+            <button
+              key={String(o.value)}
+              className={`choice ${value === o.value ? 'active' : ''} ${locked ? 'locked' : ''}`}
+              data-testid={testId ? `${testId}-${o.value}` : undefined}
+              disabled={locked}
+              aria-disabled={locked}
+              title={locked ? `Unlocks at Level ${lockLevel}` : undefined}
+              onClick={() => {
+                if (locked) return;
+                play('tap');
+                onChange(o.value);
+              }}
+            >
+              <span className="choice-label">
+                {locked && <span aria-hidden="true">🔒 </span>}
+                {o.label}
+              </span>
+              <span className="choice-sub">{locked ? `Lv ${lockLevel}` : o.sub}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -48,10 +71,20 @@ function OptionRow<T extends string | number>({
 
 export function Setup() {
   const { state, dispatch } = useStore();
+  const { profile } = useAuth();
+  const access = accessFromProfile(profile);
   const f = state.setup;
   const online = state.online;
   const set = (patch: Partial<SetupForm>) => dispatch({ type: 'UPDATE_SETUP', patch });
   const pack = packById(f.packId);
+
+  // Clamp the selection to what's unlocked (e.g. a guest defaulting to 5×5 must
+  // drop to 4×4; bo5 → bo3) so a locked option is never the active one.
+  useEffect(() => {
+    if (!boardSizeUnlocked(f.size, access) && f.size !== 4) set({ size: 4 });
+    if (!modeUnlocked(f.mode, access) && f.mode !== 'bo3') set({ mode: 'bo3' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [access.level, access.prestige, access.fullAccess]);
 
   // Pick a color for a team; if it collides with the other team, swap them so the
   // two teams are always distinct.
@@ -134,6 +167,7 @@ export function Setup() {
           value={f.mode}
           onChange={(v) => set({ mode: v })}
           testId="mode"
+          lockLevelFor={(v) => (modeUnlocked(v, access) ? null : modeUnlockLevel(v))}
         />
 
         <OptionRow<BoardSize>
@@ -146,6 +180,7 @@ export function Setup() {
           value={f.size}
           onChange={(v) => set({ size: v })}
           testId="size"
+          lockLevelFor={(v) => (boardSizeUnlocked(v, access) ? null : boardUnlockLevel(v))}
         />
 
         <OptionRow<SetupForm['timer']>

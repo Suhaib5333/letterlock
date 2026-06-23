@@ -35,6 +35,12 @@ export type Profile = {
   role: UserRole; // populated by migration 0002 (default 'player')
   banned_at: string | null; // ISO timestamp when a user is banned
   created_at: string;
+  // Progression (migration 0007). Older rows default via column defaults.
+  xp: number; // xp within the current prestige
+  level: number; // 1..10
+  prestige: number; // 0..10
+  total_xp: number; // lifetime
+  full_access: boolean; // admin override — unlock everything
 };
 
 export type AdminUserRow = {
