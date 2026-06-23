@@ -3,6 +3,9 @@ import { useMemo, useRef, useState } from 'react';
 import { useModalDismiss } from '../lib/useModalDismiss';
 import { PACK_GROUPS, PACKS } from '../content';
 import { type QuestionPack, totalQuestions } from '../core/packs';
+import { type Difficulty, difficultyUnlocked, difficultyUnlockLevel } from '../core/progression';
+import { useAuth } from '../lib/auth';
+import { accessFromProfile } from '../lib/progressionClient';
 import { play } from '../services/audio';
 import { remaining } from '../state/progress';
 
@@ -94,6 +97,8 @@ export function CategoryMenu({
   // multi-tier card sticks for that browser session so the player can shuffle
   // through them without the choice resetting.
   const [tierPick, setTierPick] = useState<Record<string, string>>({});
+  const { profile } = useAuth();
+  const access = accessFromProfile(profile);
   const dialogRef = useRef<HTMLDivElement>(null);
   useModalDismiss(dialogRef, onClose);
 
@@ -195,21 +200,27 @@ export function CategoryMenu({
                   const seenSome = left < total;
                   const active = pack.id === selectedPack;
                   const hasTiers = tiers.length > 1;
+                  const locked = !difficultyUnlocked(pack.difficulty as Difficulty, access);
+                  const unlockLvl = difficultyUnlockLevel(pack.difficulty as Difficulty);
                   return (
                     <div
                       key={stem}
-                      className={`cat-card ${active ? 'active' : ''} ${hasTiers ? 'has-tiers' : ''}`}
+                      className={`cat-card ${active ? 'active' : ''} ${hasTiers ? 'has-tiers' : ''} ${locked ? 'locked' : ''}`}
                       style={{ '--accent': pack.accent } as React.CSSProperties}
                       data-testid={`pack-${pack.id}`}
                     >
                       <button
                         className="cat-card-main"
+                        disabled={locked}
+                        aria-disabled={locked}
+                        title={locked ? `Unlocks at Level ${unlockLvl}` : undefined}
                         onClick={() => {
+                          if (locked) return;
                           play('pick');
                           onSelect(pack.id);
                           onClose();
                         }}
-                        aria-label={`Play ${pack.name}`}
+                        aria-label={locked ? `${pack.name} — locked until level ${unlockLvl}` : `Play ${pack.name}`}
                       >
                         {PACK_FLAG[pack.id] ? (
                           <img className="cat-card-flag" src={`/flags/${PACK_FLAG[pack.id]}.svg`} alt="" aria-hidden="true" draggable={false} />
@@ -224,29 +235,37 @@ export function CategoryMenu({
                           <div className="cat-card-meta">
                             <span className={`chip diff-${pack.difficulty}`}>{DIFF_LABEL[pack.difficulty] ?? pack.difficulty}</span>
                             <span className="chip ghost">{total} Qs</span>
-                            {seenSome && <span className="chip ghost">↻ {left} left</span>}
+                            {!locked && seenSome && <span className="chip ghost">↻ {left} left</span>}
+                            {locked && <span className="chip locked-chip">🔒 Unlocks at Lv {unlockLvl}</span>}
                           </div>
                         </div>
-                        {active && <div className="cat-card-check" aria-label="Selected">✓</div>}
+                        {active && !locked && <div className="cat-card-check" aria-label="Selected">✓</div>}
+                        {locked && <div className="cat-card-lock" aria-hidden="true">🔒</div>}
                       </button>
                       {hasTiers && (
                         <div className="cat-card-tiers" role="tablist" aria-label="Choose difficulty">
-                          {tiers.map((t) => (
-                            <button
-                              key={t.id}
-                              role="tab"
-                              aria-selected={t.id === pack.id}
-                              data-testid={`pack-tier-${t.id}`}
-                              className={`cat-tier ${t.id === pack.id ? 'active' : ''} diff-${t.difficulty}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                play('tap');
-                                setTierPick((s) => ({ ...s, [stem]: t.id }));
-                              }}
-                            >
-                              {DIFF_LABEL[t.difficulty] ?? t.difficulty}
-                            </button>
-                          ))}
+                          {tiers.map((t) => {
+                            const tLocked = !difficultyUnlocked(t.difficulty as Difficulty, access);
+                            return (
+                              <button
+                                key={t.id}
+                                role="tab"
+                                aria-selected={t.id === pack.id}
+                                data-testid={`pack-tier-${t.id}`}
+                                className={`cat-tier ${t.id === pack.id ? 'active' : ''} ${tLocked ? 'locked' : ''} diff-${t.difficulty}`}
+                                title={tLocked ? `Unlocks at Level ${difficultyUnlockLevel(t.difficulty as Difficulty)}` : undefined}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  play('tap');
+                                  // Still switch so the player sees the lock + requirement.
+                                  setTierPick((s) => ({ ...s, [stem]: t.id }));
+                                }}
+                              >
+                                {tLocked && '🔒 '}
+                                {DIFF_LABEL[t.difficulty] ?? t.difficulty}
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                     </div>

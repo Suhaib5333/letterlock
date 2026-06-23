@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { Board } from '../components/Board';
 import { HostPad } from '../components/HostPad';
+import { LevelUpOverlay } from '../components/LevelUpOverlay';
 import { QuestionCard } from '../components/QuestionCard';
 import { Scoreboard } from '../components/Scoreboard';
 import { Timer } from '../components/Timer';
@@ -43,7 +44,13 @@ export function Game() {
   const matchStartedAt = useRef(Date.now());
   const submittedScore = useRef(false);
   const awardedGameOver = useRef(false);
-  const [levelUp, setLevelUp] = useState<{ level: number } | null>(null);
+  const [levelUp, setLevelUp] = useState<{ level: number; prestige: number } | null>(null);
+  // Screenshot/QA seam: `?__leveluptest=1` previews the level-up celebration
+  // (or `?__leveluptest=prestige` the prestige one). Inert in normal use.
+  const levelUpTest =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('__leveluptest')
+      : null;
   const [blockToast, setBlockToast] = useState(false);
   const [confirmingExit, setConfirmingExit] = useState(false);
   const [pieDismissed, setPieDismissed] = useState(false);
@@ -66,12 +73,6 @@ export function Game() {
     if (!ui.gameOver) awardedGameOver.current = false;
   }, [ui.gameOver]);
 
-  // Auto-dismiss the level-up toast.
-  useEffect(() => {
-    if (!levelUp) return;
-    const t = setTimeout(() => setLevelUp(null), 3200);
-    return () => clearTimeout(t);
-  }, [levelUp]);
 
   // Reset the "clip played" gate whenever a new question is served (so each
   // audio/video question waits for its own first play before the timer starts).
@@ -113,7 +114,7 @@ export function Game() {
           .then((r) => {
             if (!r) return;
             void refreshProfile();
-            if (r.leveled_up) setLevelUp({ level: r.level });
+            if (r.leveled_up) setLevelUp({ level: r.level, prestige: r.prestige });
           })
           .catch(() => {});
       }
@@ -328,21 +329,6 @@ export function Game() {
                 >
                   ✕ Cancel — I'll judge
                 </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {levelUp && (
-              <motion.div
-                className="levelup-toast"
-                data-testid="levelup-toast"
-                initial={{ opacity: 0, y: -16, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-              >
-                ⭐ Level Up! <strong>Level {levelUp.level}</strong>
               </motion.div>
             )}
           </AnimatePresence>
@@ -602,6 +588,17 @@ export function Game() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Rank-up celebration (real level-ups; the ?__leveluptest seam previews it). */}
+      {(levelUp || levelUpTest) && (
+        <LevelUpOverlay
+          kind={levelUpTest === 'prestige' ? 'prestige' : 'level'}
+          level={levelUp?.level ?? 5}
+          prestige={levelUp?.prestige ?? (levelUpTest === 'prestige' ? 1 : 0)}
+          reducedMotion={reducedMotion}
+          onDone={() => setLevelUp(null)}
+        />
+      )}
     </div>
   );
 }

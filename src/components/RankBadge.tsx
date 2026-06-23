@@ -14,12 +14,17 @@ export function RankBadge({
   size?: 'sm' | 'md';
 }) {
   const tier = tierForLevel(level);
+  // Prestige adds a distinct OUTER border (data-prestige drives the ring colour),
+  // capped at a few visual bands so it stays legible.
+  const pBand = prestige <= 0 ? 0 : Math.min(5, Math.ceil(prestige / 2));
   return (
     <span
       className={`rank-badge rank-${size} tier-${tier.key}`}
       data-testid="rank-badge"
+      data-prestige={pBand}
       title={prestige > 0 ? `Prestige ${prestige} · ${tier.name}` : tier.name}
     >
+      <span className="rank-icon" aria-hidden="true">{tier.icon}</span>
       {prestige > 0 && <span className="rank-prestige">★{prestige}</span>}
       <span className="rank-lv">Lv {level}</span>
       <span className="rank-tier">{tier.name}</span>

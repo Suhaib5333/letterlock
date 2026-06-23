@@ -64,18 +64,19 @@ export function levelFromXp(xpInPrestige: number): LevelInfo {
 export interface Tier {
   name: string;
   key: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master' | 'grandmaster';
+  icon: string; // emoji shown on the rank badge
 }
 const TIERS: Record<number, Tier> = {
-  1: { name: 'Bronze I', key: 'bronze' },
-  2: { name: 'Bronze II', key: 'bronze' },
-  3: { name: 'Silver I', key: 'silver' },
-  4: { name: 'Silver II', key: 'silver' },
-  5: { name: 'Gold I', key: 'gold' },
-  6: { name: 'Gold II', key: 'gold' },
-  7: { name: 'Platinum', key: 'platinum' },
-  8: { name: 'Diamond', key: 'diamond' },
-  9: { name: 'Master', key: 'master' },
-  10: { name: 'Grandmaster', key: 'grandmaster' },
+  1: { name: 'Bronze I', key: 'bronze', icon: '🥉' },
+  2: { name: 'Bronze II', key: 'bronze', icon: '🥉' },
+  3: { name: 'Silver I', key: 'silver', icon: '🥈' },
+  4: { name: 'Silver II', key: 'silver', icon: '🥈' },
+  5: { name: 'Gold I', key: 'gold', icon: '🥇' },
+  6: { name: 'Gold II', key: 'gold', icon: '🥇' },
+  7: { name: 'Platinum', key: 'platinum', icon: '💠' },
+  8: { name: 'Diamond', key: 'diamond', icon: '💎' },
+  9: { name: 'Master', key: 'master', icon: '🔱' },
+  10: { name: 'Grandmaster', key: 'grandmaster', icon: '👑' },
 };
 export function tierForLevel(level: number): Tier {
   return TIERS[Math.min(MAX_LEVEL, Math.max(1, level))];

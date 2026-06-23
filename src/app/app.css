@@ -3383,3 +3383,151 @@
   filter: grayscale(0.4);
 }
 .choice.locked .choice-sub { color: var(--gold); font-weight: 700; }
+
+/* ── Level-up / Prestige celebration overlay ── */
+.levelup-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: var(--s-3);
+  background: radial-gradient(circle at 50% 40%, color-mix(in oklab, var(--bg) 55%, transparent), color-mix(in oklab, var(--bg) 88%, transparent));
+  backdrop-filter: blur(3px);
+}
+.levelup-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+  padding: 28px 24px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(165deg, color-mix(in oklab, var(--tier-edge, var(--accent)) 24%, var(--surface)), var(--surface));
+  border: 2px solid var(--tier-edge, var(--accent));
+  box-shadow: var(--shadow-3), 0 0 60px -10px var(--tier-edge, var(--accent));
+}
+.levelup-kicker {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  font-size: 0.95rem;
+  color: var(--tier-fg, var(--gold));
+}
+.levelup-badge { transform-origin: center; }
+.levelup-badge .rank-badge { font-size: 1.1rem; padding: 8px 18px; }
+.levelup-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 7vw, 2.4rem);
+  line-height: 1.05;
+}
+.levelup-sub { color: var(--text-dim); font-size: var(--t-sm); margin-bottom: 4px; }
+html[data-motion='reduced'] .levelup-card { animation: none; }
+
+/* ── Home rank strip (signed-in level + XP) ── */
+.home-rank {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto var(--s-2);
+}
+
+/* Rank badge icon + prestige exterior border bands (distinct colour per band). */
+.rank-icon { font-size: 0.95em; line-height: 1; }
+.rank-sm .rank-icon { font-size: 0.85em; }
+.rank-badge[data-prestige="1"] { box-shadow: 0 0 0 2px #cbd5e1, 0 0 8px -1px rgba(203,213,225,0.7); }
+.rank-badge[data-prestige="2"] { box-shadow: 0 0 0 2px #facc15, 0 0 9px -1px rgba(250,204,21,0.7); }
+.rank-badge[data-prestige="3"] { box-shadow: 0 0 0 2px #38bdf8, 0 0 10px -1px rgba(56,189,248,0.75); }
+.rank-badge[data-prestige="4"] { box-shadow: 0 0 0 2px #a78bfa, 0 0 11px -1px rgba(167,139,250,0.8); }
+.rank-badge[data-prestige="5"] {
+  box-shadow: 0 0 0 2px #f472b6, 0 0 14px -1px rgba(244,114,182,0.9);
+  border-color: #f472b6;
+}
+
+/* ── Leaderboard v2: tabs, fullscreen mobile, self-highlight, pager ── */
+.lb-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--surface-border); }
+.lb-tabs button {
+  flex: 1;
+  padding: 9px 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lb-tabs button.active { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* Current player highlight — distinct outlined colour, always visible. */
+.lb-row.is-me, .lb-podium-card.is-me {
+  outline: 2px solid var(--blue-glow);
+  outline-offset: -1px;
+  background: color-mix(in oklab, var(--blue-glow) 14%, var(--surface)) !important;
+}
+.lb-you {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: var(--blue);
+  border-radius: 999px;
+  padding: 1px 6px;
+  margin-left: 6px;
+}
+.lb-me-pinned {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--blue-glow) 18%, var(--surface));
+  border: 2px solid var(--blue-glow);
+  font-weight: 700;
+}
+.lb-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 10px;
+}
+.lb-pager-info { font-size: var(--t-sm); color: var(--text-dim); font-variant-numeric: tabular-nums; min-width: 96px; text-align: center; }
+.lb-rank-rows .lb-rank { color: var(--accent); }
+
+/* Fullscreen leaderboard on phones — fills the viewport (ignores scrim padding). */
+@media (max-width: 600px) {
+  .modal.leaderboard {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100svh;
+    max-height: 100svh;
+    border-radius: 0;
+  }
+}
+
+/* ── Locked category cards (progression gating in the category menu) ── */
+.cat-card.locked { opacity: 0.62; position: relative; }
+.cat-card.locked .cat-card-main { cursor: not-allowed; }
+.cat-card-lock {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+.chip.locked-chip {
+  background: color-mix(in oklab, var(--gold) 22%, transparent);
+  border: 1px solid color-mix(in oklab, var(--gold) 50%, transparent);
+  color: var(--gold);
+  font-weight: 700;
+}
+.cat-tier.locked { opacity: 0.55; }

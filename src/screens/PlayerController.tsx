@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MiniBoard } from '../components/MiniBoard';
+import { LevelUpOverlay } from '../components/LevelUpOverlay';
+import { XP } from '../core/progression';
+import { awardXp } from '../lib/progressionClient';
 import { isSupabaseConfigured } from '../lib/supabase';
 import {
   generatePlayerId,
@@ -86,6 +89,7 @@ export function PlayerController() {
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
   const [winner, setWinner] = useState<PlayerTeam | null>(null);
+  const [levelUp, setLevelUp] = useState<{ level: number; prestige: number } | null>(null);
   const [colors, setColors] = useState<{ A: string; B: string }>({ A: '#0a84ff', B: '#ff9f0a' });
   const [boardSnap, setBoardSnap] = useState<{
     owners: (PlayerTeam | null)[];
@@ -283,6 +287,15 @@ export function PlayerController() {
       case 'game_over':
         setWinner(event.winner);
         setPhase('done');
+        // Signed-in players on their phones earn XP for a win + see their own
+        // rank-up celebration (guests/anonymous controllers no-op cleanly).
+        if (event.winner && event.winner === teamRef.current) {
+          awardXp(XP.WIN)
+            .then((r) => {
+              if (r?.leveled_up) setLevelUp({ level: r.level, prestige: r.prestige });
+            })
+            .catch(() => {});
+        }
         break;
       case 'host_left':
         setError('The host left and the game has ended.');
@@ -520,6 +533,15 @@ export function PlayerController() {
                   : '—'}
           </p>
         </div>
+      )}
+
+      {levelUp && (
+        <LevelUpOverlay
+          kind="level"
+          level={levelUp.level}
+          prestige={levelUp.prestige}
+          onDone={() => setLevelUp(null)}
+        />
       )}
     </div>
   );

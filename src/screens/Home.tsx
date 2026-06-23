@@ -9,6 +9,7 @@ import { FriendsModal } from '../components/FriendsModal';
 import { Leaderboard } from '../components/Leaderboard';
 import { Logo, Wordmark } from '../components/Logo';
 import { PackEditor } from '../components/PackEditor';
+import { RankBar } from '../components/RankBadge';
 import { SettingsModal } from '../components/SettingsModal';
 import { useAuth } from '../lib/auth';
 import { isSupabaseConfigured } from '../lib/supabase';
@@ -121,6 +122,12 @@ export function Home() {
           </button>
         </div>
       </header>
+
+      {profile && (
+        <div className="home-rank" data-testid="home-rank">
+          <RankBar xp={profile.xp ?? 0} level={profile.level ?? 1} prestige={profile.prestige ?? 0} />
+        </div>
+      )}
 
       <section className="hero">
         <motion.h1
