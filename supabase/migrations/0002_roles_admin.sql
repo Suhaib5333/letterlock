@@ -97,6 +97,11 @@ begin
     where id = target_id;
 end $$;
 
+-- NOTE: migration 0007 widens this function's return type (adds progression
+-- columns). CI re-applies every migration on each push, and `create or replace`
+-- cannot change an existing function's return columns — so DROP first to keep
+-- the 0002→0007 sequence idempotent on re-apply.
+drop function if exists public.admin_list_users();
 create or replace function public.admin_list_users()
 returns table (
   id uuid,
