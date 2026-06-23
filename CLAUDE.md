@@ -860,6 +860,38 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
   packs** (the user's stated exception — ~195 countries exist). `checkmedia` 0 dead across
   melodies/tv-clips/songs. **218 unit tests, 36 e2e**, noscroll ALL CLEAR.
 
+## II.3k Round-10 — leaderboard v2, category locking, level-up, mode-select fix (2026-06-23)
+
+- ✅ **Leaderboard v2** (`Leaderboard.tsx`, **fullscreen on mobile**): two tabs — **🏁 Match
+  scores** and **⭐ Ranks (XP)**. The broken native `<select>` is replaced by a custom
+  pop-over dropdown (`lb-pack-menu`, dark-safe, works on mobile + casting). Match scores are
+  **deduped** (one row per player = their BEST score) and **CoD-style paginated** (25/page,
+  podium on page 1, `« ‹ Page n/N › »`) via the new `pack_leaderboard` RPC. Ranks tab lists
+  players by **lifetime XP** (`global_ranks`) with the signed-in player **self-highlighted**
+  (`is-me` + "YOU" badge) and a **pinned "you" row** (`my_global_rank`) when they're outside
+  the top list. Rank badges show **tier icons** (🥉🥈🥇💠💎🔱👑) + a **prestige border band**.
+- ✅ **Category locking properly enforced + shown** (`CategoryMenu.tsx`): packs gate by unlock
+  level. A locked card is **dimmed + disabled** with a 🔒 overlay and an **"🔒 Unlocks at Lv N"**
+  chip; locked difficulty tiers show 🔒 on the tier button. Verified live as a guest — World
+  History's Hard tier locks, Genius Mode (Extreme) shows "🔒 Unlocks At Lv 8".
+- ✅ **Level-up celebration** (`LevelUpOverlay.tsx`): full-screen confetti + tier-glow card on
+  level-up / prestige, fired on the host (`Game.tsx`) **and on players' phones**
+  (`PlayerController.tsx`); XP awarded on wins. **Home** shows a rank + XP progress bar
+  (`RankBar`) for signed-in players.
+- ✅ **Mode-select "Pick how you play" cutoff fixed** (`lobby.css`): the card descriptions were
+  clipped by `overflow:hidden` + a fixed-height grid row. Fix: `.mode-card { overflow: visible }`
+  (with `::before { border-radius: inherit }` to keep the gradient rounded) + grid
+  `align-items: start` so each card **grows to fit its content** instead of being stretched to a
+  short track; a narrow-portrait compact rule drops the forced `min-height`. Verified on 375px:
+  `clipped:false`, `descBelowBorder:false` for every card.
+- ✅ **DB: migration 0008** (`0008_global_ranks.sql`) — `global_ranks(p_limit)`,
+  `my_global_rank()` (tie-break total_xp desc, created_at asc), `pack_leaderboard(p_pack,
+  p_limit, p_offset)` (distinct-on best score + count over() for paging), granted anon+auth.
+  Deployed green; both leaderboard tabs verified **live** with real data on `letterlock.raltech.dev`.
+- ✅ Re-verified: **346 unit/content tests**, **98 Playwright e2e** (desktop+mobile),
+  **noscroll ALL CLEAR** (17 devices × every screen incl. leaderboard + mode-select), strict
+  typecheck + build clean. CI green (run 28015307305), live bundle hash matches local build.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily
