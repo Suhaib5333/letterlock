@@ -46,11 +46,13 @@ export function Game() {
   const awardedGameOver = useRef(false);
   const [levelUp, setLevelUp] = useState<{ level: number; prestige: number } | null>(null);
   // Screenshot/QA seam: `?__leveluptest=1` previews the level-up celebration
-  // (or `?__leveluptest=prestige` the prestige one). Inert in normal use.
-  const levelUpTest =
-    typeof window !== 'undefined'
-      ? new URLSearchParams(window.location.search).get('__leveluptest')
-      : null;
+  // (or `?__leveluptest=prestige` the prestige one). Optional `&lvl=N&prestige=P`
+  // pick the exact tier/prestige to preview (used to capture every tier's art).
+  // Inert in normal use.
+  const levelUpParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const levelUpTest = levelUpParams?.get('__leveluptest') ?? null;
+  const levelUpTestLvl = Number(levelUpParams?.get('lvl')) || null;
+  const levelUpTestPrestige = levelUpParams?.has('prestige') ? Number(levelUpParams.get('prestige')) || 0 : null;
   const [blockToast, setBlockToast] = useState(false);
   const [confirmingExit, setConfirmingExit] = useState(false);
   const [pieDismissed, setPieDismissed] = useState(false);
@@ -593,8 +595,8 @@ export function Game() {
       {(levelUp || levelUpTest) && (
         <LevelUpOverlay
           kind={levelUpTest === 'prestige' ? 'prestige' : 'level'}
-          level={levelUp?.level ?? 5}
-          prestige={levelUp?.prestige ?? (levelUpTest === 'prestige' ? 1 : 0)}
+          level={levelUp?.level ?? levelUpTestLvl ?? 5}
+          prestige={levelUp?.prestige ?? levelUpTestPrestige ?? (levelUpTest === 'prestige' ? 1 : 0)}
           reducedMotion={reducedMotion}
           onDone={() => setLevelUp(null)}
         />
