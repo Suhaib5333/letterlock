@@ -35,6 +35,7 @@ export type Profile = {
   role: UserRole; // populated by migration 0002 (default 'player')
   banned_at: string | null; // ISO timestamp when a user is banned
   created_at: string;
+  username_changed_at: string | null; // last username change (migration 0009); null = never
   // Progression (migration 0007). Older rows default via column defaults.
   xp: number; // xp within the current prestige
   level: number; // 1..10

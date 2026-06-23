@@ -8,6 +8,14 @@ import { RankBar } from './RankBadge';
 import { canPrestige } from '../core/progression';
 import { prestigeUp } from '../lib/progressionClient';
 
+// Names nobody may take — mirrors is_reserved_username() in migration 0009. The
+// server is the source of truth; this is just for instant client feedback.
+const RESERVED = new Set([
+  'admin', 'administrator', 'root', 'system', 'support', 'help', 'moderator', 'mod',
+  'staff', 'official', 'letterlock', 'null', 'undefined', 'everyone', 'anonymous',
+]);
+const isReserved = (name: string) => RESERVED.has(name.toLowerCase());
+
 /**
  * One-stop auth dialog:
  *  - Signed-out: shows the "Sign in with Google" CTA.
@@ -71,8 +79,8 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
             <UsernameView userId={user.id} onClaimed={refreshProfile} />
           ) : (
             <ProfileView
-              userId={user.id}
               username={profile!.username}
+              usernameChangedAt={profile!.username_changed_at ?? null}
               email={user.email}
               level={profile!.level ?? 1}
               prestige={profile!.prestige ?? 0}
@@ -306,6 +314,7 @@ function UsernameView({ userId, onClaimed }: { userId: string; onClaimed: () => 
   useEffect(() => {
     if (!name) return setStatus('idle');
     if (!valid) return setStatus('invalid');
+    if (isReserved(name)) return setStatus('taken');
     setStatus('checking');
     const t = setTimeout(async () => {
       if (!supabase) return;
@@ -386,9 +395,17 @@ function UsernameView({ userId, onClaimed }: { userId: string; onClaimed: () => 
   );
 }
 
+// Usernames may be changed at most once every 30 days (mirrors the server-side
+// limit in migration 0009). Kept here only to drive proactive UI; the DB is the
+// source of truth that actually enforces it.
+const USERNAME_CHANGE_DAYS = 30;
+function formatDate(d: Date): string {
+  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
 function ProfileView({
-  userId,
   username,
+  usernameChangedAt,
   email,
   level,
   prestige,
@@ -397,8 +414,8 @@ function ProfileView({
   onSignOut,
   onClose,
 }: {
-  userId: string;
   username: string;
+  usernameChangedAt: string | null;
   email: string | undefined;
   level: number;
   prestige: number;
@@ -416,11 +433,19 @@ function ProfileView({
   const valid = /^[a-z0-9_]{3,20}$/.test(name);
   const unchanged = name === username;
 
+  // When (if ever) the next change is allowed. The first change after claiming is
+  // always free (usernameChangedAt is null until the first edit).
+  const nextChangeAt = usernameChangedAt
+    ? new Date(new Date(usernameChangedAt).getTime() + USERNAME_CHANGE_DAYS * 86400_000)
+    : null;
+  const inCooldown = !!nextChangeAt && nextChangeAt.getTime() > Date.now();
+
   // Live availability check (debounced), skipping the user's own current name.
   useEffect(() => {
     if (!editing) return;
     if (unchanged) return setStatus('idle');
     if (!valid) return setStatus('invalid');
+    if (isReserved(name)) return setStatus('taken');
     setStatus('checking');
     const t = setTimeout(async () => {
       if (!supabase) return;
@@ -434,21 +459,31 @@ function ProfileView({
     if (!supabase || status !== 'ok' || busy) return;
     setBusy(true);
     setError(null);
-    // Updating profiles.username cascades to this user's leaderboard rows via the
-    // sync_leaderboard_username trigger (migration 0005) — keyed by user_id — so
-    // their existing scores show the new name immediately.
-    const { error: e } = await supabase.from('profiles').update({ username: name }).eq('id', userId);
+    // change_username (migration 0009) enforces the once-per-30-days limit +
+    // uniqueness + format server-side and returns a structured result. On success
+    // it cascades to this user's leaderboard rows via sync_leaderboard_username
+    // (migration 0005), keyed by user_id, so existing scores show the new name.
+    const { data, error: e } = await supabase.rpc('change_username', { p_name: name });
     setBusy(false);
-    if (!e) {
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!e && row?.ok) {
       setEditing(false);
       onUpdated();
       return;
     }
-    if (e.code === '23505' || /duplicate|unique/i.test(e.message)) {
+    const code = row?.error as string | undefined;
+    if (code === 'taken') {
       setStatus('taken');
       setError('That username was just taken — pick another.');
+    } else if (code === 'too_soon') {
+      const when = row?.next_allowed_at ? formatDate(new Date(row.next_allowed_at)) : 'later';
+      setError(`You can only change your username once a month. Next change available on ${when}.`);
+    } else if (code === 'reserved') {
+      setError('That username is reserved — pick another.');
+    } else if (code === 'invalid') {
+      setError('Use 3–20 lowercase letters, digits, and underscores.');
     } else {
-      setError(e.message || 'Could not update username.');
+      setError(e?.message || 'Could not update username. Try again.');
     }
   };
 
@@ -457,8 +492,8 @@ function ProfileView({
       <>
         <h2>Edit username</h2>
         <p className="go-sub">
-          3–20 chars, lowercase letters/digits/underscores. Your leaderboard scores update to the
-          new name automatically.
+          3–20 chars, lowercase letters/digits/underscores. You can change it{' '}
+          <strong>once a month</strong>. Your leaderboard scores update automatically.
         </p>
         <input
           type="text"
@@ -535,11 +570,19 @@ function ProfileView({
           {prestiging ? 'Prestiging…' : '⭐ Prestige — reset to Level 1, gain a star'}
         </button>
       )}
+      {inCooldown && nextChangeAt && (
+        <p className="go-sub" data-testid="username-cooldown">
+          🔒 Username locked until <strong>{formatDate(nextChangeAt)}</strong> (one change per month).
+        </p>
+      )}
       <div className="auth-actions">
         <button
           className="btn btn-secondary"
           data-testid="username-edit"
+          disabled={inCooldown}
+          title={inCooldown && nextChangeAt ? `You can change it again on ${formatDate(nextChangeAt)}` : undefined}
           onClick={() => {
+            if (inCooldown) return;
             play('pick');
             setName(username);
             setEditing(true);
