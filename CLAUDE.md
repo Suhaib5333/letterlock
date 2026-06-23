@@ -892,6 +892,29 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
   **noscroll ALL CLEAR** (17 devices × every screen incl. leaderboard + mode-select), strict
   typecheck + build clean. CI green (run 28015307305), live bundle hash matches local build.
 
+## II.3l Round-11 — username change policy (2026-06-23)
+
+- ✅ **Username changes limited to once a month** + hardened uniqueness/validation
+  (`0009_username_change_limit.sql`). Usernames were already unique + lowercase +
+  format-checked (3–20 `[a-z0-9_]`) since 0001; this adds:
+  - **`change_username(p_name)` RPC** (SECURITY DEFINER) — validates format, blocks
+    **reserved names** (admin/system/root/moderator/…), enforces a **30-day cooldown**
+    (the first change after claiming is free), checks case-insensitive uniqueness, and
+    returns a **structured result** `(ok, error, next_allowed_at)` so the UI shows
+    "you can change again on <date>" instead of a raw SQL error.
+  - **BEFORE INSERT/UPDATE trigger backstop** (`enforce_username_change_limit`) so the
+    cooldown + reserved rules hold even against a direct table update (users have an
+    UPDATE policy on their own row). New `profiles.username_changed_at` column tracks it.
+  - **Client** (`AuthModal.tsx`): the edit path calls the RPC (not a raw update); shows
+    the cooldown date, **dims the Edit button + a 🔒 lock notice** while in cooldown,
+    and rejects reserved names instantly on both claim + edit.
+- ✅ Verified **live** on the deployed Supabase: `is_reserved_username('admin')`→true,
+  `('honeybadger42')`→false, `username_change_interval()`→"30 days", `change_username`
+  (no auth)→`{ok:false, error:"not_signed_in"}`. **346 unit + 98 e2e** pass, typecheck +
+  build clean, CI green (run 28020489903), live bundle matches local build.
+- ➕ Dev seam: `?__leveluptest=level&lvl=N` / `=prestige&prestige=P` previews any tier's
+  level-up celebration art (used to capture all 7 tiers + prestige). Inert in normal use.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily
