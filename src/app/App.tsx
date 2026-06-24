@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useAuth } from '../lib/auth';
+import { hasDevSeam } from '../lib/devSeams';
 import { startSocial, stopSocial, type Notification } from '../lib/friends';
 import { play } from '../services/audio';
 import { initAudio, setAudioEnabled, setMusicContext, startMusic, stopMusic } from '../services/audio';
@@ -19,7 +20,7 @@ import { LobbyJoin } from '../screens/LobbyJoin';
 /** Test-only seam: `?__crashtest=1` throws during render so the ErrorBoundary can be
  *  verified to show the recovery card (never a blank screen). Inert otherwise. */
 function CrashProbe() {
-  if (new URLSearchParams(window.location.search).has('__crashtest')) {
+  if (hasDevSeam('__crashtest')) {
     throw new Error('crash test');
   }
   return null;

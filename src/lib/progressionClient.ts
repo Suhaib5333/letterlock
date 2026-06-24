@@ -1,5 +1,6 @@
 import type { Access } from '../core/progression';
 import { GUEST_ACCESS } from '../core/progression';
+import { devSeamsEnabled, hasDevSeam } from './devSeams';
 import { supabase, type Profile } from './supabase';
 
 /** Result of an XP award (mirrors the award_xp RPC return row). */
@@ -36,11 +37,12 @@ export async function prestigeUp(): Promise<{ level: number; prestige: number } 
 }
 
 /** Test/QA seam: `?__unlockall=1` (or localStorage flag) grants full access so the
- *  Playwright checkers can exercise locked content. Inert in normal use. */
+ *  Playwright checkers can exercise locked content. Gated to local dev/test hosts
+ *  (see devSeams.ts) so a real user can't unlock content by editing the URL. */
 function unlockAllSeam(): boolean {
-  if (typeof window === 'undefined') return false;
+  if (!devSeamsEnabled()) return false;
   try {
-    if (new URLSearchParams(window.location.search).has('__unlockall')) return true;
+    if (hasDevSeam('__unlockall')) return true;
     return localStorage.getItem('letterlock.unlockall') === '1';
   } catch {
     return false;

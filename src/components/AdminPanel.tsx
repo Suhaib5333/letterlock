@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../lib/auth';
+import { hasDevSeam } from '../lib/devSeams';
 import { useModalDismiss } from '../lib/useModalDismiss';
 import { supabase, type AdminUserRow, type CustomPack, type UserRole } from '../lib/supabase';
 import { play } from '../services/audio';
@@ -27,9 +28,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
   useModalDismiss(dialogRef, onClose);
 
   // Dev/QA seam (see Home): allow rendering the dashboard chrome without an admin
-  // session so its responsive layout can be inspected. Data calls just no-op/error.
-  const devScreens =
-    typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('__devscreens');
+  // session so its responsive layout can be inspected. Gated to local dev/test
+  // hosts (devSeams.ts). Data calls no-op/error regardless (admin RPCs enforce
+  // role server-side), so this is purely a layout-inspection affordance.
+  const devScreens = hasDevSeam('__devscreens');
   if (!isAdmin && !devScreens) return null;
 
   return (

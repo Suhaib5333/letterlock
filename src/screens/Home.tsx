@@ -12,6 +12,7 @@ import { PackEditor } from '../components/PackEditor';
 import { RankBar } from '../components/RankBadge';
 import { SettingsModal } from '../components/SettingsModal';
 import { useAuth } from '../lib/auth';
+import { hasDevSeam } from '../lib/devSeams';
 import { subscribePendingRequests } from '../lib/friends';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { play } from '../services/audio';
@@ -35,9 +36,10 @@ export function Home() {
   const [showFriends, setShowFriends] = useState(false);
   const { profile, isAdmin } = useAuth();
   // Dev/QA seam: `?__devscreens=1` surfaces the admin + pack-editor buttons even
-  // when signed-out so their responsive layout can be checked. Inert otherwise.
-  const devScreens =
-    typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('__devscreens');
+  // when signed-out so their responsive layout can be checked. Gated to local
+  // dev/test hosts (devSeams.ts) — inert in production. (Admin RPCs enforce role
+  // server-side regardless, so this never grants real admin power.)
+  const devScreens = hasDevSeam('__devscreens');
   // Re-render when question progress changes (e.g. async DB hydration on sign-in,
   // or a guest reset) so the "N unique left" badge stays accurate.
   const [, setProgressTick] = useState(0);

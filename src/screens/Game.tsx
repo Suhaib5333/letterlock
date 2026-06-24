@@ -11,6 +11,7 @@ import { submitScore } from '../components/Leaderboard';
 import type { TeamId } from '../core/models';
 import { isAnswerCorrect } from '../core/fuzzyMatch';
 import { useAuth } from '../lib/auth';
+import { devSeamsEnabled, hasDevSeam } from '../lib/devSeams';
 import { awardXp } from '../lib/progressionClient';
 import { XP } from '../core/progression';
 import { useOnlineHost } from '../lib/useOnlineHost';
@@ -48,8 +49,9 @@ export function Game() {
   // Screenshot/QA seam: `?__leveluptest=1` previews the level-up celebration
   // (or `?__leveluptest=prestige` the prestige one). Optional `&lvl=N&prestige=P`
   // pick the exact tier/prestige to preview (used to capture every tier's art).
-  // Inert in normal use.
-  const levelUpParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  // Gated to local dev/test hosts (devSeams.ts) — inert in production.
+  const levelUpParams =
+    devSeamsEnabled() && typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const levelUpTest = levelUpParams?.get('__leveluptest') ?? null;
   const levelUpTestLvl = Number(levelUpParams?.get('lvl')) || null;
   const levelUpTestPrestige = levelUpParams?.has('prestige') ? Number(levelUpParams.get('prestige')) || 0 : null;
@@ -163,10 +165,9 @@ export function Game() {
   });
   // Test-only seam: `?__onlinepanel=1` force-renders the host answers panel with
   // sample submissions so the responsive/no-scroll checker can verify the ONLINE
-  // in-game layout (which otherwise needs two live clients). Inert in normal use.
-  const forceOnlinePanel =
-    typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).has('__onlinepanel');
+  // in-game layout (which otherwise needs two live clients). Gated to local
+  // dev/test hosts (devSeams.ts) — inert in production.
+  const forceOnlinePanel = hasDevSeam('__onlinepanel');
   const showOnlineAnswers = online.online || forceOnlinePanel;
   const onlineSubs = online.online
     ? online.submissions
