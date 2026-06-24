@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MiniBoard } from '../components/MiniBoard';
 import { LevelUpOverlay } from '../components/LevelUpOverlay';
 import { XP } from '../core/progression';
+import { useAuth } from '../lib/auth';
 import { awardXp } from '../lib/progressionClient';
 import { isSupabaseConfigured } from '../lib/supabase';
 import {
@@ -67,14 +68,34 @@ function persistSave(save: ControllerSave) {
   }
 }
 
+/**
+ * Build the phone's synced-timer state from a host broadcast. `deadline` is the
+ * host-clock end instant; we measure the host↔local clock offset from `hostNow`
+ * so the countdown ends at the same wall-clock moment on every device. Returns
+ * null when there's no timer (deadline/seconds absent).
+ */
+function buildTimer(
+  deadline?: number,
+  hostNow?: number,
+  totalSeconds?: number,
+): { deadline: number; offset: number; total: number } | null {
+  if (!deadline || !totalSeconds) return null;
+  const offset = (hostNow ?? Date.now()) - Date.now();
+  return { deadline, offset, total: totalSeconds };
+}
+
 export function PlayerController() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const room = (params.get('room') ?? '').toUpperCase();
   const initialName = (params.get('name') ?? '').slice(0, 20);
+  // A signed-in phone uses its ACCOUNT username automatically — no name entry.
+  const { profile } = useAuth();
+  const accountName = profile?.username ?? null;
 
   const [name, setName] = useState(initialName);
   // Kahoot-style: scanning the QR lands here with no name → type it, then Join.
   // Arriving from the in-app Join form (which already has a name) auto-joins.
+  // A signed-in user skips the name step entirely (handled in an effect below).
   const [joined, setJoined] = useState(() => !!initialName.trim());
   const [nameDraft, setNameDraft] = useState(initialName);
   const [team, setTeam] = useState<PlayerTeam | null>(null);
@@ -97,9 +118,12 @@ export function PlayerController() {
     turn: PlayerTeam | null;
     winner: PlayerTeam | null;
   } | null>(null);
-  // Synced answer countdown: { total seconds, startedAt ms }. Drives the phone bar.
-  const [timerState, setTimerState] = useState<{ total: number; startedAt: number } | null>(null);
-  const [now, setNow] = useState(() => performance.now());
+  // Synced answer countdown. `deadline` is the host-clock instant (epoch ms) the
+  // timer ends at; `offset` = hostClock − localClock measured at receipt, so
+  // every device counts down to the SAME moment despite clock skew / latency.
+  // `total` seconds is just for the progress-bar scale.
+  const [timerState, setTimerState] = useState<{ deadline: number; offset: number; total: number } | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const handleRef = useRef<LobbyHandle | null>(null);
   // Refs so the channel's once-registered callbacks always read fresh values
   // (avoids the stale-closure bug where adjudicated feedback compared an old team).
@@ -112,6 +136,14 @@ export function PlayerController() {
   useEffect(() => {
     servedRef.current = served;
   }, [served]);
+
+  // Signed-in phones auto-join with their account username — no manual entry.
+  useEffect(() => {
+    if (joined || !accountName) return;
+    setName(accountName);
+    setNameDraft(accountName);
+    setJoined(true);
+  }, [accountName, joined]);
 
   // Bootstrap channel + presence — only AFTER the player has joined (entered a name).
   useEffect(() => {
@@ -154,11 +186,13 @@ export function PlayerController() {
           onEvent: (event) => onEvent(event, playerId),
           onRoster: (players) => {
             if (players.some((p) => p.role === 'host')) sawHostRef.current = true;
-            // Adopt a team from presence only as an UPGRADE (null → A/B). Explicit
-            // un-assignment arrives via the team_assigned event; presence is
-            // eventually-consistent and must never spuriously revert us to null.
+            // Adopt a team from presence ONLY to fill an empty slot (null → A/B).
+            // All explicit (re)assignments — including rapid blue↔amber changes —
+            // arrive via the ordered team_assigned event; presence is
+            // eventually-consistent and out-of-order, so it must never override an
+            // assignment we already have (that caused stale-colour flicker).
             const me = players.find((p) => p.id === playerId);
-            if (me && me.team && me.team !== teamRef.current) {
+            if (me && me.team && teamRef.current === null) {
               setTeam(me.team);
               teamRef.current = me.team;
               persistSave({ playerId, name: displayName, room, team: me.team });
@@ -215,7 +249,7 @@ export function PlayerController() {
   // Tick the synced countdown while a timer is running.
   useEffect(() => {
     if (!timerState) return;
-    const id = setInterval(() => setNow(performance.now()), 250);
+    const id = setInterval(() => setNow(Date.now()), 250);
     return () => clearInterval(id);
   }, [timerState]);
 
@@ -231,6 +265,10 @@ export function PlayerController() {
           const h = handleRef.current;
           if (h) h.channel.track({ ...h.self, team: event.team }).catch(() => {});
         }
+        // Team colours/names ride along with the assignment so colour + team
+        // update atomically (no ordering race with a separate team_labels event).
+        if (event.aColor && event.bColor) setColors({ A: event.aColor, B: event.bColor });
+        if (event.aName && event.bName) setLabels({ A: event.aName, B: event.bName });
         break;
       case 'team_labels':
         setLabels({ A: event.A, B: event.B });
@@ -238,6 +276,9 @@ export function PlayerController() {
         break;
       case 'board_state':
         setBoardSnap({ owners: event.owners, size: event.size, turn: event.turn, winner: event.winner });
+        // Receiving live game state means the match is underway — never stay stuck
+        // in the lobby if the match_started broadcast was missed.
+        setPhase((p) => (p === 'lobby' || p === 'waiting' ? 'ready' : p));
         break;
       case 'question_served':
         setServed({
@@ -255,13 +296,14 @@ export function PlayerController() {
         setTeammateAnswered(false);
         setAnswer('');
         setFeedback(null);
+        setWinner(null);
         setPhase('question');
-        setTimerState(event.timerSeconds ? { total: event.timerSeconds, startedAt: performance.now() } : null);
+        setTimerState(buildTimer(event.deadline, event.hostNow, event.timerSeconds));
         break;
       case 'steal_open':
         // The picking team's time is up — the other team may now answer.
         setStealOpen(true);
-        if (event.stealSeconds) setTimerState({ total: event.stealSeconds, startedAt: performance.now() });
+        setTimerState(buildTimer(event.deadline, event.hostNow, event.stealSeconds));
         break;
       case 'answer_submitted':
         // Lock out the rest of our team once a teammate has answered (only the
@@ -284,11 +326,11 @@ export function PlayerController() {
         }
         setPhase('reveal');
         break;
-      case 'game_over':
-        setWinner(event.winner);
-        setPhase('done');
-        // Signed-in players on their phones earn XP for a win + see their own
-        // rank-up celebration (guests/anonymous controllers no-op cleanly).
+      case 'game_won':
+        // Each finished GAME (even within a best-of-N series) awards the winning
+        // team's signed-in players an XP win + a rank-up celebration. Guests /
+        // anonymous controllers no-op cleanly. The 'done' screen is driven by
+        // game_over (match end), so award here but only transition there.
         if (event.winner && event.winner === teamRef.current) {
           awardXp(XP.WIN)
             .then((r) => {
@@ -296,6 +338,21 @@ export function PlayerController() {
             })
             .catch(() => {});
         }
+        setTimerState(null);
+        if (!event.matchOver) {
+          // More games to come — show a brief between-games beat, not "game over".
+          setWinner(event.winner);
+          setFeedback(
+            event.winner === teamRef.current ? '🏆 Your team won that game!' : 'That game went the other way.',
+          );
+          setPhase('reveal');
+        }
+        break;
+      case 'game_over':
+        // Match is over → final result screen. XP was already granted on game_won
+        // (don't double-award here).
+        setWinner(event.winner);
+        setPhase('done');
         break;
       case 'host_left':
         setError('The host left and the game has ended.');
@@ -304,6 +361,7 @@ export function PlayerController() {
       case 'match_started':
         setServed(null);
         setFeedback(null);
+        setWinner(null);
         setPhase('ready');
         break;
       default:
@@ -334,6 +392,18 @@ export function PlayerController() {
     setJoined(true);
   }, [nameDraft]);
 
+  // Leave the room and return to the main app home. Used both mid-match (exit any
+  // time) and after the game completes. Drops the channel cleanly first.
+  const leaveToHome = useCallback(() => {
+    const h = handleRef.current;
+    if (h) h.leave().catch(() => {});
+    handleRef.current = null;
+    // The controller is a standalone route (?view=controller); navigating to the
+    // bare path loads the full app (Home).
+    window.location.href = window.location.origin + window.location.pathname;
+  }, []);
+  const [confirmLeave, setConfirmLeave] = useState(false);
+
   const teamLabel = team === 'A' ? labels.A : team === 'B' ? labels.B : 'Unassigned';
   // Answer-gating: only the picking team answers first; the other team waits for
   // the steal window; and only the first player from a team may answer.
@@ -343,9 +413,12 @@ export function PlayerController() {
   const canAnswerNow = !!team && lockReason === null;
   const pickerLabel = pickerTeam === 'A' ? labels.A : pickerTeam === 'B' ? labels.B : 'the other team';
   const remaining = timerState
-    ? Math.max(0, timerState.total - (now - timerState.startedAt) / 1000)
+    ? Math.max(0, (timerState.deadline - (now + timerState.offset)) / 1000)
     : null;
-  const timerPct = timerState ? Math.max(0, Math.min(1, (remaining ?? 0) / timerState.total)) : 0;
+  const timerPct =
+    timerState && timerState.total > 0
+      ? Math.max(0, Math.min(1, (remaining ?? 0) / timerState.total))
+      : 0;
 
   return (
     <div
@@ -361,7 +434,33 @@ export function PlayerController() {
         <div className="controller-team" data-testid="controller-team">
           {joined ? teamLabel : ''}
         </div>
+        {joined && (
+          <button
+            className="controller-leave"
+            data-testid="controller-leave"
+            aria-label="Leave the game"
+            onClick={() => setConfirmLeave(true)}
+          >
+            Leave
+          </button>
+        )}
       </header>
+
+      {confirmLeave && (
+        <div className="controller-leave-confirm" data-testid="controller-leave-confirm" role="dialog" aria-label="Leave game?">
+          <div className="controller-leave-card">
+            <p>Leave the game and return home?</p>
+            <div className="controller-leave-actions">
+              <button className="btn btn-ghost" onClick={() => setConfirmLeave(false)}>
+                Keep playing
+              </button>
+              <button className="btn btn-primary" data-testid="controller-leave-confirm-yes" onClick={leaveToHome}>
+                Leave ▸
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {!joined && (
         <div className="controller-join" data-testid="controller-join">
@@ -532,6 +631,13 @@ export function PlayerController() {
                   ? labels.B
                   : '—'}
           </p>
+          <button
+            className="btn btn-primary btn-lg block"
+            data-testid="controller-home"
+            onClick={leaveToHome}
+          >
+            ▸ Back to home
+          </button>
         </div>
       )}
 

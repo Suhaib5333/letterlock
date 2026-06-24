@@ -57,6 +57,14 @@ export type LobbyEvent =
       picker?: PlayerTeam;
       // Answer time (seconds, 0 = no timer) so the phone can show a countdown.
       timerSeconds?: number;
+      // Synced-timer fields: the absolute host-clock deadline (epoch ms) the timer
+      // ends at, plus the host's clock reading when this was sent. The phone
+      // computes its clock offset from `hostNow` and shows remaining = deadline −
+      // (localNow + offset) — so every device counts down to the SAME instant
+      // regardless of clock skew or network latency. Re-sent verbatim on
+      // reconnect so a returning phone resumes mid-countdown (not from full).
+      deadline?: number;
+      hostNow?: number;
       // For letterless packs the prompt carries audio/video/image URLs; players
       // see the prompt text + media right on their phone.
       prompt: string;
@@ -78,9 +86,15 @@ export type LobbyEvent =
       cell: number;
     }
   | { type: 'adjudicated'; winner: PlayerTeam | null; cell: number }
+  // A single GAME finished (one board). In a best-of-N series this fires once per
+  // game; players award XP per game on this. `matchOver` marks the final game.
+  | { type: 'game_won'; winner: PlayerTeam | null; matchOver: boolean }
+  // The MATCH is over (series decided) → players show the final result screen.
   | { type: 'game_over'; winner: PlayerTeam | null }
-  // team === null un-assigns the player (host "×" / kick back to the pool).
-  | { type: 'team_assigned'; playerId: string; team: PlayerTeam | null }
+  // team === null un-assigns the player (host "×" / kick back to the pool). The
+  // team colours ride along so the phone updates colour + team atomically (no
+  // ordering race with a separate team_labels broadcast).
+  | { type: 'team_assigned'; playerId: string; team: PlayerTeam | null; aColor?: string; bColor?: string; aName?: string; bName?: string }
   // The colour-NAMES (+ hex colours) of each team so player phones show the
   // colour instead of a generic "Team A/B" and can tint the live mini-board.
   | { type: 'team_labels'; A: string; B: string; aColor?: string; bColor?: string }
@@ -97,7 +111,7 @@ export type LobbyEvent =
   | { type: 'request_state'; playerId: string }
   // Sent by the host when the picking team's time is up → the OTHER team may now
   // answer (steal window). cell scopes it to the current question.
-  | { type: 'steal_open'; cell: number; stealSeconds?: number }
+  | { type: 'steal_open'; cell: number; stealSeconds?: number; deadline?: number; hostNow?: number }
   | { type: 'match_started' }
   | { type: 'host_left' };
 

@@ -39,6 +39,7 @@ export function useOnlineHost(args: {
   served: Served | null;
   answerRevealed: boolean;
   gameOver: boolean;
+  matchOver: boolean;
   winner: TeamId | null;
   hideLetters: boolean;
   teamNames: { A: string; B: string };
@@ -47,7 +48,7 @@ export function useOnlineHost(args: {
   timerSeconds: number;
   board: { owners: (TeamId | null)[]; size: number; turn: TeamId | null };
 }): OnlineHostState {
-  const { served, answerRevealed, gameOver, winner, hideLetters, teamNames, teamColors, picker, timerSeconds, board } =
+  const { served, answerRevealed, gameOver, matchOver, winner, hideLetters, teamNames, teamColors, picker, timerSeconds, board } =
     args;
 
   // Resolve the lobby once. It only ever exists on the host's device.
@@ -82,6 +83,14 @@ export function useOnlineHost(args: {
   boardRef.current = board;
   // Cells where the host has opened the steal window — re-sent on reconnect.
   const stealOpenCells = useRef<Set<number>>(new Set());
+  // Absolute host-clock deadlines (epoch ms) for the active question + steal
+  // window, so a reconnecting phone resumes the SAME countdown instead of
+  // restarting from the full duration. Cleared when the question changes.
+  const deadlineRef = useRef<number | null>(null);
+  const stealDeadlineRef = useRef<number | null>(null);
+  // True once the match engine is live (Game is mounted) → re-announced to any
+  // (re)connecting phone so it always leaves the lobby into the game.
+  const startedRef = useRef(false);
 
   const sendLabels = () => {
     lobbyRef.current
@@ -112,6 +121,9 @@ export function useOnlineHost(args: {
   const reBroadcastCurrent = useCallback(() => {
     const lobby = lobbyRef.current;
     if (!lobby) return;
+    // A (re)connecting phone must always leave the lobby into the live game — even
+    // if it missed the original match_started (fire-and-forget, no replay).
+    if (startedRef.current) lobby.broadcast({ type: 'match_started' }).catch(() => {});
     // Always (re)send the team labels + live board so a late/reconnecting phone
     // shows the right colours and mirrors the current board.
     sendLabels();
@@ -126,6 +138,10 @@ export function useOnlineHost(args: {
         letter: s.letter,
         picker: pickerRef.current as PlayerTeam,
         timerSeconds: timerRef.current,
+        // Re-send the SAME stored deadline so the phone resumes mid-countdown;
+        // a fresh hostNow keeps the clock-offset estimate accurate.
+        deadline: deadlineRef.current ?? undefined,
+        hostNow: Date.now(),
         prompt: q.q,
         hideLetter: hideRef.current,
         audio: q.audio,
@@ -135,7 +151,15 @@ export function useOnlineHost(args: {
       })
       .catch(() => {});
     if (stealOpenCells.current.has(s.cell)) {
-      lobby.broadcast({ type: 'steal_open', cell: s.cell, stealSeconds: Math.ceil(timerRef.current / 2) }).catch(() => {});
+      lobby
+        .broadcast({
+          type: 'steal_open',
+          cell: s.cell,
+          stealSeconds: Math.ceil(timerRef.current / 2),
+          deadline: stealDeadlineRef.current ?? undefined,
+          hostNow: Date.now(),
+        })
+        .catch(() => {});
     }
     if (revealRef.current) {
       lobby.broadcast({ type: 'answer_revealed', answer: q.artist ? `${q.a} (by ${q.artist})` : q.a }).catch(() => {});
@@ -203,10 +227,15 @@ export function useOnlineHost(args: {
   useEffect(() => {
     const lobby = lobbyRef.current;
     if (!online || !lobby || !served) return;
+    startedRef.current = true; // the match engine is live
     const key = `${served.cell}:${served.question.id}`;
     if (lastServed.current === key) return;
     lastServed.current = key;
     stealOpenCells.current.clear(); // a fresh question closes any prior steal window
+    stealDeadlineRef.current = null;
+    // The synced countdown's absolute end instant (host clock). Phones derive
+    // their remaining time from this + the clock offset, so all devices agree.
+    deadlineRef.current = timerSeconds > 0 ? Date.now() + timerSeconds * 1000 : null;
     const q = served.question;
     lobby
       .broadcast({
@@ -215,6 +244,8 @@ export function useOnlineHost(args: {
         letter: served.letter,
         picker: picker as PlayerTeam,
         timerSeconds,
+        deadline: deadlineRef.current ?? undefined,
+        hostNow: Date.now(),
         prompt: q.q,
         hideLetter: hideLetters,
         audio: q.audio,
@@ -239,17 +270,25 @@ export function useOnlineHost(args: {
     lobby.broadcast({ type: 'answer_revealed', answer: ans }).catch(() => {});
   }, [online, served, answerRevealed]);
 
-  // Broadcast game over once.
+  // Broadcast game results. Each finished GAME fires `game_won` (players award XP
+  // per game in a best-of-N series); the MATCH end additionally fires `game_over`
+  // (→ the players' final result screen). In a single-game match both fire.
   const sentGameOver = useRef(false);
   useEffect(() => {
     const lobby = lobbyRef.current;
     if (!online || !lobby) return;
     if (gameOver && !sentGameOver.current) {
       sentGameOver.current = true;
-      lobby.broadcast({ type: 'game_over', winner: (winner as PlayerTeam | null) ?? null }).catch(() => {});
+      deadlineRef.current = null; // stop the synced countdown on the phones
+      lobby
+        .broadcast({ type: 'game_won', winner: (winner as PlayerTeam | null) ?? null, matchOver })
+        .catch(() => {});
+      if (matchOver) {
+        lobby.broadcast({ type: 'game_over', winner: (winner as PlayerTeam | null) ?? null }).catch(() => {});
+      }
     }
     if (!gameOver) sentGameOver.current = false; // re-arm for the next game in a series
-  }, [online, gameOver, winner]);
+  }, [online, gameOver, matchOver, winner]);
 
   const broadcastAdjudicated = useCallback(
     (w: TeamId | null, cell: number) => {
@@ -267,8 +306,18 @@ export function useOnlineHost(args: {
     const s = servedRef.current;
     if (!s) return;
     stealOpenCells.current.add(s.cell);
+    const stealSeconds = Math.ceil(timerRef.current / 2);
+    stealDeadlineRef.current = stealSeconds > 0 ? Date.now() + stealSeconds * 1000 : null;
     if (!online || !lobby) return;
-    lobby.broadcast({ type: 'steal_open', cell: s.cell, stealSeconds: Math.ceil(timerRef.current / 2) }).catch(() => {});
+    lobby
+      .broadcast({
+        type: 'steal_open',
+        cell: s.cell,
+        stealSeconds,
+        deadline: stealDeadlineRef.current ?? undefined,
+        hostNow: Date.now(),
+      })
+      .catch(() => {});
   }, [online]);
 
   const submissions = served ? [...(byCell.current.get(served.cell)?.values() ?? [])] : [];

@@ -139,9 +139,21 @@ export function LobbyHost() {
       setRoster((rs) => rs.map((p) => (p.id === playerId ? { ...p, team } : p)));
       // Player respects the broadcast and re-tracks their own presence with the
       // new team (or back to the pool when team === null) — see PlayerController.
-      h.broadcast({ type: 'team_assigned', playerId, team }).catch(() => {});
+      // The team colours + names ride along so the phone updates colour AND team
+      // in one atomic event (no ordering race with a separate team_labels).
+      const ca = colorById(state.setup.colorA);
+      const cb = colorById(state.setup.colorB);
+      h.broadcast({
+        type: 'team_assigned',
+        playerId,
+        team,
+        aColor: ca.base,
+        bColor: cb.base,
+        aName: ca.name,
+        bName: cb.name,
+      }).catch(() => {});
     },
-    [players],
+    [players, state.setup.colorA, state.setup.colorB],
   );
 
   const startMatch = useCallback(() => {

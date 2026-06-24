@@ -108,9 +108,13 @@ export function Game() {
           /* fail silent — never block the celebration */
         });
       }
-      // Award XP for completing a game (signed-in user only; no-ops for guests).
-      // Once per game-over so a bo3 awards per game, not per re-render.
-      if (!awardedGameOver.current) {
+      // Award XP for winning a game (signed-in user only; no-ops for guests).
+      // Once per game-over so a best-of-N awards PER GAME, not per re-render.
+      // BUT: in Online Mode this screen is the HOST/arbiter, not a player — the
+      // host must not earn XP for hosting. Players earn XP on their own phones
+      // (PlayerController, per game). So skip the award when we're the host.
+      const hostingOnline = !!window.__lobby && window.__lobby.self.role === 'host';
+      if (!awardedGameOver.current && !hostingOnline) {
         awardedGameOver.current = true;
         awardXp(XP.WIN)
           .then((r) => {
@@ -141,10 +145,14 @@ export function Game() {
 
   // Online Mode: mirror the live match to player phones + collect their typed
   // answers. No-ops entirely in Couch Mode (no lobby channel open).
+  // The match is over when the current game's win pushes a team to gamesNeeded
+  // (the series score isn't incremented until "Continue", so add this game in).
+  const matchOver = !!game.winner && ((series[game.winner] ?? 0) + 1) >= series.gamesNeeded;
   const online = useOnlineHost({
     served: ui.served,
     answerRevealed: ui.answerRevealed,
     gameOver: ui.gameOver,
+    matchOver,
     winner: game.winner,
     hideLetters,
     teamNames: { A: teams.A.name, B: teams.B.name },

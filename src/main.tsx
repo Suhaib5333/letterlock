@@ -29,7 +29,11 @@ createRoot(document.getElementById('root')!).render(
     {isImgView ? (
       <ImgView />
     ) : isController ? (
-      <PlayerController />
+      // Wrapped in AuthProvider so a signed-in phone auto-uses its account
+      // username on join (no manual name entry).
+      <AuthProvider>
+        <PlayerController />
+      </AuthProvider>
     ) : (
       <AuthProvider>
         <StoreProvider>

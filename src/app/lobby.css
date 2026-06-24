@@ -142,6 +142,10 @@
   border: 1.5px solid var(--surface-border);
   border-radius: 16px;
   text-align: center;
+  /* min-width:0 lets the card shrink inside the lobby grid instead of forcing an
+     overflow; max-width keeps its contents within the column. */
+  min-width: 0;
+  max-width: 100%;
 }
 .lobby-code-label {
   font-size: 13px;
@@ -150,18 +154,26 @@
   color: color-mix(in oklab, var(--ink) 65%, transparent);
 }
 .lobby-code {
-  display: flex;
-  gap: clamp(4px, 1vw, 10px);
+  /* A 6-column grid that always spans the card width → the 6 boxes ALWAYS fit on
+     one line inside the container (they scale down on narrow screens) instead of
+     overflowing or wrapping. */
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: clamp(3px, 1vw, 8px);
+  width: 100%;
+  max-width: 360px;
   font-feature-settings: "tnum";
   font-variant-numeric: tabular-nums;
   font-weight: 800;
 }
 .lobby-code-ch {
-  display: inline-grid;
+  display: grid;
   place-items: center;
-  width: clamp(34px, 6.5vw, 56px);
-  height: clamp(44px, 8vw, 70px);
-  font-size: clamp(28px, 5vw, 44px);
+  width: 100%;
+  aspect-ratio: 3 / 4; /* keeps the box shape as it scales to fit the column */
+  min-width: 0;
+  /* font scales with the box; cap so it never overflows the cell */
+  font-size: clamp(18px, 6.2vw, 34px);
   border-radius: 10px;
   background: var(--surface);
   border: 1.5px solid var(--accent);
@@ -177,6 +189,14 @@
   padding: 10px;
   border-radius: 12px;
   border: 1px solid var(--surface-border);
+  max-width: 100%;
+}
+/* Keep the QR image inside its card on narrow screens. */
+.lobby-qr .qr-img,
+.lobby-qr svg,
+.lobby-qr canvas {
+  max-width: 100%;
+  height: auto;
 }
 .lobby-qr-hint {
   font-size: 12px;
@@ -380,6 +400,42 @@
 }
 .controller[data-team="A"] .controller-head { background: var(--team-a); }
 .controller[data-team="B"] .controller-head { background: var(--team-b); }
+/* Leave button — always reachable so a player can exit any time. */
+.controller-leave {
+  flex: none;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: white;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.controller-leave:hover { background: rgba(0, 0, 0, 0.34); }
+.controller-leave-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 24px;
+}
+.controller-leave-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  padding: 22px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-3);
+}
+.controller-leave-card p { margin: 0 0 16px; font-size: 1.05rem; }
+.controller-leave-actions { display: flex; gap: 10px; justify-content: center; }
+.controller-done .btn { margin-top: 18px; }
 .controller-room strong {
   margin-left: 6px;
   letter-spacing: 0.2em;
