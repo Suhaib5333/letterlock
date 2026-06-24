@@ -925,6 +925,59 @@ this TS core is a 1:1 spec to port, and the same `game_core` could back a Dart s
 - ➕ Dev seam: `?__leveluptest=level&lvl=N` / `=prestige&prestige=P` previews any tier's
   level-up celebration art (used to capture all 7 tiers + prestige). Inert in normal use.
 
+## II.3m Round-12 — online sync hardening, account resume, anti-abuse, security gating (2026-06-24)
+
+A large multi-request batch (all deployed + CI-green on `letterlock.raltech.dev`):
+
+- ✅ **Account-linked resume** (`0010_saved_games.sql`, `state/savedGame.ts`): the
+  in-progress match is saved to the signed-in account (Supabase, RLS, one row/user)
+  so you can leave and resume on any device; guests keep a local save. Per-identity
+  local cache key prevents one user's game leaking to another on a shared browser.
+- ✅ **Username change policy** (Round-11, `0009`): once-a-month limit + reserved
+  names + case-insensitive uniqueness via `change_username` RPC + trigger backstop.
+- ✅ **OTP anti-spam** (`0011_otp_rate_limit.sql`): ≤3 sends per email AND per IP per
+  5 min, enforced in the send-otp edge function via a service-role-only RPC.
+- ✅ **Friends notifications on Home**: pending-request badge on the Friends button
+  (surfaces requests that arrived while away); modal opens on Requests when pending.
+- ✅ **Leaderboard fullscreen on every device** (centered max-width column on desktop).
+- ✅ **Mode-select**: the 3 "Pick how you play" cards are identical size on all
+  devices (equal-height grid + uniform copy, no clipped text).
+- ✅ **Room code fits its container**: rendered as a 6-col grid that always spans the
+  card width (no overflow / no wrap); QR capped to its card; lobby fits one phone
+  screen with no internal scroll (shrunk QR + tightened paddings).
+- ✅ **Online sync hardening** (`lib/lobby.ts`, `useOnlineHost.ts`, `PlayerController.tsx`,
+  `LobbyHost.tsx`) — live-verified two-device:
+  - **Start game auto-launches players**: host re-broadcasts `match_started` on
+    (re)connect and any live game event lifts a phone out of the lobby.
+  - **Synced timers**: host broadcasts an absolute deadline + its clock reading;
+    phones measure the clock offset and count down to the same instant; reconnect
+    resumes mid-countdown (stored deadline re-sent) instead of restarting full.
+  - **Team-colour reassignment**: colours + names ride atomically with
+    `team_assigned`, and presence no longer reverts an explicit assignment (fixes
+    the stale/flicker colour on rapid blue↔amber changes).
+  - **Auto username on join**: a signed-in phone uses its account username
+    (controller wrapped in AuthProvider); guests still type one.
+  - **Player exit anytime + Back-to-home** on game over.
+  - **Host is not a player**: host screen earns no XP in online mode; players earn
+    XP on their own phones, **per game** (`game_won`) in a best-of-N (`game_over` =
+    match end → result screen).
+- ✅ **Security audit + URL-tamper hardening** (`lib/devSeams.ts`): a full audit
+  confirmed all privileged paths are server-enforced — every `admin_*` RPC checks
+  `is_admin()`; `award_xp` clamps [0,200] + derives `auth.uid()`; `submit_score`
+  derives username + bounds values; RLS on profiles/leaderboard/friendships/
+  saved_games/question_progress/custom_packs blocks cross-user access; `?view=controller`
+  only ever renders the controller; a malicious player can't forge host events that
+  trigger server actions (scores/XP are submitted by each player's own RPC). The
+  one client-side gap — dev/cheat seams usable via URL — is closed: `__unlockall`,
+  `__devscreens`, `__leveluptest`, `__onlinepanel`, `__crashtest` now work ONLY on
+  local dev/test hosts and are inert in production. (Deferred, low-risk: a client can
+  still POST a leaderboard score for a not-yet-unlocked category — harmless since the
+  board is social and XP is awarded by game logic, not by submission. Add a
+  server-side eligibility check in `submit_score` only if a gate ever depends on it.)
+- ✅ Re-verified each push: typecheck + build clean, **100 Playwright e2e**, **noscroll
+  ALL CLEAR** (17 devices), CI green, live bundle matches; online cluster live-verified
+  with a real two-device (host + player) session.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily
