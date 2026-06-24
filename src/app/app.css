@@ -3501,17 +3501,35 @@ html[data-motion='reduced'] .levelup-card { animation: none; }
 .lb-pager-info { font-size: var(--t-sm); color: var(--text-dim); font-variant-numeric: tabular-nums; min-width: 96px; text-align: center; }
 .lb-rank-rows .lb-rank { color: var(--accent); }
 
-/* Fullscreen leaderboard on phones — fills the viewport (ignores scrim padding). */
-@media (max-width: 600px) {
-  .modal.leaderboard {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    max-width: 100%;
-    height: 100svh;
-    max-height: 100svh;
-    border-radius: 0;
-  }
+/* Fullscreen leaderboard takeover on EVERY screen size — fills the viewport and
+   ignores the scrim's centering/padding. On wide screens the surface is
+   full-bleed but the content sits in a centered, readable column (rows don't
+   stretch to 1440px+). */
+.modal.leaderboard {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100svh;
+  max-height: 100svh;
+  border-radius: 0;
+  padding: clamp(16px, 2.5vw, 28px) clamp(16px, 4vw, 40px) clamp(20px, 3vw, 32px);
+}
+/* Center each region in a max-width column so the fullscreen surface stays
+   legible on desktop while filling the screen edge-to-edge. */
+.modal.leaderboard > .lb-head,
+.modal.leaderboard > .lb-tabs,
+.modal.leaderboard > .lb-filter,
+.modal.leaderboard > .lb-list,
+.modal.leaderboard > .lb-pager {
+  width: 100%;
+  max-width: 760px;
+  margin-inline: auto;
+}
+/* The list is the flexible, scrolling region within the fullscreen column. */
+.modal.leaderboard > .lb-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
 }
 
 /* ── Locked category cards (progression gating in the category menu) ── */

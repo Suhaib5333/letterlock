@@ -63,8 +63,7 @@ export function ModeSelect() {
           <span className="mode-card-name">Couch Mode</span>
           <span className="mode-card-tag">In-person · one screen</span>
           <span className="mode-card-desc">
-            Same room, one device. Host reads questions aloud and taps the result.
-            The classic Letterlock party setup.
+            One shared screen. The host reads each question aloud and taps who got it.
           </span>
         </motion.button>
 
@@ -92,8 +91,7 @@ export function ModeSelect() {
             {online ? 'Phones as controllers · room code' : 'Needs Supabase — set VITE_SUPABASE_URL'}
           </span>
           <span className="mode-card-desc">
-            Host a room from this device. Everyone joins from their phone using a
-            6-letter code (or QR). Type your answer — the host sees them all and picks the winner.
+            Players join from their phones with a code or QR.
           </span>
         </motion.button>
 
@@ -118,7 +116,7 @@ export function ModeSelect() {
             {online ? 'I have a 6-letter code' : 'Needs Supabase'}
           </span>
           <span className="mode-card-desc">
-            Got the code from the host? Enter it here to join the lobby on this device.
+            Got a 6-letter code from the host? Enter it to join the lobby on this device.
           </span>
         </motion.button>
       </div>

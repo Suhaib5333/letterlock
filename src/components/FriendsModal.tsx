@@ -5,6 +5,7 @@ import {
   findUser,
   listFriends,
   notifyUser,
+  refreshPendingRequests,
   removeFriend,
   respondFriendRequest,
   sendFriendRequest,
@@ -22,8 +23,16 @@ import { RankBadge } from './RankBadge';
  * presence set. If the host has a live room (window.__lobby), each online friend
  * gets an "Invite" that pushes the room code to their notification inbox.
  */
-export function FriendsModal({ myName, onClose }: { myName: string; onClose: () => void }) {
-  const [tab, setTab] = useState<'friends' | 'requests' | 'add'>('friends');
+export function FriendsModal({
+  myName,
+  initialTab = 'friends',
+  onClose,
+}: {
+  myName: string;
+  initialTab?: 'friends' | 'requests' | 'add';
+  onClose: () => void;
+}) {
+  const [tab, setTab] = useState<'friends' | 'requests' | 'add'>(initialTab);
   const [rows, setRows] = useState<FriendRow[] | null>(null);
   const [online, setOnline] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState('');
@@ -35,6 +44,8 @@ export function FriendsModal({ myName, onClose }: { myName: string; onClose: () 
 
   const refresh = useCallback(async () => {
     setRows(await listFriends());
+    // Keep the Home "Friends" badge in sync (e.g. after accept/decline/send).
+    void refreshPendingRequests();
   }, []);
   useEffect(() => {
     void refresh();

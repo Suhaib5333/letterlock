@@ -172,6 +172,48 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Enter a valid email.' }, 400);
   }
 
+  // Anti-spam rate limit (migration 0011): max 3 sends per email AND per IP per
+  // 5 minutes. Checked BEFORE we create a user / mint a link / hit Resend, so a
+  // typo'd email or a resend-spammer can't burn quota. Enforced server-side via
+  // the service-role-only otp_rate_check RPC.
+  const clientIp =
+    (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() ||
+    req.headers.get('x-real-ip') ||
+    '';
+  try {
+    const rlResp = await fetch(`${supabaseUrl}/rest/v1/rpc/otp_rate_check`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${serviceRole}`,
+        apikey: serviceRole,
+      },
+      body: JSON.stringify({ p_email: email, p_ip: clientIp }),
+    });
+    if (rlResp.ok) {
+      const rows = (await rlResp.json()) as { allowed: boolean; retry_after: number }[];
+      const verdict = Array.isArray(rows) ? rows[0] : (rows as unknown as { allowed: boolean; retry_after: number });
+      if (verdict && verdict.allowed === false) {
+        const secs = Math.max(1, verdict.retry_after | 0);
+        const mins = Math.ceil(secs / 60);
+        return jsonResponse(
+          {
+            ok: false,
+            error: `Too many code requests. Try again in about ${mins} minute${mins === 1 ? '' : 's'}.`,
+            retry_after: secs,
+          },
+          429,
+        );
+      }
+    } else {
+      // RPC missing/not deployed → fail open (don't block real sign-ins) but log.
+      console.error('[send-otp] otp_rate_check failed', rlResp.status, await rlResp.text().catch(() => ''));
+    }
+  } catch (e) {
+    console.error('[send-otp] otp_rate_check error', e);
+    // Fail open on a transient error.
+  }
+
   const origin = req.headers.get('origin') ?? 'https://letterlock.raltech.dev';
 
   // 0. Ensure the user exists. generate_link(type:'magiclink') only mints a code

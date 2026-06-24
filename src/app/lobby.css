@@ -21,10 +21,13 @@
      START instead of clipping the top card off-screen (it became unclickable on
      short phones). */
   align-content: safe center;
-  /* `start`, NOT `stretch`: stretch forces every card to the row-track height and
-     a longer description then spills *past* the border. `start` lets each card
-     grow to fit its own content so no text is ever clipped. */
-  align-items: start;
+  /* All three boxes are the SAME size on every device. Rows size to content
+     (`max-content`, so cards never balloon to fill the viewport on desktop) and
+     `stretch` equalises the cards within a row (the multi-column case). For the
+     single-column phone case, the shared `min-height` floor on .mode-card makes
+     the stacked cards equal too (uniform short copy fits under the floor). */
+  grid-auto-rows: max-content;
+  align-items: stretch;
   min-height: 0;
   overflow-y: auto;
   padding: var(--s-2);
@@ -48,7 +51,9 @@
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
   color: inherit;
   font: inherit;
-  min-height: 180px;
+  /* Shared height floor so the three stacked cards are identical on phones; the
+     uniform short copy fits under it, so nothing is clipped. */
+  min-height: 200px;
   position: relative;
   /* overflow VISIBLE so the description is never clipped on portrait phones; the
      ::before gradient keeps the rounded corners via its own border-radius. */
@@ -821,7 +826,9 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
    half-card scroll clipping. align-items:start already lets them fit content. */
 @media (orientation: portrait) and (max-width: 460px) {
   .mode-card {
-    min-height: 0;
+    /* Shared floor so the stacked cards are pixel-equal on phones (kept above the
+       natural content height of the tightened copy). */
+    min-height: 196px;
     padding: 14px 16px;
     gap: 4px;
   }
@@ -930,4 +937,26 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
 .notif-close {
   flex: none; background: transparent; border: none; color: var(--text-dim);
   cursor: pointer; font-size: 1rem; padding: 2px 4px;
+}
+
+/* Count badge on the Home "Friends" chip — surfaces pending friend requests on
+   the main screen (incl. when the chip collapses to just its icon on phones). */
+.has-badge { position: relative; overflow: visible; }
+.notif-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--amber, #e69f00);
+  color: #1a1200;
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--surface, #11151f);
+  pointer-events: none;
 }

@@ -81,6 +81,30 @@ export function isOnline(id: string): boolean {
   return onlineIds.has(id);
 }
 
+// ── Pending incoming friend-request count ───────────────────────────────────
+// Surfaced as a badge on the Home "Friends" button so requests that arrived
+// while you were away are visible on the MAIN screen, not just inside the modal.
+let pendingCount = 0;
+const pendingSubs = new Set<(n: number) => void>();
+
+/** Subscribe to the count of incoming friend requests awaiting your response. */
+export function subscribePendingRequests(cb: (n: number) => void): () => void {
+  pendingSubs.add(cb);
+  cb(pendingCount);
+  return () => pendingSubs.delete(cb);
+}
+
+/** Re-fetch the pending-incoming count from the friends list and notify subs. */
+export async function refreshPendingRequests(): Promise<void> {
+  if (!supabase) {
+    pendingCount = 0;
+  } else {
+    const list = await listFriends();
+    pendingCount = list.filter((f) => f.status === 'pending' && f.incoming).length;
+  }
+  for (const cb of pendingSubs) cb(pendingCount);
+}
+
 /** Start presence + the per-user notification channel for the signed-in user. */
 export async function startSocial(userId: string, username: string, onNotify: (n: Notification) => void): Promise<void> {
   if (!supabase) return;
@@ -106,7 +130,12 @@ export async function startSocial(userId: string, username: string, onNotify: (n
   if (!notifyCh) {
     notifyCh = supabase.channel(`user:${userId}`, { config: { broadcast: { self: false } } });
     notifyCh.on('broadcast', { event: 'notify' }, (msg) => {
-      notifyCb?.(msg.payload as Notification);
+      const n = msg.payload as Notification;
+      notifyCb?.(n);
+      // Keep the Home badge in sync as requests arrive / are accepted live.
+      if (n.type === 'friend_request' || n.type === 'friend_accepted') {
+        void refreshPendingRequests();
+      }
     });
     await new Promise<void>((resolve) => {
       notifyCh!.subscribe((status) => {
@@ -114,6 +143,8 @@ export async function startSocial(userId: string, username: string, onNotify: (n
       });
     });
   }
+  // Seed the pending-request badge with whatever arrived while we were away.
+  void refreshPendingRequests();
 }
 
 /** Tear down presence + notifications (on sign-out). */
@@ -129,6 +160,8 @@ export async function stopSocial(): Promise<void> {
   }
   onlineIds = new Set();
   for (const cb of onlineSubs) cb(onlineIds);
+  pendingCount = 0;
+  for (const cb of pendingSubs) cb(0);
 }
 
 /** Send a notification to another user's inbox channel (fire-and-forget). */

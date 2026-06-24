@@ -12,6 +12,7 @@ import { PackEditor } from '../components/PackEditor';
 import { RankBar } from '../components/RankBadge';
 import { SettingsModal } from '../components/SettingsModal';
 import { useAuth } from '../lib/auth';
+import { subscribePendingRequests } from '../lib/friends';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { play } from '../services/audio';
 import { remaining, subscribeProgress } from '../state/progress';
@@ -41,6 +42,10 @@ export function Home() {
   // or a guest reset) so the "N unique left" badge stays accurate.
   const [, setProgressTick] = useState(0);
   useEffect(() => subscribeProgress(() => setProgressTick((t) => t + 1)), []);
+  // Incoming friend-request count → a badge on the Friends button so requests
+  // that arrived while away are visible right on the home screen.
+  const [pendingReq, setPendingReq] = useState(0);
+  useEffect(() => subscribePendingRequests(setPendingReq), []);
   const selectedPack = packById(state.setup.packId);
   const total = totalQuestions(selectedPack);
   const left = remaining(selectedPack.id, total);
@@ -66,13 +71,18 @@ export function Home() {
               </button>
               {(profile || devScreens) && (
                 <button
-                  className="btn btn-ghost"
+                  className="btn btn-ghost has-badge"
                   data-chip-label
-                  aria-label="Friends"
+                  aria-label={pendingReq > 0 ? `Friends — ${pendingReq} pending request${pendingReq === 1 ? '' : 's'}` : 'Friends'}
                   data-testid="open-friends"
                   onClick={() => setShowFriends(true)}
                 >
                   👥<span className="chip-text"> Friends</span>
+                  {pendingReq > 0 && (
+                    <span className="notif-badge" data-testid="friends-badge" aria-hidden="true">
+                      {pendingReq > 9 ? '9+' : pendingReq}
+                    </span>
+                  )}
                 </button>
               )}
               {(profile || devScreens) && (
@@ -257,7 +267,11 @@ export function Home() {
       {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
       {showPackEditor && <PackEditor onClose={() => setShowPackEditor(false)} />}
       {showFriends && (
-        <FriendsModal myName={profile?.username ?? 'player'} onClose={() => setShowFriends(false)} />
+        <FriendsModal
+          myName={profile?.username ?? 'player'}
+          initialTab={pendingReq > 0 ? 'requests' : 'friends'}
+          onClose={() => setShowFriends(false)}
+        />
       )}
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       {showCategories && (

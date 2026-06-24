@@ -78,6 +78,24 @@ test('a team can win by connecting its edges and the result overlay fires', asyn
   await expect(page.getByTestId('victory-score')).toBeVisible();
 });
 
+test('a guest can resume an in-progress game after leaving (reload = leave & come back)', async ({ page }) => {
+  await startMatch(page, { size: 5, mode: 'single' });
+  // Make the saved state distinct: claim two hexes for A.
+  await claimFor(page, 11, 'A');
+  await claimFor(page, 12, 'A');
+  await expect(page.locator('.ll-hex[data-cell="12"][data-owner="A"]')).toHaveCount(1);
+  // Leave & come back: a full reload drops in-memory state → app reboots to Home.
+  await page.reload();
+  await expect(page.getByTestId('play-button')).toBeVisible();
+  const resume = page.getByTestId('resume-game');
+  await expect(resume).toBeVisible();
+  await resume.click();
+  // The exact prior board is restored (both claims survive the round-trip).
+  await expect(page.getByTestId('game-screen')).toBeVisible();
+  await expect(page.locator('.ll-hex[data-cell="11"][data-owner="A"]')).toHaveCount(1);
+  await expect(page.locator('.ll-hex[data-cell="12"][data-owner="A"]')).toHaveCount(1);
+});
+
 test('undo reverses the last claim', async ({ page }) => {
   await startMatch(page);
   await claimFor(page, 0, 'A');

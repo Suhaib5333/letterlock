@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { configureProgress } from '../state/progress';
+import { configureSavedGame } from '../state/savedGame';
 import { supabase, type Profile } from './supabase';
 
 interface AuthState {
@@ -69,6 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (loading) return;
     void configureProgress(user?.id ?? null);
+    // Point the Resume store at this identity too: signed-in users pull their
+    // account's saved game (resumes across devices/sessions); guests use the
+    // local save. See state/savedGame.ts.
+    void configureSavedGame(user?.id ?? null);
   }, [user?.id, loading]);
 
   // Load the profile row whenever the user changes — drives the username

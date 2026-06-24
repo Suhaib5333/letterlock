@@ -5,6 +5,7 @@ import {
   useMemo,
   useReducer,
   useRef,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react';
 import { canPieSwap, replay, undoLast } from '../core/engine';
@@ -15,6 +16,13 @@ import { mulberry32 } from '../core/rng';
 import { newMatch, startGameEvent, type NewMatchOptions } from '../core/match';
 import { DEFAULT_PACK_ID, packById } from '../content';
 import { markServed, usedSet } from './progress';
+import {
+  clearSave,
+  getSavedGame,
+  hasSavedGame as hasSavedGameModule,
+  saveGame,
+  subscribeSavedGame,
+} from './savedGame';
 import { colorById } from './palette';
 import {
   DEFAULT_SETTINGS,
@@ -24,7 +32,6 @@ import {
   type UiState,
 } from './types';
 
-const PERSIST_KEY = 'letterlock.save.v1';
 const SETTINGS_KEY = 'letterlock.settings.v1';
 
 interface Series {
@@ -492,30 +499,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [state.settings]);
 
-  // Persist the live match for save/resume (plan §6.2).
+  // Persist the live match for save/resume (plan §6.2). For signed-in users this
+  // also write-throughs to their account (Supabase) so they can resume on any
+  // device; guests keep a local-only save. See state/savedGame.ts.
   useEffect(() => {
-    try {
-      if (state.opts && state.screen === 'game') {
-        localStorage.setItem(
-          PERSIST_KEY,
-          JSON.stringify({ setup: state.setup, opts: serializeOpts(state.opts), series: state.series, log: state.log }),
-        );
-      } else if (state.screen === 'home') {
-        // keep the save until a new match starts; nothing to do
-      }
-    } catch {
-      /* ignore */
+    if (state.opts && state.screen === 'game') {
+      saveGame({ setup: state.setup, opts: serializeOpts(state.opts), series: state.series, log: state.log });
     }
   }, [state.opts, state.log, state.series, state.screen, state.setup]);
+
+  // hasSavedGame is reactive: the savedGame module notifies after async remote
+  // hydration on sign-in, so the Resume button appears once the account's save
+  // loads — not only on the next render.
+  const hasSavedGame = useSyncExternalStore(
+    subscribeSavedGame,
+    hasSavedGameModule,
+    () => false,
+  );
 
   const value = useMemo<StoreApi>(
     () => ({
       state,
       dispatch,
       canPieSwap: canPieSwap(state.game),
-      hasSavedGame: typeof localStorage !== 'undefined' && !!localStorage.getItem(PERSIST_KEY),
+      hasSavedGame,
     }),
-    [state],
+    [state, hasSavedGame],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
@@ -527,23 +536,22 @@ function serializeOpts(opts: NewMatchOptions) {
 
 export function resumeSavedGame(dispatch: React.Dispatch<Action>): boolean {
   try {
-    const raw = localStorage.getItem(PERSIST_KEY);
-    if (!raw) return false;
-    const data = JSON.parse(raw);
+    const data = getSavedGame();
+    if (!data) return false;
     const pack = packById(data.opts.packId ?? DEFAULT_PACK_ID);
-    const opts: NewMatchOptions = { ...data.opts, pack };
-    const log: GameLog = data.log;
+    const opts: NewMatchOptions = { ...(data.opts as object), pack } as NewMatchOptions;
+    const log = data.log as GameLog;
     const game = replay(log);
     dispatch({
       type: 'HYDRATE',
       payload: {
         screen: 'game',
         opts,
-        series: data.series,
+        series: data.series as Series,
         log,
         game,
         ui: { ...EMPTY_UI },
-        ...(data.setup ? { setup: data.setup } : {}),
+        ...(data.setup ? { setup: data.setup as SetupForm } : {}),
       },
     });
     return true;
@@ -553,11 +561,7 @@ export function resumeSavedGame(dispatch: React.Dispatch<Action>): boolean {
 }
 
 export function clearSavedGame() {
-  try {
-    localStorage.removeItem(PERSIST_KEY);
-  } catch {
-    /* ignore */
-  }
+  clearSave();
 }
 
 export function useStore(): StoreApi {

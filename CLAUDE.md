@@ -488,6 +488,16 @@ Empty board • full board • single bridging move • both edges touched but n
 
 ---
 
+## 📊 Working convention: always report a status table
+
+> **Show the FULL status board every single time the user gives a command or
+> task — no exceptions** — and also constantly/regularly as work progresses, not
+> just at the end. Render the COMPLETE current task list (every active/pending
+> item, not a subset) as a Markdown table with: an emoji status (✅ done / 🔄
+> in-progress / ⏳ pending / 🚫 blocked), the task, and a **% completion**. Keep it
+> tight. The user must always see where everything stands. (Recorded twice at the
+> user's explicit request — this is mandatory in every session.)
+
 ## 🧩 Repo conventions for the new project (set these up day one)
 - Mirror this file as `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`. Keep it a **living document**.
 - Commit messages: **no AI attribution** (Suhaib-authored only).
