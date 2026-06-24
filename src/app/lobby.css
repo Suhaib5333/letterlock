@@ -670,6 +670,21 @@
   text-align: center;
 }
 
+/* ── Narrow / portrait phones: shrink the QR + tighten the code card so the code
+   AND the roster fit on one screen with little or no internal scroll. ── */
+@media (max-width: 600px) {
+  .lobby { padding: var(--s-2); gap: var(--s-2); }
+  .lobby-body { gap: var(--s-2); }
+  .lobby-code-card { padding: var(--s-2); gap: 8px; }
+  .lobby-qr { padding: 8px; }
+  .lobby-qr .qr-img {
+    width: clamp(116px, 33vw, 160px) !important;
+    height: auto !important;
+  }
+  .lobby-qr-hint { font-size: 11px; }
+  .lobby-copy { padding: 4px 10px; }
+}
+
 /* ── Landscape phones (short height): the host lobby must fit with no clipping.
    Keep code + QR + roster side-by-side and shrink the big elements so the
    whole thing fits ~360px tall without scrolling off the edges. ── */
