@@ -943,3 +943,54 @@ test('category: can switch tier of an already-selected category (hard → medium
   await expect(page.getByTestId('pack-flags-medium')).toBeVisible();
   await expect(page.getByTestId('pack-flags-hard')).toHaveCount(0);
 });
+
+// Helper: host a room, return { host, player, code, ctxs } with one player joined
+// onto a given team and the match started + a question served.
+async function hostWithPlayerInQuestion(browser: import('@playwright/test').Browser, teamBtn: 'Blue' | 'Amber') {
+  const hostCtx = await browser.newContext();
+  const host = await hostCtx.newPage();
+  await host.goto('/');
+  await host.getByTestId('play-button').click();
+  await host.getByTestId('mode-online').click();
+  await host.getByTestId('start-match').click();
+  await expect(host.getByTestId('lobby-start')).toBeEnabled({ timeout: 20000 });
+  const code = (await host.getByTestId('lobby-code').innerText()).replace(/[^A-Z0-9]/gi, '');
+  const playerCtx = await browser.newContext();
+  const player = await playerCtx.newPage();
+  await player.goto(`/?room=${code}&view=controller&name=Tester`);
+  await expect(player.getByTestId('controller-lobby')).toBeVisible({ timeout: 20000 });
+  await expect(host.getByTestId('lobby-count')).toContainText('1 connected', { timeout: 20000 });
+  await host.locator('.lobby-unassigned button', { hasText: teamBtn }).first().click();
+  await host.getByTestId('lobby-start').click();
+  await expect(host.getByTestId('game-screen')).toBeVisible();
+  await host.locator('.ll-hex.claimable').first().click();
+  await expect(host.getByTestId('question-card')).toBeVisible();
+  await expect(player.getByTestId('controller-question')).toBeVisible({ timeout: 20000 });
+  return { host, player, code, hostCtx, playerCtx };
+}
+
+test('online: a NON-picking team can answer (both teams play)', async ({ browser }) => {
+  test.setTimeout(60000);
+  // Team A picks first; put the player on Amber (Team B). They must still be able
+  // to answer (no picker-first lockout).
+  const { player, hostCtx, playerCtx } = await hostWithPlayerInQuestion(browser, 'Amber');
+  await expect(player.getByTestId('controller-input')).toBeVisible({ timeout: 10000 });
+  await expect(player.getByTestId('controller-submit')).toBeVisible();
+  await playerCtx.close();
+  await hostCtx.close();
+});
+
+test('online: one answer per player — refresh mid-question stays locked', async ({ browser }) => {
+  test.setTimeout(60000);
+  const { player, code, hostCtx, playerCtx } = await hostWithPlayerInQuestion(browser, 'Blue');
+  await player.getByTestId('controller-input').fill('Zzwrong');
+  await player.getByTestId('controller-submit').click();
+  await expect(player.getByTestId('controller-submitted')).toBeVisible({ timeout: 10000 });
+  // Refresh (swipe-out / reconnect): the SAME question must come back LOCKED — no
+  // input, the "answer sent" state — so the player can't submit twice.
+  await player.goto(`/?room=${code}&view=controller&name=Tester`);
+  await expect(player.getByTestId('controller-submitted')).toBeVisible({ timeout: 20000 });
+  await expect(player.getByTestId('controller-input')).toHaveCount(0);
+  await playerCtx.close();
+  await hostCtx.close();
+});

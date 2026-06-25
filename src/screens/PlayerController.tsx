@@ -48,6 +48,10 @@ interface ControllerSave {
   name: string;
   room: string;
   team?: PlayerTeam | null;
+  // The board cell this player has ALREADY answered. Persisted so a refresh /
+  // reconnect during the same question shows a locked "answer sent" state rather
+  // than letting them submit a second answer. Cleared when a new cell is served.
+  answeredCell?: number | null;
 }
 
 function loadSave(room: string): ControllerSave | null {
@@ -126,8 +130,6 @@ export function PlayerController() {
   const [status, setStatus] = useState<'connecting' | 'open' | 'error'>('connecting');
   const [error, setError] = useState<string | null>(null);
   const [served, setServed] = useState<ServedPrompt | null>(null);
-  const [pickerTeam, setPickerTeam] = useState<PlayerTeam | null>(null);
-  const [stealOpen, setStealOpen] = useState(false);
   const [teammateAnswered, setTeammateAnswered] = useState(false);
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -153,6 +155,9 @@ export function PlayerController() {
   const servedRef = useRef<ServedPrompt | null>(served);
   const nameRef = useRef(name);
   const sawHostRef = useRef(false);
+  // The cell this player has already answered (one answer per question). Seeded
+  // from the saved session so a refresh mid-question stays locked.
+  const answeredCellRef = useRef<number | null>(restored?.answeredCell ?? null);
   useEffect(() => {
     teamRef.current = team;
   }, [team]);
@@ -194,7 +199,7 @@ export function PlayerController() {
       setTeam(savedTeam);
       teamRef.current = savedTeam;
     }
-    persistSave({ playerId, name: displayName, room, team: savedTeam });
+    persistSave({ playerId, name: displayName, room, team: savedTeam, answeredCell: answeredCellRef.current });
 
     let cancelled = false;
     let notFoundTimer: ReturnType<typeof setTimeout> | undefined;
@@ -221,7 +226,7 @@ export function PlayerController() {
             if (me && me.team && teamRef.current === null) {
               setTeam(me.team);
               teamRef.current = me.team;
-              persistSave({ playerId, name: displayName, room, team: me.team });
+              persistSave({ playerId, name: displayName, room, team: me.team, answeredCell: answeredCellRef.current });
             }
           },
         });
@@ -299,7 +304,7 @@ export function PlayerController() {
           teamRef.current = event.team;
           // Persist the team so a refresh / reconnect restores it — otherwise the
           // player would come back unassigned and be unable to answer.
-          persistSave({ playerId: myId, name: nameRef.current, room, team: event.team });
+          persistSave({ playerId: myId, name: nameRef.current, room, team: event.team, answeredCell: answeredCellRef.current });
           // Re-track our own presence with the new team (or null = back to pool).
           const h = handleRef.current;
           if (h) h.channel.track({ ...h.self, team: event.team }).catch(() => {});
@@ -331,18 +336,24 @@ export function PlayerController() {
           image: event.image,
           youtube: event.youtube,
         });
-        setPickerTeam(event.picker ?? null);
-        setStealOpen(false);
         setTeammateAnswered(false);
         setAnswer('');
         setFeedback(null);
         setWinner(null);
-        setPhase('question');
         setTimerState(buildTimer(event.deadline, event.hostNow, event.timerSeconds));
+        // One answer per question: if this is the SAME cell we already answered
+        // (a reconnect / host re-broadcast), stay locked on "answer sent" instead
+        // of letting the player submit again. A NEW cell clears the lock.
+        if (answeredCellRef.current === event.cell) {
+          setPhase('submitted');
+        } else {
+          answeredCellRef.current = null;
+          setPhase('question');
+        }
         break;
       case 'steal_open':
-        // The picking team's time is up — the other team may now answer.
-        setStealOpen(true);
+        // Legacy steal event — in the both-teams-answer model there's no separate
+        // steal phase; just follow any timer the host sends so phones stay synced.
         setTimerState(buildTimer(event.deadline, event.hostNow, event.stealSeconds));
         break;
       case 'answer_submitted':
@@ -417,6 +428,14 @@ export function PlayerController() {
     const s = servedRef.current;
     const t = teamRef.current;
     if (!h || !s || !t || !answer.trim()) return; // must be on a team to answer
+    // One answer per question — ignore a second submit for the same cell (e.g.
+    // a double-tap or a refresh-and-resubmit attempt).
+    if (answeredCellRef.current === s.cell) {
+      setPhase('submitted');
+      return;
+    }
+    answeredCellRef.current = s.cell;
+    persistSave({ playerId: h.self.id, name, room, team: t, answeredCell: s.cell });
     h.broadcast({
       type: 'answer_submitted',
       playerId: h.self.id,
@@ -426,7 +445,7 @@ export function PlayerController() {
       cell: s.cell,
     }).catch(() => {});
     setPhase('submitted');
-  }, [answer, name]);
+  }, [answer, name, room]);
 
   const join = useCallback(() => {
     const n = nameDraft.trim().slice(0, 20);
@@ -448,13 +467,11 @@ export function PlayerController() {
   const [confirmLeave, setConfirmLeave] = useState(false);
 
   const teamLabel = team === 'A' ? labels.A : team === 'B' ? labels.B : 'Unassigned';
-  // Answer-gating: only the picking team answers first; the other team waits for
-  // the steal window; and only the first player from a team may answer.
-  const isPicker = team !== null && pickerTeam !== null && team === pickerTeam;
-  const lockReason: null | 'teammate' | 'waiting-picker' =
-    teammateAnswered ? 'teammate' : !isPicker && !stealOpen && pickerTeam !== null ? 'waiting-picker' : null;
+  // Answer-gating: BOTH teams answer the same question (no picker-first / steal
+  // lockout). The only lock is one answer per team — once a teammate has answered
+  // for your team, the rest of the team is locked out.
+  const lockReason: null | 'teammate' = teammateAnswered ? 'teammate' : null;
   const canAnswerNow = !!team && lockReason === null;
-  const pickerLabel = pickerTeam === 'A' ? labels.A : pickerTeam === 'B' ? labels.B : 'the other team';
   const remaining = timerState
     ? Math.max(0, (timerState.deadline - (now + timerState.offset)) / 1000)
     : null;
@@ -633,12 +650,8 @@ export function PlayerController() {
             {!team
               ? 'Not on a team'
               : canAnswerNow
-                ? stealOpen && !isPicker
-                  ? '⚡ STEAL — answer now!'
-                  : '✅ Your turn — type your answer!'
-                : lockReason === 'teammate'
-                  ? '🔒 Teammate is answering'
-                  : `⏳ ${pickerLabel} answers first`}
+                ? '✅ Answer now — both teams play!'
+                : '🔒 Teammate is answering for your team'}
           </div>
           {remaining !== null && (
             <div className={`controller-timer ${remaining <= 5 ? 'urgent' : ''}`} data-testid="controller-timer">
@@ -671,7 +684,7 @@ export function PlayerController() {
             // resort — on normal sizes everything fits with no scroll at all.
             <div className="controller-answer-bar">
               <label className="controller-answer">
-                <span>Your answer{stealOpen && !isPicker ? ' (steal!)' : ''}</span>
+                <span>Your answer</span>
                 <input
                   type="text"
                   data-testid="controller-input"
@@ -694,11 +707,9 @@ export function PlayerController() {
               </button>
             </div>
           ) : (
-            // Locked — the turn banner above already explains why; show a hint.
+            // Locked — a teammate already answered for the team.
             <p className="controller-locked" data-testid="controller-locked">
-              {lockReason === 'teammate'
-                ? 'Your teammate is answering for the team.'
-                : 'Eyes on the screen — be ready to steal if they miss!'}
+              Your teammate is answering for the team.
             </p>
           )}
         </div>

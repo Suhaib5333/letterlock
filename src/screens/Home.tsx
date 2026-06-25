@@ -25,6 +25,11 @@ const PACK_FLAG: Record<string, string> = { bahrain: 'bh', 'saudi-arabia': 'sa',
 
 const TOTAL_QUESTIONS = PACKS.reduce((sum, p) => sum + totalQuestions(p), 0);
 
+// Module-level so it survives Home unmount/remount (Home unmounts during a game).
+// The first-time username claim is offered AT MOST ONCE per page load — so it
+// never re-pops every time you return to the home screen after a match.
+let usernameClaimPrompted = false;
+
 export function Home() {
   const { state, dispatch, hasSavedGame } = useStore();
   const [showSettings, setShowSettings] = useState(false);
@@ -49,9 +54,13 @@ export function Home() {
   // or a guest reset) so the "N unique left" badge stays accurate.
   const [, setProgressTick] = useState(0);
   useEffect(() => subscribeProgress(() => setProgressTick((t) => t + 1)), []);
-  // Force the username claim open for a brand-new account.
+  // Force the username claim open for a brand-new account — but only ONCE per
+  // session, so returning to Home after a game never re-opens the profile dialog.
   useEffect(() => {
-    if (needsUsername) setShowAuth(true);
+    if (needsUsername && !usernameClaimPrompted) {
+      usernameClaimPrompted = true;
+      setShowAuth(true);
+    }
   }, [needsUsername]);
   // Incoming friend-request count → a badge on the Friends button so requests
   // that arrived while away are visible right on the home screen.

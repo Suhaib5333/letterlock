@@ -715,6 +715,14 @@
   color: var(--ink);
   word-break: break-word;
 }
+/* Auto-grade marker: ✓ correct / ✕ wrong, so the host can confirm at a glance. */
+.online-answer-grade { flex: none; font-weight: 800; font-size: var(--t-sm); }
+.online-answer-grade.ok { color: #34c759; }
+.online-answer-grade.no { color: var(--text-faint, #8a93a8); }
+.online-answers li[data-correct='yes'] {
+  background: color-mix(in oklab, #34c759 12%, transparent);
+  border-radius: 8px;
+}
 .controller-noteam {
   margin: 10px 0 0;
   padding: 12px;

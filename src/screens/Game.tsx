@@ -62,10 +62,6 @@ export function Game() {
   // Online: host gates the player-answers list behind a button (so the screen
   // doesn't reveal everyone's guesses until the host chooses to show them).
   const [showAnswers, setShowAnswers] = useState(false);
-  // Online auto-grade: a "{Colour} 3-2-1" countdown before auto-awarding a
-  // fuzzily-correct answer. null = no countdown running.
-  const [autoAward, setAutoAward] = useState<{ team: TeamId; name: string; n: number } | null>(null);
-  const autoAwardedKeys = useRef<Set<string>>(new Set());
 
   // Reset the dismiss flag once the swap window closes (so a new game can offer it).
   useEffect(() => {
@@ -84,7 +80,6 @@ export function Game() {
   useEffect(() => {
     setClipPlayed(false);
     setShowAnswers(false); // re-hide player answers for each new question
-    setAutoAward(null); // cancel any pending auto-award countdown
   }, [servedId]);
 
   // Hero-moment audio + haptics driven by the reducer's pulse counter.
@@ -190,40 +185,11 @@ export function Game() {
   const needsPlayToStart = !!(q && (q.audio || q.video || q.image || q.mapIso));
   const timerActive = !needsPlayToStart || clipPlayed;
 
-  // ── Online auto-grade: when a player's typed answer fuzzily matches the correct
-  // one, start a "{Colour} 3-2-1" countdown, then auto-award with confetti. Fires
-  // at most once per question (key-guarded) so a half-question undo lets the host
-  // re-judge manually instead of instantly re-awarding the same answer.
-  useEffect(() => {
-    if (!online.online || !ui.served || !q || autoAward) return;
-    const key = `${ui.served.cell}:${ui.served.question.id}`;
-    if (autoAwardedKeys.current.has(key)) return;
-    const hit = online.submissions.find((s) => isAnswerCorrect(s.answer, q.a));
-    if (hit) {
-      autoAwardedKeys.current.add(key);
-      setAutoAward({ team: hit.team, name: teams[hit.team].name, n: 3 });
-    }
-  }, [online.online, online.submissions, q, ui.served, autoAward, teams]);
-
-  // Countdown runner: 3 → 2 → 1 → award (+ confetti + broadcast).
-  useEffect(() => {
-    if (!autoAward) return;
-    if (autoAward.n <= 0) {
-      const team = autoAward.team;
-      const cell = ui.selectedCell;
-      setAutoAward(null);
-      if (cell !== null) {
-        play('claim');
-        haptic(16);
-        if (!reducedMotion) fireConfetti(team, teams[team].colorId);
-        online.broadcastAdjudicated(team, cell);
-        dispatch({ type: 'ADJUDICATE', team });
-      }
-      return;
-    }
-    const t = setTimeout(() => setAutoAward((a) => (a ? { ...a, n: a.n - 1 } : a)), 850);
-    return () => clearTimeout(t);
-  }, [autoAward, ui.selectedCell, teams, reducedMotion, online, dispatch]);
+  // Online answer flow (both teams answer → reveal → host decides): we do NOT
+  // auto-award on a fuzzy match anymore. Instead the host sees each submission
+  // marked correct/wrong (auto-grade hint, see the answers panel), reveals the
+  // answer to everyone, then taps ✅Blue / ✅Amber / ⬜No-one to award + continue.
+  // No 3-2-1 countdown, no auto-advance.
 
   return (
     <div className="game" data-testid="game-screen">
@@ -314,35 +280,6 @@ export function Game() {
             )}
           </AnimatePresence>
 
-          {/* Online auto-grade countdown: "{Colour} … 3-2-1" before auto-awarding a
-              correct answer. The host can cancel to judge manually instead. */}
-          <AnimatePresence>
-            {autoAward && (
-              <motion.div
-                className="auto-award"
-                data-testid="auto-award"
-                data-team={autoAward.team}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-              >
-                <div className="auto-award-name" style={{ color: `var(--t${autoAward.team === 'A' ? 'a' : 'b'})` }}>
-                  {autoAward.name} got it!
-                </div>
-                <div className="auto-award-count" key={autoAward.n}>{autoAward.n}</div>
-                <button
-                  className="btn btn-ghost sm"
-                  data-testid="auto-award-cancel"
-                  onClick={() => {
-                    play('tap');
-                    setAutoAward(null);
-                  }}
-                >
-                  ✕ Cancel — I'll judge
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           <div className="board-stage">
             <Board
@@ -440,17 +377,29 @@ export function Game() {
                       </button>
                     ) : (
                       <ul>
-                        {onlineSubs.map((s, i) => (
-                          <li key={s.playerId} data-testid={`online-answer-${s.playerId}`}>
-                            <span className="online-answer-rank" aria-hidden="true">
-                              {i === 0 ? '⚡' : i + 1}
-                            </span>
-                            <span className="online-answer-dot" data-team={s.team} aria-hidden="true" />
-                            <span className="online-answer-name">{s.playerName}</span>
-                            <span className="online-answer-text">{s.answer}</span>
-                            {i === 0 && <span className="online-answer-first">1st</span>}
-                          </li>
-                        ))}
+                        {onlineSubs.map((s, i) => {
+                          // Auto-grade hint: mark each answer correct/wrong vs the
+                          // real answer so the host can confirm at a glance, then
+                          // tap the winning team to award + continue.
+                          const correct = !!q && isAnswerCorrect(s.answer, q.a);
+                          return (
+                            <li
+                              key={s.playerId}
+                              data-testid={`online-answer-${s.playerId}`}
+                              data-correct={correct ? 'yes' : 'no'}
+                            >
+                              <span className="online-answer-rank" aria-hidden="true">
+                                {i === 0 ? '⚡' : i + 1}
+                              </span>
+                              <span className="online-answer-dot" data-team={s.team} aria-hidden="true" />
+                              <span className="online-answer-name">{s.playerName}</span>
+                              <span className="online-answer-text">{s.answer}</span>
+                              <span className={`online-answer-grade ${correct ? 'ok' : 'no'}`} aria-hidden="true">
+                                {correct ? '✓' : '✕'}
+                              </span>
+                            </li>
+                          );
+                        })}
                       </ul>
                     )}
                   </div>
