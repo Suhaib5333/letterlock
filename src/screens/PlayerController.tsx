@@ -98,6 +98,13 @@ export function PlayerController() {
   // The sign-in dialog (full Google / email-OTP / username flow). Offered to
   // signed-out players on the QR-join screen so they don't forfeit their XP.
   const [authOpen, setAuthOpen] = useState(false);
+  // First-time login (incl. a Google round-trip back to the controller) must
+  // always claim a username: once the profile fetch settles with no profile,
+  // force the dialog open (AuthModal shows the mandatory "Choose a username").
+  const needsUsername = !!user && !profile && !profileLoading && !authLoading;
+  useEffect(() => {
+    if (needsUsername) setAuthOpen(true);
+  }, [needsUsername]);
 
   // A saved session in THIS room means we've already joined before — a refresh,
   // browser-back, or accidental tab-close should drop the player straight back

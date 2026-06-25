@@ -926,3 +926,20 @@ test('online: host start auto-launches the player + sends the category', async (
   await playerCtx.close();
   await hostCtx.close();
 });
+
+test('category: can switch tier of an already-selected category (hard → medium)', async ({ page }) => {
+  await page.goto('/'); // beforeEach unlocks all tiers on localhost
+  await page.getByTestId('open-categories').click();
+  await expect(page.getByTestId('category-menu')).toBeVisible();
+  // Select the HARD flags tier and confirm it.
+  await page.getByTestId('pack-tier-flags-hard').click();
+  await page.locator('[data-testid="pack-flags-hard"] .cat-card-main').click();
+  await expect(page.getByTestId('category-menu')).toHaveCount(0);
+  // Reopen — the card shows the selected Hard tier.
+  await page.getByTestId('open-categories').click();
+  await expect(page.getByTestId('pack-flags-hard')).toBeVisible();
+  // Switching to Medium must actually take effect (the bug: it stayed on Hard).
+  await page.getByTestId('pack-tier-flags-medium').click();
+  await expect(page.getByTestId('pack-flags-medium')).toBeVisible();
+  await expect(page.getByTestId('pack-flags-hard')).toHaveCount(0);
+});

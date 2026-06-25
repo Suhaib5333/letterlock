@@ -188,12 +188,13 @@ export function CategoryMenu({
               </h3>
               <div className="cat-grid">
                 {packs.map(({ stem, primary, tiers }) => {
-                  // Which tier shows on this multi-tier card. Default = the
-                  // currently-selected pack if it's in this group, else the
-                  // session-pick, else the easiest tier.
+                  // Which tier shows on this multi-tier card. The user's EXPLICIT
+                  // tier-button choice wins first (so switching e.g. Hard→Medium in
+                  // an already-selected category actually takes effect); then the
+                  // currently-selected pack if it's in this group; else the easiest.
                   const selectedInGroup = tiers.find((t) => t.id === selectedPack);
                   const pickId =
-                    selectedInGroup?.id ?? tierPick[stem] ?? primary.id;
+                    tierPick[stem] ?? selectedInGroup?.id ?? primary.id;
                   const pack = tiers.find((t) => t.id === pickId) ?? primary;
                   const total = totalQuestions(pack);
                   const left = remaining(pack.id, total);

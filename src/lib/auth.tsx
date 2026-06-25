@@ -103,8 +103,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async (): Promise<{ ok: boolean; error?: string }> => {
     if (!supabase) return { ok: false, error: 'Supabase not configured.' };
+    // Preserve the current query string (e.g. ?room=ABC123&view=controller) so a
+    // player who signs in from the QR-scanned controller lands BACK on the
+    // controller/room after the OAuth round-trip — not on the home page.
     const redirectTo =
-      typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : undefined;
+      typeof window !== 'undefined'
+        ? `${window.location.origin}${window.location.pathname}${window.location.search}`
+        : undefined;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },

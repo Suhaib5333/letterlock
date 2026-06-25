@@ -34,7 +34,12 @@ export function Home() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showPackEditor, setShowPackEditor] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
-  const { profile, isAdmin } = useAuth();
+  const { user, profile, profileLoading, loading: authLoading, isAdmin } = useAuth();
+  // First-time login (Google OR email) must ALWAYS land on the username claim —
+  // even after a Google redirect lands here with the auth modal closed. Once the
+  // profile fetch settles and there's still no profile, force the dialog open
+  // (AuthModal then shows the mandatory "Choose a username" step).
+  const needsUsername = !!user && !profile && !profileLoading && !authLoading;
   // Dev/QA seam: `?__devscreens=1` surfaces the admin + pack-editor buttons even
   // when signed-out so their responsive layout can be checked. Gated to local
   // dev/test hosts (devSeams.ts) — inert in production. (Admin RPCs enforce role
@@ -44,6 +49,10 @@ export function Home() {
   // or a guest reset) so the "N unique left" badge stays accurate.
   const [, setProgressTick] = useState(0);
   useEffect(() => subscribeProgress(() => setProgressTick((t) => t + 1)), []);
+  // Force the username claim open for a brand-new account.
+  useEffect(() => {
+    if (needsUsername) setShowAuth(true);
+  }, [needsUsername]);
   // Incoming friend-request count → a badge on the Friends button so requests
   // that arrived while away are visible right on the home screen.
   const [pendingReq, setPendingReq] = useState(0);
