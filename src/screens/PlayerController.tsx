@@ -551,7 +551,7 @@ export function PlayerController() {
               data-testid="controller-join-name"
               value={nameDraft}
               maxLength={20}
-              placeholder="e.g. Suhaib"
+              placeholder="e.g. Ahmed"
               autoFocus
               onChange={(e) => setNameDraft(e.target.value)}
               onKeyDown={(e) => {

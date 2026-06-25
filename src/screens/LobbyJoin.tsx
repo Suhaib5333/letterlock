@@ -61,7 +61,7 @@ export function LobbyJoin() {
               data-testid="join-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Suhaib"
+              placeholder="e.g. Ahmed"
               maxLength={20}
               autoComplete="off"
             />
