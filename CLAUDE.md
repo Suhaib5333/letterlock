@@ -990,6 +990,36 @@ A large multi-request batch (all deployed + CI-green on `letterlock.raltech.dev`
   ALL CLEAR** (17 devices), CI green, live bundle matches; online cluster live-verified
   with a real two-device (host + player) session.
 
+## II.3n Round-13 — answer-flow redesign + connection-resilience hardening (2026-06-25)
+
+- ✅ **Online answer loop redesigned** (per the user): BOTH teams answer the same
+  question (no picker-first/steal lockout, one player per team); the host sees each
+  submission auto-graded ✓/✕ vs the real answer, reveals it to everyone, then taps
+  the winning team to award + continue. Removed the auto 3-2-1 countdown auto-award.
+- ✅ **One answer per player per question**: the answered cell is persisted, so a
+  refresh / reconnect mid-question comes back LOCKED ("answer sent") — no double
+  submit. Cleared on each `game_won` (NOT on `match_started`, which is re-broadcast
+  on every reconnect — clearing there wrongly unlocked; caught by the matrix).
+- ✅ **First-time username** always prompts (Google or email), at most once per
+  session (no re-pop after a game); **QR sign-in returns to the room** (OAuth
+  redirect preserves ?room=&view=controller); **category Hard→Medium switch** fixed;
+  example name placeholders neutralised.
+- ✅ **Connection-resilience matrix** (`tests-e2e/reconnect-matrix.spec.ts`, 7
+  two-client scenarios, all green): refresh in lobby / after start / mid-question
+  (unanswered → can answer) / after answering (stays locked) / **offline→online
+  mid-question recovers with no reload** / late-join receives the live question /
+  team assignment survives refresh.
+- ✅ **Deep-research audit (20 findings)**: fixed the real bug (answer-lock leaking
+  across series games); verified several "criticals" were non-issues (packById
+  falls back to default — no crash; only the host submits scores — no double-submit;
+  board_state auto-advances if match_started is missed). **Known limitation:** a
+  HOST refresh loses the live match (no host-side match persistence) — deferred.
+- 🧪 Playwright now retries once locally too (CI already retries twice) — the
+  two-client realtime reconnect tests are inherently timing-sensitive and can flake
+  under heavy local parallelism; a genuinely broken test still fails both attempts.
+- ✅ Re-verified: typecheck + build clean, **346 unit**, full e2e green (+ reconnect
+  matrix), **noscroll ALL CLEAR** (17 devices).
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily

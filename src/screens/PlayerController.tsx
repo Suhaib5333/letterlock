@@ -393,6 +393,10 @@ export function PlayerController() {
             .catch(() => {});
         }
         setTimerState(null);
+        // A finished game clears the per-question answer lock so the NEXT game in
+        // a series (which can re-use the same board cell) never starts locked.
+        answeredCellRef.current = null;
+        persistSave({ playerId: myId, name: nameRef.current, room, team: teamRef.current, answeredCell: null });
         if (!event.matchOver) {
           // More games to come — show a brief between-games beat, not "game over".
           setWinner(event.winner);
@@ -417,6 +421,10 @@ export function PlayerController() {
         setFeedback(null);
         setWinner(null);
         setPhase('ready');
+        // NOTE: do NOT clear the answer-lock here — match_started is re-broadcast
+        // on every reconnect, so clearing it would unlock a player who already
+        // answered the current question. The lock is cleared on game_won (a real
+        // new game) and naturally when a different cell is served.
         break;
       default:
         break;
