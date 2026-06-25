@@ -94,18 +94,18 @@ export function PlayerController() {
   const room = (params.get('room') ?? '').toUpperCase();
   const initialName = (params.get('name') ?? '').slice(0, 20);
   // A signed-in phone uses its ACCOUNT username automatically — no name entry.
-  const { user, profile, loading: authLoading, profileLoading } = useAuth();
+  const { user, profile, loading: authLoading, profileChecked } = useAuth();
   const accountName = profile?.username ?? null;
   // While the session/profile is still resolving we must NOT flash the name-entry
-  // screen at a signed-in player — wait until we know whether they have an account.
-  const authResolving = authLoading || (!!user && profileLoading && !profile);
+  // screen at a signed-in player — wait until the profile fetch has RESOLVED.
+  const authResolving = authLoading || (!!user && !profileChecked);
   // The sign-in dialog (full Google / email-OTP / username flow). Offered to
   // signed-out players on the QR-join screen so they don't forfeit their XP.
   const [authOpen, setAuthOpen] = useState(false);
   // First-time login (incl. a Google round-trip back to the controller) must
-  // always claim a username: once the profile fetch settles with no profile,
+  // always claim a username: once the profile fetch RESOLVES with no profile,
   // force the dialog open (AuthModal shows the mandatory "Choose a username").
-  const needsUsername = !!user && !profile && !profileLoading && !authLoading;
+  const needsUsername = !!user && profileChecked && !profile;
   useEffect(() => {
     if (needsUsername) setAuthOpen(true);
   }, [needsUsername]);

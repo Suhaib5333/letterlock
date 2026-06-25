@@ -39,12 +39,12 @@ export function Home() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showPackEditor, setShowPackEditor] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
-  const { user, profile, profileLoading, loading: authLoading, isAdmin } = useAuth();
+  const { user, profile, profileChecked, isAdmin } = useAuth();
   // First-time login (Google OR email) must ALWAYS land on the username claim —
-  // even after a Google redirect lands here with the auth modal closed. Once the
-  // profile fetch settles and there's still no profile, force the dialog open
-  // (AuthModal then shows the mandatory "Choose a username" step).
-  const needsUsername = !!user && !profile && !profileLoading && !authLoading;
+  // even after a Google redirect lands here with the auth modal closed. Gate on
+  // profileChecked (the fetch actually RESOLVED) so the brief load gap on refresh
+  // — user set but profile not fetched yet — never flashes the dialog.
+  const needsUsername = !!user && profileChecked && !profile;
   // Dev/QA seam: `?__devscreens=1` surfaces the admin + pack-editor buttons even
   // when signed-out so their responsive layout can be checked. Gated to local
   // dev/test hosts (devSeams.ts) — inert in production. (Admin RPCs enforce role

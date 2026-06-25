@@ -30,15 +30,16 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
     profile,
     loading,
     profileLoading,
+    profileChecked,
     signInWithGoogle,
     signInWithEmail,
     verifyEmailOtp,
     signOut,
     refreshProfile,
   } = useAuth();
-  // Only gate on the username AFTER the profile fetch settles — otherwise an
+  // Only gate on the username AFTER the profile fetch RESOLVES — otherwise an
   // existing user briefly sees the "choose a username" view on every sign-in.
-  const needsUsername = !!user && !profile && !profileLoading;
+  const needsUsername = !!user && profileChecked && !profile;
   const dialogRef = useRef<HTMLDivElement>(null);
   // The username-claim gate is mandatory — don't let Escape dismiss it.
   useModalDismiss(dialogRef, onClose, { closeOnEscape: !needsUsername });

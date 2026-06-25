@@ -17,6 +17,9 @@ interface AuthState {
   // True while the profile row for the current user is still being fetched — lets
   // the UI avoid flashing the "choose a username" gate at an existing user.
   profileLoading: boolean;
+  // True once the current user's profile fetch has resolved (so a null profile
+  // genuinely means "no username yet", not "still loading").
+  profileChecked: boolean;
   signInWithGoogle: () => Promise<{ ok: boolean; error?: string }>;
   // Email OTP — works out of the box on Supabase (default email provider,
   // no SMTP / dashboard config needed) so users can sign in even when Google
@@ -39,6 +42,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
+  // True once the profile fetch for the CURRENT user has actually resolved. Guards
+  // the "needs a username" gate against the brief load gap on refresh where `user`
+  // is set but `profile` hasn't been fetched yet (which used to flash the dialog).
+  const [profileChecked, setProfileChecked] = useState(false);
 
   // Bootstrap: rehydrate the session from localStorage (supabase-js does
   // this internally when persistSession=true) then listen for changes.
@@ -82,10 +89,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user || !supabase) {
       setProfile(null);
       setProfileLoading(false);
+      setProfileChecked(true); // settled: signed out → no profile, no username gate
       return;
     }
     let cancelled = false;
     setProfileLoading(true);
+    setProfileChecked(false); // a new user → haven't checked their profile yet
     supabase
       .from('profiles')
       .select('*')
@@ -95,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         setProfile((data as Profile) ?? null);
         setProfileLoading(false);
+        setProfileChecked(true);
       });
     return () => {
       cancelled = true;
@@ -241,6 +251,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isModerator,
         isBanned,
         profileLoading,
+        profileChecked,
         signInWithGoogle,
         signInWithEmail,
         verifyEmailOtp,
@@ -267,6 +278,7 @@ export function useAuth(): AuthState {
       isAdmin: false,
       isModerator: false,
       isBanned: false,
+      profileChecked: false,
       profileLoading: false,
       signInWithGoogle: async () => ({ ok: false, error: 'Auth not initialised.' }),
       signInWithEmail: async () => ({ ok: false, error: 'Auth not initialised.' }),
