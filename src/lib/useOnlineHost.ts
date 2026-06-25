@@ -117,10 +117,25 @@ export function useOnlineHost(args: {
   };
   const winnerRef = useRef(winner);
   winnerRef.current = winner;
+  // Match/game completion, mirrored to refs so a reconnect after the match ends
+  // lands on the final result screen instead of a stale question.
+  const gameOverRef = useRef(gameOver);
+  gameOverRef.current = gameOver;
+  const matchOverRef = useRef(matchOver);
+  matchOverRef.current = matchOver;
 
   const reBroadcastCurrent = useCallback(() => {
     const lobby = lobbyRef.current;
     if (!lobby) return;
+    // Match already finished → send the board + final result so a reconnecting
+    // phone goes straight to the "game over" screen, not back into a question.
+    if (gameOverRef.current && matchOverRef.current) {
+      sendBoard();
+      lobby
+        .broadcast({ type: 'game_over', winner: (winnerRef.current as PlayerTeam | null) ?? null })
+        .catch(() => {});
+      return;
+    }
     // A (re)connecting phone must always leave the lobby into the live game — even
     // if it missed the original match_started (fire-and-forget, no replay).
     if (startedRef.current) lobby.broadcast({ type: 'match_started' }).catch(() => {});

@@ -170,7 +170,7 @@ function SignInView({
       <p className="go-sub">
         {step === 'email' ? (
           <>
-            Save your scores, get on the global leaderboard, and host online matches with phones as
+            Save your scores, get on the global leaderboard, and host party matches with phones as
             buzzers.
           </>
         ) : (

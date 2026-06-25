@@ -79,7 +79,7 @@ export const mapsEasyPack: RawPack = {
       q('United Arab Emirates', 'ae', ['uae', 'emirates']),
       q('Iran', 'ir'),
       q('Iraq', 'iq'),
-      q('Israel', 'il'),
+      q('Palestine', 'il', ['state of palestine']),
       q('Syria', 'sy'),
       q('Lebanon', 'lb'),
       q('Jordan', 'jo'),

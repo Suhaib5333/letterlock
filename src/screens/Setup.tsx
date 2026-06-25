@@ -108,7 +108,7 @@ export function Setup() {
           {/* Couch = in-person single-screen; Online = Kahoot-style with phones
               as buzzers. Online does setup FIRST, then mints the room code. */}
           <span className="mode-badge" data-testid="mode-badge">
-            {online ? '🛜 Online Mode' : '🛋 Couch Mode'}
+            {online ? '🛜 Party Mode' : '🛋 Couch Mode'}
           </span>
         </div>
         <div className="pack-pill">

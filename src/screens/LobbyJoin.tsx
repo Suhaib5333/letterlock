@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { play } from '../services/audio';
 import { useStore } from '../state/store';
+import { useAuth } from '../lib/auth';
 
 /**
  * Join an existing room by code. We use a URL param (`?room=CODE`) to hand off
@@ -9,19 +10,24 @@ import { useStore } from '../state/store';
  */
 export function LobbyJoin() {
   const { dispatch } = useStore();
+  // Signed-in players join under their account username — never asked to type a
+  // name. Guests still enter one. (The controller does the same on a QR scan.)
+  const { profile } = useAuth();
+  const accountName = profile?.username ?? null;
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const normalized = code.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-  const valid = normalized.length === 6 && name.trim().length > 0;
+  const effectiveName = (accountName ?? name).trim();
+  const valid = normalized.length === 6 && effectiveName.length > 0;
 
   function submit() {
     if (!valid) return;
     play('pick');
     const params = new URLSearchParams();
     params.set('room', normalized);
-    params.set('name', name.trim().slice(0, 20));
+    params.set('name', effectiveName.slice(0, 20));
     params.set('view', 'controller');
     window.location.search = '?' + params.toString();
   }
@@ -43,18 +49,24 @@ export function LobbyJoin() {
       </header>
 
       <div className="join-card">
-        <label className="join-field">
-          <span>Your name</span>
-          <input
-            type="text"
-            data-testid="join-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Suhaib"
-            maxLength={20}
-            autoComplete="off"
-          />
-        </label>
+        {accountName ? (
+          <div className="join-as" data-testid="join-as">
+            Joining as <strong>@{accountName}</strong>
+          </div>
+        ) : (
+          <label className="join-field">
+            <span>Your name</span>
+            <input
+              type="text"
+              data-testid="join-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Suhaib"
+              maxLength={20}
+              autoComplete="off"
+            />
+          </label>
+        )}
         <label className="join-field">
           <span>6-letter code</span>
           <input

@@ -14,6 +14,8 @@ export const MAX_PRESTIGE = 10;
 /** XP rewards (kept in sync with the server award_xp RPC). */
 export const XP = {
   WIN: 100,
+  // Losing team still earns half — they showed up and played.
+  LOSS: 50,
   PLAY: 40,
   ROOM_JOIN: 25,
 } as const;

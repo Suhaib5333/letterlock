@@ -86,7 +86,7 @@ export function ModeSelect() {
           }}
         >
           <span className="mode-card-emoji" aria-hidden="true">🛜</span>
-          <span className="mode-card-name">Online Mode</span>
+          <span className="mode-card-name">Party Mode</span>
           <span className="mode-card-tag">
             {online ? 'Phones as controllers · room code' : 'Needs Supabase — set VITE_SUPABASE_URL'}
           </span>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MiniBoard } from '../components/MiniBoard';
 import { LevelUpOverlay } from '../components/LevelUpOverlay';
+import { AuthModal } from '../components/AuthModal';
 import { XP } from '../core/progression';
 import { useAuth } from '../lib/auth';
 import { awardXp } from '../lib/progressionClient';
@@ -89,17 +90,31 @@ export function PlayerController() {
   const room = (params.get('room') ?? '').toUpperCase();
   const initialName = (params.get('name') ?? '').slice(0, 20);
   // A signed-in phone uses its ACCOUNT username automatically — no name entry.
-  const { profile } = useAuth();
+  const { user, profile, loading: authLoading, profileLoading } = useAuth();
   const accountName = profile?.username ?? null;
+  // While the session/profile is still resolving we must NOT flash the name-entry
+  // screen at a signed-in player — wait until we know whether they have an account.
+  const authResolving = authLoading || (!!user && profileLoading && !profile);
+  // The sign-in dialog (full Google / email-OTP / username flow). Offered to
+  // signed-out players on the QR-join screen so they don't forfeit their XP.
+  const [authOpen, setAuthOpen] = useState(false);
 
-  const [name, setName] = useState(initialName);
+  // A saved session in THIS room means we've already joined before — a refresh,
+  // browser-back, or accidental tab-close should drop the player straight back
+  // into the match (with their name + team), never the name screen again.
+  const restored = useMemo(() => loadSave(room), [room]);
+  const firstName = initialName || restored?.name || '';
+
+  const [name, setName] = useState(firstName);
   // Kahoot-style: scanning the QR lands here with no name → type it, then Join.
   // Arriving from the in-app Join form (which already has a name) auto-joins.
   // A signed-in user skips the name step entirely (handled in an effect below).
-  const [joined, setJoined] = useState(() => !!initialName.trim());
-  const [nameDraft, setNameDraft] = useState(initialName);
+  // A restored session re-joins automatically.
+  const [joined, setJoined] = useState(() => !!firstName.trim() || !!restored);
+  const [nameDraft, setNameDraft] = useState(firstName);
   const [team, setTeam] = useState<PlayerTeam | null>(null);
   const [labels, setLabels] = useState<{ A: string; B: string }>({ A: 'Team A', B: 'Team B' });
+  const [category, setCategory] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>('waiting');
   const [status, setStatus] = useState<'connecting' | 'open' | 'error'>('connecting');
   const [error, setError] = useState<string | null>(null);
@@ -129,6 +144,7 @@ export function PlayerController() {
   // (avoids the stale-closure bug where adjudicated feedback compared an old team).
   const teamRef = useRef<PlayerTeam | null>(team);
   const servedRef = useRef<ServedPrompt | null>(served);
+  const nameRef = useRef(name);
   const sawHostRef = useRef(false);
   useEffect(() => {
     teamRef.current = team;
@@ -136,6 +152,9 @@ export function PlayerController() {
   useEffect(() => {
     servedRef.current = served;
   }, [served]);
+  useEffect(() => {
+    nameRef.current = name;
+  }, [name]);
 
   // Signed-in phones auto-join with their account username — no manual entry.
   useEffect(() => {
@@ -155,7 +174,7 @@ export function PlayerController() {
     }
     if (!isSupabaseConfigured()) {
       setStatus('error');
-      setError('Online mode needs Supabase configuration.');
+      setError('Party mode needs Supabase configuration.');
       return;
     }
 
@@ -206,6 +225,16 @@ export function PlayerController() {
         handleRef.current = h;
         setStatus('open');
         setPhase('lobby');
+        // Immediately ask the host to (re)send the live state. THIS is what makes
+        // refresh / browser-back / mid-question joins work: the host replies with
+        // the current question (+ synced timer, steal window, board, reveal, or
+        // match-over), so the player lands exactly where the match is and can type
+        // an answer right away — never stranded on "waiting". Re-asked a moment
+        // later too, in case the host's answer raced ahead of our subscription.
+        h.broadcast({ type: 'request_state', playerId }).catch(() => {});
+        setTimeout(() => {
+          if (!cancelled) h.broadcast({ type: 'request_state', playerId }).catch(() => {});
+        }, 700);
         // A code typed for a room that doesn't exist still "connects" (presence
         // channels are created on demand). If no host ever shows up, surface it.
         notFoundTimer = setTimeout(() => {
@@ -261,6 +290,9 @@ export function PlayerController() {
         if (event.playerId === myId) {
           setTeam(event.team);
           teamRef.current = event.team;
+          // Persist the team so a refresh / reconnect restores it — otherwise the
+          // player would come back unassigned and be unable to answer.
+          persistSave({ playerId: myId, name: nameRef.current, room, team: event.team });
           // Re-track our own presence with the new team (or null = back to pool).
           const h = handleRef.current;
           if (h) h.channel.track({ ...h.self, team: event.team }).catch(() => {});
@@ -273,6 +305,7 @@ export function PlayerController() {
       case 'team_labels':
         setLabels({ A: event.A, B: event.B });
         if (event.aColor && event.bColor) setColors({ A: event.aColor, B: event.bColor });
+        if (event.category) setCategory(event.category);
         break;
       case 'board_state':
         setBoardSnap({ owners: event.owners, size: event.size, turn: event.turn, winner: event.winner });
@@ -327,12 +360,15 @@ export function PlayerController() {
         setPhase('reveal');
         break;
       case 'game_won':
-        // Each finished GAME (even within a best-of-N series) awards the winning
-        // team's signed-in players an XP win + a rank-up celebration. Guests /
-        // anonymous controllers no-op cleanly. The 'done' screen is driven by
-        // game_over (match end), so award here but only transition there.
-        if (event.winner && event.winner === teamRef.current) {
-          awardXp(XP.WIN)
+        // Each finished GAME (even within a best-of-N series) awards signed-in
+        // players XP + a rank-up celebration: the winning team gets the full win,
+        // the losing team still gets HALF for playing. Guests / anonymous
+        // controllers no-op cleanly, and a draw (no winner) awards nothing. The
+        // 'done' screen is driven by game_over (match end), so award here but only
+        // transition there.
+        if (event.winner && teamRef.current) {
+          const won = event.winner === teamRef.current;
+          awardXp(won ? XP.WIN : XP.LOSS)
             .then((r) => {
               if (r?.leveled_up) setLevelUp({ level: r.level, prestige: r.prestige });
             })
@@ -434,7 +470,7 @@ export function PlayerController() {
         <div className="controller-team" data-testid="controller-team">
           {joined ? teamLabel : ''}
         </div>
-        {joined && (
+        {joined ? (
           <button
             className="controller-leave"
             data-testid="controller-leave"
@@ -442,6 +478,16 @@ export function PlayerController() {
             onClick={() => setConfirmLeave(true)}
           >
             Leave
+          </button>
+        ) : (
+          // Before joining there's still always a way out — back to the app home.
+          <button
+            className="controller-leave"
+            data-testid="controller-go-home"
+            aria-label="Back to home"
+            onClick={leaveToHome}
+          >
+            Home
           </button>
         )}
       </header>
@@ -462,9 +508,41 @@ export function PlayerController() {
         </div>
       )}
 
-      {!joined && (
+      {/* While auth is still resolving, show a brief loader instead of the name
+          form so a signed-in player never sees a name prompt flash before the
+          auto-join kicks in. */}
+      {!joined && authResolving && (
+        <div className="controller-wait" data-testid="controller-auth-resolving">
+          <div className="spinner" />
+          <p>Connecting…</p>
+        </div>
+      )}
+
+      {!joined && !authResolving && (
         <div className="controller-join" data-testid="controller-join">
           <h2>Join the game</h2>
+
+          {/* Signed-out players forfeit XP / leaderboard progress. Nudge them to
+              sign in (full auth flow) before joining — but still let them play
+              as a guest if they'd rather. Signed-in players never see this:
+              they auto-join with their account name. */}
+          {!user && (
+            <div className="controller-xp-notice" data-testid="controller-xp-notice">
+              <p className="controller-xp-warn">
+                ⚡ Heads up — playing as a guest, you <strong>won't earn XP</strong> or
+                climb the leaderboard. Sign in first so your wins actually count.
+              </p>
+              <button
+                className="btn btn-primary btn-lg block"
+                data-testid="controller-signin"
+                onClick={() => setAuthOpen(true)}
+              >
+                Sign in to earn XP ▸
+              </button>
+              <div className="controller-or"><span>or play as a guest</span></div>
+            </div>
+          )}
+
           <p>Enter a name so the host can see you.</p>
           <label className="controller-answer">
             <span>Your name</span>
@@ -510,6 +588,11 @@ export function PlayerController() {
         <div className="controller-wait" data-testid="controller-lobby">
           <h2>You're in! 🎉</h2>
           <p>Welcome, <strong>{name}</strong>.</p>
+          {category && (
+            <p className="controller-category" data-testid="controller-category">
+              Category: <strong>{category}</strong>
+            </p>
+          )}
           <p>
             {team
               ? `You're on ${teamLabel}. Waiting for the host to start…`
@@ -521,6 +604,11 @@ export function PlayerController() {
       {phase === 'ready' && status === 'open' && (
         <div className="controller-wait" data-testid="controller-ready">
           <h2>Match starting! 🎬</h2>
+          {category && (
+            <p className="controller-category" data-testid="controller-category">
+              Category: <strong>{category}</strong>
+            </p>
+          )}
           <p>Eyes on the big screen — your question will appear here when it's live.</p>
         </div>
       )}
@@ -570,7 +658,11 @@ export function PlayerController() {
               You're not on a team yet — ask the host to add you, then you can answer.
             </p>
           ) : canAnswerNow ? (
-            <>
+            // Sticky answer bar: input + Submit are always visible, even on short
+            // landscape screens where the prompt/media would otherwise push them
+            // below the fold. The content above scrolls under it only as a last
+            // resort — on normal sizes everything fits with no scroll at all.
+            <div className="controller-answer-bar">
               <label className="controller-answer">
                 <span>Your answer{stealOpen && !isPicker ? ' (steal!)' : ''}</span>
                 <input
@@ -593,7 +685,7 @@ export function PlayerController() {
               >
                 Submit ▸
               </button>
-            </>
+            </div>
           ) : (
             // Locked — the turn banner above already explains why; show a hint.
             <p className="controller-locked" data-testid="controller-locked">
@@ -649,6 +741,10 @@ export function PlayerController() {
           onDone={() => setLevelUp(null)}
         />
       )}
+
+      {/* Full sign-in flow (Google / email-OTP / username claim). On success the
+          auto-join effect picks up the account username and joins automatically. */}
+      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
     </div>
   );
 }

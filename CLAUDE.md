@@ -1,3 +1,15 @@
+# 🧪 TESTING MANDATE (read first — the user's standing instruction)
+
+> **Every feature must be tested fully end-to-end with Playwright before it's
+> called done.** For any change or feature list: drive the real app with Playwright
+> (the device-matrix `noscroll` checker + the e2e suite + live MCP-browser runs,
+> incl. two-page host+player for online), **identify the issues, fix them ALL, then
+> re-verify — and keep fixing-and-re-testing in a loop until everything passes.**
+> Don't report something as working on inspection alone; prove it by exercising the
+> actual UI. Online/multi-device features get a two-client test; signed-in features
+> get a real login via a TEMP email (mailinator) — **never** the user's work email.
+> Also always show the full status table (see below) on every reply.
+
 # 🎮 Letterlock — Master Plan & Architecture
 
 > **Name:** **Letterlock** 🔒 — claim & lock letters across the board to connect your edges. (Locked in.)

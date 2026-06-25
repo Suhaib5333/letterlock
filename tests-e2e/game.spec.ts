@@ -844,3 +844,85 @@ test('online end-to-end: host question reaches a player who answers, host sees i
   await playerCtx.close();
   await hostCtx.close();
 });
+
+test('mode-select: the 3 cards are the same height (no clipped text)', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('play-button').click();
+  await expect(page.getByTestId('mode-select')).toBeVisible();
+  await expect(page.locator('.mode-card')).toHaveCount(3);
+  // Let the entrance animation settle so heights are measured at rest.
+  await page.waitForTimeout(600);
+  const heights = await page.locator('.mode-card').evaluateAll((els) =>
+    els.map((e) => e.getBoundingClientRect().height),
+  );
+  expect(heights.length).toBe(3);
+  // All identical (allow sub-pixel rounding).
+  expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
+  // No description is clipped past its card.
+  const clipped = await page.locator('.mode-card').evaluateAll((els) =>
+    els.some((c) => {
+      const d = c.querySelector('.mode-card-desc');
+      return d ? d.getBoundingClientRect().bottom > c.getBoundingClientRect().bottom + 1 : false;
+    }),
+  );
+  expect(clipped).toBe(false);
+});
+
+test('lobby: room code (6 boxes) fits inside its card on a phone', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto('/');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-online').click();
+  await page.getByTestId('start-match').click();
+  await expect(page.getByTestId('lobby-code')).toBeVisible();
+  const overflow = await page.evaluate(() => {
+    const card = document.querySelector('.lobby-code-card');
+    const code = document.querySelector('.lobby-code');
+    if (!card || !code) return true;
+    const cr = card.getBoundingClientRect();
+    const dr = code.getBoundingClientRect();
+    return dr.right > cr.right + 1 || dr.left < cr.left - 1 || cr.right > window.innerWidth + 1;
+  });
+  expect(overflow).toBe(false);
+  await expect(page.locator('.lobby-code-ch')).toHaveCount(6);
+});
+
+test('lobby shows the chosen category (host)', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'science-nature'); // pick a known pack first
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-online').click();
+  await page.getByTestId('start-match').click();
+  await expect(page.getByTestId('lobby-host')).toBeVisible();
+  await expect(page.getByTestId('lobby-category')).toBeVisible();
+  await expect(page.getByTestId('lobby-category')).toContainText(/Science/i);
+});
+
+test('online: host start auto-launches the player + sends the category', async ({ browser }) => {
+  test.setTimeout(60000);
+  const hostCtx = await browser.newContext();
+  const host = await hostCtx.newPage();
+  await host.goto('/');
+  await host.getByTestId('play-button').click();
+  await host.getByTestId('mode-online').click();
+  await host.getByTestId('start-match').click();
+  await expect(host.getByTestId('lobby-start')).toBeEnabled({ timeout: 20000 });
+  const code = (await host.getByTestId('lobby-code').innerText()).replace(/[^A-Z0-9]/gi, '');
+
+  const playerCtx = await browser.newContext();
+  const player = await playerCtx.newPage();
+  await player.goto(`/?room=${code}&view=controller&name=Tester`);
+  await expect(player.getByTestId('controller-lobby')).toBeVisible({ timeout: 20000 });
+  // The category reached the phone.
+  await expect(player.getByTestId('controller-category')).toBeVisible({ timeout: 20000 });
+
+  // Host starts → the player auto-transitions out of the lobby (no manual action).
+  await expect(host.getByTestId('lobby-count')).toContainText('1 connected', { timeout: 20000 });
+  await host.getByTestId('lobby-start').click();
+  await expect(player.getByTestId('controller-ready')).toBeVisible({ timeout: 20000 });
+  // The player has a Leave control available in-match.
+  await expect(player.getByTestId('controller-leave')).toBeVisible();
+
+  await playerCtx.close();
+  await hostCtx.close();
+});

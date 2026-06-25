@@ -97,7 +97,9 @@ export type LobbyEvent =
   | { type: 'team_assigned'; playerId: string; team: PlayerTeam | null; aColor?: string; bColor?: string; aName?: string; bName?: string }
   // The colour-NAMES (+ hex colours) of each team so player phones show the
   // colour instead of a generic "Team A/B" and can tint the live mini-board.
-  | { type: 'team_labels'; A: string; B: string; aColor?: string; bColor?: string }
+  // `category` carries the chosen question pack's display name (emoji + title) so
+  // the lobby tells everyone what they're about to play.
+  | { type: 'team_labels'; A: string; B: string; aColor?: string; bColor?: string; category?: string }
   // Live board snapshot so the phone can mirror the hex board + whose turn it is.
   | {
       type: 'board_state';

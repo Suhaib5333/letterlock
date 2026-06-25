@@ -11,6 +11,7 @@ import {
   type PresencePlayer,
 } from '../lib/lobby';
 import { play } from '../services/audio';
+import { packById } from '../content';
 import { colorById } from '../state/palette';
 import { useStore } from '../state/store';
 
@@ -67,7 +68,7 @@ export function LobbyHost() {
   useEffect(() => {
     if (!isSupabaseConfigured()) {
       setStatus('error');
-      setError('Online mode needs Supabase — VITE_SUPABASE_URL/ANON_KEY missing.');
+      setError('Party mode needs Supabase — VITE_SUPABASE_URL/ANON_KEY missing.');
       return;
     }
     let cancelled = false;
@@ -80,10 +81,14 @@ export function LobbyHost() {
           role: 'host',
           joinedAt: Date.now(),
         };
-        const labels = () => ({
-          A: colorById(state.setup.colorA).name,
-          B: colorById(state.setup.colorB).name,
-        });
+        const labels = () => {
+          const pack = packById(state.setup.packId);
+          return {
+            A: colorById(state.setup.colorA).name,
+            B: colorById(state.setup.colorB).name,
+            category: `${pack.emoji} ${pack.name}`,
+          };
+        };
         const h = await openRoom(code, self, {
           onRoster: (players) => {
             if (cancelled) return;
@@ -188,6 +193,7 @@ export function LobbyHost() {
 
   const colorA = colorById(state.setup.colorA);
   const colorB = colorById(state.setup.colorB);
+  const pack = packById(state.setup.packId);
 
   return (
     <div className="lobby" data-testid="lobby-host">
@@ -196,8 +202,8 @@ export function LobbyHost() {
           ‹ Leave
         </button>
         <div className="sub-head-title">
-          <h1>Online lobby</h1>
-          <span className="mode-badge" data-testid="mode-badge">🛜 Online Mode</span>
+          <h1>Party lobby</h1>
+          <span className="mode-badge" data-testid="mode-badge">🛜 Party Mode</span>
         </div>
         <div />
       </header>
@@ -208,6 +214,12 @@ export function LobbyHost() {
           <p>{error}</p>
         </div>
       )}
+
+      <div className="lobby-category" data-testid="lobby-category">
+        <span className="lobby-category-label">Category</span>
+        <span className="lobby-category-name">{pack.emoji} {pack.name}</span>
+        <span className="lobby-category-diff">{pack.difficulty}</span>
+      </div>
 
       <div className="lobby-body">
         <section className="lobby-code-card">

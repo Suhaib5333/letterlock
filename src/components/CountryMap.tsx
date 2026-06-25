@@ -36,10 +36,6 @@ interface Props {
   testId?: string;
 }
 
-// Padding around the country's bounding box, as a fraction of the larger
-// bbox dimension. A higher value shows more surrounding context (continent
-// neighbours), making it easier to recognise small countries.
-const ZOOM_PAD = 1.4;
 // World viewBox from the source SVG.
 const WORLD_VB = { x: 0, y: 0, w: 2754, h: 1398 };
 // Target aspect ratio of the rendered card (matches the .qcard-map CSS rule).
@@ -143,31 +139,48 @@ export function CountryMap({ iso, onReady, onError, className = 'qcard-flag', te
     if (!isFinite(minX)) return false;
     const bw = maxX - minX;
     const bh = maxY - minY;
-    // Slightly more padding in the small card; less in the fullscreen view
-    // since the player has more room to see context.
-    const padFactor = fullscreen ? 0.9 : ZOOM_PAD;
-    const pad = Math.max(bw, bh) * padFactor;
-    let vx = minX - pad;
-    let vy = minY - pad;
-    let vw = bw + pad * 2;
-    let vh = bh + pad * 2;
+    const cx = minX + bw / 2;
+    const cy = minY + bh / 2;
+    // The country's larger side, in source-map units.
+    const size = Math.max(bw, bh);
+
     const aspect = fullscreen
       ? Math.max(0.5, Math.min(2.5, window.innerWidth / window.innerHeight))
       : CARD_ASPECT;
-    const vbAspect = vw / vh;
-    if (vbAspect < aspect) {
-      const extra = vh * aspect - vw;
-      vx -= extra / 2;
-      vw += extra;
-    } else if (vbAspect > aspect) {
-      const extra = vw / aspect - vh;
-      vy -= extra / 2;
-      vh += extra;
+
+    // CONSISTENT APPARENT SIZE. The old logic padded proportionally to the
+    // country's own bounding box, so a small country under-zoomed (a dot lost in
+    // a near-world view) while a big one filled the card. Instead, size the
+    // viewBox so the country's larger side is always ~TARGET_FILL of the viewBox's
+    // SHORTER side — a tiny island and a mid-size nation then read at about the
+    // same on-screen size. Floored so we never zoom into a meaningless sliver with
+    // no surrounding context, and CAPPED JUST BELOW the whole map so genuinely huge
+    // countries (Russia, Canada) settle at a tight region view rather than the bare
+    // full world (which would read as "no zoom" and leave the highlight a dot).
+    const TARGET_FILL = 0.5;
+    const MIN_SHORT = WORLD_VB.h * 0.12; // tightest zoom — keeps recognisable context
+    const MAX_SHORT = WORLD_VB.h * 0.96; // never the entire world
+    const shortSide = Math.min(MAX_SHORT, Math.max(MIN_SHORT, size / TARGET_FILL));
+    const vw = aspect >= 1 ? shortSide * aspect : shortSide;
+    const vh = aspect >= 1 ? shortSide : shortSide / aspect;
+
+    // Centre on the country, then keep the box inside the world bounds. When the
+    // box is larger than the map in a dimension (huge country), centre the world
+    // in that dimension instead of panning off an edge.
+    let vx = cx - vw / 2;
+    let vy = cy - vh / 2;
+    if (vw >= WORLD_VB.w) {
+      vx = WORLD_VB.x + (WORLD_VB.w - vw) / 2;
+    } else {
+      if (vx < WORLD_VB.x) vx = WORLD_VB.x;
+      if (vx + vw > WORLD_VB.x + WORLD_VB.w) vx = WORLD_VB.x + WORLD_VB.w - vw;
     }
-    if (vx < WORLD_VB.x) vx = WORLD_VB.x;
-    if (vy < WORLD_VB.y) vy = WORLD_VB.y;
-    if (vx + vw > WORLD_VB.x + WORLD_VB.w) vx = WORLD_VB.x + WORLD_VB.w - vw;
-    if (vy + vh > WORLD_VB.y + WORLD_VB.h) vy = WORLD_VB.y + WORLD_VB.h - vh;
+    if (vh >= WORLD_VB.h) {
+      vy = WORLD_VB.y + (WORLD_VB.h - vh) / 2;
+    } else {
+      if (vy < WORLD_VB.y) vy = WORLD_VB.y;
+      if (vy + vh > WORLD_VB.y + WORLD_VB.h) vy = WORLD_VB.y + WORLD_VB.h - vh;
+    }
     svg.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
     return true;
   };
