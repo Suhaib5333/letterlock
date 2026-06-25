@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PACKS, packById } from '../content';
 import { totalQuestions } from '../core/packs';
 import { AdminPanel } from '../components/AdminPanel';
@@ -54,12 +54,20 @@ export function Home() {
   // or a guest reset) so the "N unique left" badge stays accurate.
   const [, setProgressTick] = useState(0);
   useEffect(() => subscribeProgress(() => setProgressTick((t) => t + 1)), []);
-  // Force the username claim open for a brand-new account — but only ONCE per
-  // session, so returning to Home after a game never re-opens the profile dialog.
+  // Force the username claim open for a brand-new account — once per session.
+  // Belt-and-suspenders: if we auto-opened it and the user turns out to HAVE a
+  // profile (e.g. a transient null right after session-restore resolved into a
+  // real profile), auto-CLOSE it so the "Signed in as…" dialog never lingers on
+  // refresh. A user-opened dialog (button click) is never auto-closed.
+  const autoOpenedAuthRef = useRef(false);
   useEffect(() => {
     if (needsUsername && !usernameClaimPrompted) {
       usernameClaimPrompted = true;
+      autoOpenedAuthRef.current = true;
       setShowAuth(true);
+    } else if (!needsUsername && autoOpenedAuthRef.current) {
+      autoOpenedAuthRef.current = false;
+      setShowAuth(false);
     }
   }, [needsUsername]);
   // Incoming friend-request count → a badge on the Friends button so requests

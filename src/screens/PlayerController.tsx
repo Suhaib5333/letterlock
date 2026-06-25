@@ -106,8 +106,17 @@ export function PlayerController() {
   // always claim a username: once the profile fetch RESOLVES with no profile,
   // force the dialog open (AuthModal shows the mandatory "Choose a username").
   const needsUsername = !!user && profileChecked && !profile;
+  const autoOpenedAuthRef = useRef(false);
   useEffect(() => {
-    if (needsUsername) setAuthOpen(true);
+    if (needsUsername) {
+      autoOpenedAuthRef.current = true;
+      setAuthOpen(true);
+    } else if (autoOpenedAuthRef.current) {
+      // A transient null-profile that resolved into a real profile → close the
+      // auto-opened dialog so it never lingers as a "Signed in as…" popup.
+      autoOpenedAuthRef.current = false;
+      setAuthOpen(false);
+    }
   }, [needsUsername]);
 
   // A saved session in THIS room means we've already joined before — a refresh,
