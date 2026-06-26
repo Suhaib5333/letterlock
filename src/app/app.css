@@ -852,10 +852,15 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* TOP-ALIGNED, never centered: in a scroll container both `center` and
+     `margin-top:auto` push the first row above the scroll origin where it can't
+     be reached (the cut-off bug). Flex-start keeps the first option at the top
+     and lets the rest scroll into view — nothing is ever clipped. */
+  justify-content: flex-start;
   gap: clamp(8px, 1.5vh, 18px);
-  /* safety net: if enlarged text/tiny screens overflow, this region scrolls
-     internally instead of clipping (default text never triggers it) */
+  /* safety net: if the options are taller than the area (small/landscape screens,
+     enlarged text, the extra Couch host-team row) this region scrolls internally
+     instead of clipping — the page itself never scrolls. */
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -1982,6 +1987,16 @@
   opacity: 0.35;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Party Mode: "Reveal & decide" affordance (replaces the manual host pad). */
+.party-decide-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.party-decide-undo {
+  align-self: center;
 }
 
 /* ---------- Timer ---------- */
@@ -3198,7 +3213,9 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px 18px;
-    align-content: center;
+    /* start, NOT center: a centered grid taller than the area overflows above the
+       scroll origin where the first row can't be reached (the cut-off bug). */
+    align-content: start;
     justify-content: stretch;
   }
   .teams-setup {

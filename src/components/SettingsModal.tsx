@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { useRef } from 'react';
 import { useModalDismiss } from '../lib/useModalDismiss';
-import { play } from '../services/audio';
+import { play, setSuspenseVariant, startSuspense, stopSuspense, type SuspenseVariant } from '../services/audio';
 import { useStore } from '../state/store';
 import type { Settings } from '../state/types';
 
@@ -43,18 +43,23 @@ function Toggle({
 
 function Segment<T extends string>({
   label,
+  hint,
   options,
   value,
   onChange,
 }: {
   label: string;
+  hint?: string;
   options: { value: T; label: string }[];
   value: T;
   onChange: (v: T) => void;
 }) {
   return (
     <div className="set-row">
-      <div className="set-label">{label}</div>
+      <div>
+        <div className="set-label">{label}</div>
+        {hint && <div className="set-hint">{hint}</div>}
+      </div>
       <div className="segment">
         {options.map((o) => (
           <button
@@ -103,6 +108,29 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
           <h3>Audio</h3>
           <Toggle label="Sound effects" value={s.sound} onChange={(v) => set({ sound: v })} testId="set-sound" />
           <Toggle label="Music" hint="Off by default for classrooms" value={s.music} onChange={(v) => set({ music: v })} />
+          <Segment
+            label="Countdown suspense"
+            hint="Plays in the last few seconds — tap to preview"
+            value={s.suspense}
+            onChange={(v: SuspenseVariant) => {
+              set({ suspense: v });
+              // Instant preview so you can hear each style while choosing.
+              stopSuspense();
+              setSuspenseVariant(v);
+              if (v !== 'off') {
+                startSuspense();
+                window.setTimeout(() => stopSuspense(), 1800);
+              }
+            }}
+            options={[
+              { value: 'off', label: 'Off' },
+              { value: 'gameshow', label: 'Game show' },
+              { value: 'heartbeat', label: 'Heartbeat' },
+              { value: 'clock', label: 'Clock' },
+              { value: 'drumroll', label: 'Drumroll' },
+              { value: 'arcade', label: 'Arcade' },
+            ]}
+          />
         </div>
 
         <div className="set-group">

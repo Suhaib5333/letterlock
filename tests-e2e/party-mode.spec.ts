@@ -87,6 +87,45 @@ test('timer fill is tinted with the active team colour', async ({ page }) => {
   expect(accent.toLowerCase()).toBe('#0a84ff');
 });
 
+test('party mode: host always has a Decide button, and it survives an Undo (no stranded screen)', async ({ browser }) => {
+  // Regression for the reported "where are the buttons?" bug: in Party Mode the
+  // host hid the manual pad (the overlay decides on time-up) — but revealing
+  // early or UNDOing left the host with a question and no controls. There must
+  // always be a "Reveal & decide" affordance.
+  test.setTimeout(90000);
+  const ctx = await browser.newContext();
+  const host = await ctx.newPage();
+  await host.addInitScript(() => localStorage.setItem('letterlock.unlockall', '1'));
+  await host.goto('/');
+  await host.getByTestId('play-button').click();
+  await host.getByTestId('mode-online').click();
+  await host.getByTestId('mode-single').click();
+  await host.getByTestId('start-match').click();
+  await expect(host.getByTestId('lobby-start')).toBeEnabled({ timeout: 35000 });
+  await host.getByTestId('lobby-start').click(); // start with no players — host alone
+  await expect(host.getByTestId('game-screen')).toBeVisible();
+
+  await host.locator('.ll-hex.claimable[data-cell="10"]').click();
+  await expect(host.getByTestId('question-card')).toBeVisible();
+  // The decide affordance is present immediately (no waiting for the timer).
+  await expect(host.getByTestId('party-decide')).toBeVisible();
+  await host.getByTestId('party-decide').click();
+  await expect(host.getByTestId('party-reveal')).toBeVisible({ timeout: 10000 });
+  // Override to Team A + continue → the hex is claimed.
+  await host.getByTestId('reveal-pick-A').click();
+  await host.getByTestId('reveal-continue').click();
+  await expect(host.getByTestId('party-reveal')).toHaveCount(0);
+  await expect(host.locator('.ll-hex[data-owner="A"]')).toHaveCount(1);
+
+  // UNDO the adjudication → the question comes back AND the Decide button is
+  // there again (previously this left the host with NO buttons).
+  await host.getByTestId('undo-pick').click();
+  await expect(host.getByTestId('question-card')).toBeVisible();
+  await expect(host.getByTestId('party-decide')).toBeVisible();
+
+  await ctx.close();
+});
+
 test('party mode: sequential windows → auto-winner reveal → manual override applies', async ({ browser }) => {
   test.setTimeout(120000);
   const { host, picker, other, ctxs } = await setupTwoPlayerQuestion(browser);

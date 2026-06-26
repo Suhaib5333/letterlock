@@ -264,15 +264,22 @@ export function Game() {
     return null;
   };
 
-  // When the second window ends ("Time!"), open the winner-reveal overlay:
-  // reveal the answer to everyone + pre-select the auto-winner + start the 15s
-  // auto-continue. Party Mode only — Couch Mode keeps the manual host pad.
-  useEffect(() => {
-    if (!isParty || timerPhase !== 'done' || reveal || !inQuestion || ui.selectedCell === null) return;
+  // Open the winner-reveal overlay: reveal the answer to everyone, pre-select the
+  // auto-winner, and start the 15s auto-continue. Used BOTH when the timer runs
+  // out and when the host taps "Reveal & decide" (so there's always a way to
+  // adjudicate in Party Mode — e.g. after an Undo, or before time's up).
+  const openReveal = () => {
+    if (reveal || ui.selectedCell === null) return;
     dispatch({ type: 'REVEAL_ANSWER' });
     setRevealSelection(computeAutoWinner());
     setRevealCountdown(15);
     setReveal({ cell: ui.selectedCell });
+  };
+
+  // Auto-open when the second answer window ends ("Time!"). Party Mode only.
+  useEffect(() => {
+    if (!isParty || timerPhase !== 'done' || reveal || !inQuestion || ui.selectedCell === null) return;
+    openReveal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isParty, timerPhase, reveal, inQuestion, ui.selectedCell]);
 
@@ -525,8 +532,7 @@ export function Game() {
                   </div>
                 )}
                 {/* Couch Mode (incl. couch with linked players): the host taps
-                    the winner manually. Party Mode replaces this with the
-                    auto-winner reveal overlay below. */}
+                    the winner manually. */}
                 {!isParty && (
                 <HostPad
                   teams={teams}
@@ -551,6 +557,34 @@ export function Game() {
                     dispatch({ type: 'UNDO' });
                   }}
                 />
+                )}
+                {/* Party Mode: the winner is normally decided by the auto-reveal
+                    overlay when time's up — but the host always needs a way to
+                    end the question on demand (e.g. everyone's answered, or after
+                    an Undo restarted the clock). This opens that overlay now, plus
+                    an Undo so the host is never stranded without controls. */}
+                {isParty && !reveal && (
+                  <div className="party-decide-bar">
+                    <button
+                      className="btn btn-primary btn-lg block"
+                      data-testid="party-decide"
+                      onClick={openReveal}
+                    >
+                      Reveal answer &amp; decide ▸
+                    </button>
+                    {canUndo && (
+                      <button
+                        className="btn btn-ghost party-decide-undo"
+                        data-testid="party-undo"
+                        onClick={() => {
+                          play('tap');
+                          dispatch({ type: 'UNDO' });
+                        }}
+                      >
+                        ↩ Undo
+                      </button>
+                    )}
+                  </div>
                 )}
               </motion.div>
             ) : (

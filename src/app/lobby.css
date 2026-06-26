@@ -891,6 +891,58 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
   text-align: center;
 }
 
+/* Couch Mode: pick-your-team in the lobby so you can close your phone. */
+.controller-pickteam {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+.controller-pickteam-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+.controller-pickteam-btn {
+  padding: 18px 12px;
+  border-radius: var(--r-md);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: transform var(--dur-fast), filter var(--dur-fast);
+}
+.controller-pickteam-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+}
+.controller-pickteam-btn:active {
+  transform: scale(0.97);
+}
+.controller-pickteam-guest {
+  font-size: var(--t-sm);
+  color: var(--ink-dim, var(--text-dim));
+  opacity: 0.85;
+}
+.controller-couch-linked {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.controller-couch-close {
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+  border-radius: var(--r-md);
+  padding: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
 /* Couch Mode passive "watch + earn XP" note on the linked phone. */
 .controller-couch-watch {
   margin: 10px 0 0;

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { colorById } from '../state/palette';
-import { play } from '../services/audio';
+import { play, startSuspense, stopSuspense } from '../services/audio';
 
 type Phase = 'main' | 'steal' | 'done';
 
@@ -88,8 +88,12 @@ export function Timer({
           tickRef.current = whole;
           play('tick');
         }
+        // Kick off the suspense countdown cue (idempotent — only starts once
+        // while idle; honours the chosen variant + the Sound toggle).
+        startSuspense();
       }
       if (left <= 0) {
+        stopSuspense(); // end the cue at each phase boundary
         if (phaseRef.current === 'main') {
           // hand the other team half the time to answer
           phaseRef.current = 'steal';
@@ -114,6 +118,7 @@ export function Timer({
     return () => {
       cancelled = true;
       cancelAnimationFrame(rafId);
+      stopSuspense(); // a new question / unmount silences any running cue
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey, seconds, active]);

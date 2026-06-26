@@ -6,7 +6,7 @@ import { hasDevSeam } from '../lib/devSeams';
 import { clearRoom } from '../lib/couchXp';
 import { startSocial, stopSocial, type Notification } from '../lib/friends';
 import { play } from '../services/audio';
-import { initAudio, setAudioEnabled, setMusicContext, startMusic, stopMusic } from '../services/audio';
+import { initAudio, setAudioEnabled, setMusicContext, setSuspenseVariant, startMusic, stopMusic } from '../services/audio';
 import { applyTeamColors } from '../state/palette';
 import { useStore } from '../state/store';
 import { Home } from '../screens/Home';
@@ -72,6 +72,11 @@ export function App() {
   useEffect(() => {
     setAudioEnabled(state.settings.sound);
   }, [state.settings.sound]);
+
+  // Which suspense countdown cue plays in the final seconds of the timer.
+  useEffect(() => {
+    setSuspenseVariant(state.settings.suspense);
+  }, [state.settings.suspense]);
 
   // Ambient music follows the Music setting (and starts only after audio init).
   useEffect(() => {

@@ -125,6 +125,44 @@ test('settings persist accessibility choices', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-font', 'hyperlegible');
 });
 
+test('settings: the countdown-suspense picker selects a variant', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('open-settings').click();
+  const row = page.locator('.set-row', { hasText: 'Countdown suspense' });
+  await expect(row).toBeVisible();
+  // Tapping a style marks it active (and previews it — audio isn't asserted).
+  await row.getByRole('button', { name: 'Heartbeat' }).click();
+  await expect(row.getByRole('button', { name: 'Heartbeat' })).toHaveClass(/active/);
+  // 'Off' disables the suspense cue.
+  await row.getByRole('button', { name: 'Off' }).click();
+  await expect(row.getByRole('button', { name: 'Off' })).toHaveClass(/active/);
+});
+
+test('couch setup is not cut off on a short screen (top option reachable, actions pinned)', async ({ page }) => {
+  // The added host-team selector + Invite button must not push the first option
+  // above the scroll origin (the cut-off bug — fixed with `justify-content: safe center`).
+  await page.setViewportSize({ width: 360, height: 560 });
+  await page.goto('/');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
+  // Both footer actions stay visible (they're pinned outside the scroll area).
+  await expect(page.getByTestId('start-match')).toBeVisible();
+  await expect(page.getByTestId('couch-invite')).toBeVisible();
+  // The first option row is never clipped ABOVE the scrollable body's top.
+  const clippedAbove = await page.evaluate(() => {
+    const b = document.querySelector('.setup-body');
+    const f = document.querySelector('.teams-setup');
+    if (!b || !f) return true;
+    const br = b.getBoundingClientRect();
+    const fr = f.getBoundingClientRect();
+    return fr.top < br.top - 1;
+  });
+  expect(clippedAbove).toBe(false);
+  // And the host-team selector is reachable (scroll to it if needed).
+  await page.getByTestId('host-team-none').scrollIntoViewIfNeeded();
+  await expect(page.getByTestId('host-team-none')).toBeVisible();
+});
+
 test('exit uses an in-UI modal, not a browser dialog', async ({ page }) => {
   await startMatch(page);
   await page.getByTestId('exit-btn').click();

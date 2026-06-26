@@ -1,6 +1,7 @@
 import type { BoardSize, MatchMode, TeamId } from '../core/models';
 import type { Question } from '../core/packs';
 import type { TopologyKind } from '../core/topology';
+import type { SuspenseVariant } from '../services/audio';
 
 export type Screen =
   | 'home'
@@ -20,6 +21,9 @@ export interface Settings {
   textScale: 'normal' | 'large' | 'xlarge';
   tts: boolean;
   adjudicationStyle: 'structured' | 'hostcall';
+  /** Which suspense cue plays in the final seconds of the answer timer ('off' =
+   *  none). All are original game-show-style countdown riffs. */
+  suspense: SuspenseVariant;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -30,6 +34,7 @@ export const DEFAULT_SETTINGS: Settings = {
   textScale: 'normal',
   tts: false,
   adjudicationStyle: 'structured',
+  suspense: 'gameshow', // suspense countdown on by default (respects the Sound toggle)
 };
 
 export interface SetupForm {

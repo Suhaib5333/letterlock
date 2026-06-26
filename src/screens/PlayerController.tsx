@@ -517,6 +517,23 @@ export function PlayerController() {
     setJoined(true);
   }, [nameDraft]);
 
+  // Couch Mode: the player picks their OWN team right in the lobby. This writes
+  // their server-side membership immediately (via the [mode,team,room,name]
+  // effect) AND re-tracks presence so the host sees them — so after picking they
+  // can CLOSE their phone and still be credited when the game ends.
+  const pickTeam = useCallback(
+    (t: PlayerTeam) => {
+      setTeam(t);
+      teamRef.current = t;
+      const h = handleRef.current;
+      if (h) {
+        h.channel.track({ ...h.self, team: t }).catch(() => {});
+        persistSave({ playerId: h.self.id, name, room, team: t, answeredCell: answeredCellRef.current });
+      }
+    },
+    [name, room],
+  );
+
   // Leave the room and return to the main app home. Used both mid-match (exit any
   // time) and after the game completes. Drops the channel cleanly first.
   const leaveToHome = useCallback(() => {
@@ -695,11 +712,55 @@ export function PlayerController() {
               Category: <strong>{category}</strong>
             </p>
           )}
-          <p>
-            {team
-              ? `You're on ${teamLabel}. Waiting for the host to start…`
-              : 'Waiting for the host to put you on a team and start the match…'}
-          </p>
+
+          {mode === 'couch' ? (
+            team ? (
+              // Linked → membership is saved server-side; the phone is now free.
+              <div className="controller-couch-linked" data-testid="controller-couch-linked">
+                <p>✅ You're on <strong>{teamLabel}</strong>.</p>
+                <p className="controller-couch-close" data-testid="controller-couch-close">
+                  {user
+                    ? '📴 You can close your phone now — your XP is saved and counts when the game ends.'
+                    : '📴 You can close your phone now and just watch the big screen. (Sign in next time to earn XP.)'}
+                </p>
+              </div>
+            ) : (
+              // Pick your own team so you can lock in + leave (no need to wait
+              // for the host to assign you).
+              <div className="controller-pickteam" data-testid="controller-pickteam">
+                <p>Pick your team to lock in your XP:</p>
+                <div className="controller-pickteam-btns">
+                  <button
+                    className="controller-pickteam-btn"
+                    data-testid="pickteam-A"
+                    style={{ background: colors.A }}
+                    onClick={() => pickTeam('A')}
+                  >
+                    {labels.A}
+                  </button>
+                  <button
+                    className="controller-pickteam-btn"
+                    data-testid="pickteam-B"
+                    style={{ background: colors.B }}
+                    onClick={() => pickTeam('B')}
+                  >
+                    {labels.B}
+                  </button>
+                </div>
+                {!user && (
+                  <p className="controller-pickteam-guest">
+                    Heads up — sign in first (top of the join screen) or your XP won't be saved.
+                  </p>
+                )}
+              </div>
+            )
+          ) : (
+            <p>
+              {team
+                ? `You're on ${teamLabel}. Waiting for the host to start…`
+                : 'Waiting for the host to put you on a team and start the match…'}
+            </p>
+          )}
         </div>
       )}
 
@@ -716,6 +777,11 @@ export function PlayerController() {
               ? "Eyes on the big screen — the host runs the questions. You'll earn XP for your team's results."
               : "Eyes on the big screen — your question will appear here when it's live."}
           </p>
+          {mode === 'couch' && team && (
+            <p className="controller-couch-close" data-testid="controller-couch-close">
+              📴 Safe to close your phone — your XP for {teamLabel} is already saved.
+            </p>
+          )}
         </div>
       )}
 

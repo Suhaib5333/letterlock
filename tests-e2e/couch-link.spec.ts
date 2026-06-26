@@ -99,6 +99,44 @@ test('couch link: joined phone is PASSIVE (no answer input) and earns XP on a wi
   await hc.close();
 });
 
+test('couch lobby: player picks their own team, is told they can close, then closes', async ({ browser }) => {
+  test.setTimeout(120000);
+  const { host, code, ctx: hc } = await openCouchLobby(browser);
+  const hostErrors: string[] = [];
+  host.on('pageerror', (e) => hostErrors.push(e.message));
+
+  const pc = await browser.newContext();
+  const player = await pc.newPage();
+  await player.goto(CONTROLLER(code, 'Picker'));
+  await expect(player.getByTestId('controller-lobby')).toBeVisible({ timeout: 35000 });
+
+  // The couch lobby lets the player pick their OWN team (so they don't have to
+  // wait for the host) — picking locks in their membership server-side.
+  await expect(player.getByTestId('controller-pickteam')).toBeVisible({ timeout: 35000 });
+  await player.getByTestId('pickteam-A').click();
+  // …and they're told it's safe to close the phone now.
+  await expect(player.getByTestId('controller-couch-linked')).toBeVisible({ timeout: 10000 });
+  await expect(player.getByTestId('controller-couch-close')).toBeVisible();
+  // The host sees them on Blue (Team A) via presence.
+  await expect(host.getByTestId('lobby-team-A')).toContainText('Picker', { timeout: 35000 });
+
+  // Player CLOSES their phone right from the lobby — before the match even starts.
+  await pc.close();
+
+  // Host starts whenever and plays a Team A win; the closed phone causes no error.
+  await host.getByTestId('lobby-start').click();
+  await expect(host.getByTestId('game-screen')).toBeVisible();
+  for (const cell of [10, 11, 12, 13, 14]) {
+    await host.locator(`.ll-hex.claimable[data-cell="${cell}"]`).click();
+    await expect(host.getByTestId('question-card')).toBeVisible();
+    await host.getByTestId('award-A').click();
+  }
+  await expect(host.getByTestId('game-over')).toBeVisible({ timeout: 10000 });
+  expect(hostErrors).toEqual([]);
+
+  await hc.close();
+});
+
 test('couch link: host can × remove a player (they are ejected from the room)', async ({ browser }) => {
   test.setTimeout(120000);
   const { host, code, ctx: hc } = await openCouchLobby(browser);
