@@ -1,13 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
+import { colorById } from '../state/palette';
 import { play } from '../services/audio';
 
 type Phase = 'main' | 'steal' | 'done';
 
 /**
  * Two-phase countdown (plan §3.2 + steal rule). The picking team gets the full
- * time; when it runs out the OTHER team automatically gets HALF the time to steal.
- * Purely an advisory aid — the host always decides the outcome. Resets whenever
- * `resetKey` changes (a new question is served).
+ * time; when it runs out the OTHER team automatically gets HALF the time to
+ * answer. Purely an advisory aid — the host decides the outcome (Couch Mode) or
+ * the auto-reveal flow takes over (Party Mode). Resets whenever `resetKey`
+ * changes (a new question is served).
+ *
+ * The bar + labels are tinted with the **colour of whichever team's window is
+ * live** (the picker in the main phase, the other team in the steal phase) so a
+ * glance tells you whose clock is running.
+ *
+ * `endPhaseSignal` lets the host end the current phase EARLY (Party Mode): bump
+ * it when a team locks in their answer and the countdown jumps straight to the
+ * next phase (their time effectively goes to 0 and the other team's clock starts,
+ * then "Time!").
  */
 export function Timer({
   seconds,
@@ -15,6 +26,9 @@ export function Timer({
   active,
   pickerName,
   otherName,
+  pickerColorId,
+  otherColorId,
+  endPhaseSignal = 0,
   onPhase,
 }: {
   seconds: number;
@@ -22,8 +36,13 @@ export function Timer({
   active: boolean;
   pickerName: string;
   otherName: string;
+  /** Colour ids of the two teams — used to tint the bar by whose window is live. */
+  pickerColorId?: string;
+  otherColorId?: string;
+  /** Increment to end the CURRENT phase immediately (a team locked their answer). */
+  endPhaseSignal?: number;
   /** Fires when the countdown transitions to the steal phase / finishes — lets
-   *  Online Mode open the steal window to the other team's phones. */
+   *  Party Mode open the next team's window / trigger the winner reveal. */
   onPhase?: (phase: 'steal' | 'done') => void;
 }) {
   const [phase, setPhase] = useState<Phase>('main');
@@ -31,6 +50,10 @@ export function Timer({
   const startRef = useRef(0);
   const phaseRef = useRef<Phase>('main');
   const tickRef = useRef(0);
+  // Track the early-end signal so the rAF loop can consume a fresh bump.
+  const endSignalRef = useRef(endPhaseSignal);
+  endSignalRef.current = endPhaseSignal;
+  const handledSignalRef = useRef(endPhaseSignal);
 
   useEffect(() => {
     if (seconds === 0 || !active) return;
@@ -44,12 +67,20 @@ export function Timer({
     setRemaining(seconds);
     tickRef.current = 0;
     startRef.current = performance.now();
+    // A new question/phase-window: ignore any pending early-end bump from the
+    // previous question so it can't instantly skip this fresh countdown.
+    handledSignalRef.current = endSignalRef.current;
 
     const durationOf = () => (phaseRef.current === 'steal' ? seconds / 2 : seconds);
     const loop = (now: number) => {
       if (cancelled) return;
       const elapsed = (now - startRef.current) / 1000;
-      const left = Math.max(0, durationOf() - elapsed);
+      let left = Math.max(0, durationOf() - elapsed);
+      // A team locked in → end this phase NOW (their clock drops to 0).
+      if (endSignalRef.current !== handledSignalRef.current) {
+        handledSignalRef.current = endSignalRef.current;
+        left = 0;
+      }
       setRemaining(left);
       if (left <= 5 && left > 0) {
         const whole = Math.ceil(left);
@@ -60,7 +91,7 @@ export function Timer({
       }
       if (left <= 0) {
         if (phaseRef.current === 'main') {
-          // hand the other team half the time to steal
+          // hand the other team half the time to answer
           phaseRef.current = 'steal';
           setPhase('steal');
           setRemaining(seconds / 2); // refill to full immediately (no empty-frame flicker)
@@ -96,18 +127,28 @@ export function Timer({
   const done = phase === 'done';
   const steal = phase === 'steal';
 
+  // Tint the bar/labels with the colour of whoever's window is live (the other
+  // team once we're in the steal/done phases).
+  const activeColor = colorById((steal || done ? otherColorId : pickerColorId) ?? 'blue');
+
   return (
     <div
       className={`timer ${urgent ? 'urgent' : ''} ${done ? 'done' : ''} ${steal ? 'steal' : ''}`}
       data-testid="timer"
       data-phase={phase}
+      style={
+        {
+          '--timer-accent': activeColor.base,
+          '--timer-accent-glow': activeColor.glow,
+        } as React.CSSProperties
+      }
     >
       <span className="timer-label">
         {done ? (
           'Time!'
         ) : steal ? (
           <>
-            <span className="timer-bolt" aria-hidden="true">⚡</span> {otherName} steals
+            <span className="timer-bolt" aria-hidden="true">⚡</span> {otherName} answers
           </>
         ) : (
           pickerName

@@ -34,6 +34,7 @@ interface ServedPrompt {
   cell: number;
   letter: string;
   prompt: string;
+  picker?: PlayerTeam; // the team that answers FIRST (their window is open first)
   hideLetter?: boolean;
   audio?: string;
   video?: string;
@@ -140,6 +141,10 @@ export function PlayerController() {
   const [error, setError] = useState<string | null>(null);
   const [served, setServed] = useState<ServedPrompt | null>(null);
   const [teammateAnswered, setTeammateAnswered] = useState(false);
+  // Sequential windows: the picker answers first; once their window closes the
+  // host opens the "steal" window and the OTHER team may answer. True once the
+  // steal window is open for the current question.
+  const [stealOpen, setStealOpen] = useState(false);
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
   const [winner, setWinner] = useState<PlayerTeam | null>(null);
@@ -339,6 +344,7 @@ export function PlayerController() {
           cell: event.cell,
           letter: event.letter,
           prompt: event.prompt,
+          picker: event.picker,
           hideLetter: event.hideLetter,
           audio: event.audio,
           video: event.video,
@@ -346,6 +352,9 @@ export function PlayerController() {
           youtube: event.youtube,
         });
         setTeammateAnswered(false);
+        // A fresh question starts in the picker's window; the steal window is
+        // re-opened by the host (re-sent on reconnect via steal_open) if needed.
+        if (answeredCellRef.current !== event.cell) setStealOpen(false);
         setAnswer('');
         setFeedback(null);
         setWinner(null);
@@ -361,8 +370,9 @@ export function PlayerController() {
         }
         break;
       case 'steal_open':
-        // Legacy steal event — in the both-teams-answer model there's no separate
-        // steal phase; just follow any timer the host sends so phones stay synced.
+        // The picker's window closed → the OTHER team may now answer. Open the
+        // steal window for this cell and follow the new (steal) timer.
+        if (servedRef.current && event.cell === servedRef.current.cell) setStealOpen(true);
         setTimerState(buildTimer(event.deadline, event.hostNow, event.stealSeconds));
         break;
       case 'answer_submitted':
@@ -484,11 +494,22 @@ export function PlayerController() {
   const [confirmLeave, setConfirmLeave] = useState(false);
 
   const teamLabel = team === 'A' ? labels.A : team === 'B' ? labels.B : 'Unassigned';
-  // Answer-gating: BOTH teams answer the same question (no picker-first / steal
-  // lockout). The only lock is one answer per team — once a teammate has answered
-  // for your team, the rest of the team is locked out.
-  const lockReason: null | 'teammate' = teammateAnswered ? 'teammate' : null;
+  // Sequential answer-gating: the PICKER answers first (main window); once that
+  // closes the host opens the steal window and the OTHER team answers. A team's
+  // window is open when it's their turn in the sequence; one answer per team
+  // still applies (a teammate answering locks the rest of the team out).
+  const picker = served?.picker;
+  // Whose window is live right now: picker before the steal opens, the other team after.
+  const myWindowOpen = !!team && (picker ? (stealOpen ? team !== picker : team === picker) : true);
+  const lockReason: null | 'teammate' | 'waiting' | 'closed' = teammateAnswered
+    ? 'teammate'
+    : !myWindowOpen
+      ? stealOpen
+        ? 'closed' // picker whose window already passed
+        : 'waiting' // non-picker waiting for their turn
+      : null;
   const canAnswerNow = !!team && lockReason === null;
+  const pickerLabel = picker === 'A' ? labels.A : picker === 'B' ? labels.B : 'the other team';
   const remaining = timerState
     ? Math.max(0, (timerState.deadline - (now + timerState.offset)) / 1000)
     : null;
@@ -667,8 +688,12 @@ export function PlayerController() {
             {!team
               ? 'Not on a team'
               : canAnswerNow
-                ? '✅ Answer now — both teams play!'
-                : '🔒 Teammate is answering for your team'}
+                ? '✅ Your turn — answer now!'
+                : lockReason === 'waiting'
+                  ? `🔒 ${pickerLabel} answers first — you're up next`
+                  : lockReason === 'closed'
+                    ? '⏳ Other team is answering now'
+                    : '🔒 Teammate is answering for your team'}
           </div>
           {remaining !== null && (
             <div className={`controller-timer ${remaining <= 5 ? 'urgent' : ''}`} data-testid="controller-timer">
@@ -724,9 +749,13 @@ export function PlayerController() {
               </button>
             </div>
           ) : (
-            // Locked — a teammate already answered for the team.
+            // Locked — not this team's window yet (or a teammate already answered).
             <p className="controller-locked" data-testid="controller-locked">
-              Your teammate is answering for the team.
+              {lockReason === 'waiting'
+                ? `${pickerLabel} answers first. Get ready — your window opens next.`
+                : lockReason === 'closed'
+                  ? "Your team's window has closed — the other team is answering."
+                  : 'Your teammate is answering for the team.'}
             </p>
           )}
         </div>

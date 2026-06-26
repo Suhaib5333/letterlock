@@ -1990,13 +1990,12 @@
   height: 100%;
   width: 100%;
   transform-origin: left;
-  background: linear-gradient(90deg, var(--blue-glow), var(--blue));
+  /* Tinted with the live team's colour (set inline as --timer-accent*). Falls
+     back to blue if no colour was supplied. */
+  background: linear-gradient(90deg, var(--timer-accent-glow, var(--blue-glow)), var(--timer-accent, var(--blue)));
   /* updated every animation frame via rAF — a CSS transition here fights those
      updates and makes the bar stutter, so we let rAF drive it directly */
   will-change: transform;
-}
-.timer.urgent .timer-fill {
-  background: linear-gradient(90deg, var(--amber-glow), var(--amber));
 }
 .timer.urgent {
   animation: urgentPulse 0.8s ease-in-out infinite;
@@ -2015,16 +2014,17 @@
 .timer-label {
   font-size: var(--t-xs);
   font-weight: 700;
-  color: var(--text-dim);
+  /* The label is tinted with the live team's colour so whose-clock-it-is reads
+     at a glance (Feature: timer matches the active team's colour). */
+  color: var(--timer-accent-glow, var(--text-dim));
   white-space: nowrap;
   max-width: 11ch;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .timer.steal .timer-label {
-  color: var(--amber-glow);
-  /* the steal label ("⚡ Amber steals") needs more room than the 11ch main label,
-     otherwise it truncated to "⚡ Amber st…" which read as broken */
+  /* the steal label ("⚡ Amber answers") needs more room than the 11ch main label,
+     otherwise it truncated to "⚡ Amber an…" which read as broken */
   max-width: 18ch;
 }
 .timer-bolt {
@@ -2036,12 +2036,9 @@
     opacity: 0.45;
   }
 }
-.timer.steal .timer-fill {
-  background: linear-gradient(90deg, var(--amber-glow), var(--amber));
-}
 .timer.done .timer-num,
 .timer.done .timer-label {
-  color: var(--amber-glow);
+  color: var(--timer-accent-glow, var(--amber-glow));
 }
 
 /* ---------- Scoreboard ---------- */
@@ -2261,6 +2258,161 @@
 .go-sub {
   color: var(--text-dim);
   margin-bottom: var(--s-4);
+}
+
+/* ---------- Party Mode winner reveal ---------- */
+.reveal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-content: center;
+  padding: var(--s-4);
+  background: rgba(5, 7, 14, 0.72);
+  backdrop-filter: blur(6px);
+}
+.reveal-card {
+  background: linear-gradient(165deg, var(--surface), var(--bg-1));
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xl);
+  padding: var(--s-4);
+  width: min(440px, 92vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-3);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.reveal-head {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--t-h3);
+  text-align: center;
+  color: var(--text-dim);
+}
+.reveal-answer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 12px;
+}
+.reveal-answer-label {
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+.reveal-answer strong {
+  font-size: 1.4rem;
+  text-align: center;
+  line-height: 1.2;
+}
+.reveal-subs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.reveal-sub {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.reveal-sub-team {
+  font-weight: 700;
+  font-size: var(--t-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.reveal-sub.team-A .reveal-sub-team {
+  color: var(--ta-glow);
+}
+.reveal-sub.team-B .reveal-sub-team {
+  color: var(--tb-glow);
+}
+.reveal-sub-answer {
+  font-size: var(--t-sm);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.reveal-sub-grade {
+  font-weight: 800;
+}
+.reveal-sub-grade.ok {
+  color: #34d399;
+}
+.reveal-sub-grade.no {
+  color: var(--text-dim);
+}
+.reveal-winner {
+  text-align: center;
+  font-size: 1.05rem;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.reveal-winner-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.reveal-winner-dot.team-A {
+  background: var(--ta);
+}
+.reveal-winner-dot.team-B {
+  background: var(--tb);
+}
+.reveal-pick {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.reveal-pick .award {
+  padding: 10px;
+  font-size: var(--t-sm);
+  align-items: center;
+  text-align: center;
+}
+.reveal-pick .award.selected {
+  outline: 3px solid var(--text);
+  outline-offset: 1px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+.reveal-countdown {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--t-xs);
+  color: var(--text-dim);
+}
+.reveal-countdown > span {
+  white-space: nowrap;
+}
+/* A depleting track: the bar shrinks left-to-right inside a rounded rail. */
+.reveal-countdown-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--blue-glow), var(--blue));
+  transform-origin: left;
+  transition: transform 0.9s linear;
+  will-change: transform;
 }
 
 .victory {

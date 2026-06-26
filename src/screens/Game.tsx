@@ -63,6 +63,24 @@ export function Game() {
   // doesn't reveal everyone's guesses until the host chooses to show them).
   const [showAnswers, setShowAnswers] = useState(false);
 
+  // ── Party Mode answer flow ──────────────────────────────────────────────
+  // The countdown runs in two windows: the PICKER answers first (main phase);
+  // when their clock ends (timeout OR they lock in) the OTHER team's clock
+  // starts (steal phase); when that ends a winner-reveal screen appears with a
+  // 15s auto-continue. `timerPhase` mirrors the Timer; `endPhaseSignal` is
+  // bumped to end a window early when a team locks their answer in.
+  const [timerPhase, setTimerPhase] = useState<'main' | 'steal' | 'done'>('main');
+  const [endPhaseSignal, setEndPhaseSignal] = useState(0);
+  // The winner-reveal overlay (Party Mode only). `selection` is what will be
+  // applied — pre-filled with the auto-detected winner, overridable by the host.
+  const [reveal, setReveal] = useState<{ cell: number } | null>(null);
+  const [revealSelection, setRevealSelection] = useState<TeamId | null>(null);
+  const [revealCountdown, setRevealCountdown] = useState(15);
+  const revealSelectionRef = useRef<TeamId | null>(null);
+  revealSelectionRef.current = revealSelection;
+  // Guard so each (cell, phase) bumps the early-end signal at most once.
+  const phaseSignalRef = useRef<string>('');
+
   // Reset the dismiss flag once the swap window closes (so a new game can offer it).
   useEffect(() => {
     if (!canPieSwap) setPieDismissed(false);
@@ -80,6 +98,8 @@ export function Game() {
   useEffect(() => {
     setClipPlayed(false);
     setShowAnswers(false); // re-hide player answers for each new question
+    setTimerPhase('main'); // each new question starts in the picker's window
+    setReveal(null); // close any leftover reveal overlay
   }, [servedId]);
 
   // Hero-moment audio + haptics driven by the reducer's pulse counter.
@@ -185,11 +205,76 @@ export function Game() {
   const needsPlayToStart = !!(q && (q.audio || q.video || q.image || q.mapIso));
   const timerActive = !needsPlayToStart || clipPlayed;
 
-  // Online answer flow (both teams answer → reveal → host decides): we do NOT
-  // auto-award on a fuzzy match anymore. Instead the host sees each submission
-  // marked correct/wrong (auto-grade hint, see the answers panel), reveals the
-  // answer to everyone, then taps ✅Blue / ✅Amber / ⬜No-one to award + continue.
-  // No 3-2-1 countdown, no auto-advance.
+  // ── Party Mode sequential answer + auto-winner reveal ───────────────────
+  // Whose windows have produced an answer (the host buckets submissions/cell).
+  const pickerSubmitted = online.online && online.submissions.some((s) => s.team === picker);
+  const otherSubmitted = online.online && online.submissions.some((s) => s.team === other);
+
+  // Lock-in ends the current window early: picker locks → jump to the other
+  // team's window; other locks → jump to "Time!" (the reveal). Each (cell,phase)
+  // bumps once (ref-guarded).
+  useEffect(() => {
+    if (!online.online || !inQuestion || ui.selectedCell === null) return;
+    const base = `${ui.selectedCell}`;
+    if (timerPhase === 'main' && pickerSubmitted && phaseSignalRef.current !== `${base}:main`) {
+      phaseSignalRef.current = `${base}:main`;
+      setEndPhaseSignal((n) => n + 1);
+    } else if (timerPhase === 'steal' && otherSubmitted && phaseSignalRef.current !== `${base}:steal`) {
+      phaseSignalRef.current = `${base}:steal`;
+      setEndPhaseSignal((n) => n + 1);
+    }
+  }, [online.online, inQuestion, ui.selectedCell, timerPhase, pickerSubmitted, otherSubmitted]);
+
+  // The auto-detected winner = the first team (in arrival order) whose submitted
+  // answer fuzzy-matches the real answer; null when nobody got it.
+  const computeAutoWinner = (): TeamId | null => {
+    if (!q) return null;
+    for (const s of online.submissions) {
+      if (isAnswerCorrect(s.answer, q.a)) return s.team as TeamId;
+    }
+    return null;
+  };
+
+  // When the second window ends ("Time!"), open the winner-reveal overlay:
+  // reveal the answer to everyone + pre-select the auto-winner + start the 15s
+  // auto-continue. Party Mode only — Couch Mode keeps the manual host pad.
+  useEffect(() => {
+    if (!online.online || timerPhase !== 'done' || reveal || !inQuestion || ui.selectedCell === null) return;
+    dispatch({ type: 'REVEAL_ANSWER' });
+    setRevealSelection(computeAutoWinner());
+    setRevealCountdown(15);
+    setReveal({ cell: ui.selectedCell });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [online.online, timerPhase, reveal, inQuestion, ui.selectedCell]);
+
+  // Apply the reveal's current selection (award the team, or "no one") and close.
+  const applyReveal = (team: TeamId | null) => {
+    const cell = reveal?.cell ?? ui.selectedCell;
+    if (cell === null) return;
+    if (team) {
+      play('claim');
+      if (!reducedMotion) fireConfetti(team, teams[team].colorId);
+      online.broadcastAdjudicated(team, cell);
+      dispatch({ type: 'ADJUDICATE', team });
+    } else {
+      play('pass');
+      online.broadcastAdjudicated(null, cell);
+      dispatch({ type: 'ADJUDICATE', team: null });
+    }
+    setReveal(null);
+  };
+
+  // The 15s auto-continue countdown — applies the current selection at zero.
+  useEffect(() => {
+    if (!reveal) return;
+    if (revealCountdown <= 0) {
+      applyReveal(revealSelectionRef.current);
+      return;
+    }
+    const id = setTimeout(() => setRevealCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reveal, revealCountdown]);
 
   return (
     <div className="game" data-testid="game-screen">
@@ -331,9 +416,15 @@ export function Game() {
                     active={timerActive}
                     pickerName={teams[picker].name}
                     otherName={teams[other].name}
-                    // Online: when the picker's time runs out, open the steal
-                    // window so the OTHER team's phones can answer.
+                    pickerColorId={teams[picker].colorId}
+                    otherColorId={teams[other].colorId}
+                    // Bumped by the lock-in effect to end a window the instant a
+                    // team submits (Party Mode).
+                    endPhaseSignal={endPhaseSignal}
+                    // Mirror the phase locally (drives the colour + the reveal),
+                    // and in Party Mode open the other team's window on the phones.
                     onPhase={(p) => {
+                      setTimerPhase(p);
                       if (p === 'steal' && online.online) online.broadcastStealOpen();
                     }}
                   />
@@ -404,6 +495,9 @@ export function Game() {
                     )}
                   </div>
                 )}
+                {/* Couch Mode: the host taps the winner manually. Party Mode
+                    replaces this with the auto-winner reveal overlay below. */}
+                {!online.online && (
                 <HostPad
                   teams={teams}
                   picker={picker}
@@ -427,6 +521,7 @@ export function Game() {
                     dispatch({ type: 'UNDO' });
                   }}
                 />
+                )}
               </motion.div>
             ) : (
               <motion.div
@@ -498,6 +593,104 @@ export function Game() {
                   Exit to home
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Party Mode winner reveal ──────────────────────────────────────
+          When both teams' answer windows have closed, this shows the real
+          answer + the auto-detected winner, with a 15-second auto-continue.
+          The host can override the pick or hit Continue to apply it now. */}
+      <AnimatePresence>
+        {reveal && q && (
+          <motion.div
+            className="reveal-scrim"
+            data-testid="party-reveal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="reveal-card"
+              role="dialog"
+              aria-label="Round result"
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+            >
+              <div className="reveal-head">Time's up!</div>
+              <div className="reveal-answer">
+                <span className="reveal-answer-label">Answer</span>
+                <strong data-testid="reveal-answer">{q.artist ? `${q.a} (by ${q.artist})` : q.a}</strong>
+              </div>
+
+              <div className="reveal-subs">
+                {(['A', 'B'] as TeamId[]).map((t) => {
+                  const sub = online.submissions.find((s) => s.team === t);
+                  const correct = !!sub && isAnswerCorrect(sub.answer, q.a);
+                  return (
+                    <div className={`reveal-sub team-${t}`} key={t} data-testid={`reveal-sub-${t}`}>
+                      <span className="reveal-sub-team">{teams[t].name}</span>
+                      <span className="reveal-sub-answer">{sub ? sub.answer : '— no answer —'}</span>
+                      <span className={`reveal-sub-grade ${correct ? 'ok' : 'no'}`} aria-hidden="true">
+                        {sub ? (correct ? '✓' : '✕') : '·'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="reveal-winner" data-testid="reveal-winner">
+                {revealSelection ? (
+                  <>
+                    <span className={`reveal-winner-dot team-${revealSelection}`} aria-hidden="true" />
+                    <strong>{teams[revealSelection].name}</strong> takes this hex
+                  </>
+                ) : (
+                  <>No winner — the hex stays open</>
+                )}
+              </div>
+
+              <div className="reveal-pick">
+                {(['A', 'B'] as TeamId[]).map((t) => (
+                  <button
+                    key={t}
+                    className={`award team-${t} ${revealSelection === t ? 'selected' : ''}`}
+                    data-testid={`reveal-pick-${t}`}
+                    onClick={() => {
+                      play('tap');
+                      setRevealSelection(t);
+                    }}
+                  >
+                    ✅ {teams[t].name}
+                  </button>
+                ))}
+                <button
+                  className={`award none ${revealSelection === null ? 'selected' : ''}`}
+                  data-testid="reveal-pick-none"
+                  onClick={() => {
+                    play('tap');
+                    setRevealSelection(null);
+                  }}
+                >
+                  ⬜ No one
+                </button>
+              </div>
+
+              <div className="reveal-countdown" data-testid="reveal-countdown">
+                <div className="reveal-countdown-bar" style={{ transform: `scaleX(${revealCountdown / 15})` }} />
+                <span>Auto-continues in {revealCountdown}s</span>
+              </div>
+
+              <button
+                className="btn btn-primary btn-lg block"
+                data-testid="reveal-continue"
+                onClick={() => applyReveal(revealSelection)}
+              >
+                Continue ▸
+              </button>
             </motion.div>
           </motion.div>
         )}

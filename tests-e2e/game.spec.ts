@@ -359,6 +359,24 @@ test('lettered packs do NOT render chess coords (avoid double-labelling)', async
   await expect(page.locator('.ll-board .ll-coord-row')).toHaveCount(0);
 });
 
+test('conspiracy theories pack is selectable and serves a playable question', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'conspiracy-theories');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await expect(page.getByTestId('game-screen')).toBeVisible();
+  await expect(page.getByTestId('pack-tag')).toContainText(/Conspiracy/i);
+  // Letters ARE shown (normal lettered trivia pack, not letterless).
+  await expect(page.locator('.ll-board .hex-letter').first()).toBeVisible();
+  // Serve a question and reveal its answer — proves the pack is wired + playable.
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-text')).toBeVisible();
+  await page.getByTestId('reveal-answer').click();
+  await expect(page.getByTestId('answer-text')).toBeVisible();
+});
+
 test('melody pack plays a real audio clip and hides board letters', async ({ page }) => {
   await page.goto('/');
   await selectPack(page, 'melodies');
@@ -969,13 +987,14 @@ async function hostWithPlayerInQuestion(browser: import('@playwright/test').Brow
   return { host, player, code, hostCtx, playerCtx };
 }
 
-test('online: a NON-picking team can answer (both teams play)', async ({ browser }) => {
+test('online: the non-picking team is locked until the picker window closes', async ({ browser }) => {
   test.setTimeout(60000);
-  // Team A picks first; put the player on Amber (Team B). They must still be able
-  // to answer (no picker-first lockout).
+  // Team A picks first; put the player on Amber (Team B). In the sequential
+  // Party-Mode flow the other team answers AFTER the picker, so Amber must be
+  // locked (no input) while the picker's window is open.
   const { player, hostCtx, playerCtx } = await hostWithPlayerInQuestion(browser, 'Amber');
-  await expect(player.getByTestId('controller-input')).toBeVisible({ timeout: 10000 });
-  await expect(player.getByTestId('controller-submit')).toBeVisible();
+  await expect(player.getByTestId('controller-locked')).toBeVisible({ timeout: 10000 });
+  await expect(player.getByTestId('controller-input')).toHaveCount(0);
   await playerCtx.close();
   await hostCtx.close();
 });
