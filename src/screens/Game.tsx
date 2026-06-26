@@ -13,7 +13,7 @@ import { isAnswerCorrect } from '../core/fuzzyMatch';
 import { useAuth } from '../lib/auth';
 import { devSeamsEnabled, hasDevSeam } from '../lib/devSeams';
 import { awardXp } from '../lib/progressionClient';
-import { XP } from '../core/progression';
+import { hostXpForResult } from '../core/progression';
 import { useOnlineHost } from '../lib/useOnlineHost';
 import { haptic, play } from '../services/audio';
 import { colorById } from '../state/palette';
@@ -40,6 +40,14 @@ export function Game() {
   const teams = opts!.teams;
   const timer = state.setup.timer;
   const reducedMotion = state.settings.motion === 'reduced';
+  // Gameplay style: 'party' = phones answer + auto-winner reveal; 'couch' = host
+  // adjudicates on this screen (HostPad) and any linked phones are passive + earn
+  // XP only. A lobby may be open in EITHER (party always; couch when the host
+  // invited players for XP) — that's `online.online` below, distinct from this.
+  const isParty = state.playMode === 'party';
+  // Which team the host plays on in Couch Mode (drives the host's own XP); null =
+  // "just hosting" (no host XP). Irrelevant in Party Mode.
+  const hostTeam = state.setup.hostTeam;
   const { refreshProfile } = useAuth();
   const lastPulse = useRef(0);
   const matchStartedAt = useRef(Date.now());
@@ -125,15 +133,16 @@ export function Game() {
           /* fail silent — never block the celebration */
         });
       }
-      // Award XP for winning a game (signed-in user only; no-ops for guests).
-      // Once per game-over so a best-of-N awards PER GAME, not per re-render.
-      // BUT: in Online Mode this screen is the HOST/arbiter, not a player — the
-      // host must not earn XP for hosting. Players earn XP on their own phones
-      // (PlayerController, per game). So skip the award when we're the host.
-      const hostingOnline = !!window.__lobby && window.__lobby.self.role === 'host';
-      if (!awardedGameOver.current && !hostingOnline) {
+      // Host XP — once per game-over (a best-of-N awards PER GAME, not per
+      // re-render). In PARTY Mode this screen is the arbiter and earns nothing
+      // (players score on their own phones). In COUCH Mode the host earns XP for
+      // the team they chose to play on (full for a win, partial for a loss); a
+      // "just hosting" host (hostTeam null) earns nothing. Any linked couch
+      // players earn their own XP on their phones via the game_won broadcast.
+      const hostAmount = isParty ? null : hostXpForResult(hostTeam, game.winner);
+      if (!awardedGameOver.current && hostAmount !== null) {
         awardedGameOver.current = true;
-        awardXp(XP.WIN)
+        awardXp(hostAmount)
           .then((r) => {
             if (!r) return;
             void refreshProfile();
@@ -176,6 +185,7 @@ export function Game() {
     teamColors: { A: colorById(teams.A.colorId).base, B: colorById(teams.B.colorId).base },
     picker,
     timerSeconds: timer,
+    mode: state.playMode,
     board: { owners: game.owners, size: game.size, turn: game.turn },
   });
   // Test-only seam: `?__onlinepanel=1` force-renders the host answers panel with
@@ -183,7 +193,9 @@ export function Game() {
   // in-game layout (which otherwise needs two live clients). Gated to local
   // dev/test hosts (devSeams.ts) — inert in production.
   const forceOnlinePanel = hasDevSeam('__onlinepanel');
-  const showOnlineAnswers = online.online || forceOnlinePanel;
+  // The submitted-answers panel only applies in Party Mode (couch linked phones
+  // never submit answers — they're passive XP earners).
+  const showOnlineAnswers = (online.online && isParty) || forceOnlinePanel;
   const onlineSubs = online.online
     ? online.submissions
     : forceOnlinePanel
@@ -207,14 +219,15 @@ export function Game() {
 
   // ── Party Mode sequential answer + auto-winner reveal ───────────────────
   // Whose windows have produced an answer (the host buckets submissions/cell).
-  const pickerSubmitted = online.online && online.submissions.some((s) => s.team === picker);
-  const otherSubmitted = online.online && online.submissions.some((s) => s.team === other);
+  // Party Mode only — Couch linked phones never submit answers.
+  const pickerSubmitted = isParty && online.submissions.some((s) => s.team === picker);
+  const otherSubmitted = isParty && online.submissions.some((s) => s.team === other);
 
   // Lock-in ends the current window early: picker locks → jump to the other
   // team's window; other locks → jump to "Time!" (the reveal). Each (cell,phase)
   // bumps once (ref-guarded).
   useEffect(() => {
-    if (!online.online || !inQuestion || ui.selectedCell === null) return;
+    if (!isParty || !inQuestion || ui.selectedCell === null) return;
     const base = `${ui.selectedCell}`;
     if (timerPhase === 'main' && pickerSubmitted && phaseSignalRef.current !== `${base}:main`) {
       phaseSignalRef.current = `${base}:main`;
@@ -223,7 +236,7 @@ export function Game() {
       phaseSignalRef.current = `${base}:steal`;
       setEndPhaseSignal((n) => n + 1);
     }
-  }, [online.online, inQuestion, ui.selectedCell, timerPhase, pickerSubmitted, otherSubmitted]);
+  }, [isParty, inQuestion, ui.selectedCell, timerPhase, pickerSubmitted, otherSubmitted]);
 
   // The auto-detected winner = the first team (in arrival order) whose submitted
   // answer fuzzy-matches the real answer; null when nobody got it.
@@ -239,13 +252,13 @@ export function Game() {
   // reveal the answer to everyone + pre-select the auto-winner + start the 15s
   // auto-continue. Party Mode only — Couch Mode keeps the manual host pad.
   useEffect(() => {
-    if (!online.online || timerPhase !== 'done' || reveal || !inQuestion || ui.selectedCell === null) return;
+    if (!isParty || timerPhase !== 'done' || reveal || !inQuestion || ui.selectedCell === null) return;
     dispatch({ type: 'REVEAL_ANSWER' });
     setRevealSelection(computeAutoWinner());
     setRevealCountdown(15);
     setReveal({ cell: ui.selectedCell });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [online.online, timerPhase, reveal, inQuestion, ui.selectedCell]);
+  }, [isParty, timerPhase, reveal, inQuestion, ui.selectedCell]);
 
   // Apply the reveal's current selection (award the team, or "no one") and close.
   const applyReveal = (team: TeamId | null) => {
@@ -425,7 +438,7 @@ export function Game() {
                     // and in Party Mode open the other team's window on the phones.
                     onPhase={(p) => {
                       setTimerPhase(p);
-                      if (p === 'steal' && online.online) online.broadcastStealOpen();
+                      if (p === 'steal' && isParty) online.broadcastStealOpen();
                     }}
                   />
                 )}
@@ -495,9 +508,10 @@ export function Game() {
                     )}
                   </div>
                 )}
-                {/* Couch Mode: the host taps the winner manually. Party Mode
-                    replaces this with the auto-winner reveal overlay below. */}
-                {!online.online && (
+                {/* Couch Mode (incl. couch with linked players): the host taps
+                    the winner manually. Party Mode replaces this with the
+                    auto-winner reveal overlay below. */}
+                {!isParty && (
                 <HostPad
                   teams={teams}
                   picker={picker}

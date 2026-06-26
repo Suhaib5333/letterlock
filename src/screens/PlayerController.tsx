@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MiniBoard } from '../components/MiniBoard';
 import { LevelUpOverlay } from '../components/LevelUpOverlay';
 import { AuthModal } from '../components/AuthModal';
-import { XP } from '../core/progression';
+import { teamXpForResult } from '../core/progression';
 import { useAuth } from '../lib/auth';
 import { awardXp } from '../lib/progressionClient';
 import { isSupabaseConfigured } from '../lib/supabase';
@@ -136,6 +136,9 @@ export function PlayerController() {
   const [team, setTeam] = useState<PlayerTeam | null>(null);
   const [labels, setLabels] = useState<{ A: string; B: string }>({ A: 'Team A', B: 'Team B' });
   const [category, setCategory] = useState<string | null>(null);
+  // 'party' = answer on the phone; 'couch' = passive, watch the big screen and
+  // earn XP for your team. Defaults to party (back-compat with older hosts).
+  const [mode, setMode] = useState<'party' | 'couch'>('party');
   const [phase, setPhase] = useState<Phase>('waiting');
   const [status, setStatus] = useState<'connecting' | 'open' | 'error'>('connecting');
   const [error, setError] = useState<string | null>(null);
@@ -332,6 +335,7 @@ export function PlayerController() {
         setLabels({ A: event.A, B: event.B });
         if (event.aColor && event.bColor) setColors({ A: event.aColor, B: event.bColor });
         if (event.category) setCategory(event.category);
+        if (event.mode) setMode(event.mode);
         break;
       case 'board_state':
         setBoardSnap({ owners: event.owners, size: event.size, turn: event.turn, winner: event.winner });
@@ -404,8 +408,7 @@ export function PlayerController() {
         // 'done' screen is driven by game_over (match end), so award here but only
         // transition there.
         if (event.winner && teamRef.current) {
-          const won = event.winner === teamRef.current;
-          awardXp(won ? XP.WIN : XP.LOSS)
+          awardXp(teamXpForResult(teamRef.current, event.winner))
             .then((r) => {
               if (r?.leveled_up) setLevelUp({ level: r.level, prestige: r.prestige });
             })
@@ -671,7 +674,11 @@ export function PlayerController() {
               Category: <strong>{category}</strong>
             </p>
           )}
-          <p>Eyes on the big screen — your question will appear here when it's live.</p>
+          <p>
+            {mode === 'couch'
+              ? "Eyes on the big screen — the host runs the questions. You'll earn XP for your team's results."
+              : "Eyes on the big screen — your question will appear here when it's live."}
+          </p>
         </div>
       )}
 
@@ -682,18 +689,22 @@ export function PlayerController() {
           )}
           {/* Clear "whose turn" banner + synced countdown. */}
           <div
-            className={`controller-turn ${canAnswerNow ? 'go' : 'wait'}`}
+            className={`controller-turn ${mode === 'couch' ? 'go' : canAnswerNow ? 'go' : 'wait'}`}
             data-testid="controller-turn"
           >
-            {!team
-              ? 'Not on a team'
-              : canAnswerNow
-                ? '✅ Your turn — answer now!'
-                : lockReason === 'waiting'
-                  ? `🔒 ${pickerLabel} answers first — you're up next`
-                  : lockReason === 'closed'
-                    ? '⏳ Other team is answering now'
-                    : '🔒 Teammate is answering for your team'}
+            {mode === 'couch'
+              ? !team
+                ? 'Not on a team yet'
+                : `👀 Watch the big screen — you're earning XP for ${teamLabel}`
+              : !team
+                ? 'Not on a team'
+                : canAnswerNow
+                  ? '✅ Your turn — answer now!'
+                  : lockReason === 'waiting'
+                    ? `🔒 ${pickerLabel} answers first — you're up next`
+                    : lockReason === 'closed'
+                      ? '⏳ Other team is answering now'
+                      : '🔒 Teammate is answering for your team'}
           </div>
           {remaining !== null && (
             <div className={`controller-timer ${remaining <= 5 ? 'urgent' : ''}`} data-testid="controller-timer">
@@ -715,7 +726,15 @@ export function PlayerController() {
           )}
           {served.audio && <audio controls src={served.audio} className="controller-media" />}
           {served.video && <video controls src={served.video} className="controller-media" />}
-          {!team ? (
+          {mode === 'couch' ? (
+            // Couch Mode: phones don't answer. The host adjudicates on the shared
+            // screen; this phone is just linked so its account earns the team's XP.
+            <p className="controller-couch-watch" data-testid="controller-couch-watch">
+              {team
+                ? `🛋 Sit back and watch the big screen — you'll earn XP whenever ${teamLabel} scores.`
+                : "Ask the host to put you on a team so your XP counts."}
+            </p>
+          ) : !team ? (
             <p className="controller-noteam" data-testid="controller-noteam">
               You're not on a team yet — ask the host to add you, then you can answer.
             </p>

@@ -979,6 +979,17 @@
   flex: 0 0 auto;
   margin-top: 0;
 }
+/* Couch setup footer: primary Start + secondary "Invite players for XP". */
+.setup-actions {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.invite-btn {
+  flex: 0 0 auto;
+  margin-top: 0;
+}
 
 /* ---------- Switch ---------- */
 .switch {

@@ -108,7 +108,9 @@ import { gulfCultureGaps } from './gulfCultureGaps';
 // Round-13: two new themed packs + history easy/medium tiers.
 import { mythologyPack } from './mythology';
 import { animalKingdomPack } from './animalKingdom';
-import { conspiracyPack } from './conspiracy';
+import { conspiracyEasyPack } from './conspiracyEasy';
+import { conspiracyMediumPack } from './conspiracyMedium';
+import { conspiracyHardPack } from './conspiracyHard';
 import { historyEasyPack } from './historyEasy';
 import { historyMediumPack } from './historyMedium';
 // Round-14: world-map identification packs (a country highlighted on the map).
@@ -321,8 +323,12 @@ export const PACKS: QuestionPack[] = [
   // Round-13: new themed packs.
   mythologyPack,
   animalKingdomPack,
-  // Conspiracy Theories — secret societies, cover-ups, UFOs, cryptids (226 Qs).
-  conspiracyPack,
+  // Conspiracy Theories — three difficulty tiers (collapse into one tier-card):
+  // easy (mainstream lore), medium (named cover-ups/cryptids), hard (declassified
+  // ops & deep cuts). 200+ questions each.
+  conspiracyEasyPack,
+  conspiracyMediumPack,
+  conspiracyHardPack,
   // Round-14: world-map identification packs.
   mapsEasyPack,
   mapsMediumPack,

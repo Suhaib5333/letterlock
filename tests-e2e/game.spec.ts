@@ -359,9 +359,18 @@ test('lettered packs do NOT render chess coords (avoid double-labelling)', async
   await expect(page.locator('.ll-board .ll-coord-row')).toHaveCount(0);
 });
 
-test('conspiracy theories pack is selectable and serves a playable question', async ({ page }) => {
+test('conspiracy theories tiers collapse into one card and a tier is playable', async ({ page }) => {
   await page.goto('/');
-  await selectPack(page, 'conspiracy-theories');
+  // The easy/medium/hard tiers share the `conspiracy` stem → one tier-selector card.
+  await page.getByTestId('open-categories').click();
+  await expect(page.getByTestId('category-menu')).toBeVisible();
+  await expect(page.locator('[data-testid="pack-tier-conspiracy-easy"]')).toBeVisible();
+  await expect(page.locator('[data-testid="pack-tier-conspiracy-medium"]')).toBeVisible();
+  await expect(page.locator('[data-testid="pack-tier-conspiracy-hard"]')).toBeVisible();
+  // Pick the Medium tier and confirm the card.
+  await page.locator('[data-testid="pack-tier-conspiracy-medium"]').click();
+  await page.locator('[data-testid="pack-conspiracy-medium"] .cat-card-main').click();
+  await expect(page.getByTestId('category-menu')).toHaveCount(0);
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-couch').click();
   await page.getByTestId('mode-single').click();
@@ -370,7 +379,7 @@ test('conspiracy theories pack is selectable and serves a playable question', as
   await expect(page.getByTestId('pack-tag')).toContainText(/Conspiracy/i);
   // Letters ARE shown (normal lettered trivia pack, not letterless).
   await expect(page.locator('.ll-board .hex-letter').first()).toBeVisible();
-  // Serve a question and reveal its answer — proves the pack is wired + playable.
+  // Serve a question and reveal its answer — proves the tier is wired + playable.
   await page.locator('.ll-hex.claimable').first().click();
   await expect(page.getByTestId('question-text')).toBeVisible();
   await page.getByTestId('reveal-answer').click();

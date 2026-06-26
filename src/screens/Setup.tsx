@@ -75,6 +75,8 @@ export function Setup() {
   const access = accessFromProfile(profile);
   const f = state.setup;
   const online = state.online;
+  const playMode = state.playMode;
+  const isParty = playMode === 'party';
   const set = (patch: Partial<SetupForm>) => dispatch({ type: 'UPDATE_SETUP', patch });
   const pack = packById(f.packId);
 
@@ -215,24 +217,61 @@ export function Setup() {
             <span className="knob" />
           </button>
         </div>
+
+        {/* Couch Mode: choose which team the HOST plays on (so the host earns
+            that team's XP) — or "Just hosting" to run the game without scoring.
+            Party Mode hides this (the host is the arbiter and never earns XP). */}
+        {!isParty && (
+          <OptionRow<'A' | 'B' | 'none'>
+            label="You're playing as"
+            hint="Earn XP for this team — or just host without scoring"
+            options={[
+              { value: 'A', label: colorById(f.colorA).name, sub: 'earn its XP' },
+              { value: 'B', label: colorById(f.colorB).name, sub: 'earn its XP' },
+              { value: 'none', label: '👀 Just hosting', sub: 'no XP' },
+            ]}
+            value={f.hostTeam ?? 'none'}
+            onChange={(v) => set({ hostTeam: v === 'none' ? null : v })}
+            testId="host-team"
+          />
+        )}
       </div>
 
-      <button
-        className="btn btn-primary btn-lg block start-btn"
-        data-testid="start-match"
-        onClick={() => {
-          play('pick');
-          // Online: go to the lobby to share the code (match starts from there).
-          // Couch: start the match immediately.
-          if (online) {
-            dispatch({ type: 'SET_SCREEN', screen: 'lobby-host' });
-          } else {
-            dispatch({ type: 'START_MATCH' });
-          }
-        }}
-      >
-        {online ? 'Create room ▸' : 'Start match ▸'}
-      </button>
+      <div className="setup-actions">
+        <button
+          className="btn btn-primary btn-lg block start-btn"
+          data-testid="start-match"
+          onClick={() => {
+            play('pick');
+            // Party: go to the lobby to share the code (match starts from there).
+            // Couch: start the match immediately on this one screen.
+            if (isParty) {
+              dispatch({ type: 'SET_SCREEN', screen: 'lobby-host' });
+            } else {
+              dispatch({ type: 'START_MATCH' });
+            }
+          }}
+        >
+          {isParty ? 'Create room ▸' : 'Start match ▸'}
+        </button>
+
+        {/* Couch Mode only: optionally open a room so friends can scan a QR and
+            link their account — they earn XP for their team's results without
+            answering on their phones (the host still adjudicates on this screen). */}
+        {!isParty && (
+          <button
+            className="btn btn-secondary btn-lg block invite-btn"
+            data-testid="couch-invite"
+            onClick={() => {
+              play('pick');
+              dispatch({ type: 'SET_ONLINE', value: true }); // open a lobby (stays Couch)
+              dispatch({ type: 'SET_SCREEN', screen: 'lobby-host' });
+            }}
+          >
+            📱 Invite players for XP ▸
+          </button>
+        )}
+      </div>
     </div>
   );
 }

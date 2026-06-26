@@ -20,6 +20,27 @@ export const XP = {
   ROOM_JOIN: 25,
 } as const;
 
+/**
+ * XP a participant on `team` earns for a finished game won by `winner`:
+ * the winning team gets the full WIN; everyone else who played (including a
+ * drawn board, winner === null) gets the partial LOSS. Used identically for a
+ * linked player (Couch/Party) and the couch host, so attribution is consistent
+ * and unit-testable. (The server `award_xp` RPC re-clamps the amount.)
+ */
+export function teamXpForResult(team: 'A' | 'B', winner: 'A' | 'B' | null): number {
+  return winner !== null && team === winner ? XP.WIN : XP.LOSS;
+}
+
+/**
+ * XP the COUCH host earns, given the team they chose to play on (`hostTeam`).
+ * `null` = "just hosting" → no XP (returns null). Party-Mode hosts are arbiters
+ * and never earn XP, so callers pass `hostTeam = null` there.
+ */
+export function hostXpForResult(hostTeam: 'A' | 'B' | null, winner: 'A' | 'B' | null): number | null {
+  if (!hostTeam) return null;
+  return teamXpForResult(hostTeam, winner);
+}
+
 /** Games needed to advance FROM level i (1-indexed). Index 0 unused. Level 10 = prestige. */
 const GAMES_TO_NEXT = [0, 2, 3, 5, 7, 9, 11, 13, 15, 20];
 /** XP needed to go from level L → L+1 (L = 1..9). */

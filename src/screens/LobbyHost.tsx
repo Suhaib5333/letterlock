@@ -87,6 +87,8 @@ export function LobbyHost() {
             A: colorById(state.setup.colorA).name,
             B: colorById(state.setup.colorB).name,
             category: `${pack.emoji} ${pack.name}`,
+            // Tells phones whether to answer (party) or stay passive + earn XP (couch).
+            mode: state.playMode,
           };
         };
         const h = await openRoom(code, self, {
@@ -202,8 +204,10 @@ export function LobbyHost() {
           ‹ Leave
         </button>
         <div className="sub-head-title">
-          <h1>Party lobby</h1>
-          <span className="mode-badge" data-testid="mode-badge">🛜 Party Mode</span>
+          <h1>{state.playMode === 'couch' ? 'Couch lobby' : 'Party lobby'}</h1>
+          <span className="mode-badge" data-testid="mode-badge">
+            {state.playMode === 'couch' ? '🛋 Couch · link for XP' : '🛜 Party Mode'}
+          </span>
         </div>
         <div />
       </header>
@@ -251,7 +255,12 @@ export function LobbyHost() {
           <div className="lobby-qr">
             <QrCode value={joinUrl} size={180} />
           </div>
-          <div className="lobby-qr-hint">Scan to join — or open <code>{joinUrl}</code></div>
+          <div className="lobby-qr-hint">
+            {state.playMode === 'couch'
+              ? 'Scan to link your account & earn XP — you watch the big screen, the host scores it.'
+              : 'Scan to join — or open '}
+            {state.playMode !== 'couch' && <code>{joinUrl}</code>}
+          </div>
         </section>
 
         <section className="lobby-roster" data-testid="lobby-roster">

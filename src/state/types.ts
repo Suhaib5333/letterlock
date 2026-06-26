@@ -1,4 +1,4 @@
-import type { BoardSize, MatchMode } from '../core/models';
+import type { BoardSize, MatchMode, TeamId } from '../core/models';
 import type { Question } from '../core/packs';
 import type { TopologyKind } from '../core/topology';
 
@@ -41,6 +41,11 @@ export interface SetupForm {
   pieRule: boolean;
   timer: 0 | 20 | 30 | 45; // seconds; 0 = no timer (relaxed/classroom)
   packId: string;
+  /** Which team the HOST plays on in Couch Mode — drives whose XP the host earns
+   *  (their team's win/loss). `null` = "just hosting" (host earns no XP, e.g. when
+   *  only the linked players should score). Ignored in Party Mode (host is the
+   *  arbiter and never earns XP there). */
+  hostTeam: TeamId | null;
 }
 
 export interface Served {

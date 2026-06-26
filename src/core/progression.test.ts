@@ -10,10 +10,35 @@ import {
   modeUnlocked,
   rankLabel,
   tierForLevel,
+  teamXpForResult,
+  hostXpForResult,
   XP,
   xpToNext,
   xpToReach,
 } from './progression';
+
+describe('XP attribution (couch-mode linking + party)', () => {
+  it('winning team earns the full WIN; losing team earns the partial LOSS', () => {
+    expect(teamXpForResult('A', 'A')).toBe(XP.WIN);
+    expect(teamXpForResult('B', 'B')).toBe(XP.WIN);
+    expect(teamXpForResult('A', 'B')).toBe(XP.LOSS);
+    expect(teamXpForResult('B', 'A')).toBe(XP.LOSS);
+  });
+  it('a drawn board (no winner) pays everyone the partial LOSS', () => {
+    expect(teamXpForResult('A', null)).toBe(XP.LOSS);
+    expect(teamXpForResult('B', null)).toBe(XP.LOSS);
+  });
+  it('loser XP is exactly half the winner XP (winner-full / loser-partial)', () => {
+    expect(XP.LOSS * 2).toBe(XP.WIN);
+  });
+  it('couch host earns their chosen team\'s result; "just hosting" earns nothing', () => {
+    expect(hostXpForResult('A', 'A')).toBe(XP.WIN); // host on winning team
+    expect(hostXpForResult('A', 'B')).toBe(XP.LOSS); // host on losing team
+    expect(hostXpForResult('B', 'B')).toBe(XP.WIN);
+    expect(hostXpForResult(null, 'A')).toBeNull(); // "just hosting" → no XP
+    expect(hostXpForResult(null, null)).toBeNull();
+  });
+});
 
 describe('xp curve', () => {
   it('level 1 needs 2 games to advance', () => {

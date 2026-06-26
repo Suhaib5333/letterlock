@@ -46,9 +46,12 @@ export function useOnlineHost(args: {
   teamColors: { A: string; B: string };
   picker: TeamId;
   timerSeconds: number;
+  /** 'party' = phones answer; 'couch' = phones are passive XP earners. Rides the
+   *  team_labels broadcast so a reconnecting phone restores the right behaviour. */
+  mode: 'couch' | 'party';
   board: { owners: (TeamId | null)[]; size: number; turn: TeamId | null };
 }): OnlineHostState {
-  const { served, answerRevealed, gameOver, matchOver, winner, hideLetters, teamNames, teamColors, picker, timerSeconds, board } =
+  const { served, answerRevealed, gameOver, matchOver, winner, hideLetters, teamNames, teamColors, picker, timerSeconds, mode, board } =
     args;
 
   // Resolve the lobby once. It only ever exists on the host's device.
@@ -79,6 +82,8 @@ export function useOnlineHost(args: {
   pickerRef.current = picker;
   const timerRef = useRef(timerSeconds);
   timerRef.current = timerSeconds;
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
   const boardRef = useRef(board);
   boardRef.current = board;
   // Cells where the host has opened the steal window — re-sent on reconnect.
@@ -100,6 +105,7 @@ export function useOnlineHost(args: {
         B: namesRef.current.B,
         aColor: colorsRef.current.A,
         bColor: colorsRef.current.B,
+        mode: modeRef.current,
       })
       .catch(() => {});
   };

@@ -891,6 +891,20 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
   text-align: center;
 }
 
+/* Couch Mode passive "watch + earn XP" note on the linked phone. */
+.controller-couch-watch {
+  margin: 10px 0 0;
+  padding: 16px;
+  border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+  color: var(--ink);
+  font-size: var(--t-body);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.4;
+}
+
 /* Signed-out XP nudge on the QR-join screen. */
 .controller-xp-notice {
   display: flex;

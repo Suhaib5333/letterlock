@@ -99,7 +99,10 @@ export type LobbyEvent =
   // colour instead of a generic "Team A/B" and can tint the live mini-board.
   // `category` carries the chosen question pack's display name (emoji + title) so
   // the lobby tells everyone what they're about to play.
-  | { type: 'team_labels'; A: string; B: string; aColor?: string; bColor?: string; category?: string }
+  // `mode` tells the phone how to behave: 'party' = answer questions on the
+  // phone; 'couch' = passive "watch the big screen, earn XP for your team" view
+  // (the host adjudicates on the shared screen). Absent ⇒ 'party' (back-compat).
+  | { type: 'team_labels'; A: string; B: string; aColor?: string; bColor?: string; category?: string; mode?: 'party' | 'couch' }
   // Live board snapshot so the phone can mirror the hex board + whose turn it is.
   | {
       type: 'board_state';

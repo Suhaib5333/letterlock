@@ -51,9 +51,14 @@ export interface StoreState {
   log: GameLog;
   game: GameState;
   ui: UiState;
-  // True when the player chose Online Mode: Setup is done first, THEN the lobby
-  // code is shown (so team colours are picked before sharing the room).
+  // True when a lobby is (or will be) opened so phones connect — Party Mode
+  // always, and Couch Mode when the host opts into "invite players for XP".
   online: boolean;
+  // Gameplay style, independent of whether a lobby is open:
+  //   'party' — phones answer + the auto-winner reveal flow (online only).
+  //   'couch' — host adjudicates on one screen (HostPad); any linked phones are
+  //             passive and earn XP only. Couch is the default.
+  playMode: 'couch' | 'party';
 }
 
 const EMPTY_UI: UiState = {
@@ -79,6 +84,7 @@ const DEFAULT_SETUP: SetupForm = {
   pieRule: true,
   timer: 30,
   packId: DEFAULT_PACK_ID,
+  hostTeam: 'A', // host plays on Blue by default (earns that team's XP in Couch Mode)
 };
 
 // A harmless placeholder game so `state.game` is always defined before a match starts.
@@ -97,6 +103,7 @@ const PLACEHOLDER_GAME = replay([
 type Action =
   | { type: 'SET_SCREEN'; screen: Screen }
   | { type: 'SET_ONLINE'; value: boolean }
+  | { type: 'SET_PLAY_MODE'; mode: 'couch' | 'party' }
   | { type: 'UPDATE_SETTINGS'; patch: Partial<Settings> }
   | { type: 'UPDATE_SETUP'; patch: Partial<SetupForm> }
   | { type: 'START_MATCH' }
@@ -213,6 +220,11 @@ function reducer(state: StoreState, action: Action): StoreState {
 
     case 'SET_ONLINE':
       return { ...state, online: action.value };
+
+    case 'SET_PLAY_MODE':
+      // Party always opens a lobby; Couch starts solo (no lobby) unless the host
+      // later opts into inviting players (SET_ONLINE true).
+      return { ...state, playMode: action.mode, online: action.mode === 'party' };
 
     case 'UPDATE_SETTINGS':
       return { ...state, settings: { ...state.settings, ...action.patch } };
@@ -422,7 +434,7 @@ function reducer(state: StoreState, action: Action): StoreState {
     }
 
     case 'EXIT_HOME':
-      return { ...state, screen: 'home', online: false };
+      return { ...state, screen: 'home', online: false, playMode: 'couch' };
 
     case 'HYDRATE':
       return { ...state, ...action.payload };
@@ -439,6 +451,7 @@ const initialState: StoreState = {
   game: PLACEHOLDER_GAME,
   ui: { ...EMPTY_UI },
   online: false,
+  playMode: 'couch',
 };
 
 interface StoreApi {
