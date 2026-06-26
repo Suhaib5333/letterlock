@@ -163,6 +163,17 @@ export function LobbyHost() {
     [players, state.setup.colorA, state.setup.colorB],
   );
 
+  // Fully REMOVE a player from the room (× in the roster). The targeted phone
+  // leaves and drops its XP-membership row; here we also drop them from the local
+  // roster immediately so the host UI feels instant.
+  const remove = useCallback((playerId: string) => {
+    const h = handleRef.current;
+    if (!h) return;
+    play('tap');
+    setRoster((rs) => rs.filter((p) => p.id !== playerId));
+    h.broadcast({ type: 'kicked', playerId }).catch(() => {});
+  }, []);
+
   const startMatch = useCallback(() => {
     const h = handleRef.current;
     if (!h) return;
@@ -287,14 +298,14 @@ export function LobbyHost() {
                 colorVar="--team-a"
                 team="A"
                 players={teamA}
-                onAssign={assign}
+                onRemove={remove}
               />
               <TeamColumn
                 label={colorB.name}
                 colorVar="--team-b"
                 team="B"
                 players={teamB}
-                onAssign={assign}
+                onRemove={remove}
               />
               {unassigned.length > 0 && (
                 <div className="lobby-unassigned">
@@ -306,6 +317,14 @@ export function LobbyHost() {
                         <div className="lobby-assign">
                           <button onClick={() => assign(p.id, 'A')}>→ {colorA.name}</button>
                           <button onClick={() => assign(p.id, 'B')}>→ {colorB.name}</button>
+                          <button
+                            className="lobby-kick"
+                            data-testid={`lobby-remove-${p.id}`}
+                            aria-label={`Remove ${p.name}`}
+                            onClick={() => remove(p.id)}
+                          >
+                            ×
+                          </button>
                         </div>
                       </li>
                     ))}
@@ -334,13 +353,13 @@ function TeamColumn({
   colorVar,
   team,
   players,
-  onAssign,
+  onRemove,
 }: {
   label: string;
   colorVar: '--team-a' | '--team-b';
   team: PlayerTeam;
   players: PresencePlayer[];
-  onAssign: (id: string, team: PlayerTeam | null) => void;
+  onRemove: (id: string) => void;
 }) {
   return (
     <div
@@ -357,7 +376,14 @@ function TeamColumn({
           {players.map((p) => (
             <li key={p.id} data-testid={`lobby-player-${p.id}`}>
               <span className="lobby-name">{p.name}</span>
-              <button className="lobby-kick" onClick={() => onAssign(p.id, null)}>×</button>
+              <button
+                className="lobby-kick"
+                data-testid={`lobby-remove-${p.id}`}
+                aria-label={`Remove ${p.name}`}
+                onClick={() => onRemove(p.id)}
+              >
+                ×
+              </button>
             </li>
           ))}
         </ul>

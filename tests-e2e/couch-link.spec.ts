@@ -98,3 +98,61 @@ test('couch link: joined phone is PASSIVE (no answer input) and earns XP on a wi
   await pc.close();
   await hc.close();
 });
+
+test('couch link: host can × remove a player (they are ejected from the room)', async ({ browser }) => {
+  test.setTimeout(120000);
+  const { host, code, ctx: hc } = await openCouchLobby(browser);
+
+  const pc = await browser.newContext();
+  const player = await pc.newPage();
+  await player.goto(CONTROLLER(code, 'Unwanted'));
+  await expect(player.getByTestId('controller-lobby')).toBeVisible({ timeout: 35000 });
+  await expect(host.getByTestId('lobby-count')).toContainText('1 connected', { timeout: 35000 });
+  // Wait until the player row (with its × remove button) has actually rendered.
+  await expect(host.getByTestId('lobby-roster')).toContainText('Unwanted', { timeout: 35000 });
+  const removeBtn = host.locator('.lobby-roster .lobby-kick').first();
+  await expect(removeBtn).toBeVisible({ timeout: 35000 });
+
+  // Host clicks the × next to the player → they're removed from the room.
+  await removeBtn.click();
+  await expect(player.getByTestId('controller-error')).toBeVisible({ timeout: 35000 });
+  await expect(player.getByTestId('controller-error')).toContainText(/removed/i);
+  // Roster empties on the host side too.
+  await expect(host.getByTestId('lobby-count')).toContainText('0 connected', { timeout: 35000 });
+
+  await pc.close();
+  await hc.close();
+});
+
+test('couch link: a player can CLOSE their phone after joining and the host finishes fine', async ({ browser }) => {
+  test.setTimeout(120000);
+  const { host, code, ctx: hc } = await openCouchLobby(browser);
+  // Catch any uncaught host error caused by a vanished player.
+  const hostErrors: string[] = [];
+  host.on('pageerror', (e) => hostErrors.push(e.message));
+
+  const pc = await browser.newContext();
+  const player = await pc.newPage();
+  await player.goto(CONTROLLER(code, 'Driveby'));
+  await expect(player.getByTestId('controller-lobby')).toBeVisible({ timeout: 35000 });
+  await expect(host.getByTestId('lobby-count')).toContainText('1 connected', { timeout: 35000 });
+  await host.locator('.lobby-unassigned button', { hasText: 'Blue' }).first().click();
+  await host.getByTestId('lobby-start').click();
+  await expect(host.getByTestId('game-screen')).toBeVisible();
+
+  // The player scanned once and is linked — now they CLOSE their phone entirely.
+  await pc.close();
+
+  // Host plays the game to a Team A win (row 2). The server credits members at
+  // game end; the closed phone causes NO error on the host, and the match
+  // completes normally.
+  for (const cell of [10, 11, 12, 13, 14]) {
+    await host.locator(`.ll-hex.claimable[data-cell="${cell}"]`).click();
+    await expect(host.getByTestId('question-card')).toBeVisible();
+    await host.getByTestId('award-A').click();
+  }
+  await expect(host.getByTestId('game-over')).toBeVisible({ timeout: 10000 });
+  expect(hostErrors).toEqual([]);
+
+  await hc.close();
+});

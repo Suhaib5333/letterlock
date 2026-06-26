@@ -14,6 +14,7 @@ import { useAuth } from '../lib/auth';
 import { devSeamsEnabled, hasDevSeam } from '../lib/devSeams';
 import { awardXp } from '../lib/progressionClient';
 import { hostXpForResult } from '../core/progression';
+import { awardRoomXp } from '../lib/couchXp';
 import { useOnlineHost } from '../lib/useOnlineHost';
 import { haptic, play } from '../services/audio';
 import { colorById } from '../state/palette';
@@ -53,6 +54,7 @@ export function Game() {
   const matchStartedAt = useRef(Date.now());
   const submittedScore = useRef(false);
   const awardedGameOver = useRef(false);
+  const awardedRoomXp = useRef(false); // couch linked-player server award, once/game
   const [levelUp, setLevelUp] = useState<{ level: number; prestige: number } | null>(null);
   // Screenshot/QA seam: `?__leveluptest=1` previews the level-up celebration
   // (or `?__leveluptest=prestige` the prestige one). Optional `&lvl=N&prestige=P`
@@ -94,9 +96,12 @@ export function Game() {
     if (!canPieSwap) setPieDismissed(false);
   }, [canPieSwap]);
 
-  // Re-arm the per-game XP award when a new game begins.
+  // Re-arm the per-game XP awards when a new game begins.
   useEffect(() => {
-    if (!ui.gameOver) awardedGameOver.current = false;
+    if (!ui.gameOver) {
+      awardedGameOver.current = false;
+      awardedRoomXp.current = false;
+    }
   }, [ui.gameOver]);
 
 
@@ -149,6 +154,17 @@ export function Game() {
             if (r.leveled_up) setLevelUp({ level: r.level, prestige: r.prestige });
           })
           .catch(() => {});
+      }
+      // COUCH Mode with linked players: credit every recorded room member their
+      // XP SERVER-SIDE so it lands even if their phone has been closed since they
+      // scanned the QR. Once per game-over (ref-guarded); idempotent per game key
+      // server-side too. No-ops in Party Mode (phones self-award) and Couch solo
+      // (no lobby → no room code).
+      const couchLobby = !!window.__lobby && window.__lobby.self.role === 'host';
+      if (!awardedRoomXp.current && !isParty && couchLobby) {
+        awardedRoomXp.current = true;
+        const key = `${matchStartedAt.current}:${series.gamesPlayed}`;
+        void awardRoomXp(window.__lobby!.code, game.winner, key);
       }
     } else if (ui.lastClaimCell !== null) {
       play(ui.blockHint ? 'block' : 'claim');

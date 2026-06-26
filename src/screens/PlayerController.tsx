@@ -3,6 +3,7 @@ import { MiniBoard } from '../components/MiniBoard';
 import { LevelUpOverlay } from '../components/LevelUpOverlay';
 import { AuthModal } from '../components/AuthModal';
 import { teamXpForResult } from '../core/progression';
+import { linkRoomMember, unlinkRoomMember } from '../lib/couchXp';
 import { useAuth } from '../lib/auth';
 import { awardXp } from '../lib/progressionClient';
 import { isSupabaseConfigured } from '../lib/supabase';
@@ -171,6 +172,7 @@ export function PlayerController() {
   const teamRef = useRef<PlayerTeam | null>(team);
   const servedRef = useRef<ServedPrompt | null>(served);
   const nameRef = useRef(name);
+  const modeRef = useRef(mode);
   const sawHostRef = useRef(false);
   // The cell this player has already answered (one answer per question). Seeded
   // from the saved session so a refresh mid-question stays locked.
@@ -184,6 +186,18 @@ export function PlayerController() {
   useEffect(() => {
     nameRef.current = name;
   }, [name]);
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
+
+  // Couch Mode: the moment a signed-in player is linked to a team, persist that
+  // membership server-side (idempotent upsert). After this they can CLOSE their
+  // phone — the host credits every recorded member's XP at game end. No-ops for
+  // guests (no account → no XP) and for Party Mode (phones stay open + score live).
+  useEffect(() => {
+    if (mode !== 'couch' || !team || !room) return;
+    void linkRoomMember(room, team, name || 'Player');
+  }, [mode, team, room, name]);
 
   // Signed-in phones auto-join with their account username — no manual entry.
   useEffect(() => {
@@ -335,7 +349,10 @@ export function PlayerController() {
         setLabels({ A: event.A, B: event.B });
         if (event.aColor && event.bColor) setColors({ A: event.aColor, B: event.bColor });
         if (event.category) setCategory(event.category);
-        if (event.mode) setMode(event.mode);
+        if (event.mode) {
+          setMode(event.mode);
+          modeRef.current = event.mode;
+        }
         break;
       case 'board_state':
         setBoardSnap({ owners: event.owners, size: event.size, turn: event.turn, winner: event.winner });
@@ -407,7 +424,11 @@ export function PlayerController() {
         // controllers no-op cleanly, and a draw (no winner) awards nothing. The
         // 'done' screen is driven by game_over (match end), so award here but only
         // transition there.
-        if (event.winner && teamRef.current) {
+        // PARTY Mode: the phone is open (it answers) so it credits its own XP
+        // live. COUCH Mode: the phone may be closed, so the HOST credits every
+        // recorded member server-side (award_room_xp) — this phone must NOT
+        // double-award.
+        if (event.winner && teamRef.current && modeRef.current !== 'couch') {
           awardXp(teamXpForResult(teamRef.current, event.winner))
             .then((r) => {
               if (r?.leveled_up) setLevelUp({ level: r.level, prestige: r.prestige });
@@ -433,6 +454,18 @@ export function PlayerController() {
         // (don't double-award here).
         setWinner(event.winner);
         setPhase('done');
+        break;
+      case 'kicked':
+        // The host removed THIS player from the room. Drop our XP membership and
+        // disconnect so we stop receiving the match (and no longer earn its XP).
+        if (event.playerId === myId) {
+          void unlinkRoomMember(room);
+          const h = handleRef.current;
+          if (h) h.leave().catch(() => {});
+          handleRef.current = null;
+          setError('The host removed you from the room.');
+          setStatus('error');
+        }
         break;
       case 'host_left':
         setError('The host left and the game has ended.');
@@ -487,6 +520,10 @@ export function PlayerController() {
   // Leave the room and return to the main app home. Used both mid-match (exit any
   // time) and after the game completes. Drops the channel cleanly first.
   const leaveToHome = useCallback(() => {
+    // Explicitly leaving = opting out, so drop the XP membership. (Merely CLOSING
+    // the tab does NOT call this — that's the whole point: scan once, close, still
+    // get XP. unlink no-ops for guests / when not linked.)
+    void unlinkRoomMember(room);
     const h = handleRef.current;
     if (h) h.leave().catch(() => {});
     handleRef.current = null;

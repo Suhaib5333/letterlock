@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useAuth } from '../lib/auth';
 import { hasDevSeam } from '../lib/devSeams';
+import { clearRoom } from '../lib/couchXp';
 import { startSocial, stopSocial, type Notification } from '../lib/friends';
 import { play } from '../services/audio';
 import { initAudio, setAudioEnabled, setMusicContext, startMusic, stopMusic } from '../services/audio';
@@ -97,6 +98,9 @@ export function App() {
     const lobby = window.__lobby;
     if (!lobby) return;
     window.__lobby = undefined;
+    // Wipe any couch XP-membership rows for this room so a reused 6-char code
+    // can't later credit stale members (no-op for party / no members).
+    void clearRoom(lobby.code);
     lobby.leave().catch(() => {});
     try {
       sessionStorage.removeItem('letterlock.lobby.code');

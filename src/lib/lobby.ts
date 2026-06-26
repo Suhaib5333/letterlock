@@ -118,6 +118,9 @@ export type LobbyEvent =
   // answer (steal window). cell scopes it to the current question.
   | { type: 'steal_open'; cell: number; stealSeconds?: number; deadline?: number; hostNow?: number }
   | { type: 'match_started' }
+  // Host removed a player from the room (× in the lobby). The targeted phone
+  // leaves and drops its XP-membership row.
+  | { type: 'kicked'; playerId: string }
   | { type: 'host_left' };
 
 export interface LobbyHandlers {
