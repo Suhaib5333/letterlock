@@ -39,7 +39,7 @@ export function Home() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showPackEditor, setShowPackEditor] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
-  const { user, profile, profileChecked, isAdmin } = useAuth();
+  const { user, profile, profileChecked, isAdmin, authRedirectError } = useAuth();
   // First-time login (Google OR email) must ALWAYS land on the username claim —
   // even after a Google redirect lands here with the auth modal closed. Gate on
   // profileChecked (the fetch actually RESOLVED) so the brief load gap on refresh
@@ -70,6 +70,12 @@ export function Home() {
       setShowAuth(false);
     }
   }, [needsUsername]);
+  // A failed Google redirect lands here signed-out with the error in the URL hash
+  // (already captured into authRedirectError). Open the dialog once so the player
+  // sees why sign-in didn't take, instead of a silent "the page just refreshed".
+  useEffect(() => {
+    if (authRedirectError) setShowAuth(true);
+  }, [authRedirectError]);
   // Incoming friend-request count → a badge on the Friends button so requests
   // that arrived while away are visible right on the home screen.
   const [pendingReq, setPendingReq] = useState(0);

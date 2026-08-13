@@ -36,7 +36,16 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
     verifyEmailOtp,
     signOut,
     refreshProfile,
+    authRedirectError,
+    clearAuthRedirectError,
   } = useAuth();
+  // Show a failed OAuth round-trip's error once: seed the sign-in view with it,
+  // then clear it from context so reopening the dialog later starts clean.
+  const [redirectError] = useState(authRedirectError);
+  useEffect(() => {
+    if (authRedirectError) clearAuthRedirectError();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- consume once on mount
+  }, []);
   // Only gate on the username AFTER the profile fetch RESOLVES — otherwise an
   // existing user briefly sees the "choose a username" view on every sign-in.
   const needsUsername = !!user && profileChecked && !profile;
@@ -73,6 +82,7 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
               onSignInEmail={signInWithEmail}
               onVerifyOtp={verifyEmailOtp}
               onClose={onClose}
+              initialError={redirectError}
             />
           ) : !profile && profileLoading ? (
             <p className="go-sub">Loading your profile…</p>
@@ -105,18 +115,22 @@ function SignInView({
   onSignInEmail,
   onVerifyOtp,
   onClose,
+  initialError,
 }: {
   onSignInGoogle: () => Promise<{ ok: boolean; error?: string }>;
   onSignInEmail: (email: string) => Promise<{ ok: boolean; error?: string }>;
   onVerifyOtp: (email: string, code: string) => Promise<{ ok: boolean; error?: string }>;
   onClose: () => void;
+  initialError?: string | null;
 }) {
   // Two-step: email → 6-digit code (mirrors palmandplate admin flow).
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState<'google' | 'email' | 'verify' | 'resend' | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    initialError ? `Google sign-in failed: ${initialError}` : null,
+  );
   const [cooldown, setCooldown] = useState(0);
 
   // Resend cooldown — 60s after every send (Supabase rate-limits anyway).

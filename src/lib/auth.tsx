@@ -32,6 +32,31 @@ interface AuthState {
   ) => Promise<{ ok: boolean; error?: string }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  // Error carried back from an OAuth redirect (see consumeOAuthErrorFromUrl).
+  // The auth modal shows it once, then clears it.
+  authRedirectError: string | null;
+  clearAuthRedirectError: () => void;
+}
+
+// A failed OAuth round-trip (Google → Supabase → back here) lands with the
+// failure in the URL hash: #error=...&error_code=...&error_description=...
+// supabase-js's detectSessionInUrl only consumes SUCCESS tokens — an error hash
+// was silently ignored, so to the player it looked like "the page refreshed and
+// nothing happened". Capture it synchronously at module load (before auth-js's
+// async init runs), then scrub it from the URL so a manual refresh is clean.
+function consumeOAuthErrorFromUrl(): string | null {
+  if (typeof window === 'undefined') return null;
+  if (!/[#&]error(_description|_code)?=/.test(window.location.hash)) return null;
+  const params = new URLSearchParams(window.location.hash.slice(1));
+  const msg = params.get('error_description') || params.get('error');
+  if (!msg) return null;
+  window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  return msg;
+}
+const oauthRedirectError = consumeOAuthErrorFromUrl();
+if (oauthRedirectError) {
+  // Keep a diagnostic trail even if no UI is mounted to show it.
+  console.error('OAuth sign-in failed:', oauthRedirectError);
 }
 
 const AuthCtx = createContext<AuthState | null>(null);
@@ -46,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // the "needs a username" gate against the brief load gap on refresh where `user`
   // is set but `profile` hasn't been fetched yet (which used to flash the dialog).
   const [profileChecked, setProfileChecked] = useState(false);
+  const [authRedirectError, setAuthRedirectError] = useState<string | null>(oauthRedirectError);
 
   // Bootstrap: rehydrate the session from localStorage (supabase-js does
   // this internally when persistSession=true) then listen for changes.
@@ -257,6 +283,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         verifyEmailOtp,
         signOut,
         refreshProfile,
+        authRedirectError,
+        clearAuthRedirectError: () => setAuthRedirectError(null),
       }}
     >
       {children}
@@ -285,6 +313,8 @@ export function useAuth(): AuthState {
       verifyEmailOtp: async () => ({ ok: false, error: 'Auth not initialised.' }),
       signOut: async () => {},
       refreshProfile: async () => {},
+      authRedirectError: null,
+      clearAuthRedirectError: () => {},
     };
   }
   return v;

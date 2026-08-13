@@ -270,6 +270,21 @@ is placed under the letter its **answer's first letter** dictates (A–Z). Conse
    free today; YouTube is banned for clips).
 5. Anything new the user reports — reproduce with the `scripts/*.mjs` Playwright drivers (or MCP when
    connected), fix, re-run §1 tools + `checkmedia`, push to `main`.
+6. **Google sign-in "page just refreshes, no login" (reported 2026-08-13).** Two parts:
+   - *Client (fixed):* a failed OAuth round-trip returns to the app with the error in the URL
+     hash (`#error=...&error_description=...`). supabase-js's `detectSessionInUrl` only consumes
+     SUCCESS tokens, so the failure was swallowed → looked like a silent refresh. `lib/auth.tsx`
+     now captures the hash at module load, surfaces it in the auth dialog, and scrubs the URL.
+     Covered by `tests-e2e/oauth-error.spec.ts` (watched failing on old code first).
+   - *Backend (NOT fixed here — needs dashboard/creds):* the exchange itself is failing. The
+     `/auth/v1/authorize?provider=google` endpoint DOES 302 to Google with a real client_id, so the
+     provider is enabled; the failure is at the callback code-exchange. Check, in order:
+     (a) Google Cloud console OAuth client "Authorized redirect URIs" includes
+     `https://lkudntyvngwwlzuciocd.supabase.co/auth/v1/callback`;
+     (b) the Client Secret in Supabase → Auth → Providers → Google matches the current Google secret;
+     (c) the OAuth consent screen is **Published**, not stuck in "Testing" (test-mode blocks
+     non-allowlisted Google accounts). Read the exact error via Management API auth_logs:
+     `GET /v1/projects/lkudntyvngwwlzuciocd/analytics/endpoints/logs` with SUPABASE_ACCESS_TOKEN.
 
 ## 10. Conventions checklist before every push
 - [ ] `npx tsc -b` clean
