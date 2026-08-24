@@ -38,6 +38,49 @@ export type RawPack = Omit<QuestionPack, 'letters'> & {
 };
 
 export const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+/** The 28 Arabic letters, used as the board alphabet for `locale: 'ar'` packs. */
+export const ARABIC_ALPHABET = 'ابتثجحخدذرزسشصضطظعغفقكلمنهوي'.split('');
+const ARABIC_SET = new Set(ARABIC_ALPHABET);
+
+/** The alphabet a pack plays with — Arabic-locale packs use the 28 Arabic letters. */
+export function alphabetOf(pack: Pick<QuestionPack, 'locale'>): string[] {
+  return pack.locale?.startsWith('ar') ? ARABIC_ALPHABET : ALPHABET;
+}
+
+// Tashkeel (fatha..sukun), dagger alef and tatweel — presentation marks, never letters.
+const AR_MARKS = /[ً-ْٰـ]/g;
+/** Normalize Arabic text for bucketing/matching: strip marks, unify hamza/alef,
+ *  taa marbuta → haa, alef maqsura → yaa. */
+export function normalizeArabic(s: string): string {
+  return s
+    .replace(AR_MARKS, '')
+    .replace(/[أإآٱ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/ؤ/g, 'و')
+    .replace(/ئ/g, 'ي')
+    .replace(/ء/g, '');
+}
+
+/**
+ * The board letter an answer plays under, or null if the answer can't be filed.
+ * Arabic quiz convention (سين جيم / حروف): the definite article "ال" does NOT
+ * count — "البحرين" plays under ب — and hamza forms (أ إ آ) count as ا. The
+ * article check runs on the RAW text (bare alef + lam only) so hamza-initial
+ * words like "ألمانيا" are never mistaken for article-prefixed ones.
+ */
+export function bucketLetter(answer: string, locale = 'en'): string | null {
+  let t = answer.trim();
+  if (!t) return null;
+  if (locale.startsWith('ar')) {
+    t = t.replace(AR_MARKS, ''); // marks before the article check — ال + tashkeel still counts
+    if (/^ال[ء-ي]{2,}/.test(t)) t = t.slice(2);
+    const c = normalizeArabic(t)[0];
+    return c && ARABIC_SET.has(c) ? c : null;
+  }
+  const c = t[0].toUpperCase();
+  return c >= 'A' && c <= 'Z' ? c : null;
+}
 
 /** Ordering used to sort packs easiest → hardest in the selector. */
 export const DIFFICULTY_RANK: Record<QuestionPack['difficulty'], number> = {
@@ -49,16 +92,19 @@ export const DIFFICULTY_RANK: Record<QuestionPack['difficulty'], number> = {
   extreme: 5,
 };
 /** Hardest starting letters — biased OUT of small boards so games stay answerable (plan §2.5). */
-export const HARD_LETTERS = new Set(['X', 'Z', 'Q', 'J', 'K']);
+export const HARD_LETTERS = new Set(['X', 'Z', 'Q', 'J', 'K', 'ظ', 'ض', 'ذ', 'ث', 'غ']);
 
 /**
  * Letters ordered easiest → hardest by how readily an answer can start with them
  * (roughly initial-letter frequency). Used to bias the hardest letters off small
  * boards: we keep the easiest `cellCount` letters when the board can't fit all 26.
+ * Arabic gets its own order (both alphabets share one rank map — no overlap).
  */
 const EASE_ORDER = 'SCPATBMDRFLHIEONGWUVYKJQXZ'.split('');
+const AR_EASE_ORDER = 'مابتسكحعقفنرجدشصلهطخويزثغذضظ'.split('');
 const EASE_RANK: Record<string, number> = {};
 EASE_ORDER.forEach((l, i) => (EASE_RANK[l] = i));
+AR_EASE_ORDER.forEach((l, i) => (EASE_RANK[l] = i));
 
 /** Assign stable ids to any pack loaded from JSON/authored that omitted them. */
 export function normalizePack(pack: RawPack | QuestionPack): QuestionPack {
@@ -95,7 +141,7 @@ export function totalQuestions(pack: QuestionPack): number {
 
 /** Letters that actually have at least one question. */
 export function answerableLetters(pack: QuestionPack): string[] {
-  return ALPHABET.filter((l) => letterCount(pack, l) > 0);
+  return alphabetOf(pack).filter((l) => letterCount(pack, l) > 0);
 }
 
 /**
@@ -164,17 +210,22 @@ export function serveQuestion(
   return { question: pool[Math.floor(rng() * pool.length)], letter };
 }
 
-/** Loose answer matching: case/space/punctuation-insensitive, accepts alternatives. */
+/** Loose answer matching: case/space/punctuation-insensitive, accepts alternatives.
+ *  Arabic-aware: tashkeel/hamza-form/taa-marbuta differences and a leading "ال"
+ *  article never fail a correct guess. */
 export function answerMatches(question: Question, guess: string): boolean {
-  const norm = (s: string) =>
-    s
+  const norm = (s: string) => {
+    let t = s.trim().replace(AR_MARKS, ''); // marks first so ال + tashkeel still reads as the article
+    if (/^ال[ء-ي]{2,}/.test(t)) t = t.slice(2); // strip a leading Arabic definite article
+    return normalizeArabic(t)
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '') // strip diacritics
+      .replace(/[̀-ͯ]/g, '') // strip latin diacritics
       .trim()
       .replace(/\s+/g, ' ')
-      .replace(/^(the|a|an)\s+/, '') // strip a single leading article
-      .replace(/[^a-z0-9]/g, '');
+      .replace(/^(the|a|an)\s+/, '') // strip a single leading English article
+      .replace(/[^a-z0-9ء-ي]/g, '');
+  };
   const g = norm(guess);
   if (!g) return false;
   const candidates = [question.a, ...(question.alt ?? [])].map(norm);

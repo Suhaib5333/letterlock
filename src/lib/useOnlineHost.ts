@@ -245,6 +245,7 @@ export function useOnlineHost(args: {
 
   // Broadcast a freshly served question (covers pick / skip / auto-skip uniformly).
   const lastServed = useRef<string | null>(null);
+  const lastServedCell = useRef<number | null>(null);
   useEffect(() => {
     const lobby = lobbyRef.current;
     if (!online || !lobby || !served) return;
@@ -252,11 +253,23 @@ export function useOnlineHost(args: {
     const key = `${served.cell}:${served.question.id}`;
     if (lastServed.current === key) return;
     lastServed.current = key;
+    // A different question on this cell (skip, or an undo back to the pick then a
+    // re-pick) makes the collected guesses stale — drop them so the answers panel
+    // and the auto-winner never rule on a previous question's submissions.
+    byCell.current.delete(served.cell);
+    bump((v) => v + 1);
     stealOpenCells.current.clear(); // a fresh question closes any prior steal window
     stealDeadlineRef.current = null;
     // The synced countdown's absolute end instant (host clock). Phones derive
     // their remaining time from this + the clock offset, so all devices agree.
-    deadlineRef.current = timerSeconds > 0 ? Date.now() + timerSeconds * 1000 : null;
+    // A SKIP re-serves onto the SAME cell and must NOT restart the clock (the
+    // host's own Timer deliberately keeps running across a skip) — only a new
+    // pick stamps a fresh deadline.
+    const sameCell = lastServedCell.current === served.cell;
+    lastServedCell.current = served.cell;
+    if (!sameCell || deadlineRef.current === null) {
+      deadlineRef.current = timerSeconds > 0 ? Date.now() + timerSeconds * 1000 : null;
+    }
     const q = served.question;
     lobby
       .broadcast({

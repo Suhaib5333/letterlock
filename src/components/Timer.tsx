@@ -56,6 +56,11 @@ export function Timer({
   const handledSignalRef = useRef(endPhaseSignal);
 
   useEffect(() => {
+    // Reset BEFORE the inactive bail-out: a question that waits for its clip to
+    // play (active=false) must still show a full bar, not the last one's "Time! 0s".
+    phaseRef.current = 'main';
+    setPhase('main');
+    setRemaining(seconds);
     if (seconds === 0 || !active) return;
     // `cancelled` + a loop-local rafId are scoped to THIS effect run, so React
     // StrictMode's double-invoke (and any rapid resetKey change) can never leave

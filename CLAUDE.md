@@ -1027,3 +1027,67 @@ board/streaks/leaderboards/achievements, AI opponent, varying-difficulty packs, 
 mode UI toggle, native store builds, replays, online ranked/anti-cheat, i18n/RTL packs. The
 core engine already supports the seams these need (pluggable topology, event log as wire
 format, seeded RNG, pure rules engine).
+
+## II.3o Round-17 — the Arabic section (سين جيم), 22 new packs, 10 bug fixes (2026-08-24)
+
+- ✅ **Arabic support, engine-deep** (`src/core/packs.ts`): a 28-letter `ARABIC_ALPHABET`,
+  `alphabetOf(pack)` (locale `ar*`), `normalizeArabic` (strips tashkeel/tatweel, unifies
+  أإآٱ→ا, ة→ه, ى→ي, ؤ→و, ئ→ي, drops ء) and a locale-aware `bucketLetter(answer, locale)`
+  that is now the **single source of truth** shared by the pack loader AND the content
+  tests. Filing convention (matching سين جيم / حروف): the definite article **ال does not
+  count**, so البحرين files under **ب** and القاهرة under **ق**; the article check runs on
+  the RAW text so a hamza-initial word like ألمانيا is never mistaken for one (→ ا, not م).
+  `answerMatches` is Arabic-aware, so tashkeel, hamza forms, taa marbuta and a leading ال
+  never fail a correct guess. `HARD_LETTERS` + an Arabic ease order (`AR_EASE_ORDER`) bias
+  ظ ض ذ off a 25-cell board. **The rules engine itself needed no change** (letters were
+  already opaque strings; the SVG board renders any glyph).
+- ✅ **RTL + fonts**: `dir="auto"` on the question text, the revealed answer, and the phone
+  controller's prompt/letter, so Arabic lays out right-to-left and English stays LTR.
+  **Tajawal** is appended to every font stack (incl. both accessibility fonts) so Arabic
+  falls through to it per-glyph.
+- ✅ **12 Arabic packs (2,517 questions)** in a dedicated **عربي** category group:
+  سين جيم easy/medium/hard (208/206/204, a tier-card), جغرافيا وعواصم 206, كرة القدم والرياضة 209,
+  مطبخ وأكلات عربية 228, إسلاميات 201, علوم وطبيعة 205, أمثال وحكم عربية 217,
+  الخليج والعالم العربي 210, مشاهير العرب 213, أدب وشعر عربي 210. All MSA, no tashkeel.
+- ✅ **10 new English packs**: Video Games easy/medium/hard (210/223/234, its own **Video
+  Games** group, built on the 45 biggest/most nostalgic games), Anime easy/medium (207/209),
+  Superheroes easy/medium (212/220), Emoji Puzzles easy/medium (245/215), Food & Drink
+  easy/medium (222/211), Football easy/medium (208/206).
+- ✅ **Every new pack is 200+.** Repo total: **83 packs, 19,097 questions**
+  (`node scripts/packstats.mjs` prints the breakdown + anything under 200; the only
+  under-200 packs remain the source-capped flags/maps/logos/songs-rnb).
+- ✅ **New Arabic leak test** (`content.test.ts`): the English check tokenizes on `[^a-z0-9]`
+  which erases Arabic, so an Arabic twin tokenizes on `[^ء-ي]+`, strips ال, and exempts
+  generic head-nouns. It caught **13 packs / ~30 leaking questions**, all rewritten
+  (question text only, answers untouched, no question deleted).
+- 🐛 **10 bugs found and fixed** (deep audit of the game loop, online sync, core and menu):
+  1. `core/fuzzyMatch.ts` — `normalizeAnswer` stripped **all Arabic** (`[^a-z0-9\s]`), so
+     Party Mode on any `ar-*` pack graded **every** submission wrong and auto-continued
+     "no one" forever: no hex could ever be claimed. Arabic block kept + normalised + ال stripped.
+  2. 13 packs leaked their own answer into the question (above).
+  3. `Game.tsx` — `submittedScore` was never re-armed, so a Bo3/Bo5 posted score **1**
+     instead of the real series score. Re-armed per game.
+  4. `useOnlineHost.ts` — a **skip** re-stamped the synced deadline, so phones jumped back
+     to a full clock while the host's bar kept counting. Only a new *cell* re-stamps now.
+  5. `PlayerController.tsx` — the host re-broadcasts `question_served` on any reconnect,
+     which cleared `teammateAnswered` and wiped in-progress typing → a second answer for
+     the same team. Those resets are now gated on a genuinely new cell.
+  6. `Timer.tsx` — the reset sat *after* the `!active` bail-out, so a question waiting on
+     its clip to play showed the previous question's **"Time! 0s"**. Reset moved first.
+  7. `useOnlineHost.ts` — a new question on the same cell (skip, or undo then re-pick) kept
+     the **previous** question's submissions, so the reveal panel and auto-winner could rule
+     on stale guesses. Cleared per question.
+  8. `store.tsx` — undoing back INTO a question reset `skipsUsed`/`autoSkips` to 0, giving
+     unlimited skips and re-arming the broken-media loop guard. Both now carry forward.
+  9. `QuestionCard.tsx` — an unreachable audio/video clip never called `onMediaPlay`, so
+     past the auto-skip cap the question ran with **no timer at all**. Matches the image path now.
+  10. The phone controller's Arabic prompt rendered LTR (no `dir="auto"`).
+- ✅ Verified: **506 unit/content tests**, **174 Playwright e2e** (incl. the new
+  `tests-e2e/arabic.spec.ts`: 25 distinct Arabic hexes, `direction: rtl`, full pick → reveal
+  → claim, and the عربي group + tier picker), **noscroll ALL CLEAR** (17 devices × 18 screens
+  on an Arabic pack), strict typecheck + build clean, and a live browser run of a real Arabic
+  match (0 console errors).
+- ✅ **Google SSO verified working**: "Continue with Google" on `letterlock.raltech.dev`
+  redirects correctly to `accounts.google.com` with the right client_id and the Supabase
+  `/auth/v1/callback` redirect_uri, so the provider is enabled and configured. (A full
+  round-trip needs a real Google account; never the user's work email.)

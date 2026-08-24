@@ -389,6 +389,11 @@ function reducer(state: StoreState, action: Action): StoreState {
               phase: 'question',
               selectedCell: last.cell,
               served: { question: q, letter: last.letter, cell: last.cell },
+              // Carry the per-pick budgets forward: undoing back INTO a question
+              // must not refund the skip already spent on it, nor re-arm the
+              // broken-media auto-skip loop guard.
+              skipsUsed: state.ui.skipsUsed,
+              autoSkips: state.ui.autoSkips,
               pulse: state.ui.pulse + 1,
             },
           };

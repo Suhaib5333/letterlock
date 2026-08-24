@@ -278,7 +278,10 @@ export function QuestionCard({
             }}
             onPause={() => duckMusic(false)}
             onEnded={() => duckMusic(false)}
-            onError={() => setMediaError(true)}
+            onError={() => {
+              setMediaError(true);
+              onMediaPlay(); // an unreachable clip must still start the clock (matches the image path)
+            }}
           />
         ))}
 
@@ -301,13 +304,17 @@ export function QuestionCard({
               }}
               onPause={() => duckMusic(false)}
               onEnded={() => duckMusic(false)}
-              onError={() => setMediaError(true)}
+              onError={() => {
+              setMediaError(true);
+              onMediaPlay(); // an unreachable clip must still start the clock (matches the image path)
+            }}
             />
           </div>
         ))}
 
       {!served.question.mapIso && (
-        <p className="qcard-q" data-testid="question-text">
+        // dir="auto": Arabic questions lay out right-to-left, English stays LTR.
+        <p className="qcard-q" data-testid="question-text" dir="auto">
           {served.question.q}
         </p>
       )}
@@ -322,7 +329,7 @@ export function QuestionCard({
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
             <span className="answer-label">Answer</span>
-            <span className="answer-value">{served.question.a}</span>
+            <span className="answer-value" dir="auto">{served.question.a}</span>
             {served.question.artist && (
               <span className="answer-artist" data-testid="answer-artist">
                 by {served.question.artist}

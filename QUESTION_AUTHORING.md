@@ -240,3 +240,25 @@ answer away and never strands the game:
 - Register packs in `src/content/index.ts` (the `PACKS` array, sorted by
   `DIFFICULTY_RANK`). Expansions merge into a base pack via `withExtra(...)`.
 - After editing content: `npx vitest run src/content` must stay green.
+
+## 🕌 Arabic packs (locale: 'ar') — special rules
+
+Arabic packs put the **28 Arabic letters on the board** and run fully RTL. Extra rules:
+
+1. **Letter filing follows quiz convention (سين جيم / حروف):** the definite article
+   "ال" does NOT count — "البحرين" plays under **ب**. Hamza forms (أ إ آ) all count
+   as **ا**. Filing is done by `bucketLetter(answer, 'ar')` in `core/packs.ts`; the
+   loader rebuckets automatically, and the content tests verify with the same function.
+   NOTE: the article check runs on RAW text (bare alef + lam) so hamza-initial words
+   like "ألمانيا" correctly file under ا, not م.
+2. **Modern Standard Arabic (فصحى), no tashkeel.** Answers 1-3 words. Dialect
+   variants go in `alt`, not in `a`.
+3. **Answer matching** (`answerMatches`) is Arabic-aware: tashkeel, hamza variants,
+   ة/ه, ى/ي and a leading "ال" never fail a correct guess.
+4. **Coverage:** ≥18 letters (the playability test needs ≥16). Rare letters
+   (ث ذ ض ظ ز غ) may be thin or skipped — `placeLetters` biases them off small boards
+   via the Arabic ease order in `core/packs.ts`.
+5. **Group:** ids start with `ar-` → the "عربي" browse group. Tier siblings share the
+   stem (`ar-seen-jeem-easy/-medium/-hard` collapse into one card).
+6. **UI:** question + answer render with `dir="auto"` (RTL automatic); Arabic glyphs
+   come from the Tajawal font (in the Google Fonts link + font stacks).

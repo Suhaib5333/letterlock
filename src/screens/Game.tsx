@@ -101,6 +101,7 @@ export function Game() {
     if (!ui.gameOver) {
       awardedGameOver.current = false;
       awardedRoomXp.current = false;
+      submittedScore.current = false; // re-arm per game so a Bo3/Bo5 posts its real series score
     }
   }, [ui.gameOver]);
 

@@ -5,17 +5,22 @@
  * the auto-award countdown; the host can always override with the undo button.
  */
 
+import { normalizeArabic } from './packs';
+
 /** Normalise for comparison: lowercase, strip accents/punctuation, drop a leading
- *  article ("the/a/an"), collapse whitespace. */
+ *  article ("the/a/an", Arabic "ال"), collapse whitespace. Arabic letters survive
+ *  the punctuation strip and are unified (tashkeel, hamza forms, taa marbuta) so
+ *  ar-locale packs auto-grade at all. */
 export function normalizeAnswer(s: string): string {
-  return s
+  return normalizeArabic(s)
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '') // strip diacritics (café → cafe)
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ') // punctuation → space
+    .replace(/[^a-z0-9ء-ي\s]/g, ' ') // punctuation → space (Arabic block kept)
     .replace(/\s+/g, ' ')
     .trim()
-    .replace(/^(the|a|an)\s+/, ''); // ignore a LEADING article only
+    .replace(/^(the|a|an)\s+/, '') // ignore a LEADING article only
+    .replace(/^ال(?=[ء-ي]{2,})/, ''); // ...and the Arabic definite article
 }
 
 /** Levenshtein edit distance (iterative, O(m·n)). */

@@ -360,7 +360,11 @@ export function PlayerController() {
         // in the lobby if the match_started broadcast was missed.
         setPhase((p) => (p === 'lobby' || p === 'waiting' ? 'ready' : p));
         break;
-      case 'question_served':
+      case 'question_served': {
+        // The host re-broadcasts this event on any reconnect / roster change, so a
+        // re-send for the SAME cell must not wipe a teammate's lock or the text a
+        // player is mid-way through typing. Only a genuinely new cell resets those.
+        const freshCell = servedRef.current?.cell !== event.cell;
         setServed({
           cell: event.cell,
           letter: event.letter,
@@ -372,11 +376,13 @@ export function PlayerController() {
           image: event.image,
           youtube: event.youtube,
         });
-        setTeammateAnswered(false);
+        if (freshCell) {
+          setTeammateAnswered(false);
+          setAnswer('');
+        }
         // A fresh question starts in the picker's window; the steal window is
         // re-opened by the host (re-sent on reconnect via steal_open) if needed.
         if (answeredCellRef.current !== event.cell) setStealOpen(false);
-        setAnswer('');
         setFeedback(null);
         setWinner(null);
         setTimerState(buildTimer(event.deadline, event.hostNow, event.timerSeconds));
@@ -390,6 +396,7 @@ export function PlayerController() {
           setPhase('question');
         }
         break;
+      }
       case 'steal_open':
         // The picker's window closed → the OTHER team may now answer. Open the
         // steal window for this cell and follow the new (steal) timer.
@@ -816,9 +823,10 @@ export function PlayerController() {
             </div>
           )}
           {!served.hideLetter && (
-            <div className="controller-letter" aria-hidden="true">{served.letter}</div>
+            <div className="controller-letter" dir="auto" aria-hidden="true">{served.letter}</div>
           )}
-          <div className="controller-prompt">{served.prompt}</div>
+          {/* dir="auto" so Arabic (ar-locale packs) lays out right-to-left on phones. */}
+          <div className="controller-prompt" dir="auto">{served.prompt}</div>
           {served.image && (
             <img
               src={served.image}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { answerableLetters, normalizePack, serveQuestion, totalQuestions } from '../core/packs';
+import { answerableLetters, bucketLetter, normalizePack, serveQuestion, totalQuestions } from '../core/packs';
 import { mulberry32 } from '../core/rng';
 import { generalKnowledgePack } from './generalKnowledge';
 import { kidsPack } from './kids';
@@ -86,16 +86,46 @@ describe('no clue-restatement / sentence answers (the "Ukraine\'s capital is Kyi
 });
 
 describe('EVERY registered pack: every answer starts with its letter', () => {
+  // Locale-aware: Arabic packs bucket via bucketLetter (the "ال" article doesn't
+  // count and hamza forms unify to ا) — the same function the loader uses.
   for (const pack of PACKS) {
     it(`${pack.name}`, () => {
       const bad: string[] = [];
       for (const [letter, qs] of Object.entries(pack.letters)) {
         for (const q of qs) {
-          const first = q.a.trim()[0]?.toUpperCase();
+          const first = bucketLetter(q.a, pack.locale);
           if (first !== letter) bad.push(`[${letter}] "${q.a}" (q: ${q.q.slice(0, 40)})`);
         }
       }
       expect(bad, `Mismatches in "${pack.name}":\n${bad.join('\n')}`).toEqual([]);
+    });
+  }
+});
+
+describe('Arabic packs: the answer never leaks into the question text', () => {
+  // The English leak-check below tokenizes on [^a-z0-9] which erases Arabic —
+  // this is its Arabic twin. A distinctive answer word (≥3 letters after
+  // stripping "ال") appearing verbatim in the question is a leak.
+  const AR_GENERIC = new Set([
+    'دولة', 'مدينة', 'عاصمة', 'نهر', 'جبل', 'بحر', 'قارة', 'لغة', 'عملة', 'كتاب',
+    'سورة', 'نبي', 'ملك', 'حيوان', 'طائر', 'كوكب', 'لعبة', 'فريق', 'نادي', 'بطولة',
+    'شاعر', 'كاتب', 'عالم', 'مسجد', 'برج', 'جزيرة', 'خليج', 'صحراء', 'قناة', 'ميناء',
+  ]);
+  const stripAl = (w: string) => (/^ال./.test(w) ? w.slice(2) : w);
+  for (const pack of PACKS.filter((p) => p.locale.startsWith('ar'))) {
+    it(`${pack.name}`, () => {
+      const bad: string[] = [];
+      for (const qs of Object.values(pack.letters)) {
+        for (const q of qs) {
+          const qWords = new Set(q.q.split(/[^ء-ي]+/).filter(Boolean).map(stripAl));
+          const aWords = q.a.split(/[^ء-ي]+/).filter(Boolean).map(stripAl);
+          const leak = aWords.some(
+            (w) => w.length >= 3 && !AR_GENERIC.has(w) && qWords.has(w),
+          );
+          if (leak) bad.push(`"${q.a}" ⟵ ${q.q}`);
+        }
+      }
+      expect(bad, `Answer leaks in "${pack.name}" (${bad.length}):\n${bad.join('\n')}`).toEqual([]);
     });
   }
 });

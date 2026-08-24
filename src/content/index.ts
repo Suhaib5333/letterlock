@@ -1,4 +1,4 @@
-import { DIFFICULTY_RANK, normalizePack, type QuestionPack, type RawPack } from '../core/packs';
+import { bucketLetter, DIFFICULTY_RANK, normalizePack, type QuestionPack, type RawPack } from '../core/packs';
 import { generalKnowledgePack } from './generalKnowledge';
 import { extraGeneralKnowledge } from './generalKnowledge2';
 import { extraGeneralKnowledge3 } from './generalKnowledge3';
@@ -142,6 +142,34 @@ import { music00sHipHopGaps2 } from './music00sHipHopGaps2';
 import { music10sPopGaps2 } from './music10sPopGaps2';
 import { music10sHipHopGaps2 } from './music10sHipHopGaps2';
 import { historyGaps2 } from './historyGaps2';
+// Round-17: the Arabic section (سين جيم style — Arabic letters on the board, RTL).
+import { arSeenJeemEasyPack } from './arSeenJeemEasy';
+import { arSeenJeemMediumPack } from './arSeenJeemMedium';
+import { arSeenJeemHardPack } from './arSeenJeemHard';
+import { arGeographyPack } from './arGeography';
+import { arIslamicPack } from './arIslamic';
+import { arSportsPack } from './arSports';
+import { arSciencePack } from './arScience';
+// Round-17: Video Games — three tiers built on the most iconic/nostalgic games.
+import { videoGamesEasyPack } from './videoGamesEasy';
+import { videoGamesMediumPack } from './videoGamesMedium';
+import { videoGamesHardPack } from './videoGamesHard';
+// Round-17 wave 2: more Arabic + themed packs (all 200+ questions).
+import { arProverbsPack } from './arProverbs';
+import { arFoodPack } from './arFood';
+import { emojiEasyPack } from './emojiEasy';
+import { emojiMediumPack } from './emojiMedium';
+import { foodDrinkEasyPack } from './foodDrinkEasy';
+import { foodDrinkMediumPack } from './foodDrinkMedium';
+import { superheroesEasyPack } from './superheroesEasy';
+import { superheroesMediumPack } from './superheroesMedium';
+import { arArabWorldPack } from './arArabWorld';
+import { arLiteraturePack } from './arLiterature';
+import { arCelebritiesPack } from './arCelebrities';
+import { animeEasyPack } from './animeEasy';
+import { animeMediumPack } from './animeMedium';
+import { footballEasyPack } from './footballEasy';
+import { footballMediumPack } from './footballMedium';
 
 /**
  * Re-bucket every question under the letter its ANSWER actually starts with.
@@ -153,8 +181,10 @@ function rebucketByAnswer(pack: RawPack): RawPack {
   const seen = new Set<string>(); // drop duplicate questions within a pack
   for (const qs of Object.values(pack.letters)) {
     for (const q of qs) {
-      const k = q.a.trim()[0]?.toUpperCase();
-      if (!k || k < 'A' || k > 'Z') continue; // skip non A–Z answers
+      // Locale-aware: Arabic packs bucket by Arabic letter (article "ال" ignored,
+      // hamza forms unified) — see core/packs.bucketLetter.
+      const k = bucketLetter(q.a, pack.locale);
+      if (!k) continue; // skip answers outside the pack's alphabet
       const sig = `${q.q.trim().toLowerCase()}|${q.a.trim().toLowerCase()}`;
       if (seen.has(sig)) continue; // de-duplicate
       seen.add(sig);
@@ -267,8 +297,10 @@ const worldPack = themedFrom(
 /** Ordered category groups for the browse menu. */
 export const PACK_GROUPS = [
   'Trivia & Knowledge',
+  'عربي',
   'Movies & TV',
   'Music',
+  'Video Games',
   'Flags',
   'Logos & Brands',
   'Sports',
@@ -279,6 +311,10 @@ export type PackGroup = (typeof PACK_GROUPS)[number];
 
 /** Map a pack id to its browse-menu group. */
 export function groupOf(id: string): PackGroup {
+  if (/^ar-/.test(id)) return 'عربي';
+  if (/^videogames/.test(id)) return 'Video Games';
+  if (/^anime|^superheroes/.test(id)) return 'Movies & TV';
+  if (/^football/.test(id)) return 'Sports';
   if (/^flags|^maps/.test(id)) return 'Flags';
   if (/^logos/.test(id)) return 'Logos & Brands';
   if (/^sports/.test(id)) return 'Sports';
@@ -320,6 +356,34 @@ export const PACKS: QuestionPack[] = [
   withExtra(historyPack, historyGaps, historyGaps2),
   withExtra(spacePack, spaceCosmosGaps),
   withExtra(geniusPack, geniusExtremeGaps),
+  // Round-17: the Arabic section (سين جيم style).
+  arSeenJeemEasyPack,
+  arSeenJeemMediumPack,
+  arSeenJeemHardPack,
+  arGeographyPack,
+  arIslamicPack,
+  arSportsPack,
+  arSciencePack,
+  // Round-17: Video Games tiers.
+  videoGamesEasyPack,
+  videoGamesMediumPack,
+  videoGamesHardPack,
+  // Round-17 wave 2.
+  arProverbsPack,
+  arFoodPack,
+  emojiEasyPack,
+  emojiMediumPack,
+  foodDrinkEasyPack,
+  foodDrinkMediumPack,
+  superheroesEasyPack,
+  superheroesMediumPack,
+  arArabWorldPack,
+  arLiteraturePack,
+  arCelebritiesPack,
+  animeEasyPack,
+  animeMediumPack,
+  footballEasyPack,
+  footballMediumPack,
   // Round-13: new themed packs.
   mythologyPack,
   animalKingdomPack,

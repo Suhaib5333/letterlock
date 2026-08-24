@@ -56,8 +56,10 @@
   --team-b: var(--tb);
 
   /* ---- Type ---- */
-  --font-display: 'Bricolage Grotesque', 'Sora', system-ui, sans-serif;
-  --font-body: 'Sora', system-ui, -apple-system, sans-serif;
+  /* 'Tajawal' carries the Arabic glyphs — the Latin faces before it don't have
+     them, so Arabic text falls through to it per-glyph (RTL packs). */
+  --font-display: 'Bricolage Grotesque', 'Sora', 'Tajawal', system-ui, sans-serif;
+  --font-body: 'Sora', 'Tajawal', system-ui, -apple-system, sans-serif;
 
   /* type scale — hero scales with BOTH width and height so it never clips short screens */
   --t-hero: clamp(1.9rem, min(7vw, 7.5vh), 4.6rem);
@@ -101,10 +103,10 @@
 
 /* ----- Accessibility: font picker (plan §7.3) ----- */
 html[data-font='hyperlegible'] {
-  --font-body: 'Atkinson Hyperlegible', 'Sora', system-ui, sans-serif;
+  --font-body: 'Atkinson Hyperlegible', 'Sora', 'Tajawal', system-ui, sans-serif;
 }
 html[data-font='lexend'] {
-  --font-body: 'Lexend', 'Sora', system-ui, sans-serif;
+  --font-body: 'Lexend', 'Sora', 'Tajawal', system-ui, sans-serif;
 }
 
 /* Modest scaling so the no-scroll layout can absorb it without clipping. */
