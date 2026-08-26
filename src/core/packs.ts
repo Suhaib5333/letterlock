@@ -64,7 +64,7 @@ export function normalizeArabic(s: string): string {
 
 /**
  * The board letter an answer plays under, or null if the answer can't be filed.
- * Arabic quiz convention (سين جيم / حروف): the definite article "ال" does NOT
+ * Arabic quiz convention العربية للحروف: the definite article "ال" does NOT
  * count — "البحرين" plays under ب — and hamza forms (أ إ آ) count as ا. The
  * article check runs on the RAW text (bare alef + lam only) so hamza-initial
  * words like "ألمانيا" are never mistaken for article-prefixed ones.

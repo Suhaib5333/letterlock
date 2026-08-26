@@ -3,6 +3,7 @@ import { answerableLetters, bucketLetter, normalizePack, serveQuestion, totalQue
 import { mulberry32 } from '../core/rng';
 import { generalKnowledgePack } from './generalKnowledge';
 import { kidsPack } from './kids';
+import { leaks } from './leakRules';
 import { PACKS } from './index';
 
 const FULLY_COVERED = [normalizePack(generalKnowledgePack), normalizePack(kidsPack)];
@@ -102,85 +103,15 @@ describe('EVERY registered pack: every answer starts with its letter', () => {
   }
 });
 
-describe('Arabic packs: the answer never leaks into the question text', () => {
-  // The English leak-check below tokenizes on [^a-z0-9] which erases Arabic —
-  // this is its Arabic twin. A distinctive answer word (≥3 letters after
-  // stripping "ال") appearing verbatim in the question is a leak.
-  const AR_GENERIC = new Set([
-    'دولة', 'مدينة', 'عاصمة', 'نهر', 'جبل', 'بحر', 'قارة', 'لغة', 'عملة', 'كتاب',
-    'سورة', 'نبي', 'ملك', 'حيوان', 'طائر', 'كوكب', 'لعبة', 'فريق', 'نادي', 'بطولة',
-    'شاعر', 'كاتب', 'عالم', 'مسجد', 'برج', 'جزيرة', 'خليج', 'صحراء', 'قناة', 'ميناء',
-  ]);
-  const stripAl = (w: string) => (/^ال./.test(w) ? w.slice(2) : w);
-  for (const pack of PACKS.filter((p) => p.locale.startsWith('ar'))) {
-    it(`${pack.name}`, () => {
-      const bad: string[] = [];
-      for (const qs of Object.values(pack.letters)) {
-        for (const q of qs) {
-          const qWords = new Set(q.q.split(/[^ء-ي]+/).filter(Boolean).map(stripAl));
-          const aWords = q.a.split(/[^ء-ي]+/).filter(Boolean).map(stripAl);
-          const leak = aWords.some(
-            (w) => w.length >= 3 && !AR_GENERIC.has(w) && qWords.has(w),
-          );
-          if (leak) bad.push(`"${q.a}" ⟵ ${q.q}`);
-        }
-      }
-      expect(bad, `Answer leaks in "${pack.name}" (${bad.length}):\n${bad.join('\n')}`).toEqual([]);
-    });
-  }
-});
-
 describe('EVERY pack: the answer never leaks into the question text', () => {
   // Generic head-nouns that legitimately appear in both a clue and a multi-word
   // answer (e.g. "ocean" in "Pacific Ocean") — only the DISTINCTIVE word leaking is a bug.
-  const GENERIC = new Set([
-    'ocean', 'sea', 'river', 'lake', 'mountain', 'desert', 'island', 'city', 'year', 'day',
-    'number', 'angle', 'triangle', 'square', 'circle', 'scale', 'note', 'rock', 'stone',
-    'jersey', 'jump', 'race', 'racing', 'kick', 'vault', 'match', 'test', 'set', 'sets',
-    'point', 'points', 'sport', 'game', 'team', 'trophy', 'stadium', 'derby', 'tour',
-    'bowler', 'animal', 'bird', 'fish', 'tree', 'plant', 'flower', 'colour', 'color',
-    'shape', 'meal', 'pastry', 'moon', 'phase', 'chromosome', 'pulsar', 'star', 'wonder',
-    'half', 'clef', 'song', 'dance', 'opera', 'concerto', 'symphony',
-    // space / science head-nouns
-    'velocity', 'spacecraft', 'programme', 'program', 'mission', 'station', 'cluster',
-    'galaxy', 'planet', 'nebula', 'comet', 'asteroid', 'meteor', 'telescope', 'probe',
-    'ring', 'rings', 'belt', 'field', 'tilt', 'orbit', 'light', 'sun', 'system', 'effect',
-    'force', 'energy', 'wave', 'particle', 'acid', 'element', 'organ', 'gland', 'disease',
-    'instrument', 'theory', 'reaction', 'cloud', 'crater', 'tide', 'eclipse', 'matter',
-    // geography head-nouns
-    'mount', 'cape', 'gulf', 'bay', 'strait', 'range', 'peak', 'falls', 'kingdom',
-    'country', 'nation', 'capital', 'republic', 'sea', 'union',
-    // history / culture head-nouns
-    'war', 'battle', 'treaty', 'empire', 'dynasty', 'revolution', 'coup', 'code', 'age', 'period',
-    'era', 'century', 'king', 'queen', 'emperor', 'pope', 'saint', 'language', 'alphabet',
-    // buildings / structures / organisations (generic head-nouns)
-    'mosque', 'tower', 'towers', 'studio', 'palace', 'fort', 'castle', 'bridge', 'temple',
-    'cathedral', 'stadium', 'circuit', 'causeway', 'governorate', 'emirate',
-    // sports head-nouns
-    'medal', 'league', 'club', 'final', 'open', 'championship', 'tournament', 'event',
-    'jersey', 'cup', 'goal', 'series', 'cricket', 'football', 'tennis', 'golf', 'rugby',
-    // screen / music head-nouns
-    'film', 'movie', 'show', 'series', 'award', 'prize', 'band', 'novel', 'poem', 'play',
-    'genre', 'sonata', 'overture', 'painting', 'opera', 'god', 'goddess', 'myth',
-    // faith descriptors + pronouns/common words that legitimately recur
-    'islam', 'islamic', 'muslim', 'christian', 'buddhist', 'hindu', 'jewish', 'faith',
-    'your', 'this', 'that', 'them', 'with', 'from', 'into',
-  ]);
-  const leaks = (q: string, a: string): boolean => {
-    const ql = ` ${q.toLowerCase().replace(/[^a-z0-9]+/g, ' ')} `;
-    const words = a.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-    const meaningful = words.filter((w) => w.length >= 4);
-    if (meaningful.length === 0) return false; // short answers exempt (rarely leak)
-    if (words.length === 1) return ql.includes(` ${words[0]} `); // single-word answer present = leak
-    if (ql.includes(` ${words.join(' ')} `)) return true; // whole phrase present
-    return meaningful.some((w) => !GENERIC.has(w) && ql.includes(` ${w} `)); // distinctive word present
-  };
   for (const pack of PACKS) {
     it(`${pack.name}`, () => {
       const bad: string[] = [];
       for (const qs of Object.values(pack.letters)) {
         for (const q of qs) {
-          if (leaks(q.q, q.a)) bad.push(`"${q.a}" ⟵ ${q.q}`);
+          if (leaks(q, pack.locale)) bad.push(`"${q.a}" ⟵ ${q.q}`);
         }
       }
       expect(bad, `Answer leaks in "${pack.name}" (${bad.length}):\n${bad.join('\n')}`).toEqual([]);

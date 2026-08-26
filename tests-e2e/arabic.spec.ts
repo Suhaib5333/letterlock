@@ -7,17 +7,19 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('letterlock.unlockall', '1'));
 });
 
-/** Open the category browse menu and choose a pack (selecting closes the menu). */
+/** Open the category browse menu and choose a pack (selecting closes the menu).
+ *  Arabic packs live behind the عربي language toggle. */
 async function selectPack(page: Page, id: string) {
   await page.getByTestId('open-categories').click();
   await expect(page.getByTestId('category-menu')).toBeVisible();
+  if (id.startsWith('ar-')) await page.getByTestId('cat-lang-ar').click();
   await page.getByTestId(`pack-${id}`).click();
   await expect(page.getByTestId('category-menu')).toHaveCount(0);
 }
 
 test('Arabic pack: Arabic board letters, RTL question, full claim flow', async ({ page }) => {
   await page.goto('/');
-  await selectPack(page, 'ar-seen-jeem-easy');
+  await selectPack(page, 'ar-general-easy');
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-couch').click();
   await page.getByTestId('start-match').click();
@@ -48,16 +50,29 @@ test('Arabic pack: Arabic board letters, RTL question, full claim flow', async (
   await expect(page.locator(`.ll-hex[data-cell="${cell}"]`)).toHaveAttribute('data-owner', 'A');
 });
 
-test('Arabic packs live in the عربي group with a tier picker for سين جيم', async ({ page }) => {
+test('the language toggle swaps English categories for real Arabic ones', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('open-categories').click();
   await expect(page.getByTestId('category-menu')).toBeVisible();
-  await page.getByTestId('cat-chip-عربي').click();
-  // The three سين جيم tiers collapse into one card with tier buttons.
-  await expect(page.getByTestId('pack-ar-seen-jeem-easy')).toBeVisible();
-  await expect(page.getByTestId('pack-tier-ar-seen-jeem-medium')).toBeVisible();
-  await expect(page.getByTestId('pack-tier-ar-seen-jeem-hard')).toBeVisible();
-  // Single-tier Arabic packs render their own cards.
+
+  // English side: English groups present, Arabic packs hidden.
+  await expect(page.getByTestId('cat-chip-trivia-&-knowledge')).toBeVisible();
+  await expect(page.getByTestId('pack-ar-general-easy')).toHaveCount(0);
+
+  await page.getByTestId('cat-lang-ar').click();
+  // Arabic side: Arabic packs are split across real Arabic categories, and the
+  // English groups are gone (no single catch-all "Arabic" bucket).
+  await expect(page.getByTestId('cat-chip-trivia-&-knowledge')).toHaveCount(0);
+  for (const g of ['معلومات-عامة', 'دين-وتاريخ', 'علوم-وطبيعة', 'جغرافيا-وسفر']) {
+    await expect(page.getByTestId(`cat-chip-${g}`)).toBeVisible();
+  }
+  // The three general-knowledge tiers collapse into one card with tier buttons.
+  await expect(page.getByTestId('pack-ar-general-easy')).toBeVisible();
+  await expect(page.getByTestId('pack-tier-ar-general-medium')).toBeVisible();
+  await expect(page.getByTestId('pack-tier-ar-general-hard')).toBeVisible();
   await expect(page.getByTestId('pack-ar-geography')).toBeVisible();
   await expect(page.getByTestId('pack-ar-islamic')).toBeVisible();
+
+  // Nothing anywhere references the show this game was inspired by.
+  expect(await page.getByTestId('category-menu').innerText()).not.toContain('سين جيم');
 });

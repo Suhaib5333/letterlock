@@ -1,9 +1,9 @@
 import type { RawPack } from '../core/packs';
 
-export const arSeenJeemMediumPack: RawPack = {
-  id: 'ar-seen-jeem-medium',
-  name: 'سين جيم: معلومات عامة · Medium',
-  description: 'أسئلة معلومات عامة متوسطة بأسلوب سين جيم — تحتاج تفكيرا قليلا.',
+export const arGeneralMediumPack: RawPack = {
+  id: 'ar-general-medium',
+  name: 'معلومات عامة · Medium',
+  description: 'أسئلة معلومات عامة متوسطة للأصدقاء والعائلة — تحتاج تفكيرا قليلا.',
   locale: 'ar',
   difficulty: 'medium',
   contentRating: 'everyone',

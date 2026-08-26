@@ -245,7 +245,7 @@ answer away and never strands the game:
 
 Arabic packs put the **28 Arabic letters on the board** and run fully RTL. Extra rules:
 
-1. **Letter filing follows quiz convention (سين جيم / حروف):** the definite article
+1. **Letter filing follows quiz convention العربية للحروف:** the definite article
    "ال" does NOT count — "البحرين" plays under **ب**. Hamza forms (أ إ آ) all count
    as **ا**. Filing is done by `bucketLetter(answer, 'ar')` in `core/packs.ts`; the
    loader rebuckets automatically, and the content tests verify with the same function.
@@ -259,6 +259,6 @@ Arabic packs put the **28 Arabic letters on the board** and run fully RTL. Extra
    (ث ذ ض ظ ز غ) may be thin or skipped — `placeLetters` biases them off small boards
    via the Arabic ease order in `core/packs.ts`.
 5. **Group:** ids start with `ar-` → the "عربي" browse group. Tier siblings share the
-   stem (`ar-seen-jeem-easy/-medium/-hard` collapse into one card).
+   stem (`ar-general-easy/-medium/-hard` collapse into one card).
 6. **UI:** question + answer render with `dir="auto"` (RTL automatic); Arabic glyphs
    come from the Tajawal font (in the Google Fonts link + font stacks).

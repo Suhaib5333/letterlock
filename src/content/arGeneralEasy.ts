@@ -1,9 +1,9 @@
 import type { RawPack } from '../core/packs';
 
-export const arSeenJeemEasyPack: RawPack = {
-  id: 'ar-seen-jeem-easy',
-  name: 'سين جيم: معلومات عامة · Easy',
-  description: 'أسئلة معلومات عامة سهلة بأسلوب سين جيم — الجواب يبدأ بحرف الخانة.',
+export const arGeneralEasyPack: RawPack = {
+  id: 'ar-general-easy',
+  name: 'معلومات عامة · Easy',
+  description: 'أسئلة معلومات عامة سهلة والجواب يبدأ بحرف الخانة.',
   locale: 'ar',
   difficulty: 'easy',
   contentRating: 'everyone',

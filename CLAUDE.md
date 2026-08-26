@@ -1028,13 +1028,13 @@ mode UI toggle, native store builds, replays, online ranked/anti-cheat, i18n/RTL
 core engine already supports the seams these need (pluggable topology, event log as wire
 format, seeded RNG, pure rules engine).
 
-## II.3o Round-17 — the Arabic section (سين جيم), 22 new packs, 10 bug fixes (2026-08-24)
+## II.3o Round-17 — the Arabic section (معلومات عامة), 22 new packs, 10 bug fixes (2026-08-24)
 
 - ✅ **Arabic support, engine-deep** (`src/core/packs.ts`): a 28-letter `ARABIC_ALPHABET`,
   `alphabetOf(pack)` (locale `ar*`), `normalizeArabic` (strips tashkeel/tatweel, unifies
   أإآٱ→ا, ة→ه, ى→ي, ؤ→و, ئ→ي, drops ء) and a locale-aware `bucketLetter(answer, locale)`
   that is now the **single source of truth** shared by the pack loader AND the content
-  tests. Filing convention (matching سين جيم / حروف): the definite article **ال does not
+  tests. Filing convention (matching معلومات عامة / حروف): the definite article **ال does not
   count**, so البحرين files under **ب** and القاهرة under **ق**; the article check runs on
   the RAW text so a hamza-initial word like ألمانيا is never mistaken for one (→ ا, not م).
   `answerMatches` is Arabic-aware, so tashkeel, hamza forms, taa marbuta and a leading ال
@@ -1046,7 +1046,7 @@ format, seeded RNG, pure rules engine).
   **Tajawal** is appended to every font stack (incl. both accessibility fonts) so Arabic
   falls through to it per-glyph.
 - ✅ **12 Arabic packs (2,517 questions)** in a dedicated **عربي** category group:
-  سين جيم easy/medium/hard (208/206/204, a tier-card), جغرافيا وعواصم 206, كرة القدم والرياضة 209,
+  معلومات عامة easy/medium/hard (208/206/204, a tier-card), جغرافيا وعواصم 206, كرة القدم والرياضة 209,
   مطبخ وأكلات عربية 228, إسلاميات 201, علوم وطبيعة 205, أمثال وحكم عربية 217,
   الخليج والعالم العربي 210, مشاهير العرب 213, أدب وشعر عربي 210. All MSA, no tashkeel.
 - ✅ **10 new English packs**: Video Games easy/medium/hard (210/223/234, its own **Video
@@ -1091,3 +1091,51 @@ format, seeded RNG, pure rules engine).
   redirects correctly to `accounts.google.com` with the right client_id and the Supabase
   `/auth/v1/callback` redirect_uri, so the provider is enabled and configured. (A full
   round-trip needs a real Google account; never the user's work email.)
+
+## II.3p Round-18: bilingual category browser, Fandoms, +43 packs, settings on one page (2026-08-26)
+
+- ✅ **Bilingual category browser** (`CategoryMenu.tsx`): a 🇬🇧 English / 🇸🇦 عربي segmented
+  toggle at the top of the browser swaps the ENTIRE selector, groups and all. Arabic packs
+  are no longer one catch-all "Arabic" bucket: they sit in 8 real Arabic groups
+  (`AR_GROUPS` in `content/index.ts`) routed by topic in `groupOf(id)`, معلومات عامة،
+  دين وتاريخ، علوم وطبيعة، جغرافيا وسفر، رياضة، فنون ومشاهير، أدب ولغة، طعام وتراث. Chips,
+  search placeholder, empty state and the heading all localize; the search box is `dir="auto"`.
+- ✅ **No reference to the show that inspired the format**: the three Arabic general-knowledge
+  packs were renamed `arSeenJeem*.ts` → `arGeneral*.ts` (ids `ar-general-easy|medium|hard`,
+  names معلومات عامة · Easy/Medium/Hard) and the mention in `core/packs.ts` was rewritten.
+  A Playwright assertion fails the build if the string ever reappears in the menu.
+- ✅ **New "Fandoms" group: 17 deep-dive packs, one per franchise** (205-216 questions each,
+  ~3,580 total): Harry Potter, Star Wars, Marvel, LOTR, Game of Thrones, Pokémon, Minecraft,
+  Zelda, Super Mario, GTA, Friends, The Office, Disney & Pixar, Breaking Bad, Stranger Things,
+  DC & Batman, SpongeBob.
+- ✅ **+26 more packs**. English: Ancient World, Architecture & Landmarks, Art & Painters,
+  Aviation & Space Race, Business & Brands, Cars & Motorsport, Horror Movies, Inventions,
+  Medicine & Body, Birds & Insects, Fairy Tales, Internet Memes, Languages & Words.
+  Arabic: علماء وأعلام، مدن ومعالم، أنبياء وقصص، رمضان وعبادات، حيوانات وطبيعة، جسم الإنسان،
+  فضاء وفلك، أدب وشعر، ألغاز، أغاني عربية، مشاهير العرب، تراث ومطبخ.
+- ✅ **126 packs, 28,151 questions.** Every new pack is 200+. The only packs under 200 remain
+  the source-capped ones (flags/maps/logos/songs-rnb, there aren't 200 countries).
+- ✅ **Tooling** (kept, they pay for themselves): `scripts/autoregister.mjs` (registers any
+  `<name>Pack: RawPack` not yet in `index.ts`, skipping merge-only intermediates and
+  half-written files), `scripts/leaks.mjs` (prints every answer that leaks into its own
+  question, per pack), `scripts/packstats.mjs` (per-group counts + anything under 200),
+  `scripts/checksettings.mjs` (settings-fits-one-screen checker). Leak rules moved to
+  `src/content/leakRules.ts` so the tests and the script share ONE definition.
+- ✅ **⚙️ Settings fits on one page, every device, nothing cut off** (the user's report). Was:
+  a fixed `88vh` scroll box whose 6-option "Countdown suspense" segment overflowed and whose
+  controls fell off small screens. Now three regimes, all measured, not guessed:
+  - **Tall screens**: one column, `max-height: calc(100svh - 16px)`, tightened rows.
+  - **≥900px wide and short** (laptops, iPad landscape): the modal widens to 1040px and the
+    three groups become **three columns**.
+  - **Landscape phones (≤460px tall)**: `.set-group { display: contents }` turns the whole
+    body into ONE wrapping strip of controls, so 9 settings land in ~3 lines instead of 9;
+    hints hide, the Done button hides (✕ / scrim / Escape all close).
+  `overflow-y: auto` stays purely as a safety net. Verified by `scripts/checksettings.mjs`:
+  **15 viewports (375×667 → 1920×1080) × default AND xlarge text = ALL CLEAR**, zero internal
+  scroll, zero controls outside the viewport.
+- ✅ Re-verified: **707 unit/content tests**, full Playwright e2e, **noscroll ALL CLEAR**
+  (17 devices × every screen), zero answer leaks repo-wide (`node scripts/leaks.mjs`),
+  strict typecheck + build clean.
+- ⏳ Deferred by budget, not by blocker: the further ~30 English + ~30 Arabic categories. The
+  authoring pipeline (agent per pack → `autoregister` → `leaks` → `packstats`) is proven and
+  can resume at any time.

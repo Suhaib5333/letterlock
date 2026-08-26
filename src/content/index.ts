@@ -142,10 +142,10 @@ import { music00sHipHopGaps2 } from './music00sHipHopGaps2';
 import { music10sPopGaps2 } from './music10sPopGaps2';
 import { music10sHipHopGaps2 } from './music10sHipHopGaps2';
 import { historyGaps2 } from './historyGaps2';
-// Round-17: the Arabic section (سين جيم style — Arabic letters on the board, RTL).
-import { arSeenJeemEasyPack } from './arSeenJeemEasy';
-import { arSeenJeemMediumPack } from './arSeenJeemMedium';
-import { arSeenJeemHardPack } from './arSeenJeemHard';
+// Round-17: the Arabic section (Arabic letters on the board, RTL).
+import { arGeneralEasyPack } from './arGeneralEasy';
+import { arGeneralMediumPack } from './arGeneralMedium';
+import { arGeneralHardPack } from './arGeneralHard';
 import { arGeographyPack } from './arGeography';
 import { arIslamicPack } from './arIslamic';
 import { arSportsPack } from './arSports';
@@ -170,6 +170,51 @@ import { animeEasyPack } from './animeEasy';
 import { animeMediumPack } from './animeMedium';
 import { footballEasyPack } from './footballEasy';
 import { footballMediumPack } from './footballMedium';
+// Round-18: Fandoms — one deep pack per franchise (its own browse group).
+import { fandomHarryPotterPack } from './fandomHarryPotter';
+import { fandomLotrPack } from './fandomLotr';
+import { fandomMarvelPack } from './fandomMarvel';
+import { fandomGotPack } from './fandomGot';
+import { fandomPokemonPack } from './fandomPokemon';
+import { fandomMinecraftPack } from './fandomMinecraft';
+import { fandomStarWarsPack } from './fandomStarWars';
+import { fandomDisneyPack } from './fandomDisney';
+import { fandomMarioPack } from './fandomMario';
+import { fandomBreakingBadPack } from './fandomBreakingBad';
+import { fandomDcPack } from './fandomDc';
+import { fandomGtaPack } from './fandomGta';
+import { fandomStrangerThingsPack } from './fandomStrangerThings';
+import { fandomZeldaPack } from './fandomZelda';
+import { fandomFriendsPack } from './fandomFriends';
+import { fandomTheOfficePack } from './fandomTheOffice';
+import { fandomSpongebobPack } from './fandomSpongebob';
+import { ancientWorldPack } from './ancientWorld';
+import { arBodyPack } from './arBody';
+import { architectureLandmarksPack } from './architectureLandmarks';
+import { arProphetsPack } from './arProphets';
+import { arRiddlesPack } from './arRiddles';
+import { arSongsPack } from './arSongs';
+import { artPaintersPack } from './artPainters';
+import { aviationSpaceRacePack } from './aviationSpaceRace';
+import { birdsInsectsPack } from './birdsInsects';
+import { businessBrandsPack } from './businessBrands';
+import { carsMotorsportPack } from './carsMotorsport';
+import { fairyTalesPack } from './fairyTales';
+import { horrorMoviesPack } from './horrorMovies';
+import { internetMemesPack } from './internetMemes';
+import { inventionsPack } from './inventions';
+import { medicineBodyPack } from './medicineBody';
+import { oceanLifePack } from './oceanLife';
+import { royalsPack } from './royals';
+import { arAnimalsPack } from './arAnimals';
+import { arPoetryPack } from './arPoetry';
+import { arScholarsPack } from './arScholars';
+import { weatherDisastersPack } from './weatherDisasters';
+import { worldRecordsPack } from './worldRecords';
+import { arCitiesPack } from './arCities';
+import { arSpacePack } from './arSpace';
+import { arRamadanPack } from './arRamadan';
+// AUTO-REGISTER-IMPORTS (scripts/autoregister.mjs inserts new pack imports above this line)
 
 /**
  * Re-bucket every question under the letter its ANSWER actually starts with.
@@ -294,10 +339,14 @@ const worldPack = themedFrom(
   new Set(['geography']),
 );
 
-/** Ordered category groups for the browse menu. */
-export const PACK_GROUPS = [
+/**
+ * Ordered category groups, per language. The browse menu shows ONE language's
+ * groups at a time (an English ⇄ عربي toggle), so Arabic packs are organised into
+ * real Arabic categories rather than dumped in a single "Arabic" bucket.
+ */
+export const EN_GROUPS = [
   'Trivia & Knowledge',
-  'عربي',
+  'Fandoms',
   'Movies & TV',
   'Music',
   'Video Games',
@@ -307,11 +356,33 @@ export const PACK_GROUPS = [
   'Charades',
   'Regional',
 ] as const;
+export const AR_GROUPS = [
+  'معلومات عامة',
+  'دين وتاريخ',
+  'علوم وطبيعة',
+  'جغرافيا وسفر',
+  'رياضة',
+  'فنون ومشاهير',
+  'أدب ولغة',
+  'طعام وتراث',
+] as const;
+export const PACK_GROUPS = [...EN_GROUPS, ...AR_GROUPS] as const;
 export type PackGroup = (typeof PACK_GROUPS)[number];
 
 /** Map a pack id to its browse-menu group. */
 export function groupOf(id: string): PackGroup {
-  if (/^ar-/.test(id)) return 'عربي';
+  // Arabic packs get Arabic categories of their own (shown under the عربي toggle).
+  if (/^ar-/.test(id)) {
+    if (/^ar-(islamic|history|prophets|ramadan)/.test(id)) return 'دين وتاريخ';
+    if (/^ar-(science|space|animals|body|nature|tech|invent)/.test(id)) return 'علوم وطبيعة';
+    if (/^ar-(geography|arab-world|gulf|cities|flags|travel|sea)/.test(id)) return 'جغرافيا وسفر';
+    if (/^ar-(sports|football)/.test(id)) return 'رياضة';
+    if (/^ar-(celebrities|songs|music|drama|series|movies|art)/.test(id)) return 'فنون ومشاهير';
+    if (/^ar-(literature|proverbs|poetry|language|riddles)/.test(id)) return 'أدب ولغة';
+    if (/^ar-(food|heritage|clothes|plants|kitchen)/.test(id)) return 'طعام وتراث';
+    return 'معلومات عامة';
+  }
+  if (/^fandom-/.test(id)) return 'Fandoms';
   if (/^videogames/.test(id)) return 'Video Games';
   if (/^anime|^superheroes/.test(id)) return 'Movies & TV';
   if (/^football/.test(id)) return 'Sports';
@@ -356,10 +427,10 @@ export const PACKS: QuestionPack[] = [
   withExtra(historyPack, historyGaps, historyGaps2),
   withExtra(spacePack, spaceCosmosGaps),
   withExtra(geniusPack, geniusExtremeGaps),
-  // Round-17: the Arabic section (سين جيم style).
-  arSeenJeemEasyPack,
-  arSeenJeemMediumPack,
-  arSeenJeemHardPack,
+  // Round-17: the Arabic section.
+  arGeneralEasyPack,
+  arGeneralMediumPack,
+  arGeneralHardPack,
   arGeographyPack,
   arIslamicPack,
   arSportsPack,
@@ -384,6 +455,51 @@ export const PACKS: QuestionPack[] = [
   animeMediumPack,
   footballEasyPack,
   footballMediumPack,
+  // Round-18: Fandoms.
+  fandomHarryPotterPack,
+  fandomLotrPack,
+  fandomMarvelPack,
+  fandomGotPack,
+  fandomPokemonPack,
+  fandomMinecraftPack,
+  fandomStarWarsPack,
+  fandomDisneyPack,
+  fandomMarioPack,
+  fandomBreakingBadPack,
+  fandomDcPack,
+  fandomGtaPack,
+  fandomStrangerThingsPack,
+  fandomZeldaPack,
+  fandomFriendsPack,
+  fandomTheOfficePack,
+  fandomSpongebobPack,
+  ancientWorldPack,
+  arBodyPack,
+  architectureLandmarksPack,
+  arProphetsPack,
+  arRiddlesPack,
+  arSongsPack,
+  artPaintersPack,
+  aviationSpaceRacePack,
+  birdsInsectsPack,
+  businessBrandsPack,
+  carsMotorsportPack,
+  fairyTalesPack,
+  horrorMoviesPack,
+  internetMemesPack,
+  inventionsPack,
+  medicineBodyPack,
+  oceanLifePack,
+  royalsPack,
+  arAnimalsPack,
+  arPoetryPack,
+  arScholarsPack,
+  weatherDisastersPack,
+  worldRecordsPack,
+  arCitiesPack,
+  arSpacePack,
+  arRamadanPack,
+  // AUTO-REGISTER-PACKS (scripts/autoregister.mjs inserts new pack entries above this line)
   // Round-13: new themed packs.
   mythologyPack,
   animalKingdomPack,

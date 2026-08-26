@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { useMemo, useRef, useState } from 'react';
 import { useModalDismiss } from '../lib/useModalDismiss';
-import { PACK_GROUPS, PACKS } from '../content';
+import { AR_GROUPS, EN_GROUPS, PACKS } from '../content';
 import { type QuestionPack, totalQuestions } from '../core/packs';
 import { type Difficulty, difficultyUnlocked, difficultyUnlockLevel } from '../core/progression';
 import { useAuth } from '../lib/auth';
@@ -72,6 +72,13 @@ export function CategoryMenu({
 }) {
   const [query, setQuery] = useState('');
   const [group, setGroup] = useState<string>('All');
+  // The browser shows ONE language at a time. It opens on the language of the
+  // currently-selected pack, so re-opening the menu mid-setup never yanks an
+  // Arabic player back to the English list.
+  const [lang, setLang] = useState<'en' | 'ar'>(() =>
+    PACKS.find((p) => p.id === selectedPack)?.locale.startsWith('ar') ? 'ar' : 'en',
+  );
+  const groups = lang === 'ar' ? AR_GROUPS : EN_GROUPS;
   // Only autofocus the search on devices with a fine pointer (desktop/laptop). On
   // touch phones autofocus pops the on-screen keyboard the moment the menu opens,
   // covering the categories — so there we focus only when the user taps the field.
@@ -81,6 +88,7 @@ export function CategoryMenu({
   const filtered = useMemo(
     () =>
       PACKS.filter((p) => {
+        if (p.locale.startsWith('ar') !== (lang === 'ar')) return false;
         if (group !== 'All' && p.group !== group) return false;
         if (!q) return true;
         return (
@@ -90,7 +98,7 @@ export function CategoryMenu({
           p.difficulty.toLowerCase().includes(q)
         );
       }),
-    [q, group],
+    [q, group, lang],
   );
 
   // Each user has a tier preference per stem — clicking a tier button on a
@@ -107,11 +115,11 @@ export function CategoryMenu({
   // with a tier picker, instead of three near-identical cards.
   const sections = useMemo(
     () =>
-      PACK_GROUPS.map((g) => ({
+      groups.map((g) => ({
         group: g,
         packs: bucketByStem(filtered.filter((p) => p.group === g)),
       })).filter((s) => s.packs.length > 0),
-    [filtered],
+    [filtered, groups],
   );
 
   return (
@@ -136,17 +144,39 @@ export function CategoryMenu({
       >
         <header className="cat-head">
           <div className="cat-head-top">
-            <h2>Choose a category</h2>
+            <h2>{lang === 'ar' ? 'اختر فئة' : 'Choose a category'}</h2>
             <button className="icon-btn" aria-label="Close" data-testid="category-close" onClick={onClose}>
               ✕
             </button>
+          </div>
+          {/* Language switch: English categories ⇄ Arabic categories. Switching
+              resets the group filter, since the two languages have no groups in
+              common and a stale filter would show an empty list. */}
+          <div className="cat-lang" role="tablist" aria-label="Category language">
+            {(['en', 'ar'] as const).map((l) => (
+              <button
+                key={l}
+                role="tab"
+                aria-selected={lang === l}
+                className={`cat-lang-btn ${lang === l ? 'active' : ''}`}
+                data-testid={`cat-lang-${l}`}
+                onClick={() => {
+                  play('tap');
+                  setLang(l);
+                  setGroup('All');
+                }}
+              >
+                {l === 'en' ? '🇬🇧 English' : '🇸🇦 عربي'}
+              </button>
+            ))}
           </div>
           <div className="cat-search">
             <span className="cat-search-icon" aria-hidden="true">🔍</span>
             <input
               type="search"
-              placeholder="Search categories…"
+              placeholder={lang === 'ar' ? 'ابحث في الفئات…' : 'Search categories…'}
               aria-label="Search categories"
+              dir="auto"
               data-testid="category-search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -159,7 +189,7 @@ export function CategoryMenu({
             )}
           </div>
           <div className="cat-chips" role="tablist" aria-label="Filter by type">
-            {['All', ...PACK_GROUPS].map((g) => (
+            {['All', ...groups].map((g) => (
               <button
                 key={g}
                 role="tab"
@@ -171,7 +201,7 @@ export function CategoryMenu({
                   setGroup(g);
                 }}
               >
-                {g}
+                {g === 'All' && lang === 'ar' ? 'الكل' : g}
               </button>
             ))}
           </div>
@@ -179,7 +209,9 @@ export function CategoryMenu({
 
         <div className="cat-body" data-testid="category-body">
           {sections.length === 0 && (
-            <div className="cat-empty">No categories match “{query}”.</div>
+            <div className="cat-empty" dir="auto">
+              {lang === 'ar' ? `لا توجد فئات تطابق «${query}».` : `No categories match “${query}”.`}
+            </div>
           )}
           {sections.map(({ group: g, packs }) => (
             <section key={g} className="cat-section">

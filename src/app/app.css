@@ -577,6 +577,35 @@
   color: var(--text-dim);
   background: rgba(255, 255, 255, 0.06);
 }
+/* Language switch (English ⇄ عربي) — a segmented control above the search. */
+.cat-lang {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  align-self: flex-start;
+  max-width: 100%;
+}
+.cat-lang-btn {
+  flex: 0 0 auto;
+  padding: 6px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: var(--t-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  transition: all var(--dur-fast);
+}
+.cat-lang-btn.active {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: var(--shadow-1);
+}
+
 .cat-chips {
   display: flex;
   gap: 8px;
@@ -2785,7 +2814,9 @@
   border-radius: var(--r-xl);
   padding: var(--s-4);
   width: min(480px, 92vw);
-  max-height: 88vh;
+  max-height: calc(100svh - 16px);
+  /* Safety net only: the settings layout below is sized to fit every device
+     without scrolling at default text. Enlarged text can still scroll. */
   overflow-y: auto;
   box-shadow: var(--shadow-3);
 }
@@ -2798,23 +2829,39 @@
 .modal-head h2 {
   font-size: var(--t-h2);
 }
+/* One page, no scrolling: the groups sit in a responsive grid that goes
+   multi-column exactly when the viewport is too short for one column. */
+.set-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-3) var(--s-4);
+  align-items: start;
+}
 .set-group {
-  margin-bottom: var(--s-4);
+  min-width: 0;
 }
 .set-group h3 {
   font-size: var(--t-sm);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-faint);
-  margin-bottom: var(--s-2);
+  margin-bottom: 4px;
 }
 .set-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: var(--s-3);
-  padding: 10px 0;
+  gap: 6px var(--s-3);
+  padding: 7px 0;
   border-bottom: 1px solid var(--line);
+}
+.set-group .set-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.set-row > div:first-child {
+  flex: 1 1 130px;
 }
 .set-label {
   font-weight: 600;
@@ -2825,6 +2872,8 @@
 }
 .segment {
   display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   background: var(--surface-2);
   border-radius: var(--r-sm);
   padding: 3px;
@@ -2838,6 +2887,96 @@
   border-radius: 7px;
   font-weight: 600;
   font-size: var(--t-sm);
+}
+/* Short viewports (landscape phones, small laptops): widen and column up so
+   everything stays on one screen instead of scrolling inside the modal. */
+@media (max-height: 880px) and (min-width: 900px) {
+  .modal.modal-settings {
+    width: min(1040px, 96vw);
+  }
+  .set-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+/* Narrow screens can't go multi-column, so trim instead: drop the hints, let a
+   control sit inline while it fits, and lay a wrapped segment out as an
+   auto-fitting grid so a 6-option row is two tidy lines, not four ragged ones. */
+@media (max-width: 900px) {
+  .set-hint {
+    display: none;
+  }
+  .set-row {
+    padding: 4px 0;
+  }
+  .set-row > div:first-child {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+  .segment {
+    padding: 2px;
+  }
+  .segment button {
+    padding: 6px 7px;
+    font-size: var(--t-xs);
+  }
+  .set-group h3 {
+    margin-bottom: 2px;
+  }
+  .set-grid {
+    gap: var(--s-2) var(--s-3);
+  }
+}
+@media (max-height: 700px) {
+  .modal.modal-settings {
+    padding: var(--s-3);
+  }
+  .modal-settings .set-row {
+    padding: 3px 0;
+  }
+}
+/* Landscape phones: too short for a column of rows, so each group lays its rows
+   out side by side instead. ponytail: the Done button goes (✕ / scrim / Escape
+   all close) rather than costing 60px of the only 360px we have. */
+@media (max-height: 460px) {
+  .modal.modal-settings {
+    width: min(1100px, 96vw);
+    padding: var(--s-3);
+  }
+  .modal-head {
+    margin-bottom: 2px;
+  }
+  .modal-head h2 {
+    font-size: var(--t-h3);
+  }
+  /* One wrapping strip of controls: the group headings become inline labels
+     (display: contents lets their rows flow in the same line-up) so 9 settings
+     land in ~3 lines instead of 9. */
+  .set-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 16px;
+  }
+  .set-group {
+    display: contents;
+  }
+  .set-group h3 {
+    align-self: center;
+    margin-bottom: 0;
+  }
+  .set-row {
+    display: block;
+    flex: 0 1 auto;
+    border-bottom: none;
+    padding: 2px 0;
+  }
+  .set-row.row-toggle {
+    display: flex;
+    gap: 8px;
+  }
+  .modal-settings > .btn.block {
+    display: none;
+  }
 }
 .segment button.active {
   background: var(--blue);

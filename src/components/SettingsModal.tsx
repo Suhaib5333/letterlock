@@ -19,7 +19,7 @@ function Toggle({
   testId?: string;
 }) {
   return (
-    <div className="set-row">
+    <div className="set-row row-toggle">
       <div>
         <div className="set-label">{label}</div>
         {hint && <div className="set-hint">{hint}</div>}
@@ -89,7 +89,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
     <div className="modal-scrim" onClick={onClose}>
       <motion.div
         ref={dialogRef}
-        className="modal"
+        className="modal modal-settings"
         onClick={(e) => e.stopPropagation()}
         initial={{ scale: 0.92, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -104,6 +104,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
           </button>
         </header>
 
+        <div className="set-grid">
         <div className="set-group">
           <h3>Audio</h3>
           <Toggle label="Sound effects" value={s.sound} onChange={(v) => set({ sound: v })} testId="set-sound" />
@@ -183,6 +184,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
               { value: 'hostcall', label: 'Host-call' },
             ]}
           />
+        </div>
         </div>
 
         <button className="btn btn-primary block" onClick={onClose}>

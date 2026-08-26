@@ -1,9 +1,9 @@
 import type { RawPack } from '../core/packs';
 
-export const arSeenJeemHardPack: RawPack = {
-  id: 'ar-seen-jeem-hard',
-  name: 'سين جيم: معلومات عامة · Hard',
-  description: 'أسئلة صعبة بأسلوب سين جيم — للمثقفين وعشاق التحدي.',
+export const arGeneralHardPack: RawPack = {
+  id: 'ar-general-hard',
+  name: 'معلومات عامة · Hard',
+  description: 'أسئلة صعبة للمثقفين وعشاق التحدي.',
   locale: 'ar',
   difficulty: 'hard',
   contentRating: 'everyone',
