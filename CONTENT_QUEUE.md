@@ -8,13 +8,13 @@
 
 | Metric | Value | Updated |
 |---|---|---|
-| Packs shipped | **151** | 2026-08-27 |
-| Questions shipped | **33,508** | 2026-08-27 |
-| Arabic packs | 36 | 2026-08-27 |
-| Packs fact-audited | 37 | 2026-08-27 |
+| Packs shipped | **161** | 2026-08-27 |
+| Questions shipped | **35,648** | 2026-08-27 |
+| Arabic packs | 45 | 2026-08-27 |
+| Packs fact-audited | 55 | 2026-08-27 |
 | Target for this programme | 60 new packs (30 EN + 30 AR) | |
-| Done toward target | 18 | |
-| Left toward target | **42** | |
+| Done toward target | 30 | |
+| Left toward target | **30** | |
 
 `node scripts/packstats.mjs` prints the live per-group counts, the total, and any
 pack under 200 questions.
@@ -79,14 +79,15 @@ a formatting task. Never author content with a cheap model.**
 
 Nothing in flight. Everything authored so far is registered, audited and pushed.
 
-**Done in waves 2-4** (all audited, all 210+ questions): Olympics, Pets, Money & Economics,
-Comics & Graphic Novels, Trains & Ships, Fashion & Designers, Famous Firsts, Travel &
-Airlines, اقتصاد وعملات، البحر والملاحة، نباتات وزراعة، جغرافيا الخليج، طب وصحة،
-رياضيات وأرقام، فنون وعمارة إسلامية، تاريخ عالمي، قرآن وسور، مسلسلات ودراما عربية.
+**Done in waves 2-5** (all audited, all 210+ questions). English: Olympics, Pets, Money &
+Economics, Comics & Graphic Novels, Trains & Ships, Fashion & Designers, Famous Firsts,
+Travel & Airlines, Board Games & Puzzles, Festivals & Holidays. Arabic: اقتصاد وعملات،
+البحر والملاحة، نباتات وزراعة، جغرافيا الخليج، طب وصحة، رياضيات وأرقام، فنون وعمارة إسلامية،
+تاريخ عالمي، قرآن وسور، مسلسلات ودراما عربية، مصر، بلاد الشام، المغرب العربي، فلسطين والقدس،
+حيوانات الصحراء، صناعات وحرف تقليدية، صحافة وإعلام، سيارات ومواصلات.
 
 ### ⏳ Not started, English
 
-Board Games & Puzzles (`board-games`) · Festivals & Holidays (`festivals`) ·
 Ocean & Sailing · Photography · Architecture Styles · Dance & Ballet ·
 Wine, Coffee & Tea · Chess · Cycling · Motorsport Legends · Toys & Lego ·
 Currencies & Flags of Asia · Volcanoes & Earthquakes · Deserts & Rivers ·
@@ -94,16 +95,17 @@ Cats of the Wild · Dinosaurs · Robotics & AI · Cryptography · Nobel Prizes �
 Shipwrecks · Castles · Bridges & Tunnels · Trains of the World · Airports ·
 Islands · Waterfalls · Coral Reefs
 
-> Board Games and Festivals were both authored by the cheap model and deleted. Festivals
-> in particular filled itself with invented names ("X-citing Event", "Quirky Festival").
-> Re-author both from scratch with Opus.
-
-**Audit yield so far (Opus-authored):** 2,145 questions read, 5 wrong. The catches were
+**Audit yield so far (Opus-authored):** ~3,300 questions read, 8 wrong (99.76%). The catches were
 subtle and worth the pass: الاستهلاك clued as accounting depreciation (that is الإهلاك),
 مسجد الحسن الثاني called the world's tallest minaret (only true 1993-2019), the Dow Jones
-"30-company average first published in 1896" (it launched with 12), and a drama pack that
-CONTRADICTED ITSELF on باي باي لندن and on who played قناوي. Self-contradiction inside a
-file is the most reliable smell of a wrong answer.
+"30-company average first published in 1896" (it launched with 12), إنزو فيراري's 1939
+company paired with the prancing-horse badge (that marque is 1947), النمر clued as a
+striped tiger, and الليمون grown on the Jaffa plain (Jaffa is famous for oranges).
+
+**The single most useful audit heuristic:** three of the eight catches were found because the
+file CONTRADICTED ITSELF (باي باي لندن credited to two people, قناوي to two actors, نمر used
+for both leopard and tiger, Jaffa growing lemons in one entry and oranges in another). Put
+"watch for the file contradicting itself" first in every audit prompt.
 
 ### ⏳ Not started, Arabic
 

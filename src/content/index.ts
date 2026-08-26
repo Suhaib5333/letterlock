@@ -239,6 +239,16 @@ import { arEconomyPack } from './arEconomy';
 import { arIslamicArtPack } from './arIslamicArt';
 import { arSeaPack } from './arSea';
 import { arWorldHistoryPack } from './arWorldHistory';
+import { arCarsPack } from './arCars';
+import { arCraftsPack } from './arCrafts';
+import { arDesertAnimalsPack } from './arDesertAnimals';
+import { arEgyptPack } from './arEgypt';
+import { arLevantPack } from './arLevant';
+import { arMediaPack } from './arMedia';
+import { boardGamesPack } from './boardGames';
+import { festivalsHolidaysPack } from './festivalsHolidays';
+import { arJerusalemPack } from './arJerusalem';
+import { arMaghrebPack } from './arMaghreb';
 // AUTO-REGISTER-IMPORTS (scripts/autoregister.mjs inserts new pack imports above this line)
 
 /**
@@ -399,12 +409,14 @@ export function groupOf(id: string): PackGroup {
   // Arabic packs get Arabic categories of their own (shown under the عربي toggle).
   if (/^ar-/.test(id)) {
     if (/^ar-(islamic|history|prophets|ramadan|quran|world-history)/.test(id)) return 'دين وتاريخ';
-    if (/^ar-(science|space|animals|body|nature|tech|invent|medicine|math)/.test(id)) return 'علوم وطبيعة';
-    if (/^ar-(geography|arab-world|gulf|cities|flags|travel|sea)/.test(id)) return 'جغرافيا وسفر';
+    if (/^ar-(science|space|animals|body|nature|tech|invent|medicine|math|desert-animals)/.test(id))
+      return 'علوم وطبيعة';
+    if (/^ar-(geography|arab-world|gulf|cities|flags|travel|sea|egypt|levant|maghreb|jerusalem)/.test(id))
+      return 'جغرافيا وسفر';
     if (/^ar-(sports|football)/.test(id)) return 'رياضة';
-    if (/^ar-(celebrities|songs|music|drama|series|movies|art)/.test(id)) return 'فنون ومشاهير';
+    if (/^ar-(celebrities|songs|music|drama|series|movies|art|media)/.test(id)) return 'فنون ومشاهير';
     if (/^ar-(literature|proverbs|poetry|language|riddles)/.test(id)) return 'أدب ولغة';
-    if (/^ar-(food|heritage|clothes|plants|kitchen)/.test(id)) return 'طعام وتراث';
+    if (/^ar-(food|heritage|clothes|plants|kitchen|crafts)/.test(id)) return 'طعام وتراث';
     return 'معلومات عامة';
   }
   if (/^fandom-/.test(id)) return 'Fandoms';
@@ -549,6 +561,16 @@ export const PACKS: QuestionPack[] = [
   arIslamicArtPack,
   arSeaPack,
   arWorldHistoryPack,
+  arCarsPack,
+  arCraftsPack,
+  arDesertAnimalsPack,
+  arEgyptPack,
+  arLevantPack,
+  arMediaPack,
+  boardGamesPack,
+  festivalsHolidaysPack,
+  arJerusalemPack,
+  arMaghrebPack,
   // AUTO-REGISTER-PACKS (scripts/autoregister.mjs inserts new pack entries above this line)
   // Round-13: new themed packs.
   mythologyPack,
