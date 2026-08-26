@@ -221,6 +221,10 @@ import { arLanguagePack } from './arLanguage';
 import { arTechPack } from './arTech';
 import { languagesWordsPack } from './languagesWords';
 import { militaryHistoryPack } from './militaryHistory';
+import { comicsGraphicNovelsPack } from './comicsGraphicNovels';
+import { moneyEconomicsPack } from './moneyEconomics';
+import { olympicsPack } from './olympics';
+import { petsPack } from './pets';
 // AUTO-REGISTER-IMPORTS (scripts/autoregister.mjs inserts new pack imports above this line)
 
 /**
@@ -513,6 +517,10 @@ export const PACKS: QuestionPack[] = [
   arTechPack,
   languagesWordsPack,
   militaryHistoryPack,
+  comicsGraphicNovelsPack,
+  moneyEconomicsPack,
+  olympicsPack,
+  petsPack,
   // AUTO-REGISTER-PACKS (scripts/autoregister.mjs inserts new pack entries above this line)
   // Round-13: new themed packs.
   mythologyPack,

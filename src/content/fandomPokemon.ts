@@ -255,7 +255,7 @@ export const fandomPokemonPack: RawPack = {
       { q: 'The tiny Bug and Poison larva with a sharp horn on its head.', a: 'Weedle' },
       { q: 'The blue Psychic type that only counters attacks and joins Team Rocket in the anime.', a: 'Wobbuffet' },
       { q: 'The type that beats Fire, Rock and Ground.', a: 'Water' },
-      { q: 'The gigantic Hoenn whale that is the tallest Pokemon of all.', a: 'Wailord' },
+      { q: 'The enormous blue whale of the Hoenn region, 14.5 metres long.', a: 'Wailord' },
       { q: 'The Goldenrod City Gym Leader whose Miltank frustrates so many players.', a: 'Whitney' },
     ],
     X: [
