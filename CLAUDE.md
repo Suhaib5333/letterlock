@@ -510,6 +510,17 @@ Empty board • full board • single bridging move • both edges touched but n
 > tight. The user must always see where everything stands. (Recorded twice at the
 > user's explicit request — this is mandatory in every session.)
 
+## 📚 Content authoring: see `CONTENT_QUEUE.md`
+
+Pack authoring has its own living doc, **`CONTENT_QUEUE.md`**: the pipeline (Opus authors,
+the agent self-verifies with `scripts/checkpack.mjs`, a separate Sonnet agent fact-audits a
+sample, then register, verify, push), the full script list, the copy-paste authoring spec,
+the remaining queue, and the running pack/question counters. **Read it before authoring any
+pack, and update its counters every wave.** It also records the finding that cost a million
+tokens: content authored by a cheap model passed every scriptable gate and was 60-100%
+factually wrong, so all ten of those packs were deleted. Never author content with a cheap
+model.
+
 ## 🧩 Repo conventions for the new project (set these up day one)
 - Mirror this file as `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`. Keep it a **living document**.
 - Commit messages: **no AI attribution** (Suhaib-authored only).

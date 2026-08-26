@@ -148,7 +148,16 @@ for (const vp of VIEWPORTS) {
     await page.goto(BASE);
     await page.getByTestId('open-categories').click().catch(() => {});
     await sleep(150);
-    await page.getByTestId(`pack-${PACK}`).click().catch(() => {});
+    // Arabic packs live behind the عربي side of the language toggle.
+    if (PACK.startsWith('ar-')) {
+      await page.getByTestId('cat-lang-ar').click().catch(() => {});
+      await sleep(200);
+    }
+    await page.getByTestId(`pack-${PACK}`).click({ timeout: 5000 }).catch(() => {});
+    await sleep(150);
+    // If the pack card was unreachable the menu is still open and would swallow
+    // the clicks below, so close it rather than time out 60s later.
+    await page.keyboard.press('Escape').catch(() => {});
     await sleep(150);
   } else {
     await page.goto(BASE);

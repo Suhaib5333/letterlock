@@ -225,6 +225,20 @@ import { comicsGraphicNovelsPack } from './comicsGraphicNovels';
 import { moneyEconomicsPack } from './moneyEconomics';
 import { olympicsPack } from './olympics';
 import { petsPack } from './pets';
+import { arDramaPack } from './arDrama';
+import { arGulfGeoPack } from './arGulfGeo';
+import { arMathPack } from './arMath';
+import { arMedicinePack } from './arMedicine';
+import { arPlantsPack } from './arPlants';
+import { arQuranPack } from './arQuran';
+import { famousFirstsPack } from './famousFirsts';
+import { fashionDesignersPack } from './fashionDesigners';
+import { trainsShipsPack } from './trainsShips';
+import { travelAirlinesPack } from './travelAirlines';
+import { arEconomyPack } from './arEconomy';
+import { arIslamicArtPack } from './arIslamicArt';
+import { arSeaPack } from './arSea';
+import { arWorldHistoryPack } from './arWorldHistory';
 // AUTO-REGISTER-IMPORTS (scripts/autoregister.mjs inserts new pack imports above this line)
 
 /**
@@ -384,8 +398,8 @@ export type PackGroup = (typeof PACK_GROUPS)[number];
 export function groupOf(id: string): PackGroup {
   // Arabic packs get Arabic categories of their own (shown under the عربي toggle).
   if (/^ar-/.test(id)) {
-    if (/^ar-(islamic|history|prophets|ramadan)/.test(id)) return 'دين وتاريخ';
-    if (/^ar-(science|space|animals|body|nature|tech|invent)/.test(id)) return 'علوم وطبيعة';
+    if (/^ar-(islamic|history|prophets|ramadan|quran|world-history)/.test(id)) return 'دين وتاريخ';
+    if (/^ar-(science|space|animals|body|nature|tech|invent|medicine|math)/.test(id)) return 'علوم وطبيعة';
     if (/^ar-(geography|arab-world|gulf|cities|flags|travel|sea)/.test(id)) return 'جغرافيا وسفر';
     if (/^ar-(sports|football)/.test(id)) return 'رياضة';
     if (/^ar-(celebrities|songs|music|drama|series|movies|art)/.test(id)) return 'فنون ومشاهير';
@@ -521,6 +535,20 @@ export const PACKS: QuestionPack[] = [
   moneyEconomicsPack,
   olympicsPack,
   petsPack,
+  arDramaPack,
+  arGulfGeoPack,
+  arMathPack,
+  arMedicinePack,
+  arPlantsPack,
+  arQuranPack,
+  famousFirstsPack,
+  fashionDesignersPack,
+  trainsShipsPack,
+  travelAirlinesPack,
+  arEconomyPack,
+  arIslamicArtPack,
+  arSeaPack,
+  arWorldHistoryPack,
   // AUTO-REGISTER-PACKS (scripts/autoregister.mjs inserts new pack entries above this line)
   // Round-13: new themed packs.
   mythologyPack,
