@@ -1139,3 +1139,35 @@ format, seeded RNG, pure rules engine).
 - ⏳ Deferred by budget, not by blocker: the further ~30 English + ~30 Arabic categories. The
   authoring pipeline (agent per pack → `autoregister` → `leaks` → `packstats`) is proven and
   can resume at any time.
+
+## II.3q Round-19: settings on one page, 7 recovered packs, and the cheap-model experiment (2026-08-26)
+
+- ✅ **7 packs recovered for free**: Military History (208), Languages & Words (211) and the
+  Arabic تقنية (206), اختراعات (213), لغة (210), تاريخ إسلامي (209), مطبخ خليجي (207) were
+  already fully written on disk from agents killed by a usage limit. Registering them cost
+  nothing. **133 packs, 29,615 questions.**
+- ✅ **A Sonnet sample audit (14 questions per pack) rated those 7 at 0-7% bad, all SHIP.**
+  The two flagged items were fixed: an organ-transplant clue that described Barnard's 1967
+  heart operation, and a Hattin clue that conflated the battle with the later recapture of
+  Jerusalem.
+- 🚫 **The cheap-model authoring experiment FAILED, and this is the finding worth keeping.**
+  10 packs were authored by Haiku with the format spec inlined. They passed every gate that
+  can be scripted (210+ questions, 20+ letters, no duplicates, no answer leaks after a fix
+  loop) and failed the one that cannot: **facts**. A sampled audit put them at **60-100%
+  wrong, invented or vague** (Houston hosted the 1992 Olympics, Comme des Garçons is Belgian,
+  ARAMCO is an airline, the Great Dane is Italian, invented words like "Quay-haul"). One file
+  still carried its own `// Wrong, Tokyo hosted 2020` comment. **All 10 were deleted, none
+  shipped.** Authoring trivia is a knowledge task, not a formatting task: use a model that
+  knows the facts, and sample-audit every wave before it ships.
+- ✅ **New content tooling** (all three earn their keep):
+  - `scripts/checkpack.mjs <file>` validates ONE unregistered pack (count, letter coverage,
+    duplicate answers, misfiled answers, every leak) and exits non-zero until clean, so an
+    authoring agent can self-verify instead of round-tripping through the orchestrator.
+  - `scripts/dropleaks.mjs <files>` deletes leaking and duplicate-answer questions, refusing
+    when the pack would fall under 200 (`MIN=` overrides).
+  - It also caught a silent killer: a **duplicate `D:` key** in one pack, where JavaScript
+    keeps only the last block, so 15 questions vanished AND were never leak-checked. Any new
+    pack should be scanned for repeated letter keys.
+- ✅ **⚙️ Settings fits on one page, every device, nothing cut off** (see II.3p for the CSS).
+  Verified again here: `scripts/checksettings.mjs` ALL CLEAR on 15 viewports at default AND
+  xlarge text; `noscroll.mjs` ALL CLEAR on 17 devices.

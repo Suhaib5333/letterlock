@@ -231,7 +231,7 @@ export const languagesWordsPack: RawPack = {
       { q: 'The Austronesian speech of Manila that became the base of the national standard.', a: 'Tagalog' },
       { q: 'The Dravidian language of Hyderabad and Andhra Pradesh.', a: 'Telugu' },
       { q: 'The tonal language of Bangkok, written in its own abugida.', a: 'Thai' },
-      { q: 'The Sino-Tibetan language of Lhasa.', a: 'Tibetan' },
+      { q: 'The main language spoken in Lhasa.', a: 'Tibetan' },
       { q: 'A reference book of synonyms grouped by meaning, famously compiled by Peter Roget.', a: 'Thesaurus' },
       { q: 'The act of turning written text from one language into another.', a: 'Translation' },
       { q: 'A phrase deliberately hard to say quickly, such as she sells seashells by the seashore.', a: 'Tongue twister' },
