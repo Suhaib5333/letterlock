@@ -197,7 +197,7 @@ export const fandomPokemonPack: RawPack = {
       { q: 'The Electric type reached by giving a Thunder Stone to the yellow mouse mascot.', a: 'Raichu' },
       { q: 'The purple Normal rodent found on almost every early route in Kanto.', a: 'Rattata' },
       { q: 'The Dragon and Flying legendary that lives high in the ozone layer.', a: 'Rayquaza' },
-      { q: 'The Ground and Rock type with a drill horn, the very first Pokemon ever designed.', a: 'Rhydon' },
+      { q: 'The armour-plated Ground and Rock quadruped of Kanto that charges in a straight line.', a: 'Rhydon' },
       { q: 'The type used by the Pewter City Gym that is weak to Water and Grass.', a: 'Rock' },
       { q: 'The baby Fighting type that evolves into Lucario.', a: 'Riolu' },
       { q: 'The Electric and Ghost type that possesses household appliances.', a: 'Rotom' },

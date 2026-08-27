@@ -145,7 +145,7 @@ export const superheroesMediumPack: RawPack = {
       { q: 'Marvel\'s unbreakable-skinned hero for hire from Harlem.', a: 'Luke Cage' },
       { q: 'Curt Connors, whose limb-regrowth serum turns him into a reptilian Spider-Man foe.', a: 'Lizard', alt: ['The Lizard'] },
       { q: 'Wolverine\'s everyday name, also the title of his 2017 farewell film.', a: 'Logan' },
-      { q: 'The ancient order of killers that trained Bruce Wayne in Batman Begins.', a: 'League of Assassins', alt: ['League of Shadows'] },
+      { q: 'The ancient order of killers, led by Ra\'s al Ghul, that trained Bruce Wayne in the comics.', a: 'League of Assassins', alt: ['League of Shadows'] },
       { q: 'Doctor Doom\'s small fictional European dictatorship.', a: 'Latveria' },
       { q: 'Samuel Sterns, the giant-brained gamma villain who schemes against the Hulk.', a: 'Leader', alt: ['The Leader'] },
       { q: 'Wonder Woman\'s unbreakable golden rope that forces captives to be honest.', a: 'Lasso of Truth', alt: ['Golden Lasso'] },

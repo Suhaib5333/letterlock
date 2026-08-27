@@ -142,7 +142,7 @@ export const carsMotorsportPack: RawPack = {
       { q: 'British marque founded by Colin Chapman in 1952.', a: 'Lotus' },
       { q: 'British maker of the Defender and the Discovery.', a: 'Land Rover' },
       { q: 'Briton who took a record equalling seventh world title in 2020.', a: 'Lewis Hamilton' },
-      { q: 'Italian marque that won six straight world rally makers titles in the 1980s.', a: 'Lancia' },
+      { q: 'Italian marque that won six straight world rally makers titles from 1987.', a: 'Lancia' },
       { q: 'Luxury badge that Toyota launched in 1989 with the LS 400.', a: 'Lexus' },
       { q: 'Ford luxury division named after an American president.', a: 'Lincoln' },
       { q: 'Device that stops one spinning wheel from taking all the torque.', a: 'Limited slip differential', alt: ['LSD'] },

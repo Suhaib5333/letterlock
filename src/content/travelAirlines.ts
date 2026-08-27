@@ -122,7 +122,7 @@ export const travelAirlinesPack: RawPack = {
       { q: 'Finnair\'s base is the airport of this Nordic capital.', a: 'Helsinki' },
       { q: 'The most common kind of paid lodging for travellers.', a: 'Hotel' },
       { q: 'The central airport through which an airline routes most connecting traffic.', a: 'Hub' },
-      { q: 'The mountain system that contains the world\'s fourteen highest peaks.', a: 'Himalayas' },
+      { q: 'The Asian mountain system that contains Everest and most of the highest peaks on Earth.', a: 'Himalayas' },
       { q: 'The Vietnamese capital in the north of the country.', a: 'Hanoi' },
     ],
     I: [

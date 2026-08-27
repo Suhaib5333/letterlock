@@ -96,7 +96,7 @@ export const fandomBreakingBadPack: RawPack = {
       { q: 'The actor who played the composed owner of Los Pollos Hermanos.', a: 'Giancarlo Esposito' },
       { q: 'The surname of Hank\'s DEA partner Steven, who dies in the desert shootout.', a: 'Gomez' },
       { q: 'Walt\'s former laboratory assistant and girlfriend, who married his business partner.', a: 'Gretchen Schwartz', alt: ['Gretchen'] },
-      { q: 'The season 3 episode in which Walt hurls a potted plant at his old partner\'s office window.', a: 'Green Light' },
+      { q: 'The season 3 episode in which Walt hurls a potted plant at the office window of Skyler\'s boss.', a: 'Green Light' },
       { q: 'The season 2 episode set mostly at the desert hideout of Tuco and his uncle.', a: 'Grilled' },
     ],
     H: [

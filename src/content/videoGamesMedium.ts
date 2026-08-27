@@ -47,7 +47,7 @@ export const videoGamesMediumPack: RawPack = {
       { q: 'The spiky-haired ex-SOLDIER who hauls the Buster Sword through Final Fantasy VII, full name.', a: 'Cloud Strife', alt: ['Cloud'] },
     ],
     D: [
-      { q: 'Sega\'s final console, launched in 1999 with a built-in modem for online play.', a: 'Dreamcast' },
+      { q: 'Sega\'s final console, which reached the West in 1999 with a built-in modem for online play.', a: 'Dreamcast' },
       { q: 'Blizzard\'s Lord of Terror, first fought beneath the town of Tristram in 1996.', a: 'Diablo' },
       { q: 'The red-capped little chimp who debuted as Donkey\'s sidekick in a 1994 SNES platformer.', a: 'Diddy Kong' },
       { q: 'The Elder Scrolls\' guild of assassins, sworn to Sithis and the Night Mother.', a: 'Dark Brotherhood' },

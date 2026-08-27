@@ -62,7 +62,7 @@ export const footballMediumPack: RawPack = {
       { q: 'Galician club that won a surprise La Liga title in 2000.', a: 'Deportivo La Coruna', alt: ['Deportivo'] },
       { q: 'Name given to the fixture between Bayern Munich and Borussia Dortmund.', a: 'Der Klassiker' },
       { q: 'Scottish forward known as King Kenny who won league titles as Liverpool\'s player and as its manager (surname).', a: 'Dalglish', alt: ['Kenny Dalglish'] },
-      { q: 'Argentine winger who scored in the finals of the 2014 Champions League, the 2021 Copa America and the 2022 World Cup (surname).', a: 'Di Maria', alt: ['Angel Di Maria'] },
+      { q: 'Argentine winger who scored in the finals of both the 2021 Copa America and the 2022 World Cup (surname).', a: 'Di Maria', alt: ['Angel Di Maria'] },
     ],
     E: [
       { q: 'Name given to the fixture between Real Madrid and Barcelona.', a: 'El Clasico', alt: ['Clasico'] },

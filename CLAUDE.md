@@ -1236,3 +1236,38 @@ format, seeded RNG, pure rules engine).
 - ✅ **⚙️ Settings fits on one page, every device, nothing cut off** (see II.3p for the CSS).
   Verified again here: `scripts/checksettings.mjs` ALL CLEAR on 15 viewports at default AND
   xlarge text; `noscroll.mjs` ALL CLEAR on 17 devices.
+
+## II.3t Round-22: the second fact-audit sweep — every pack from the past week (2026-08-27)
+
+The user asked for the Round-21 treatment to be extended to "the last couple of batches we
+delivered in the past week or so". Scope came from git (`--since=2026-08-20 --diff-filter=A`):
+125 files added, of which **103 were packs still unaudited (~21,600 questions)**. All 103 were
+read question by question and corrected in place. Nothing was deleted; every edited pack
+re-passes `scripts/checkpack.mjs`.
+
+- ✅ **Arabic: 51 packs (~10,700 questions), 12 corrections.** All single facts (al-Baghdadi's
+  nisba, Baligh Hamdi's birthplace, Tariq's ships, Baybars at Ain Jalut, an Ahmed Zaki film,
+  a China population figure, an overstated Ibn Firnas claim). **The finding: the lexicon
+  failure mode of Round 21 was specific to everyday-vocabulary packs, not to Arabic.** Every
+  knowledge-domain Arabic pack (history, geography, religion, science, sport, literature,
+  proverbs, poetry) held up.
+- ✅ **English: 52 packs (~10,900 questions), 22 corrections.** The failure mode is
+  **superlatives and dated claims**, never identity: "six straight titles in the 1980s"
+  (Lancia's sixth came in 1987), "the episode that opened the Hundred Years War" (Crécy came
+  years in), record-holder claims true of a different holder, "the very first Pokémon ever
+  designed" attached to Rhyhorn when the drill horn and the anecdote both belong to Rhydon,
+  and a Di María clue crediting him with a 2014 Champions League final goal he never scored.
+- ✅ **The 17 Fandoms packs were the cleanest in the repo: 14 needed nothing at all.**
+  In-universe facts are stable. All three fixes were out-of-universe slips (a film's own term
+  vs the comics' term, step-brother written as half-brother, an episode clue naming the wrong
+  character's office).
+- ➕ **`src/content/dinosaurs.ts` was committed.** It was imported by `content/index.ts` but had
+  never been added to git, so a clean clone could not build. It validates clean (212 questions).
+- 🧠 **Authoring rules added to `CONTENT_QUEUE.md`:** never write "the first / the only / the
+  biggest" unless the pack needs it (a plain identifying clue cannot be wrong, and a
+  superlative rots as records change); never date a claim to a decade you have not checked,
+  name the single year; a clue that names a film must use that film's own terms; and when two
+  entities in a family share a trait, clue the trait that separates them.
+- ✅ Re-verified after the sweep: **987 unit/content tests**, full Playwright e2e,
+  **noscroll ALL CLEAR** (17 devices × every screen), `scripts/leaks.mjs` zero leaks repo-wide,
+  strict typecheck and production build clean.

@@ -95,7 +95,7 @@ export const oceanLifePack: RawPack = {
       { q: 'Warm Atlantic current that carries tropical heat toward northwest Europe.', a: 'Gulf Stream' },
       { q: 'Heavy-bodied reef predator that swallows prey with a vacuum-like gulp.', a: 'Grouper' },
       { q: 'The feathery organ a fish uses to pull oxygen out of water.', a: 'Gill' },
-      { q: 'Deep-dwelling mollusc that has the largest eyes in the animal kingdom.', a: 'Giant squid' },
+      { q: 'Deep-dwelling mollusc with huge eyes and tentacles stretching over ten metres.', a: 'Giant squid' },
       { q: 'Pink deep-water predator with a blade-like snout and jaws that shoot forward.', a: 'Goblin shark' },
       { q: 'Large basin bordered by Texas, Florida and the Yucatan peninsula.', a: 'Gulf of Mexico' },
       { q: 'Sluggish long-lived Arctic species thought to reach 400 years of age.', a: 'Greenland shark' },
@@ -146,7 +146,7 @@ export const oceanLifePack: RawPack = {
       { q: 'The largest turtle, with a ridged rubbery back instead of hard plates.', a: 'Leatherback' },
       { q: 'Small deep-water fish with rows of light organs, among the most abundant vertebrates alive.', a: 'Lanternfish' },
       { q: 'The moment at which water sits at its lowest point on a shore.', a: 'Low tide' },
-      { q: 'Bright blue tropical crustacean prized as a delicacy and once a mascot of aquariums.', a: 'Langoustine' },
+      { q: 'Small pink clawed crustacean of the North Atlantic, sold in restaurants as scampi.', a: 'Langoustine' },
     ],
     M: [
       { q: 'The deepest known gash in the sea floor, lying in the western Pacific.', a: 'Mariana Trench' },

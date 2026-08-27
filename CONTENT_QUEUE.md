@@ -11,7 +11,7 @@
 | Packs shipped | **182** | 2026-08-27 |
 | Questions shipped | **40,159** | 2026-08-27 |
 | Arabic packs | 51 | 2026-08-27 |
-| Packs fact-audited | 55 | 2026-08-27 |
+| Packs fact-audited | **158** (every pack added since 2026-08-20, plus the 55 earlier) | 2026-08-27 |
 | Target for this programme | 60 new packs (30 EN + 30 AR) | |
 | Done toward target | 51 | |
 | Left toward target | **see viability finding below** | |
@@ -196,3 +196,46 @@ Practical rules that came out of the sweep:
 - **Tashkeel to disambiguate does not work**: `برد` vs `بَرَد` looked distinct to
   `checkpack` but `normalizeArabic` strips the harakat, so in play they were the same answer.
   Use two different words instead.
+
+## 🔎 Fact-audit sweep 2 (2026-08-27) — the rest of the past week's packs, all 103 of them
+
+The user asked for the same treatment for "the last couple of batches we delivered in the
+past week or so". Scope was taken from git: `git log --since=2026-08-20 --diff-filter=A
+--name-only -- src/content` lists 125 added files; minus `leakRules.ts` and the 21 packs
+already swept above, that left **103 packs (~21,600 questions)**. Every one was read
+question by question and corrected in place. No question was deleted; every edited pack
+still passes `checkpack.mjs`.
+
+| Side | Packs read | Questions | Corrections |
+|---|---|---|---|
+| Arabic | 51 | ~10,700 | 12 |
+| English | 52 | ~10,900 | 22 |
+
+**The finding: the wider corpus is far stronger than the six weak packs of sweep 1.** Those
+six were everyday-vocabulary Arabic packs and needed ~150 fixes between them. The other 51
+Arabic packs — history, geography, religion, science, sport, literature — needed **12 fixes
+in total**, all single facts (a nisba, a birthplace, a film credit, one overstated claim
+about Ibn Firnas). The lexicon failure mode is specific to vocabulary packs, not to Arabic.
+
+**English packs fail on superlatives and dated claims, not on identity.** Of 22 corrections,
+nearly all were of the form "the first / the only / the biggest / in the 1980s":
+- `worldRecords`, `famousFirsts`, `militaryHistory`, `carsMotorsport`: six-straight-titles,
+  "opened the Hundred Years War", record-holder claims that were true of a *different* holder.
+- Fandom packs were the cleanest of all (14 of 17 needed nothing) because in-universe facts
+  are stable. The three fixes were an *out*-of-universe slip each: a film's team name given
+  where the comics' name was the answer (League of Assassins vs the film's League of Shadows),
+  a step-brother called a half-brother, and an episode clue that named the wrong character's
+  office.
+- Two were wrong-entity clues that a script cannot see: a Pokémon clue describing Rhydon's
+  drill horn while the answer was Rhyhorn, and a Di María clue crediting him with a 2014
+  Champions League final goal he did not score.
+
+**Rules added for future waves:**
+- **Never write "the first", "the only" or "the biggest" unless the pack needs it.** A plain
+  identifying clue cannot be wrong; a superlative can, and it silently rots as records change.
+- **Never date a claim to a decade you have not checked** ("six titles in the 1980s" was five
+  in the 1980s plus one in 1987 for a *different* team). Name the single year instead.
+- **A clue naming a film or show must use that film's own terms**, or reword it to the
+  comics/book framing so the primary answer matches the source you named.
+- **When two entities in a family share a trait, name the trait that separates them**
+  (Rhyhorn/Rhydon, Kotake/Koume). Otherwise the clue fits the answer's relative, not the answer.

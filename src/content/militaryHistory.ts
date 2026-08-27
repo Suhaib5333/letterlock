@@ -37,7 +37,7 @@ export const militaryHistoryPack: RawPack = {
     ],
     C: [
       { q: 'The 216 BC battle in Apulia where Hannibal\'s double envelopment destroyed a Roman army.', a: 'Cannae' },
-      { q: 'The 1346 archery victory in Picardy that opened the Hundred Years War.', a: 'Crecy', alt: ['Crécy'] },
+      { q: 'The 1346 archery victory in Picardy in the early years of the Hundred Years War.', a: 'Crecy', alt: ['Crécy'] },
       { q: 'The 1746 moor near Inverness where the Jacobite rising was finally broken.', a: 'Culloden' },
       { q: 'The city whose triple walls fell to Mehmed the Second\'s siege guns in 1453.', a: 'Constantinople' },
       { q: 'The general name for a large gunpowder artillery tube, from a Latin word for a reed or pipe.', a: 'Cannon' },

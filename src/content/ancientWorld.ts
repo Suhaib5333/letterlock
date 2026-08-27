@@ -200,7 +200,7 @@ export const ancientWorldPack: RawPack = {
     R: [
       { q: 'Egyptian sun god who sailed a boat across the sky each day.', a: 'Ra', alt: ['Re', 'Amun-Ra'] },
       { q: 'Legendary founder of Rome who killed his twin brother in a quarrel.', a: 'Romulus' },
-      { q: 'Granite slab whose three parallel scripts unlocked Egyptian writing.', a: 'Rosetta Stone' },
+      { q: 'Dark granodiorite slab whose three parallel scripts unlocked Egyptian writing.', a: 'Rosetta Stone' },
       { q: 'Pharaoh of the 19th dynasty who built Abu Simbel and fought at Kadesh.', a: 'Ramesses II', alt: ['Ramses II', 'Ramesses the Great'] },
       { q: 'Small Italian river Caesar crossed with a legion to begin a civil war.', a: 'Rubicon' },
       { q: 'System of elected consuls and a senate that governed Rome between its kings and its emperors.', a: 'Roman Republic', alt: ['Republic'] },

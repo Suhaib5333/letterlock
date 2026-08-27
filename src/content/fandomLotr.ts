@@ -226,7 +226,7 @@ export const fandomLotrPack: RawPack = {
       { q: "The actor who played Samwise Gamgee.", a: "Sean Astin" },
       { q: "The English actor who played Boromir.", a: "Sean Bean" },
       { q: "The quarter of the Shire famous for growing pipe-weed.", a: "Southfarthing" },
-      { q: "The horse of Theoden, crushed by a fell beast on the Pelennor.", a: "Snowmane" },
+      { q: "The horse of Theoden, felled by a dart on the Pelennor.", a: "Snowmane" },
     ],
     T: [
       { q: "The King of Rohan freed from Saruman's spell by Gandalf.", a: "Theoden" },
@@ -240,7 +240,7 @@ export const fandomLotrPack: RawPack = {
       { q: "The Elf king of Doriath, father of Luthien.", a: "Thingol" },
       { q: "The name the Dwarves give to the Grey Wizard.", a: "Tharkun" },
       { q: "Telperion and Laurelin, the great lights of Valinor.", a: "Two Trees" },
-      { q: "The era of Middle-earth that ended when the Ring went into the fire.", a: "Third Age" },
+      { q: "The era of Middle-earth that ended with the passing of the Ring-bearers over the sea.", a: "Third Age" },
     ],
     U: [
       { q: "The great crossbred orc soldiers of Saruman.", a: "Uruk-hai" },

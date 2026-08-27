@@ -245,7 +245,7 @@ export const birdsInsectsPack: RawPack = {
       { q: 'Bald-headed scavenger that circles on thermals looking for carcasses.', a: 'Vulture' },
       { q: 'Toxin a wasp or a spider injects to subdue prey or defend itself.', a: 'Venom' },
       { q: 'Insect that mimics the monarch closely so that predators leave it alone.', a: 'Viceroy' },
-      { q: 'The scientific genus that covers hornets and yellowjackets.', a: 'Vespa' },
+      { q: 'The scientific genus to which the hornets belong.', a: 'Vespa' },
       { q: 'Small greenish American songbird with a persistent repetitive phrase.', a: 'Vireo' },
     ],
     W: [

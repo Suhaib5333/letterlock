@@ -220,7 +220,7 @@ export const videoGamesHardPack: RawPack = {
       { q: 'The nickname for the three flashing lights of a dead Xbox 360.', a: 'Red Ring of Death' },
     ],
     S: [
-      { q: 'The designer whose own name contractually appears in the title of Civilization.', a: 'Sid Meier', alt: ['Meier'] },
+      { q: 'The designer whose own name has been part of the Civilization title since 1991.', a: 'Sid Meier', alt: ['Meier'] },
       { q: 'The company, its name short for "Service Games", that quit the console business in 2001.', a: 'Sega' },
       { q: 'Will Wright\'s 1989 city builder, rejected by publishers because it had no way to win.', a: 'SimCity' },
       { q: 'The blue mascot created in 1991 by Naka, Oshima and Yasuhara to outrun a plumber.', a: 'Sonic the Hedgehog', alt: ['Sonic'] },

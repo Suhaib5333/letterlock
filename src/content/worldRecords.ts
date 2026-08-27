@@ -106,13 +106,13 @@ export const worldRecordsPack: RawPack = {
     ],
     H: [
       { q: 'The tallest known living tree, a coast redwood in northern California.', a: 'Hyperion' },
-      { q: 'The mountain range containing every peak above eight thousand metres.', a: 'Himalayas' },
+      { q: 'The mountain range that holds Everest and most of the peaks above eight thousand metres.', a: 'Himalayas' },
       { q: 'The only birds that can hover in place and fly backwards.', a: 'Hummingbird' },
       { q: 'The United States state home to the largest volcano on Earth by volume.', a: 'Hawaii' },
       { q: 'The city with more skyscrapers than anywhere else in the world.', a: 'Hong Kong' },
       { q: 'The third heaviest land animal, after elephants and rhinos.', a: 'Hippopotamus' },
       { q: 'The largest aircraft ever flown, a German airship destroyed in 1937.', a: 'Hindenburg' },
-      { q: 'The heaviest single piece of frozen precipitation on record fell in South Dakota in 2010, and it was one of these.', a: 'Hailstone' },
+      { q: 'The heaviest one ever recorded in the United States fell in South Dakota in 2010, weighing nearly a kilogram.', a: 'Hailstone' },
       { q: 'The largest single meteorite known on Earth, still lying where it fell in Namibia.', a: 'Hoba' },
     ],
     I: [

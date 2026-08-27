@@ -120,7 +120,7 @@ export const fandomMarvelPack: RawPack = {
       { q: 'The polite artificial butler voiced by Paul Bettany before Vision existed.', a: 'Jarvis' },
       { q: 'The telepathic X-Man consumed by the Phoenix force.', a: 'Jean Grey' },
       { q: 'The super-strong private investigator played by Krysten Ritter.', a: 'Jessica Jones' },
-      { q: 'The unstoppable helmeted half-brother of Charles Xavier.', a: 'Juggernaut' },
+      { q: 'The unstoppable helmeted step-brother of Charles Xavier.', a: 'Juggernaut' },
       { q: 'Hope\'s mother, stranded for decades in the Quantum Realm.', a: 'Janet van Dyne', alt: ['Janet'] },
     ],
     K: [
