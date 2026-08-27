@@ -265,6 +265,7 @@ import { drinksPack } from './drinks';
 import { nobelPack } from './nobel';
 import { cyclingPack } from './cycling';
 import { arWorldCitiesPack } from './arWorldCities';
+import { arWorldFoodPack } from './arWorldFood';
 // AUTO-REGISTER-IMPORTS (scripts/autoregister.mjs inserts new pack imports above this line)
 
 /**
@@ -432,7 +433,7 @@ export function groupOf(id: string): PackGroup {
     if (/^ar-(sports|football)/.test(id)) return 'رياضة';
     if (/^ar-(celebrities|songs|music|drama|series|movies|art|media)/.test(id)) return 'فنون ومشاهير';
     if (/^ar-(literature|proverbs|poetry|language|riddles)/.test(id)) return 'أدب ولغة';
-    if (/^ar-(food|heritage|clothes|plants|kitchen|crafts)/.test(id)) return 'طعام وتراث';
+    if (/^ar-(food|world-food|heritage|clothes|plants|kitchen|crafts)/.test(id)) return 'طعام وتراث';
     return 'معلومات عامة';
   }
   if (/^fandom-/.test(id)) return 'Fandoms';
@@ -603,6 +604,7 @@ export const PACKS: QuestionPack[] = [
   nobelPack,
   cyclingPack,
   arWorldCitiesPack,
+  arWorldFoodPack,
   // AUTO-REGISTER-PACKS (scripts/autoregister.mjs inserts new pack entries above this line)
   // Round-13: new themed packs.
   mythologyPack,
