@@ -259,6 +259,8 @@ import { castlesPack } from './castles';
 import { engineeringPack } from './engineering';
 import { dancePack } from './dance';
 import { predatorsPack } from './predators';
+import { codesSpiesPack } from './codesSpies';
+import { roboticsAiPack } from './roboticsAi';
 // AUTO-REGISTER-IMPORTS (scripts/autoregister.mjs inserts new pack imports above this line)
 
 /**
@@ -591,6 +593,8 @@ export const PACKS: QuestionPack[] = [
   engineeringPack,
   dancePack,
   predatorsPack,
+  codesSpiesPack,
+  roboticsAiPack,
   // AUTO-REGISTER-PACKS (scripts/autoregister.mjs inserts new pack entries above this line)
   // Round-13: new themed packs.
   mythologyPack,
