@@ -437,7 +437,7 @@ export function groupOf(id: string): PackGroup {
     if (/^ar-(sports|football)/.test(id)) return 'رياضة';
     if (/^ar-(celebrities|songs|music|drama|series|movies|art|media)/.test(id)) return 'فنون ومشاهير';
     if (/^ar-(literature|proverbs|poetry|language|riddles)/.test(id)) return 'أدب ولغة';
-    if (/^ar-(jobs|home|crafts2|food|world-food|heritage|clothes|plants|kitchen|crafts)/.test(id)) return 'طعام وتراث';
+    if (/^ar-(food|world-food|heritage|clothes|plants|kitchen|crafts)/.test(id)) return 'طعام وتراث';
     return 'معلومات عامة';
   }
   if (/^fandom-/.test(id)) return 'Fandoms';
