@@ -163,3 +163,36 @@ back to معلومات عامة. Add new keywords there as needed.
   to the checker too.
 - Packs permanently under 200 because the real world caps them: flags (39/54/81),
   maps (61/74/60), logos (147/178), songs-rnb (82). Not defects.
+
+## 🔎 Fact-audit sweep (2026-08-27) — every question of the 21-pack wave, read line by line
+
+The user asked "all questions verified?". They were gate-clean, not fact-checked, so the
+whole Round-20 wave was read question by question (~4,300 questions) and corrected in place.
+No question was deleted; every pack still passes `checkpack.mjs` (count, letters,
+duplicates, misfiles, leaks) after the edits.
+
+| Side | Packs read | Corrections | Notes |
+|---|---|---|---|
+| English | 15 (dinosaurs → cycling) | 26 | Worst offender was `cycling.ts`: 9 wrong palmares stats (jersey counts, podium years). Two `shorten.mjs` over-trims (`blanc`, `Dry ice wine`) replaced with real answers (`Brut`, `Dolcetto`). |
+| Arabic | 6 (`arWorldCities`, `arWorldFood`, `arJobs`, `arTravel`, `arHome`, `arClimate`) | ~150 | `arWorldFood` was clean (0). `arHome` needed 85 and `arClimate` 54. |
+
+**The finding worth keeping: an everyday-vocabulary Arabic pack fails differently from a
+knowledge pack.** A history or geography pack fails on facts, which a careful author mostly
+gets right. A "things in the house" pack fails on **lexicon**: to reach 210 under a
+28-letter index the author reaches for a plausible-looking word that does not exist
+(`ثيابدان`, `بشكير النوم`, `عصا الجمع`, `آلة الشفط`) or attaches a real word to the wrong
+object (`بانيو` clued as the bathroom, `شرشف` as a towel, `برشامة` as a pillowcase,
+`دورق` as a plate, `هراوة` as a carpet beater, `ممسحة` as a dish scourer). **Neither failure
+is visible to any script**: the answer is correctly lettered, unique and leak-free, so every
+gate passes. Only reading it catches it.
+
+Practical rules that came out of the sweep:
+- **Author the noun, then the clue.** Most bad entries were a clue in search of an answer.
+- **A compound answer of the shape `<noun> + <noun>` is a smell** (`لجة المرجان`,
+  `نطاق الوشاح`, `أرض القارة`): it usually means no single real word was available, and the
+  fix is a different, real word for that letter.
+- **Two entries for the same object is a bug even when the words differ** (ثريا/نجفة,
+  صحراء/صحاري, كرة أرضية/كوكب الأرض, دعسة/دواسة). Sweep each letter for near-twins.
+- **Tashkeel to disambiguate does not work**: `برد` vs `بَرَد` looked distinct to
+  `checkpack` but `normalizeArabic` strips the harakat, so in play they were the same answer.
+  Use two different words instead.
