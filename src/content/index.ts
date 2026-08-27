@@ -263,6 +263,7 @@ import { codesSpiesPack } from './codesSpies';
 import { roboticsAiPack } from './roboticsAi';
 import { drinksPack } from './drinks';
 import { nobelPack } from './nobel';
+import { cyclingPack } from './cycling';
 // AUTO-REGISTER-IMPORTS (scripts/autoregister.mjs inserts new pack imports above this line)
 
 /**
@@ -599,6 +600,7 @@ export const PACKS: QuestionPack[] = [
   roboticsAiPack,
   drinksPack,
   nobelPack,
+  cyclingPack,
   // AUTO-REGISTER-PACKS (scripts/autoregister.mjs inserts new pack entries above this line)
   // Round-13: new themed packs.
   mythologyPack,
