@@ -8,13 +8,13 @@
 
 | Metric | Value | Updated |
 |---|---|---|
-| Packs shipped | **161** | 2026-08-27 |
-| Questions shipped | **35,648** | 2026-08-27 |
-| Arabic packs | 45 | 2026-08-27 |
+| Packs shipped | **182** | 2026-08-27 |
+| Questions shipped | **40,159** | 2026-08-27 |
+| Arabic packs | 51 | 2026-08-27 |
 | Packs fact-audited | 55 | 2026-08-27 |
 | Target for this programme | 60 new packs (30 EN + 30 AR) | |
-| Done toward target | 30 | |
-| Left toward target | **30** | |
+| Done toward target | 51 | |
+| Left toward target | **see viability finding below** | |
 
 `node scripts/packstats.mjs` prints the live per-group counts, the total, and any
 pack under 200 questions.
@@ -86,34 +86,68 @@ Travel & Airlines, Board Games & Puzzles, Festivals & Holidays. Arabic: اقتص
 تاريخ عالمي، قرآن وسور، مسلسلات ودراما عربية، مصر، بلاد الشام، المغرب العربي، فلسطين والقدس،
 حيوانات الصحراء، صناعات وحرف تقليدية، صحافة وإعلام، سيارات ومواصلات.
 
-### ⏳ Not started, English
+### ✅ Wave 6 (2026-08-27) — 21 packs shipped
 
-Ocean & Sailing · Photography · Architecture Styles · Dance & Ballet ·
-Wine, Coffee & Tea · Chess · Cycling · Motorsport Legends · Toys & Lego ·
-Currencies & Flags of Asia · Volcanoes & Earthquakes · Deserts & Rivers ·
-Cats of the Wild · Dinosaurs · Robotics & AI · Cryptography · Nobel Prizes ·
-Shipwrecks · Castles · Bridges & Tunnels · Trains of the World · Airports ·
-Islands · Waterfalls · Coral Reefs
+**English (15, all 210+, 0 leaks, 0 misfiled):** Dinosaurs (212), Ocean & Sailing (212),
+Photography (215), Chess (212), Volcanoes & Earthquakes (213), Rivers Lakes & Waterfalls
+(212), Castles & Fortresses (213), Great Engineering (220, covers the queue's Bridges &
+Tunnels), Predators & Prey (212, covers Cats of the Wild), Dance & Ballet (211), Robots &
+AI (211), Codes Ciphers & Spies (219, covers Cryptography), Nobel Prizes (210), Wine
+Coffee & Tea (216), Cycling (210).
 
-**Audit yield so far (Opus-authored):** ~3,300 questions read, 8 wrong (99.76%). The catches were
-subtle and worth the pass: الاستهلاك clued as accounting depreciation (that is الإهلاك),
-مسجد الحسن الثاني called the world's tallest minaret (only true 1993-2019), the Dow Jones
-"30-company average first published in 1896" (it launched with 12), إنزو فيراري's 1939
-company paired with the prancing-horse badge (that marque is 1947), النمر clued as a
-striped tiger, and الليمون grown on the Jaffa plain (Jaffa is famous for oranges).
+**Arabic (6, all 210+):** مدن العالم (213), مأكولات عالمية (258), مهن وأعمال (210),
+سفر ومواصلات (210), البيت والأدوات (212), مناخ وطبيعة (210).
 
-**The single most useful audit heuristic:** three of the eight catches were found because the
-file CONTRADICTED ITSELF (باي باي لندن credited to two people, قناوي to two actors, نمر used
-for both leopard and tiger, Jaffa growing lemons in one entry and oranges in another). Put
-"watch for the file contradicting itself" first in every audit prompt.
+### ☠️ The finding of this wave: TOPIC WIDTH, not effort, is the binding constraint
 
-### ⏳ Not started, Arabic
+A pack needs ~210 answers spread over 26 (EN) or 28 (AR) letter buckets. **A narrow topic
+cannot supply them, no matter how well it is authored.** The diagnostic is the
+`checkpack.mjs` misfiled count: if a first draft shows 30-80 answers filed under the wrong
+letter, the author was reaching for on-topic items that do not start with the needed letter,
+i.e. the topic is out of answers. Two packs were **written and then deleted** for this:
 
-أمثال خليجية · أفلام عالمية بالعربية · أطفال وعائلة · مناخ وطبيعة ·
-عمارة ومدن عربية · صحافة وإعلام عربي · ألعاب وترفيه · سيارات ومواصلات ·
-موسيقى عربية كلاسيكية · تاريخ مصر · الشام وبلاد الرافدين · المغرب العربي ·
-اليمن وعمان · فلسطين والقدس · لغات وحروف · فلك وتقويم · صناعات وحرف ·
-أعياد ومناسبات · حيوانات الصحراء · طيور ومحميات
+- **Toys & Playthings** (EN): 52 of 187 answers could not file under their own letter —
+  toy names cluster on B/L/M (Lego, Barbie, Mattel…). Its intent is already covered by the
+  existing Board Games & Puzzles and Video Games packs.
+- **طيور ومحميات** (AR): 203 questions but 64 leaks and 11 misfiles; bird names in Arabic
+  cluster on ب/ح/ن/ط, and abstract fillers (لحم، ليل، ماء) leak into their own clues.
+
+**What DOES work at 210:**
+- EN: a topic where *proper names* spread across the alphabet (riders, laureates, cities,
+  dishes), or a whole engineering/scientific vocabulary. Cycling only cleared 210 once it
+  was rebuilt around rider surnames (Anquetil→Zoetemelk).
+- AR: only **broad everyday-vocabulary domains** — food, home, jobs, travel, climate,
+  cities. Those six are now done. Every remaining Arabic topic tried (أعياد، ألعاب،
+  كرتون، أبطال، حيوانات بحرية، مدرسة، ألبسة) tops out at **110-170 real answers**; going
+  further means padding, which this doc already forbids. **Do not start them.**
+
+### 🔧 Two Arabic-specific authoring rules learned the hard way
+
+1. **Never write a clue as «الـ+answer الذي…»** — the leak checker strips ال, so
+   «اللون الذي يميز ريش الغراب» + answer «لون أسود» is a leak. Describe, never name.
+2. **Prefer single-word answers.** Compound answers («X الماء», «Y الباب») almost always
+   leak, because the clue has to mention the common noun. 60 of the 64 leaks in the
+   deleted birds pack were of this shape.
+
+### 📐 The distribution that reaches 210 in one pass (Arabic)
+
+Skew hard, do not spread evenly — this is how the existing arFood (228) is built:
+ب/م ≈ 18-21 · ك/س/ش/ت/ف/ح/ق ≈ 10-16 · most others 5-9 · ث/ذ/ض/ظ ≈ 2-3.
+Even spreading (8 per letter) always lands ~180 and then needs two top-up rounds.
+
+### ⏳ Not started (deliberately, with reasons)
+
+- **English, viable but not attempted:** Architecture Styles (overlaps the shipped
+  Architecture & Landmarks), Motorsport Legends (overlaps Cars & Motorsport), Trains of
+  the World (overlaps Trains & Ships), Currencies & Flags of Asia (overlaps Flags + Money).
+- **English, tried and judged too narrow for 210:** Toys & Lego (deleted), Airports,
+  Islands, Waterfalls, Coral Reefs, Shipwrecks, Deserts & Rivers (the last four are folded
+  into the shipped Rivers Lakes & Waterfalls and Volcanoes packs).
+- **Arabic:** every topic on the old list is either already shipped under another name
+  (سيارات = arCars, فلسطين = arJerusalem, المغرب = arMaghreb, تاريخ مصر = arEgypt,
+  حيوانات الصحراء = arDesertAnimals, صناعات = arCrafts, صحافة = arMedia, أمثال =
+  arProverbs, لغات = arLanguage, فلك = arSpace) or below the 210 line (see the finding
+  above).
 
 ## 🎨 Category routing
 

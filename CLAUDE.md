@@ -1031,6 +1031,34 @@ A large multi-request batch (all deployed + CI-green on `letterlock.raltech.dev`
 - ✅ Re-verified: typecheck + build clean, **346 unit**, full e2e green (+ reconnect
   matrix), **noscroll ALL CLEAR** (17 devices).
 
+## II.3r Round-20: 21 more Opus-authored packs, and the topic-width finding (2026-08-27)
+
+- ✅ **21 new packs, every one 210+ questions, 0 answer leaks, 0 misfiled letters.**
+  English (15): Dinosaurs, Ocean & Sailing, Photography, Chess, Volcanoes & Earthquakes,
+  Rivers Lakes & Waterfalls, Castles & Fortresses, Great Engineering, Predators & Prey,
+  Dance & Ballet, Robots & AI, Codes Ciphers & Spies, Nobel Prizes, Wine Coffee & Tea,
+  Cycling. Arabic (6): مدن العالم، مأكولات عالمية، مهن وأعمال، سفر ومواصلات،
+  البيت والأدوات، مناخ وطبيعة. Repo total: **182 packs, 40,159 questions.**
+- ☠️ **The finding worth keeping: topic WIDTH is the binding constraint, not effort.**
+  210 questions must spread over 26 (EN) or 28 (AR) letters. A narrow topic simply has no
+  answers for most letters, and `scripts/checkpack.mjs` shows it as a huge *misfiled*
+  count on the first draft (30-80 answers filed under a letter they do not start with).
+  Two packs were written and then **deleted** rather than padded: **Toys & Playthings**
+  (52/187 unfileable — toy names cluster on B/L/M) and **طيور ومحميات** (64 leaks, bird
+  names cluster on ب/ح/ن/ط). What works: EN topics whose *proper names* span the alphabet
+  (Cycling only cleared 210 after being rebuilt around rider surnames), and in Arabic only
+  broad everyday-vocabulary domains — food, home, jobs, travel, climate, cities, all six
+  now shipped. Every other Arabic topic tried tops out at 110-170 real answers.
+- 🔧 **Two Arabic authoring rules added to `CONTENT_QUEUE.md`:** never phrase a clue as
+  «الـ+answer الذي…» (the leak test strips ال, so it is a leak), and prefer single-word
+  answers — compound answers leak because the clue must name the common noun.
+- 📐 **The Arabic distribution that lands 210 in one pass:** skew hard (ب/م ≈ 18-21,
+  ك/س/ش/ت/ف/ح/ق ≈ 10-16, ث/ذ/ض/ظ ≈ 2-3). Spreading evenly always lands ~180.
+- ✅ Re-verified at the end of the round: **987 unit/content tests**, **174 Playwright e2e**
+  (desktop + mobile, incl. the online two-client and reconnect matrices), **noscroll ALL
+  CLEAR** (17 devices × every screen, default and on a new Arabic pack), `scripts/leaks.mjs`
+  reports **zero answer leaks repo-wide**, strict typecheck and production build clean.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily
