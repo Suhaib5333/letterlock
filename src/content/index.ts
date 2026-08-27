@@ -249,6 +249,10 @@ import { boardGamesPack } from './boardGames';
 import { festivalsHolidaysPack } from './festivalsHolidays';
 import { arJerusalemPack } from './arJerusalem';
 import { arMaghrebPack } from './arMaghreb';
+import { dinosaursPack } from './dinosaurs';
+import { chessPack } from './chess';
+import { oceanSailingPack } from './oceanSailing';
+import { photographyPack } from './photography';
 // AUTO-REGISTER-IMPORTS (scripts/autoregister.mjs inserts new pack imports above this line)
 
 /**
@@ -571,6 +575,10 @@ export const PACKS: QuestionPack[] = [
   festivalsHolidaysPack,
   arJerusalemPack,
   arMaghrebPack,
+  dinosaursPack,
+  chessPack,
+  oceanSailingPack,
+  photographyPack,
   // AUTO-REGISTER-PACKS (scripts/autoregister.mjs inserts new pack entries above this line)
   // Round-13: new themed packs.
   mythologyPack,
