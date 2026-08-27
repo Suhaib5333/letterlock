@@ -253,6 +253,8 @@ import { dinosaursPack } from './dinosaurs';
 import { chessPack } from './chess';
 import { oceanSailingPack } from './oceanSailing';
 import { photographyPack } from './photography';
+import { riversLakesPack } from './riversLakes';
+import { volcanoesPack } from './volcanoes';
 // AUTO-REGISTER-IMPORTS (scripts/autoregister.mjs inserts new pack imports above this line)
 
 /**
@@ -579,6 +581,8 @@ export const PACKS: QuestionPack[] = [
   chessPack,
   oceanSailingPack,
   photographyPack,
+  riversLakesPack,
+  volcanoesPack,
   // AUTO-REGISTER-PACKS (scripts/autoregister.mjs inserts new pack entries above this line)
   // Round-13: new themed packs.
   mythologyPack,
