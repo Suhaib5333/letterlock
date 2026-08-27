@@ -267,6 +267,7 @@ import { cyclingPack } from './cycling';
 import { arWorldCitiesPack } from './arWorldCities';
 import { arWorldFoodPack } from './arWorldFood';
 import { arJobsPack } from './arJobs';
+import { arTravelPack } from './arTravel';
 // AUTO-REGISTER-IMPORTS (scripts/autoregister.mjs inserts new pack imports above this line)
 
 /**
@@ -607,6 +608,7 @@ export const PACKS: QuestionPack[] = [
   arWorldCitiesPack,
   arWorldFoodPack,
   arJobsPack,
+  arTravelPack,
   // AUTO-REGISTER-PACKS (scripts/autoregister.mjs inserts new pack entries above this line)
   // Round-13: new themed packs.
   mythologyPack,
