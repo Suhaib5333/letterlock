@@ -140,11 +140,11 @@ export const photographyPack: RawPack = {
     L: [
       { q: 'The shaped glass assembly that gathers light and forms the image.', a: 'Lens' },
       { q: 'Adobe\'s cataloguing and raw-processing program for photographers.', a: 'Lightroom' },
-      { q: 'The German maker whose 1925 35mm rangefinder made street work possible.', a: 'Leica' },
+      { q: 'The German maker whose pocketable 1925 35mm camera made street work possible.', a: 'Leica' },
       { q: 'A shutter left open for seconds or minutes, turning water to silk.', a: 'Long exposure' },
       { q: 'The horizontal orientation of a frame, wider than it is tall.', a: 'Landscape' },
       { q: 'The handheld device that reads how much light is falling on a subject.', a: 'Light meter' },
-      { q: 'The pattern of light and shade that shapes a face in a portrait.', a: 'Lighting ratio' },
+      { q: 'The measured difference between the key lamp and the fill, quoted as 2:1 or 4:1.', a: 'Lighting ratio' },
       { q: 'The brightness component of an image, as against its colour.', a: 'Luminance' },
       { q: 'The illuminated panel on which slides and negatives are laid out for viewing.', a: 'Light box' },
       { q: 'The magnifier you press to a negative or a print to inspect fine detail.', a: 'Loupe' },

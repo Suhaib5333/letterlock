@@ -201,7 +201,7 @@ export const riversLakesPack: RawPack = {
       { q: 'The word for the strip of land and life along a bank.', a: 'Riparian' },
       { q: 'The border river between Texas and Mexico.', a: 'Rio Grande' },
       { q: 'One of the five Punjab rivers, flowing past Lahore.', a: 'Ravi' },
-      { q: 'The tall marsh plant whose stems the Egyptians made into paper.', a: 'Reed' },
+      { q: 'The tall marsh grass whose hollow stems are cut for thatch and pens.', a: 'Reed' },
       { q: 'The share of rainfall that flows over the surface instead of soaking in.', a: 'Runoff' },
     ],
     S: [

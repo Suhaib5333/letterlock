@@ -102,7 +102,7 @@ export const volcanoesPack: RawPack = {
       { q: 'The technical name for the underground point where a rupture begins.', a: 'Hypocentre' },
       { q: 'The chance of damaging shaking at a given place, shown on a coloured map.', a: 'Hazard' },
       { q: 'The long rhythmic underground signal that means magma is on the move.', a: 'Harmonic tremor' },
-      { q: 'The Icelandic volcano the medieval Danes called the gateway to hell.', a: 'Hekla' },
+      { q: 'The Icelandic volcano medieval Europeans called the gateway to hell.', a: 'Hekla' },
       { q: 'The Roman seaside town buried in 79 AD under mud and hot flows, not just cinders.', a: 'Herculaneum' },
       { q: 'The block resting above an inclined fault plane.', a: 'Hanging wall' },
       { q: 'The huge Maui volcano whose summit gives the most famous sunrise in the Pacific.', a: 'Haleakala' },
@@ -168,7 +168,7 @@ export const volcanoesPack: RawPack = {
       { q: 'The 1994 Los Angeles quake named for a San Fernando Valley district.', a: 'Northridge' },
       { q: 'The Himalayan country whose capital was struck in April 2015.', a: 'Nepal' },
       { q: 'The mid-continent seismic zone in Missouri that shook hard three times in 1811 and 1812.', a: 'New Madrid' },
-      { q: 'The New Zealand island where White Island erupted fatally in 2019.', a: 'North Island' },
+      { q: 'The larger New Zealand island, off whose Bay of Plenty coast Whakaari lies.', a: 'North Island' },
       { q: 'The Tanzanian crater, a collapsed volcano now packed with wildlife.', a: 'Ngorongoro' },
     ],
     O: [

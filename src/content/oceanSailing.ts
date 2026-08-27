@@ -19,7 +19,7 @@ export const oceanSailingPack: RawPack = {
       { q: 'The stinging flower-like animal that shelters clownfish on a reef.', a: 'Anemone' },
       { q: 'The Norwegian who led the first voyage right through the Northwest Passage.', a: 'Amundsen' },
       { q: 'The flat deep-sea floor lying below about 4,000 metres.', a: 'Abyssal plain' },
-      { q: 'The shipping lane crossing the Suez cuts out this long African cape route.', a: 'Agulhas' },
+      { q: 'The powerful warm current that sweeps down the east coast of southern Africa.', a: 'Agulhas' },
       { q: 'A sheltered spot just off a coast where a ship can safely lie at anchor.', a: 'Anchorage' },
     ],
     B: [
@@ -267,7 +267,7 @@ export const oceanSailingPack: RawPack = {
       { q: 'The end of the spar from which mutineers were said to be hanged.', a: 'Yardarm' },
       { q: 'A vessel\'s swing from side to side about her vertical axis.', a: 'Yaw' },
       { q: 'A two-masted rig whose small after mast stands aft of the rudder post.', a: 'Yawl' },
-      { q: 'The tuna species most prized for sashimi.', a: 'Yellowfin' },
+      { q: 'The tuna species sold as ahi and served in most sashimi platters.', a: 'Yellowfin' },
     ],
     Z: [
       { q: 'The animal half of the drifting community, which grazes on algae.', a: 'Zooplankton' },

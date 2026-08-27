@@ -114,7 +114,7 @@ export const codesSpiesPack: RawPack = {
       { q: 'The seduction of a target in order to gain secrets or leverage.', a: 'Honeytrap' },
       { q: 'The officer who runs an agent, meets them and passes on their product.', a: 'Handler' },
       { q: 'The first director of the American domestic bureau, in post for 48 years.', a: 'Hoover' },
-      { q: 'The German-born rotor machine inventor whose patents predated Enigma, an American.', a: 'Hebern' },
+      { q: 'The American rotor machine inventor whose patents came before the German machine.', a: 'Hebern' },
     ],
     I: [
       { q: 'The guarantee that a message has not been altered on the way.', a: 'Integrity' },

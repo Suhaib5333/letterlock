@@ -76,7 +76,7 @@ export const engineeringPack: RawPack = {
       { q: 'The moving and shaping of soil and rock that begins most projects.', a: 'Earthworks' },
       { q: 'The St Louis steel arch of 1874, the first big use of that metal in a bridge.', a: 'Eads Bridge' },
       { q: 'The gap left in a deck, filled with a sliding plate, to allow for heat movement.', a: 'Expansion joint' },
-      { q: 'The moving staircase, first shown to the public at the Paris exposition of 1900.', a: 'Escalator' },
+      { q: 'The moving staircase that took the prize at the Paris exposition of 1900.', a: 'Escalator' },
     ],
     F: [
       { q: 'The part of a structure below ground, which carries the load into the soil.', a: 'Foundation' },
@@ -170,7 +170,7 @@ export const engineeringPack: RawPack = {
     N: [
       { q: 'The Englishman whose three laws of motion underpin all structural analysis.', a: 'Newton' },
       { q: 'The Victorian word for the labourer who dug the canals and railways by hand.', a: 'Navvy' },
-      { q: 'The 1968 West Virginia steel arch, once the longest of that type in the world.', a: 'New River Gorge' },
+      { q: 'The 1977 West Virginia steel arch, once the longest of that type in the world.', a: 'New River Gorge' },
       { q: 'The French cable-stayed crossing of 1995 over the Seine estuary near Le Havre.', a: 'Normandy Bridge' },
       { q: 'The threaded fastener that screws onto a bolt.', a: 'Nut' },
       { q: 'The Chinese city whose 1968 Yangtze crossing was a symbol of self-reliance.', a: 'Nanjing' },

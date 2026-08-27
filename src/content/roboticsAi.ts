@@ -120,13 +120,13 @@ export const roboticsAiPack: RawPack = {
       { q: 'The Asimov collection of nine stories that set out the famous three laws.', a: 'I, Robot' },
       { q: 'The maths of working out what joint angles will put a hand in a given place.', a: 'Inverse kinematics' },
       { q: 'The picture recognition contest whose 2012 result launched deep learning.', a: 'ImageNet' },
-      { q: 'The chip designed for one job only, faster than a general processor.', a: 'Integrated circuit' },
+      { q: 'The whole circuit of transistors etched onto a single slice of silicon.', a: 'Integrated circuit' },
     ],
     J: [
       { q: 'The moving connection between two rigid links of a robot arm.', a: 'Joint' },
       { q: 'The stick control used to drive a machine by hand.', a: 'Joystick' },
       { q: 'The Nvidia board, named after a cartoon family, used in student robots.', a: 'Jetson' },
-      { q: 'The Python notebook, named after three planets, in which most model code is written.', a: 'Jupyter' },
+      { q: 'The browser notebook of code cells and outputs in which most model code is written.', a: 'Jupyter' },
     ],
     K: [
       { q: 'The study of motion and joint geometry in a mechanical limb.', a: 'Kinematics' },
@@ -183,7 +183,7 @@ export const roboticsAiPack: RawPack = {
       { q: 'The adjustable number inside a model, counted in the billions.', a: 'Parameter' },
       { q: 'The teaching of a machine to spot a regular shape in data.', a: 'Pattern recognition' },
       { q: 'The industrial controller, three initials, that runs most factory machinery.', a: 'PLC' },
-      { q: 'The mechanical device driven by air or oil pressure to push a limb.', a: 'Piston' },
+      { q: 'The sliding part inside a pressurised cylinder that pushes a limb out.', a: 'Piston' },
       { q: 'The knowing of where a robot is, from wheel counts and landmarks.', a: 'Positioning' },
       { q: 'The cutting away of unneeded weights to make a model smaller and faster.', a: 'Pruning' },
       { q: 'The working out of a route across a room that avoids all the furniture.', a: 'Path planning' },
@@ -250,7 +250,7 @@ export const roboticsAiPack: RawPack = {
       { q: 'The camera-and-software sense that lets a machine read the world.', a: 'Vision' },
       { q: 'The computer-made world you enter through a headset, two initials.', a: 'VR' },
       { q: 'The list of numbers that stands for a word or an image inside a model.', a: 'Vector' },
-      { q: 'The German firm whose Golf line pioneered welding automation in Europe.', a: 'Volkswagen' },
+      { q: 'The German carmaker whose Wolfsburg plant pioneered robot welding in Europe.', a: 'Volkswagen' },
     ],
     W: [
       { q: 'The number on each connection of a network, adjusted during training.', a: 'Weight' },

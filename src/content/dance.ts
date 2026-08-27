@@ -121,7 +121,7 @@ export const dancePack: RawPack = {
       { q: 'The turning-in of the working leg, the opposite of the classical stance.', a: 'Inward rotation' },
     ],
     J: [
-      { q: 'The fast bouncy ballroom dance of the rock-and-roll era, in six-eight.', a: 'Jive' },
+      { q: 'The fast bouncy ballroom dance of the rock-and-roll era, counted over six beats.', a: 'Jive' },
       { q: 'Any leap from one foot onto the other, French for thrown.', a: 'Jete' },
       { q: 'The theatre style of Broadway, born from ragtime and swing.', a: 'Jazz dance' },
       { q: 'The lively Irish and Scottish folk dance in six-eight time.', a: 'Jig' },
@@ -141,7 +141,7 @@ export const dancePack: RawPack = {
       { q: 'The close-fitting one-piece garment worn for class, named after a French acrobat.', a: 'Leotard' },
       { q: 'The move in which one partner raises the other clear off the floor.', a: 'Lift' },
       { q: 'The formation dance in which everyone faces the same way and repeats a sequence.', a: 'Line dance' },
-      { q: 'The Mexican-born American whose modern technique is built on fall and recovery.', a: 'Limon' },
+      { q: 'The Mexican-born American whose technique grew from weight, momentum and breath.', a: 'Limon' },
       { q: 'The Harlem swing dance of the 1930s, named after a famous flight.', a: 'Lindy hop' },
       { q: 'The system of symbols invented in 1928 to write movement down.', a: 'Labanotation' },
       { q: 'The Fokine ballet of moonlit sylphs in white, set to Chopin.', a: 'Les Sylphides' },
@@ -166,7 +166,7 @@ export const dancePack: RawPack = {
       { q: 'The Russian star of the Ballets Russes who choreographed the Rite of Spring.', a: 'Nijinsky' },
       { q: 'The Tatar-born dancer who defected in Paris in 1961 and partnered Fonteyn.', a: 'Nureyev' },
       { q: 'The sister of that Russian star, who made Les Noces and Les Biches.', a: 'Nijinska' },
-      { q: 'The company Balanchine and Kirstein founded in 1948 at Lincoln Center.', a: 'New York City Ballet' },
+      { q: 'The company Balanchine and Kirstein founded in 1948, later resident at Lincoln Center.', a: 'New York City Ballet' },
       { q: 'The character numbers of a country, adapted for the classical stage.', a: 'National dances' },
     ],
     O: [
@@ -266,7 +266,7 @@ export const dancePack: RawPack = {
     Y: [
       { q: 'The Chinese folk dance of drums, ribbons and stilts, seen at new year.', a: 'Yangge' },
       { q: 'The French ballerina, born 1917, remembered as the great Giselle of Paris.', a: 'Yvette Chauvire' },
-      { q: 'The young dancer in the corps, still working up to a solo.', a: 'Youngest member' },
+      { q: 'The Bolshoi choreographer of Spartacus who ran the company for thirty years.', a: 'Yuri Grigorovich' },
     ],
     Z: [
       { q: 'The Colombian-born fitness class that turned Latin rhythms into a workout.', a: 'Zumba' },

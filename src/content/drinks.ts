@@ -38,11 +38,11 @@ export const drinksPack: RawPack = {
       { q: 'The roasted seed of the coffee cherry.', a: 'Bean' },
       { q: 'The hoppy English pale ale served from a hand pump.', a: 'Bitter' },
       { q: 'The Italian herbal aperitif, bright red, drunk with soda and orange.', a: 'Bitters' },
-      { q: 'The Loire white grape of Vouvray, made bone dry to lusciously sweet.', a: 'blanc' },
+      { q: 'The label word for a sparkling wine that is dry, with little sugar added.', a: 'Brut' },
       { q: 'The Berlin sour wheat beer, served cloudy with a shot of syrup.', a: 'Berliner Weisse' },
     ],
     C: [
-      { q: 'The drink made from roasted ground seeds, the world second most traded commodity.', a: 'Coffee' },
+      { q: 'The drink made from roasted ground seeds, among the most traded farm goods on Earth.', a: 'Coffee' },
       { q: 'The Italian breakfast drink of espresso, steamed milk and a cap of foam.', a: 'Cappuccino' },
       { q: 'The white grape of Chablis, Meursault and most sparkling wine.', a: 'Chardonnay' },
       { q: 'The sparkling wine that may only carry that name if grown near Reims and Epernay.', a: 'Champagne' },
@@ -56,7 +56,7 @@ export const drinksPack: RawPack = {
       { q: 'The stimulant that makes coffee and tea worth getting up for.', a: 'Caffeine' },
       { q: 'The Spanish sparkling wine of Penedes, made by the traditional method.', a: 'Cava' },
       { q: 'The Tuscan red of the sangiovese grape, once sold in a straw flask.', a: 'Chianti' },
-      { q: 'The Viennese order of a dark brew crowned with whipped cream.', a: 'Cafe Vienna' },
+      { q: 'The South American country whose mild washed beans are a byword for the drink.', a: 'Colombia' },
     ],
     D: [
       { q: 'Coffee with the stimulant taken out.', a: 'Decaf' },
@@ -69,7 +69,7 @@ export const drinksPack: RawPack = {
       { q: 'The glass jug into which an old red is poured off its sediment.', a: 'Decanter' },
       { q: 'The large brown raw sugar crystals named after a district of Guyana.', a: 'Demerara' },
       { q: 'The Portuguese river valley of terraced vineyards where port is grown.', a: 'Douro' },
-      { q: 'The German sweet style whose grapes are picked frozen on the vine, in English two words.', a: 'Dry ice wine' },
+      { q: 'The Piedmont red grape whose name means little sweet one, though the wine is dry.', a: 'Dolcetto' },
     ],
     E: [
       { q: 'The small strong Italian shot forced through the grounds under pressure.', a: 'Espresso' },
@@ -117,7 +117,7 @@ export const drinksPack: RawPack = {
       { q: 'The winter drink of melted cocoa and milk.', a: 'Hot chocolate' },
       { q: 'The everyday mixture a roaster sells as its own standard.', a: 'House blend' },
       { q: 'The Japanese maker of the ribbed glass cone beloved of speciality shops.', a: 'Hario' },
-      { q: 'The Bavarian beer hall measure of one litre, in a dimpled glass.', a: 'Humpen' },
+      { q: 'The tall glass of a single spirit topped up with a mixer and ice.', a: 'Highball' },
       { q: 'The old English word for Rhine wine, taken from the town of Hochheim.', a: 'Hock' },
     ],
     I: [

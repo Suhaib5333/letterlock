@@ -103,7 +103,7 @@ export const chessPack: RawPack = {
       { q: 'The engine flaw of not seeing just past the end of its own search.', a: 'Horizon effect' },
       { q: 'The cramped but springy set-up where Black keeps his men on the sixth rank.', a: 'Hedgehog' },
       { q: 'A file on which only one of the two sides still has a foot soldier.', a: 'Half-open' },
-      { q: 'The English seaside town whose congress ran every New Year from 1895.', a: 'Hastings' },
+      { q: 'The English seaside town of the great 1895 tournament and a New Year congress ever since.', a: 'Hastings' },
       { q: 'Giving material or extra turns to a weaker opponent, as in the old odds games.', a: 'Handicap' },
       { q: 'The Chinese woman who became world champion at sixteen, surname Hou.', a: 'Hou Yifan' },
     ],
@@ -118,7 +118,7 @@ export const chessPack: RawPack = {
       { q: 'The title one rank below grandmaster.', a: 'International Master' },
     ],
     J: [
-      { q: 'The Hungarian who was the strongest woman ever and beat nine world champions.', a: 'Judit Polgar' },
+      { q: 'The Hungarian, strongest woman ever, who beat a string of world champions including Kasparov.', a: 'Judit Polgar' },
       { q: 'The engine, sold as Deep this, that drew a match with Kasparov in 2003.', a: 'Junior' },
       { q: 'The wild 19th-century American line that throws two pieces at f7.', a: 'Jerome Gambit' },
       { q: 'The Russian theorist whose gambit 3...f5 answers the Spanish.', a: 'Jaenisch' },

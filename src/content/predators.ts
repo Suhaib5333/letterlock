@@ -21,7 +21,7 @@ export const predatorsPack: RawPack = {
       { q: 'The freshwater reptile whose hooked beak and mossy shell make it look prehistoric.', a: 'Alligator snapping turtle' },
       { q: 'The red-tailed raptor of the East African highlands, often seen perched on wires.', a: 'Augur buzzard' },
       { q: 'The small venomous snake of North Africa said to have killed Cleopatra.', a: 'Asp' },
-      { q: 'The armoured, tongue-flicking mammal of the pampas that raids ant nests.', a: 'Anteater' },
+      { q: 'The long-snouted, tongue-flicking mammal of the pampas that raids ant nests.', a: 'Anteater' },
     ],
     B: [
       { q: 'The large heavy omnivore of the northern forests, brown or black.', a: 'Bear' },
@@ -111,7 +111,7 @@ export const predatorsPack: RawPack = {
       { q: 'The long-winged raptor that glides low over marshes and hunts by ear.', a: 'Harrier' },
     ],
     I: [
-      { q: 'The spiral-horned African antelope that leaps ten metres from a standstill.', a: 'Impala' },
+      { q: 'The lyre-horned African antelope that leaps ten metres from a standstill.', a: 'Impala' },
       { q: 'The inborn behaviour a young hunter shows without being taught.', a: 'Instinct' },
       { q: 'The rarest cat in the world, of Spain and Portugal, saved from extinction since 2002.', a: 'Iberian lynx' },
       { q: 'An animal that lives on insects rather than on flesh.', a: 'Insectivore' },

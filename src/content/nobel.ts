@@ -118,7 +118,7 @@ export const nobelPack: RawPack = {
       { q: 'The Japanese-born British novelist of The Remains of the Day, honoured in 2017.', a: 'Ishiguro' },
       { q: 'The hormone whose isolation in Toronto won the 1923 medicine prize.', a: 'Insulin' },
       { q: 'The country of Tagore, Raman, Sen and Satyarthi.', a: 'India' },
-      { q: 'The Russian who shared the 1908 medicine prize for discovering phagocytes.', a: 'Ivanovich Mechnikov' },
+      { q: 'The Russian who shared the 1908 medicine prize for discovering phagocytes.', a: 'Ilya Mechnikov' },
     ],
     J: [
       { q: 'The Austrian author of The Piano Teacher, honoured in literature in 2004.', a: 'Jelinek' },
