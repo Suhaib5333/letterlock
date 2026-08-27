@@ -1059,6 +1059,32 @@ A large multi-request batch (all deployed + CI-green on `letterlock.raltech.dev`
   CLEAR** (17 devices × every screen, default and on a new Arabic pack), `scripts/leaks.mjs`
   reports **zero answer leaks repo-wide**, strict typecheck and production build clean.
 
+## II.3s Round-21: the fact-audit sweep (2026-08-27)
+
+The wave above was gate-clean but not fact-checked, so **every question of all 21 packs was
+read line by line (~4,300 questions)** and corrected in place. No question was deleted, and
+every pack still passes `checkpack.mjs` afterwards.
+
+- ✅ **English: 15 packs read, 26 corrections.** Worst offender `cycling.ts` (9 wrong
+  palmares stats: jersey counts, podium years). Two `shorten.mjs` over-trims that had
+  produced non-answers (`blanc`, `Dry ice wine`) replaced with real ones (`Brut`, `Dolcetto`).
+- ✅ **Arabic: 6 packs read, ~150 corrections.** `arWorldFood` was clean; `arHome` needed 85
+  and `arClimate` 54. `arWorldCities` still carried five leftover «؟ لا، بل» trick clues and
+  four geography errors (حيفا placed in the south, حضرموت and خراسان called cities).
+- 🧠 **The finding: an everyday-vocabulary Arabic pack fails on LEXICON, not on facts.** To
+  reach 210 under a 28-letter index the author reaches for a plausible word that does not
+  exist (`ثيابدان`, `بشكير النوم`, `عصا الجمع`, `آلة الشفط`) or attaches a real word to the
+  wrong object (`بانيو` clued as the bathroom, `شرشف` as a towel, `دورق` as a plate,
+  `ممسحة` as a dish scourer). **No script can see either**: the answer is correctly lettered,
+  unique and leak-free, so every gate passes. Rules now in `CONTENT_QUEUE.md`: author the
+  noun before the clue; treat a `<noun> + <noun>` answer as a smell; sweep each letter for
+  near-twins (ثريا/نجفة, صحراء/صحاري); **never disambiguate with tashkeel** (`برد` vs `بَرَد`
+  looked distinct to `checkpack` but `normalizeArabic` makes them the same answer in play).
+- ✅ Re-verified after the sweep: **987 unit/content tests**, **173 Playwright e2e** (one
+  known-flaky reconnect test passed on retry), **noscroll ALL CLEAR** (17 devices, default
+  and an Arabic pack), zero repo-wide leaks, strict typecheck + build clean, pushed and
+  deployed green.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily
