@@ -1,7 +1,8 @@
 {
   "name": "Letterlock",
   "short_name": "Letterlock",
-  "description": "Claim & lock letters across the board to connect your edges. A fair, gorgeous reinvention of Blockbusters.",
+  "description": "Letterlock (letter lock): the free online trivia board game. Two teams claim and lock letters on a hex board to connect their edges. A fair, modern take on Blockbusters.",
+  "categories": ["games", "entertainment", "education"],
   "start_url": "/",
   "display": "standalone",
   "orientation": "any",

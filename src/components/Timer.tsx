@@ -30,6 +30,8 @@ export function Timer({
   otherColorId,
   endPhaseSignal = 0,
   onPhase,
+  pauseAtSteal = false,
+  resumeSignal = 0,
 }: {
   seconds: number;
   resetKey: string;
@@ -44,6 +46,12 @@ export function Timer({
   /** Fires when the countdown transitions to the steal phase / finishes — lets
    *  Party Mode open the next team's window / trigger the winner reveal. */
   onPhase?: (phase: 'steal' | 'done') => void;
+  /** Charades (Couch Mode): HOLD the steal countdown when the main phase ends,
+   *  until `resumeSignal` bumps — the second team taps "Start timer" exactly like
+   *  the first team did (their actor needs to scan the QR / get ready too). */
+  pauseAtSteal?: boolean;
+  /** Increment to release a countdown held by `pauseAtSteal`. */
+  resumeSignal?: number;
 }) {
   const [phase, setPhase] = useState<Phase>('main');
   const [remaining, setRemaining] = useState(seconds);
@@ -54,6 +62,13 @@ export function Timer({
   const endSignalRef = useRef(endPhaseSignal);
   endSignalRef.current = endPhaseSignal;
   const handledSignalRef = useRef(endPhaseSignal);
+  // Steal-phase hold (charades): the loop parks itself here and `resumeSignal`
+  // releases it. Refs so the rAF closure always sees the live values.
+  const pauseAtStealRef = useRef(pauseAtSteal);
+  pauseAtStealRef.current = pauseAtSteal;
+  const pausedRef = useRef(false);
+  const resumeRef = useRef<() => void>(() => {});
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     // Reset BEFORE the inactive bail-out: a question that waits for its clip to
@@ -61,6 +76,8 @@ export function Timer({
     phaseRef.current = 'main';
     setPhase('main');
     setRemaining(seconds);
+    pausedRef.current = false;
+    setPaused(false);
     if (seconds === 0 || !active) return;
     // `cancelled` + a loop-local rafId are scoped to THIS effect run, so React
     // StrictMode's double-invoke (and any rapid resetKey change) can never leave
@@ -108,6 +125,12 @@ export function Timer({
           tickRef.current = 0;
           play('steal');
           onPhase?.('steal');
+          if (pauseAtStealRef.current) {
+            // Hold the steal window at full time until the other team taps Start.
+            pausedRef.current = true;
+            setPaused(true);
+            return; // no rAF scheduled — resumeRef restarts the loop
+          }
           rafId = requestAnimationFrame(loop);
           return;
         }
@@ -119,6 +142,16 @@ export function Timer({
       }
       rafId = requestAnimationFrame(loop);
     };
+    // Release a held steal countdown (bumped via `resumeSignal`). Scoped inside the
+    // effect so it shares `cancelled` + `rafId` with the loop — cleanup still cancels.
+    resumeRef.current = () => {
+      if (cancelled || !pausedRef.current) return;
+      pausedRef.current = false;
+      setPaused(false);
+      startRef.current = performance.now();
+      tickRef.current = 0;
+      rafId = requestAnimationFrame(loop);
+    };
     rafId = requestAnimationFrame(loop);
     return () => {
       cancelled = true;
@@ -127,6 +160,12 @@ export function Timer({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey, seconds, active]);
+
+  // A resumeSignal bump releases the held steal countdown (no-op while not paused,
+  // including the initial mount).
+  useEffect(() => {
+    resumeRef.current();
+  }, [resumeSignal]);
 
   if (seconds === 0) return null;
   const total = phase === 'steal' ? seconds / 2 : seconds;
@@ -146,6 +185,7 @@ export function Timer({
       className={`timer ${urgent ? 'urgent' : ''} ${done ? 'done' : ''} ${steal ? 'steal' : ''}`}
       data-testid="timer"
       data-phase={phase}
+      data-paused={paused ? '1' : undefined}
       style={
         {
           '--timer-accent': activeColor.base,

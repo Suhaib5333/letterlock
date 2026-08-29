@@ -31,6 +31,10 @@ interface Props {
   onSkip: () => void;
   onAutoSkip: () => void;
   onMediaPlay: () => void; // fired the first time a clip is played → starts the timer
+  /** Charades: the steal countdown is held for the OTHER team — re-show the
+   *  "▶ Start timer" button so they release it themselves (mirrors team 1). */
+  stealPending?: boolean;
+  onStealStart?: () => void;
 }
 
 export function QuestionCard({
@@ -47,8 +51,11 @@ export function QuestionCard({
   onSkip,
   onAutoSkip,
   onMediaPlay,
+  stealPending,
+  onStealStart,
 }: Props) {
   const pickerTeam = teams[picker];
+  const otherTeam = teams[picker === 'A' ? 'B' : 'A'];
   const charade = served.question.category === 'charade';
 
   // Media clips are HOTLINKED previews (Deezer/iTunes/flagcdn/simpleicons) and can
@@ -170,19 +177,29 @@ export function QuestionCard({
             <button
               className="btn btn-primary sm charade-start"
               data-testid="charade-start"
-              disabled={charadeStarted}
+              disabled={charadeStarted && !stealPending}
               onClick={() => {
-                if (charadeStarted) return;
-                setCharadeStarted(true);
-                play('reveal');
-                // Charade questions still set `needsPlayToStart=true` (because
-                // they carry an image URL for the secret-prompt page), so the
-                // timer waits for this explicit tap rather than ticking down
-                // while players scan the QR.
-                onMediaPlay();
+                if (!charadeStarted) {
+                  setCharadeStarted(true);
+                  play('reveal');
+                  // Charade questions still set `needsPlayToStart=true` (because
+                  // they carry an image URL for the secret-prompt page), so the
+                  // timer waits for this explicit tap rather than ticking down
+                  // while players scan the QR.
+                  onMediaPlay();
+                } else if (stealPending) {
+                  // Second window: the OTHER team releases their held countdown,
+                  // exactly the way team 1 started theirs.
+                  play('reveal');
+                  onStealStart?.();
+                }
               }}
             >
-              {charadeStarted ? '⏱ Timer running…' : '▶ Start timer'}
+              {!charadeStarted
+                ? '▶ Start timer'
+                : stealPending
+                  ? `▶ Start ${otherTeam.name}’s timer`
+                  : '⏱ Timer running…'}
             </button>
           </div>
         </div>

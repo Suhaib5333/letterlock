@@ -581,6 +581,89 @@ test('manual switch-turn flips the active team', async ({ page }) => {
   await expect(banner).not.toContainText(first);
 });
 
+test('flags (media) pack: the skip button keeps WORKING after the first skip', async ({ page }) => {
+  // Regression: the button stayed enabled on media packs (`hasClip` backstop) but the
+  // reducer silently rejected every skip after the first — a live-looking dead button.
+  await page.goto('/');
+  await selectPack(page, 'flags-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  const skip = page.getByTestId('skip-question');
+  const flag = page.locator('img.qcard-flag');
+  await expect(flag).toBeVisible();
+  const s1 = await flag.getAttribute('src');
+  await skip.click();
+  await expect(flag).not.toHaveAttribute('src', s1!); // first skip served a new flag
+  const s2 = await flag.getAttribute('src');
+  await expect(skip).toBeEnabled();
+  await skip.click(); // THE BUG: this second click used to be silently ignored
+  await expect(flag).not.toHaveAttribute('src', s2!); // second skip also serves a new flag
+  await expect(skip).toBeEnabled(); // media questions stay skippable
+});
+
+test('maps (media) pack: a second skip serves a different question too', async ({ page }) => {
+  await page.goto('/');
+  await selectPack(page, 'maps-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  const skip = page.getByTestId('skip-question');
+  // Use the revealed answer as the question discriminator (maps prompts all read alike).
+  const answerNow = async () => {
+    await page.getByTestId('reveal-answer').click();
+    return (await page.getByTestId('answer-text').textContent())!;
+  };
+  const a1 = await answerNow();
+  await skip.click();
+  const a2 = await answerNow();
+  expect(a2).not.toBe(a1);
+  await skip.click(); // second skip — used to be a dead click on media packs
+  const a3 = await answerNow();
+  expect(a3).not.toBe(a2);
+});
+
+test('charades: the steal countdown HOLDS until team 2 taps Start timer', async ({ page }) => {
+  test.setTimeout(90_000); // waits out a real 20s main phase
+  await page.goto('/');
+  await selectPack(page, 'charades-easy');
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-couch').click();
+  await page.getByTestId('mode-single').click();
+  await page.getByTestId('timer-20').click(); // shortest timer → 10s steal window
+  await page.getByTestId('start-match').click();
+  await page.locator('.ll-hex.claimable').first().click();
+  await expect(page.getByTestId('question-card')).toBeVisible();
+  const startBtn = page.getByTestId('charade-start');
+  const timer = page.getByTestId('timer');
+  const num = page.locator('.timer-num');
+  // Team 1 starts their window.
+  await startBtn.click();
+  await expect(startBtn).toBeDisabled();
+  // Main phase (20s) runs out → the steal phase arrives PAUSED at full time.
+  await expect(timer).toHaveAttribute('data-phase', 'steal', { timeout: 25_000 });
+  await expect(timer).toHaveAttribute('data-paused', '1');
+  const held = await num.textContent();
+  await page.waitForTimeout(1700);
+  await expect(num).toHaveText(held!); // clock is frozen for team 2
+  // The Start button is BACK for team 2, exactly like team 1's.
+  await expect(startBtn).toBeEnabled();
+  await expect(startBtn).toContainText('Start');
+  await startBtn.click();
+  // Released: button disables again and the steal clock counts down.
+  await expect(startBtn).toBeDisabled();
+  await expect(timer).not.toHaveAttribute('data-paused', '1');
+  await page.waitForTimeout(1600);
+  const after = await num.textContent();
+  expect(parseInt(after!)).toBeLessThan(parseInt(held!));
+});
+
 test('only one skip is allowed and the skip button then disables', async ({ page }) => {
   await startMatch(page);
   await page.locator('.ll-hex.claimable[data-cell="0"]').click();

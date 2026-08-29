@@ -287,7 +287,14 @@ function reducer(state: StoreState, action: Action): StoreState {
 
     case 'SKIP_QUESTION': {
       if (!state.opts || !state.ui.served) return state;
-      if (state.ui.skipsUsed >= 1) return state; // only ONE skip per pick (user request)
+      // A media question (image/audio/video/map) is ALWAYS skippable — a broken or
+      // unplayable clip must never strand the game. This mirrors the `hasClip`
+      // enable in Game.tsx (the button was enabled but this guard silently ate the
+      // click — the "skip does nothing on flags/maps" bug). Capped like AUTO_SKIP
+      // so a fully-broken pack can't loop forever. Text questions: ONE skip per pick.
+      const q0 = state.ui.served.question;
+      const mediaQ = !!(q0.image || q0.audio || q0.video || q0.mapIso);
+      if (state.ui.skipsUsed >= (mediaQ ? 12 : 1)) return state;
       const cell = state.ui.served.cell;
       const skip: GameEvent = {
         type: 'QuestionSkipped',

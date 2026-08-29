@@ -81,6 +81,11 @@ export function Game() {
   // bumped to end a window early when a team locks their answer in.
   const [timerPhase, setTimerPhase] = useState<'main' | 'steal' | 'done'>('main');
   const [endPhaseSignal, setEndPhaseSignal] = useState(0);
+  // Charades (Couch Mode): the steal countdown is HELD when the main phase ends —
+  // `stealHeld` re-shows the "▶ Start timer" button for the second team, and
+  // bumping `stealResume` releases the Timer's held countdown.
+  const [stealHeld, setStealHeld] = useState(false);
+  const [stealResume, setStealResume] = useState(0);
   // The winner-reveal overlay (Party Mode only). `selection` is what will be
   // applied — pre-filled with the auto-detected winner, overridable by the host.
   const [reveal, setReveal] = useState<{ cell: number } | null>(null);
@@ -113,6 +118,7 @@ export function Game() {
     setClipPlayed(false);
     setShowAnswers(false); // re-hide player answers for each new question
     setTimerPhase('main'); // each new question starts in the picker's window
+    setStealHeld(false); // and any charade steal-hold from the last question clears
     setReveal(null); // close any leftover reveal overlay
   }, [servedId]);
 
@@ -233,6 +239,11 @@ export function Game() {
   //   player isn't stranded with an indefinitely paused clock.
   const needsPlayToStart = !!(q && (q.audio || q.video || q.image || q.mapIso));
   const timerActive = !needsPlayToStart || clipPlayed;
+  // Charades hold the steal countdown for a second "Start timer" tap — Couch Mode
+  // only (Party Mode phones follow the host's broadcast steal window; a host-side
+  // pause would desync them).
+  const isCharade = q?.category === 'charade';
+  const holdStealForCharade = isCharade && !isParty;
 
   // ── Party Mode sequential answer + auto-winner reveal ───────────────────
   // Whose windows have produced an answer (the host buckets submissions/cell).
@@ -463,7 +474,10 @@ export function Game() {
                     onPhase={(p) => {
                       setTimerPhase(p);
                       if (p === 'steal' && isParty) online.broadcastStealOpen();
+                      if (p === 'steal' && holdStealForCharade) setStealHeld(true);
                     }}
+                    pauseAtSteal={holdStealForCharade}
+                    resumeSignal={stealResume}
                   />
                 )}
                 <div className="qcard-scroll">
@@ -474,13 +488,20 @@ export function Game() {
                     teams={teams}
                     hideLetter={hideLetters}
                     tts={state.settings.tts}
-                    canSkip={ui.skipsUsed < 1 || hasClip}
+                    // Media questions stay skippable up to the same cap the reducer
+                    // enforces (12); text questions get exactly one skip.
+                    canSkip={ui.skipsUsed < (hasClip ? 12 : 1)}
                     canAutoSkip={ui.autoSkips < 12}
                     repeated={ui.repeated}
                     onReveal={() => dispatch({ type: 'REVEAL_ANSWER' })}
                     onSkip={() => dispatch({ type: 'SKIP_QUESTION' })}
                     onAutoSkip={() => dispatch({ type: 'AUTO_SKIP' })}
                     onMediaPlay={() => setClipPlayed(true)}
+                    stealPending={stealHeld}
+                    onStealStart={() => {
+                      setStealHeld(false);
+                      setStealResume((n) => n + 1);
+                    }}
                   />
                 </div>
                 {showOnlineAnswers && (

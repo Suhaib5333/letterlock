@@ -5,12 +5,93 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0a0e1f" />
-    <meta name="description" content="Letterlock — claim & lock letters across the board to connect your edges. A fair, gorgeous reinvention of Blockbusters." />
+
+    <!-- ── SEO ─────────────────────────────────────────────────────────── -->
+    <title>Letterlock | Letter Lock Trivia Board Game, Play Free Online</title>
+    <meta
+      name="description"
+      content="Letterlock (letter lock) is a free online trivia board game: two teams claim and lock letters on a hex board to connect their edges. A fair, modern take on Blockbusters with 180+ question packs in English and Arabic. Play free on phone, tablet, or TV."
+    />
+    <meta
+      name="keywords"
+      content="letterlock, letter lock, letter lock game, trivia board game, blockbusters game online, hex trivia game, party trivia game, team quiz game, free trivia game"
+    />
+    <link rel="canonical" href="https://letterlock.raltech.dev/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="RAL Technologies" />
+
+    <!-- Open Graph (WhatsApp / Facebook / LinkedIn link previews) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Letterlock" />
+    <meta property="og:url" content="https://letterlock.raltech.dev/" />
+    <meta property="og:title" content="Letterlock | Letter Lock Trivia Board Game" />
+    <meta
+      property="og:description"
+      content="Two teams battle on a hex board of letters: answer trivia, claim hexes, block your rivals, connect your edges. Free to play on any device."
+    />
+    <meta property="og:image" content="https://letterlock.raltech.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Letterlock, the letter lock trivia board game" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ar_AR" />
+
+    <!-- Twitter / X card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Letterlock | Letter Lock Trivia Board Game" />
+    <meta
+      name="twitter:description"
+      content="Two teams battle on a hex board of letters: answer trivia, claim hexes, block your rivals, connect your edges. Free to play."
+    />
+    <meta name="twitter:image" content="https://letterlock.raltech.dev/og.png" />
+
+    <!-- Structured data: tells Google this is a free web game named Letterlock,
+         also known as "Letter Lock" (covers the two-word search). -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "VideoGame",
+            "@id": "https://letterlock.raltech.dev/#game",
+            "name": "Letterlock",
+            "alternateName": ["Letter Lock", "Letter Lock Game", "Letterlock Game"],
+            "url": "https://letterlock.raltech.dev/",
+            "image": "https://letterlock.raltech.dev/og.png",
+            "description": "A free online trivia board game where two teams claim and lock letters on a hex board to connect their edges. A fair, modern take on the classic Blockbusters format with 180+ question packs in English and Arabic.",
+            "inLanguage": ["en", "ar"],
+            "genre": ["Trivia", "Word game", "Party game", "Board game"],
+            "playMode": ["MultiPlayer", "CoOp"],
+            "gamePlatform": "Web browser",
+            "applicationCategory": "GameApplication",
+            "operatingSystem": "Any",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "publisher": {
+              "@type": "Organization",
+              "name": "RAL Technologies",
+              "url": "https://raltech.dev"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://letterlock.raltech.dev/#website",
+            "url": "https://letterlock.raltech.dev/",
+            "name": "Letterlock",
+            "alternateName": "Letter Lock",
+            "inLanguage": ["en", "ar"],
+            "publisher": { "@id": "https://letterlock.raltech.dev/#game" }
+          }
+        ]
+      }
+    </script>
+    <!-- ── /SEO ────────────────────────────────────────────────────────── -->
+
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Letterlock" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>Letterlock</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -24,6 +105,20 @@
       <div class="boot-name">LETTERLOCK</div>
     </div>
     <div id="root"></div>
+    <noscript>
+      <h1>Letterlock, the Letter Lock Trivia Board Game</h1>
+      <p>
+        Letterlock (also searched as "letter lock") is a free online trivia board game for
+        two teams. Each hex on the board holds a letter; answer a trivia question whose
+        answer starts with that letter to claim and lock the hex in your team's color.
+        One team connects left to right, the other top to bottom, and blocking your
+        opponent's path is half the fun. A fair, modern reinvention of the classic
+        Blockbusters TV game show, with 180+ question packs in English and Arabic:
+        general knowledge, flags, maps, movies, music, charades, and more. Play free in
+        your browser on phone, tablet, laptop, or TV. Letterlock requires JavaScript;
+        please enable it to play.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
