@@ -4,8 +4,9 @@ export function Logo({ size = 40 }: { size?: number }) {
       <svg width={size} height={size} viewBox="0 0 48 54" fill="none">
         <defs>
           <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#3aa0ff" />
-            <stop offset="100%" stopColor="#ff9f0a" />
+            <stop offset="0%" stopColor="#d6c2ff" />
+            <stop offset="45%" stopColor="#a78bfa" />
+            <stop offset="100%" stopColor="#7c5aff" />
           </linearGradient>
         </defs>
         <path
@@ -15,8 +16,9 @@ export function Logo({ size = 40 }: { size?: number }) {
           strokeOpacity="0.35"
           strokeWidth="1.5"
         />
-        {/* centered L (bbox 17–31 × 17–37 → centre 24,27 = hex centre) */}
-        <path d="M17 17h4.5v15.5H31V37H17z" fill="#fff" />
+        {/* L nudged up-right of the geometric centre so its visual mass
+            (stem bottom-left heavy) reads centred in the hex */}
+        <path d="M19 15h4.5v15.5H33V35.5H19z" fill="#fff" />
       </svg>
     </span>
   );
