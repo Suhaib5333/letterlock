@@ -7,7 +7,13 @@
 > re-verify — and keep fixing-and-re-testing in a loop until everything passes.**
 > Don't report something as working on inspection alone; prove it by exercising the
 > actual UI. Online/multi-device features get a two-client test; signed-in features
-> get a real login via a TEMP email (mailinator) — **never** the user's work email.
+> get a real login via a TEMP email (maildrop.cc — mailinator is bot-walled) — **never**
+> the user's work email.
+> **QA-account cleanup is part of the test:** every account created during testing
+> (claimed username or email-only stray) MUST be deleted from the DB afterwards via
+> `gh workflow run qa-cleanup.yml -f targets=<username-or-email>,…`
+> (`.github/workflows/qa-cleanup.yml`, uses the CI service-role secret; exact matches
+> only — never touch real players).
 > Also always show the full status table (see below) on every reply.
 
 # 🎮 Letterlock — Master Plan & Architecture

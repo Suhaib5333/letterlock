@@ -1,0 +1,40 @@
+# Deletes specific accounts after QA testing — see the CLAUDE.md testing mandate:
+# any account created during testing MUST be removed afterwards via this workflow.
+# Manual-only (workflow_dispatch); repo write access required to run it.
+#   gh workflow run qa-cleanup.yml -f targets=some_username,someone@maildrop.cc
+name: QA account cleanup
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: 'Comma-separated usernames and/or emails to DELETE (exact matches only)'
+        required: true
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete listed accounts
+        env:
+          SUPABASE_URL: https://lkudntyvngwwlzuciocd.supabase.co
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TARGETS: ${{ inputs.targets }}
+        run: |
+          set -euo pipefail
+          auth() { curl -sf -H "apikey: $KEY" -H "Authorization: Bearer $KEY" "$@"; }
+          # Small user base — one admin page resolves every email.
+          USERS=$(auth "$SUPABASE_URL/auth/v1/admin/users?page=1&per_page=1000")
+          IFS=',' read -ra TS <<< "$TARGETS"
+          for t in "${TS[@]}"; do
+            t=$(echo "$t" | xargs) # trim
+            [ -z "$t" ] && continue
+            if [[ "$t" == *@* ]]; then
+              id=$(echo "$USERS" | jq -r --arg em "$t" '.users[] | select(.email == $em) | .id')
+            else
+              id=$(auth "$SUPABASE_URL/rest/v1/profiles?username=eq.$t&select=id" | jq -r '.[0].id // empty')
+            fi
+            if [ -z "$id" ]; then echo "NOT FOUND: $t (skipped)"; continue; fi
+            email=$(auth "$SUPABASE_URL/auth/v1/admin/users/$id" | jq -r '.email // "?"')
+            # auth.users cascades to profiles/leaderboard/saved_games/progress/friendships.
+            auth -X DELETE "$SUPABASE_URL/auth/v1/admin/users/$id" > /dev/null
+            echo "DELETED $t ($id, $email)"
+          done
