@@ -84,7 +84,10 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
               onClose={onClose}
               initialError={redirectError}
             />
-          ) : !profile && profileLoading ? (
+          ) : !profile && (profileLoading || !profileChecked) ? (
+            // Covers BOTH the in-flight fetch and the one render right after
+            // sign-in where the fetch hasn't started yet — without the second
+            // clause that render fell through to ProfileView with a null profile.
             <p className="go-sub">Loading your profile…</p>
           ) : needsUsername ? (
             <UsernameView userId={user.id} onClaimed={refreshProfile} />

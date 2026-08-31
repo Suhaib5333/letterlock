@@ -67,10 +67,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
-  // True once the profile fetch for the CURRENT user has actually resolved. Guards
-  // the "needs a username" gate against the brief load gap on refresh where `user`
-  // is set but `profile` hasn't been fetched yet (which used to flash the dialog).
-  const [profileChecked, setProfileChecked] = useState(false);
+  // The user id whose profile fetch has RESOLVED. profileChecked derives from it
+  // (checkedUserId === user.id), so a user switch can never leave a stale "checked"
+  // from the previous identity: the old boolean stayed true for one render right
+  // after sign-in, which flashed needsUsername=true → the Home modal auto-close
+  // race that swallowed the "Choose a username" gate.
+  const [checkedUserId, setCheckedUserId] = useState<string | null>(null);
   const [authRedirectError, setAuthRedirectError] = useState<string | null>(oauthRedirectError);
 
   // Bootstrap: rehydrate the session from localStorage (supabase-js does
@@ -115,12 +117,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user || !supabase) {
       setProfile(null);
       setProfileLoading(false);
-      setProfileChecked(true); // settled: signed out → no profile, no username gate
+      setCheckedUserId(null); // settled: signed out → no profile, no username gate
       return;
     }
     let cancelled = false;
     setProfileLoading(true);
-    setProfileChecked(false); // a new user → haven't checked their profile yet
     supabase
       .from('profiles')
       .select('*')
@@ -130,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         setProfile((data as Profile) ?? null);
         setProfileLoading(false);
-        setProfileChecked(true);
+        setCheckedUserId(user.id);
       });
     return () => {
       cancelled = true;
@@ -261,6 +262,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
     setProfile((data as Profile) ?? null);
   };
+
+  // Signed out counts as "checked" (there is nothing to fetch); signed in only
+  // once THIS user's fetch resolved — never a stale carry-over between renders.
+  const profileChecked = user ? checkedUserId === user.id : true;
 
   const isBanned = !!profile?.banned_at;
   const isAdmin = !isBanned && profile?.role === 'admin';

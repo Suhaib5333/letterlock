@@ -25,11 +25,6 @@ const PACK_FLAG: Record<string, string> = { bahrain: 'bh', 'saudi-arabia': 'sa',
 
 const TOTAL_QUESTIONS = PACKS.reduce((sum, p) => sum + totalQuestions(p), 0);
 
-// Module-level so it survives Home unmount/remount (Home unmounts during a game).
-// The first-time username claim is offered AT MOST ONCE per page load — so it
-// never re-pops every time you return to the home screen after a match.
-let usernameClaimPrompted = false;
-
 export function Home() {
   const { state, dispatch, hasSavedGame } = useStore();
   const [showSettings, setShowSettings] = useState(false);
@@ -54,18 +49,19 @@ export function Home() {
   // or a guest reset) so the "N unique left" badge stays accurate.
   const [, setProgressTick] = useState(0);
   useEffect(() => subscribeProgress(() => setProgressTick((t) => t + 1)), []);
-  // Force the username claim open for a brand-new account — once per session.
-  // Belt-and-suspenders: if we auto-opened it and the user turns out to HAVE a
-  // profile (e.g. a transient null right after session-restore resolved into a
-  // real profile), auto-CLOSE it so the "Signed in as…" dialog never lingers on
-  // refresh. A user-opened dialog (button click) is never auto-closed.
+  // Force the username claim open WHENEVER a signed-in account lacks one — the
+  // gate is mandatory (the modal can't be dismissed while needsUsername), so no
+  // "only once per session" flag: that flag once ate the prompt entirely when a
+  // transient needsUsername flip closed the modal mid-profile-fetch. If we
+  // auto-opened it and the profile then resolves (username claimed, or a
+  // transient null became a real profile), auto-CLOSE so the "Signed in as…"
+  // dialog never lingers. A user-opened dialog (button click) is never auto-closed.
   const autoOpenedAuthRef = useRef(false);
   useEffect(() => {
-    if (needsUsername && !usernameClaimPrompted) {
-      usernameClaimPrompted = true;
+    if (needsUsername) {
       autoOpenedAuthRef.current = true;
       setShowAuth(true);
-    } else if (!needsUsername && autoOpenedAuthRef.current) {
+    } else if (autoOpenedAuthRef.current) {
       autoOpenedAuthRef.current = false;
       setShowAuth(false);
     }

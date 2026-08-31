@@ -1085,6 +1085,38 @@ every pack still passes `checkpack.mjs` afterwards.
   and an Arabic pack), zero repo-wide leaks, strict typecheck + build clean, pushed and
   deployed green.
 
+## II.3u Round-23: the swallowed "Choose a username" gate (2026-08-31)
+
+The user reported that a fresh login doesn't land on the username claim. Reproduced live
+with a real email-OTP sign-in (maildrop.cc inbox, read via its GraphQL API): after
+"Verify & sign in" the auth modal **closed itself and never showed "Choose a username"**;
+a page reload with a session-but-no-profile (exactly what a first-time **Google** login
+lands in after the OAuth redirect) ALSO showed no prompt — the header even still showed
+the signed-out 👤. Manually reopening the dialog showed the claim fine, so the bug was
+pure auto-open orchestration:
+
+- 🐛 **Root cause 1 (auth.tsx):** `profileChecked` was a plain boolean that stayed
+  **stale-true from the signed-out state** for one render right after `user` arrived, so
+  `needsUsername` flashed true → false (profile fetch starts) → true (fetch resolves).
+- 🐛 **Root cause 2 (Home.tsx):** the false dip hit the auto-close branch (modal closes),
+  and the module-level once-per-session `usernameClaimPrompted` flag — set during the
+  true flash — then blocked the reopen forever. This fired on EVERY page load, which is
+  why the Google-redirect path never prompted.
+- ✅ **Fix:** `profileChecked` now derives from a `checkedUserId` keyed to the current
+  user (`checkedUserId === user.id`), so it can never carry over between identities; the
+  once-flag is deleted (the gate is mandatory and non-dismissable, so "open whenever
+  needsUsername" is the correct behavior); AuthModal's loading branch also covers the
+  not-yet-checked render (it used to fall through to ProfileView with a null profile).
+- 🧪 **New e2e `tests-e2e/auth-username-gate.spec.ts`** (Supabase network mocked, real UI):
+  (1) email-OTP verify → username claim visible immediately → claim → gate auto-closes;
+  (2) page load with a seeded session + no profile → gate auto-opens (the Google path).
+  Both **verified red on the pre-fix code, green on the fix**.
+- 🔍 **Google SSO config verified live**: "Continue with Google" reaches
+  accounts.google.com with the right client_id, Supabase `/auth/v1/callback` redirect_uri,
+  PKCE `response_type=code`, and `redirect_to=letterlock.raltech.dev`. Google blocks
+  automated credential entry, so the post-redirect app path is covered by test (2), which
+  is byte-identical app-side.
+
 ## II.4 Still deferred (unchanged from §14 "Future TODO")
 
 Multiplayer (Phase 2 §10), accounts/cloud (Supabase), pack editor + UGC moderation, daily
