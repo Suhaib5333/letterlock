@@ -394,7 +394,12 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 
 ---
 
-## 15. 📝 Change log for this plan
+## 15. 📄 Shareable versions
+
+- `docs/launch-plan/index.html`: the tabbed, plain-words version of this doc (also published as a Claude artifact).
+- `node docs/launch-plan/pdf.mjs`: renders it to an A4 PDF (default output: `Letterlock-Launch-Plan.pdf` on the Desktop) for WhatsApp / email. Regenerate after editing the HTML; keep the HTML in step with this file.
+
+## 16. 📝 Change log for this plan
 
 - 2026-09-03: created after the research sweep. No code changed yet. Awaiting decisions D1-D13 (recommendations given).
-- 2026-09-03 (later): Suhaib confirmed "we will migrate off Supabase": added §2b (what off-Supabase means, no Supabase account after cutover) + D14 (open-source stack self-run vs. custom backend). Readable artifact rebuilt as a tabbed page.
+- 2026-09-03 (later): Suhaib confirmed "we will migrate off Supabase": added §2b (what off-Supabase means, no Supabase account after cutover) + D14 (open-source stack self-run vs. custom backend). Readable artifact rebuilt as a tabbed page; HTML + PDF generator committed under `docs/launch-plan/`.

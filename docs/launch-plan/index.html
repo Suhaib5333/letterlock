@@ -1,0 +1,576 @@
+<title>Letterlock Launch Plan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Sora:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f5f6fa; --surface:#ffffff; --surface-2:#eef0f6; --line:#d9dce8; --line-strong:#b9bfd3;
+  --ink:#141a2e; --ink-2:#4a5270; --ink-3:#737b99;
+  --blue:#0072B2; --blue-ink:#005a8e; --blue-soft:#e3f0fa;
+  --amber:#E69F00; --amber-ink:#8a5f00; --amber-soft:#fbf1d6;
+  --red-soft:#fbe3e0; --red-ink:#9b2f22; --green-soft:#e0f3e8; --green-ink:#1f6b3f;
+  --display:"Bricolage Grotesque",Georgia,"Times New Roman",serif;
+  --body:"Sora",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0a0e1f; --surface:#111731; --surface-2:#182040; --line:#273052; --line-strong:#3a4570;
+    --ink:#eef1fb; --ink-2:#b6bdd8; --ink-3:#8790b3;
+    --blue:#4aa3dc; --blue-ink:#8cc8ee; --blue-soft:#12304a;
+    --amber:#E69F00; --amber-ink:#f2c257; --amber-soft:#3a2d0a;
+    --red-soft:#4a1a14; --red-ink:#f0a094; --green-soft:#12341f; --green-ink:#8fd4a8;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0a0e1f; --surface:#111731; --surface-2:#182040; --line:#273052; --line-strong:#3a4570;
+  --ink:#eef1fb; --ink-2:#b6bdd8; --ink-3:#8790b3;
+  --blue:#4aa3dc; --blue-ink:#8cc8ee; --blue-soft:#12304a;
+  --amber:#E69F00; --amber-ink:#f2c257; --amber-soft:#3a2d0a;
+  --red-soft:#4a1a14; --red-ink:#f0a094; --green-soft:#12341f; --green-ink:#8fd4a8;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;padding:36px 20px 80px}
+header.top{display:grid;gap:12px;margin-bottom:22px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,6vw,52px);line-height:1.02;margin:0;letter-spacing:-.02em;text-wrap:balance}
+h1 span{color:var(--blue)}
+.lede{font-size:16.5px;color:var(--ink-2);max-width:64ch;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--ink-3)}
+.meta b{color:var(--ink-2);font-weight:600}
+
+/* tabs */
+.tabs{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 0;border-bottom:1px solid var(--line);margin-bottom:26px}
+.tabs [role=tablist]{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:0}
+.tabs [role=tablist]::-webkit-scrollbar{display:none}
+.tabs button{appearance:none;background:none;border:0;border-bottom:3px solid transparent;color:var(--ink-2);font:inherit;font-size:13.5px;font-weight:500;padding:8px 12px 10px;cursor:pointer;white-space:nowrap;border-radius:6px 6px 0 0}
+.tabs button:hover{color:var(--ink);background:var(--surface-2)}
+.tabs button[aria-selected=true]{color:var(--blue-ink);border-bottom-color:var(--blue);font-weight:600}
+.tabs button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+[role=tabpanel][hidden]{display:none}
+.panel-title{font-family:var(--display);font-weight:700;font-size:28px;line-height:1.1;letter-spacing:-.01em;margin:0 0 6px;text-wrap:balance}
+.panel-sub{color:var(--ink-2);margin:0 0 20px;max-width:64ch}
+
+h2{font-family:var(--display);font-weight:700;font-size:22px;line-height:1.15;margin:34px 0 12px;text-wrap:balance}
+h3{font-family:var(--display);font-weight:700;font-size:17px;margin:0}
+p{margin:0 0 12px;max-width:68ch}
+
+ol.tl{margin:0;padding:0;list-style:none;display:grid;gap:8px;counter-reset:n}
+ol.tl li{counter-increment:n;display:flex;gap:14px;align-items:flex-start;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+ol.tl li::before{content:counter(n);flex:none;width:24px;font-family:var(--display);font-weight:800;font-size:18px;color:var(--blue);line-height:1.3;font-variant-numeric:tabular-nums}
+ol.tl li span{flex:1;min-width:0}
+ol.tl b{font-weight:600}
+
+.hex{width:26px;height:26px;display:inline-grid;place-items:center;color:#fff;font-family:var(--display);font-weight:800;font-size:13px;background:var(--blue);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);flex:none}
+.hex.amber{background:var(--amber);color:#1a1200}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface);margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
+th,td{padding:10px 12px;text-align:left;vertical-align:top;border-top:1px solid var(--line)}
+thead th{border-top:0;background:var(--surface-2);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+td:first-child{font-weight:600;color:var(--ink)}
+td{color:var(--ink-2)}
+td b,td strong{color:var(--ink);font-weight:600}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em;background:var(--surface-2);padding:1px 5px;border-radius:4px;color:var(--ink)}
+.num{font-variant-numeric:tabular-nums}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:600;letter-spacing:.03em;white-space:nowrap}
+.hi{background:var(--red-soft);color:var(--red-ink)} .md{background:var(--amber-soft);color:var(--amber-ink)} .lo{background:var(--green-soft);color:var(--green-ink)}
+.callout{border-left:3px solid var(--blue);background:var(--blue-soft);padding:12px 16px;border-radius:0 6px 6px 0;margin:16px 0}
+.callout.warn{border-color:var(--amber);background:var(--amber-soft)}
+.callout p{max-width:none}
+.callout p:last-child{margin:0}
+
+.rail{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:0 0 22px}
+.rail a{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 8px;font-size:12px;line-height:1.35;color:var(--ink-2);display:grid;gap:4px;text-decoration:none}
+.rail a:hover{border-color:var(--blue)}
+.rail a b{color:var(--ink);font-weight:600;display:block}
+.rail a small{color:var(--ink-3);font-variant-numeric:tabular-nums}
+@media (max-width:720px){.rail{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:420px){.rail{grid-template-columns:repeat(2,1fr)}}
+
+details.phase{background:var(--surface);border:1px solid var(--line);border-radius:6px;margin:0 0 10px}
+details.phase summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 14px}
+details.phase summary::-webkit-details-marker{display:none}
+details.phase summary .eta{margin-left:auto;font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap}
+details.phase summary .arrow{width:18px;flex:none;color:var(--ink-3);transition:transform .15s}
+details.phase[open] summary .arrow{transform:rotate(90deg)}
+details.phase summary:focus-visible{outline:2px solid var(--amber);outline-offset:-2px;border-radius:6px}
+details.phase .body{padding:0 14px 14px 52px;border-top:1px solid var(--line)}
+details.phase .body > :first-child{margin-top:12px}
+details.phase .body .tablewrap{border-radius:6px}
+@media (max-width:560px){details.phase .body{padding-left:14px}}
+
+.flow{display:grid;margin:14px 0 18px;border:1px solid var(--line);border-radius:6px;background:var(--surface);overflow:hidden}
+.flow div{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
+.flow div:first-child{border-top:0}
+.flow .k{flex:none;width:20px;font-family:var(--display);font-weight:800;color:var(--blue);font-size:17px;line-height:1.35}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 18px}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.card h4{margin:0 0 6px;font-family:var(--display);font-size:15px;font-weight:700}
+.card p{font-size:13.5px;color:var(--ink-2);margin:0}
+.total{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 18px}
+.total div{flex:1 1 160px;background:var(--surface);border:1px solid var(--line-strong);border-radius:6px;padding:12px 16px}
+.total .big{font-family:var(--display);font-weight:800;font-size:26px;line-height:1.1;color:var(--blue);font-variant-numeric:tabular-nums}
+.total small{display:block;color:var(--ink-3);font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-top:4px}
+ul{margin:0 0 12px;padding-left:20px}
+li{margin-bottom:6px}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+a{color:var(--blue-ink)}
+a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+@media (max-width:640px){
+  .stack table{min-width:0}
+  .stack thead{display:none}
+  .stack tr{display:block;border-top:1px solid var(--line);padding:8px 12px}
+  .stack tr:first-child{border-top:0}
+  .stack td{display:block;border:0;padding:2px 0}
+  .stack td:first-child{padding-bottom:4px}
+  .stack td:nth-child(2)::before{content:"Today: ";color:var(--ink-3);font-weight:600}
+  .stack td:nth-child(3)::before{content:"After: ";color:var(--blue-ink);font-weight:600}
+}
+@media (prefers-reduced-motion: reduce){details.phase summary .arrow{transition:none}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Letterlock · Store launch plan · 3 Sep 2026</div>
+  <h1>From web game to <span>App Store and Play Store</span>, on our own VPS</h1>
+  <p class="lede">The plain-words version of <code>LAUNCH_PLAN.md</code>. Pick a tab.</p>
+  <div class="meta"><span><b>~22</b> dev days</span><span><b>6 to 8</b> weeks to live</span><span><b>14</b> decisions waiting on you</span><span><b>7</b> phases</span></div>
+</header>
+
+<nav class="tabs" aria-label="Plan sections">
+  <div role="tablist">
+    <button role="tab" id="tab-overview" aria-controls="p-overview" aria-selected="true" data-tab="overview">Overview</button>
+    <button role="tab" id="tab-decisions" aria-controls="p-decisions" aria-selected="false" tabindex="-1" data-tab="decisions">Your decisions</button>
+    <button role="tab" id="tab-phases" aria-controls="p-phases" aria-selected="false" tabindex="-1" data-tab="phases">Phases</button>
+    <button role="tab" id="tab-backend" aria-controls="p-backend" aria-selected="false" tabindex="-1" data-tab="backend">Off Supabase</button>
+    <button role="tab" id="tab-purchases" aria-controls="p-purchases" aria-selected="false" tabindex="-1" data-tab="purchases">Remove Ads</button>
+    <button role="tab" id="tab-ads" aria-controls="p-ads" aria-selected="false" tabindex="-1" data-tab="ads">Ads</button>
+    <button role="tab" id="tab-copyright" aria-controls="p-copyright" aria-selected="false" tabindex="-1" data-tab="copyright">Copyright</button>
+    <button role="tab" id="tab-review" aria-controls="p-review" aria-selected="false" tabindex="-1" data-tab="review">Store review</button>
+    <button role="tab" id="tab-money" aria-controls="p-money" aria-selected="false" tabindex="-1" data-tab="money">Costs, timeline, risks</button>
+  </div>
+</nav>
+
+<!-- OVERVIEW -->
+<section role="tabpanel" id="p-overview" aria-labelledby="tab-overview">
+  <h2 class="panel-title">The whole plan in 12 lines</h2>
+  <ol class="tl">
+    <li><span><b>Wrap, don't rewrite.</b> The React app ships inside a Capacitor shell. One codebase for web, iOS and Android.</span></li>
+    <li><span><b>Backend leaves Supabase cloud and runs on our VPS.</b> We run the open-source server software ourselves (Postgres, auth, API, realtime). No Supabase account, no bill, no supabase.co anywhere. Only the URL changes in the app. Web and apps share one database. See the "Off Supabase" tab.</span></li>
+    <li><span><b>That same move fixes the Google login text.</b> The consent screen shows the callback domain. Ours becomes <code>api.letterlock.raltech.dev</code>, then we verify the brand so it reads "Letterlock".</span></li>
+    <li><span><b>Ads = Google AdMob.</b> Interstitial only between games, rewarded ads for an extra skip or hint, banner only on menus. Never during a question.</span></li>
+    <li><span><b>Remove Ads = one purchase, about $3.99,</b> through Apple and Google billing via RevenueCat, mirrored to a flag on the account so it follows the login, not just the phone.</span></li>
+    <li><span><b>Purchases belong to the Apple ID or Google account by default.</b> Our server flag is what makes them follow the user across iPhone, Android and web. The "Remove Ads" tab explains it.</span></li>
+    <li><span><b>The song, TV-clip and iTunes-melody packs cannot ship in the store build.</b> Apple's guideline 5.2.5 forbids using iTunes previews "as the soundtrack to a game". Replace with self-made public-domain melodies and text clues.</span></li>
+    <li><span><b>Store requirements we do not have yet:</b> in-app account deletion, privacy policy and terms pages, Sign in with Apple (mandatory because we offer Google login), real PNG icons, offline handling.</span></li>
+    <li><span><b>"AI-looking code" is a myth.</b> Neither store checks who wrote the code. They reject thin web wrappers, crashes, placeholders and missing privacy features. The "Store review" tab is the real checklist.</span></li>
+    <li><span><b>Paperwork first:</b> Apple Developer ($99/yr), Google Play ($25 once), AdMob, RevenueCat, and a differentiated store name because exact "Letterlock" is already taken.</span></li>
+    <li><span><b>Ops we must add:</b> backups, uptime monitoring, crash reporting, a version gate, <code>app-ads.txt</code>.</span></li>
+    <li><span><b>Realistic money:</b> ads earn tens of dollars a month at hundreds of daily players. The $3.99 purchase will likely out-earn ads early. Do it for reach and polish, not quick revenue.</span></li>
+  </ol>
+
+  <h2>Where we actually are today</h2>
+  <div class="tablewrap"><table>
+  <thead><tr><th>Area</th><th>Reality</th><th>Consequence</th></tr></thead>
+  <tbody>
+  <tr><td>Web hosting</td><td><b>Cloudflare Pages</b>, not the VPS. The VPS hosts nothing for Letterlock yet.</td><td>The migration builds the VPS side from scratch.</td></tr>
+  <tr><td>Backend</td><td>Supabase <b>cloud</b> project, ref committed in <code>.env.production</code>.</td><td>That ref is the random text on the Google consent screen. We leave it.</td></tr>
+  <tr><td>Backend footprint</td><td>Auth (email code via Resend, Google), 9 tables, ~30 database functions, 12 migrations, realtime broadcast + presence, 2 edge functions, no file storage.</td><td>Small and portable. Moving it is realistic.</td></tr>
+  <tr><td>Account deletion</td><td>None for users.</td><td>Store blocker on both stores.</td></tr>
+  <tr><td>Privacy policy, terms</td><td>None anywhere.</td><td>Store blocker, also needed by AdMob and Google brand verification.</td></tr>
+  <tr><td>Sign in with Apple</td><td>Not built.</td><td>Required by Apple 4.8 because Google login exists.</td></tr>
+  <tr><td>Icons</td><td>SVG favicon only.</td><td>Need 1024/512/192 PNG set and splash.</td></tr>
+  <tr><td>Join links</td><td>Query params only (<code>?room=</code>).</td><td>Add <code>/join/CODE</code>: universal links match paths reliably.</td></tr>
+  <tr><td>Remote media</td><td class="num">1,624 iTunes song previews, 296 iTunes TV clips, ~600 CDN logos, random Flickr photos in charades.</td><td>Copyright, reliability and content-safety work (Copyright tab).</td></tr>
+  <tr><td>Monetization SDKs</td><td>Zero.</td><td>Ads, purchases, crash reporting are all new.</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- DECISIONS -->
+<section role="tabpanel" id="p-decisions" aria-labelledby="tab-decisions" hidden>
+  <h2 class="panel-title">Decisions waiting on you</h2>
+  <p class="panel-sub">Recommendation is listed first. Say "go with the recommendations" and the plan proceeds as written.</p>
+  <div class="tablewrap"><table>
+  <thead><tr><th>#</th><th>Decision</th><th>Recommendation</th><th>Why</th></tr></thead>
+  <tbody>
+  <tr><td>D1</td><td>Store listing name</td><td><b>Letterlock: Trivia Hex Duel</b> (or Letterlock Party Quiz)</td><td>Exact "Letterlock" is taken on both stores by word-puzzle apps. Apple names must be unique.</td></tr>
+  <tr><td>D2</td><td>Developer account type</td><td><b>Organization</b> (RAL, free D-U-N-S number)</td><td>Shows the company name; Play organization accounts skip the 12-testers-for-14-days rule.</td></tr>
+  <tr><td>D3</td><td>Song / TV / iTunes-melody packs</td><td><b>Remove from the store build.</b> Grow the 23 self-made melodies to 200+, convert songs and TV to text clues.</td><td>Apple 5.2.5 and the iTunes API terms forbid game use. Licensed clips can come later.</td></tr>
+  <tr><td>D4</td><td>Ads placement and price</td><td>Interstitial between games (max 1 per 3 to 5 min), rewarded for skip/hint, banner on menus. Remove Ads at <b>$3.99</b>.</td><td>Matches Play "Better Ads" and Apple UX rules. $2.99 to $4.99 is the norm.</td></tr>
+  <tr><td>D5</td><td>Static web hosting</td><td>Move the site to the VPS too, keep Cloudflare as DNS only</td><td>You asked for "fully on our VPS". One hour once the API is there.</td></tr>
+  <tr><td>D6</td><td>Target audience</td><td><b>13+, not directed at children</b></td><td>Kids Category forbids third-party ads. Keep the Kids pack, skip child-directed marketing.</td></tr>
+  <tr><td>D7</td><td>Over-the-air JS updates</td><td><b>Later.</b> Store builds only at launch.</td><td>Content waves need a store update (Play hours, Apple 1 to 2 days). Add Capgo when that hurts.</td></tr>
+  <tr><td>D8</td><td>VPS size</td><td><b>8 GB RAM</b> (4 GB hard minimum)</td><td>The backend stack idles near 3 to 4 GB. Tell me the current spec.</td></tr>
+  <tr><td>D9</td><td>Charades images</td><td><b>Drop images, show the word only</b></td><td>Random Flickr photos: content-safety and license risk.</td></tr>
+  <tr><td>D10</td><td>Logo packs</td><td>Keep: bundle SVGs, trademark disclaimer, drop the Apple logo, removal contact</td><td>How every Logo Quiz app survives.</td></tr>
+  <tr><td>D11</td><td>Fandom packs</td><td>Keep as text, label "Unofficial fan trivia", rename the Harry Potter and Pokémon packs, never in store metadata</td><td>Those two rights-holders are the most aggressive. Facts are not copyrightable.</td></tr>
+  <tr><td>D12</td><td>Web ads</td><td><b>Skip at launch</b></td><td>AdSense rejects thin-text game pages; a rejection complicates later approval.</td></tr>
+  <tr><td>D13</td><td>Web Remove-Ads purchase</td><td>Optional, later, via Paddle or Lemon Squeezy</td><td>They handle VAT. Never mention web pricing inside the apps.</td></tr>
+  <tr><td>D14</td><td><b>What runs on the VPS</b></td><td><b>Option A:</b> run the open-source Supabase server stack ourselves (no Supabase account, no bill, our domain). ~3 days, zero app rewrite.</td><td><b>Option B</b> is a fully custom backend (own API, own auth, own websockets): 4 to 6 weeks of rewrite for the same result. The database is plain Postgres either way, so B stays possible later. See the "Off Supabase" tab.</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- PHASES -->
+<section role="tabpanel" id="p-phases" aria-labelledby="tab-phases" hidden>
+  <h2 class="panel-title">The seven phases</h2>
+  <p class="panel-sub">Phases 1 and 2 run in parallel. Phase 0 starts today because it is mostly waiting. Click a phase to open it.</p>
+  <div class="rail">
+    <a href="#ph0"><b>0 Paperwork</b><small>1 to 2 weeks wait</small></a>
+    <a href="#ph1"><b>1 Store-ready web</b><small>5 days</small></a>
+    <a href="#ph2"><b>2 Backend to VPS</b><small>3 days + cutover</small></a>
+    <a href="#ph3"><b>3 Capacitor apps</b><small>5 days</small></a>
+    <a href="#ph4"><b>4 Ads</b><small>2 days</small></a>
+    <a href="#ph5"><b>5 Remove Ads</b><small>3 days</small></a>
+    <a href="#ph6"><b>6 Submission</b><small>2 days + 2 to 4 weeks</small></a>
+    <a href="#ph7"><b>7 Ops</b><small>2 days, ongoing</small></a>
+  </div>
+
+  <details class="phase" id="ph0" open>
+    <summary><span class="hex">0</span><h3>Paperwork and accounts</h3><span class="eta">you · 1 hour of forms · 1 to 2 weeks wait</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <ul>
+        <li>D-U-N-S number for RAL (free, 5 to 10 business days). Needed for Organization accounts.</li>
+        <li>Apple Developer Program, $99/yr, then Paid Apps Agreement, bank and W-8BEN tax form. Bahrain bank acceptance is unverified; a bank in another country is accepted if needed.</li>
+        <li>Google Play Console, $25 once, plus a Play merchant account. Bahrain is officially supported for both. Payout in USD by wire.</li>
+        <li>AdMob account (Bahrain supported, $100 payout threshold). Apps get approved only once live in a store.</li>
+        <li>RevenueCat account (free under $2,500/month).</li>
+        <li>Google Cloud consent screen: app name Letterlock, logo, homepage, privacy URL, authorized domain, Search Console verification.</li>
+        <li>Pick the store name (D1), decide the VPS (D8), give me SSH access.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="phase" id="ph1">
+    <summary><span class="hex">1</span><h3>Store-readiness changes inside the web app</h3><span class="eta">5 dev days</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <p>Everything here ships to the website too, so it pays off before the apps exist.</p>
+      <div class="tablewrap"><table>
+      <thead><tr><th>Change</th><th>Where</th><th>Why</th></tr></thead>
+      <tbody>
+      <tr><td>Account deletion</td><td>New <code>delete_my_account()</code> database function, button in the profile view, web page for the Play listing</td><td>Apple 5.1.1(v), Play policy</td></tr>
+      <tr><td>Privacy policy + terms pages</td><td>Static pages on letterlock.raltech.dev, linked from Settings and both store listings</td><td>Both stores, AdMob, Google brand verification</td></tr>
+      <tr><td>Sign in with Apple</td><td>Apple provider in our auth server (Services ID, Team ID, .p8 key; secret renews every 6 months)</td><td>Apple 4.8</td></tr>
+      <tr><td><code>/join/CODE</code> links</td><td>Router, QR code, copy link; <code>?room=</code> stays as alias</td><td>Universal links</td></tr>
+      <tr><td>Offline handling</td><td>Non-blocking banner, local play works offline, remote-media packs hidden offline, rooms disabled, score posts queued</td><td>Apple 2.1: reviewers test in airplane mode and IPv6-only</td></tr>
+      <tr><td>Version gate</td><td><code>/api/app-config</code> with min version + maintenance flag</td><td>Retire old app versions, show maintenance notices</td></tr>
+      <tr><td>Icons + splash</td><td>1024 PNG master, generated sets, PWA icons</td><td>Stores + PWA</td></tr>
+      <tr><td>Bundle media</td><td>Flags, logo SVGs, fonts served locally</td><td>Offline, review reliability</td></tr>
+      <tr><td>Content changes</td><td>D3, D9, D10, D11 applied</td><td>Copyright tab</td></tr>
+      <tr><td><code>app-ads.txt</code></td><td>Root of the domain listed in the stores</td><td>AdMob requires it since Jan 2025</td></tr>
+      </tbody></table></div>
+    </div>
+  </details>
+
+  <details class="phase" id="ph2">
+    <summary><span class="hex">2</span><h3>Backend off Supabase cloud, onto the VPS</h3><span class="eta">3 dev days + a cutover evening</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <div class="callout"><p><b>Will this continue for our app? Yes.</b> The apps and the website all talk to <code>api.letterlock.raltech.dev</code>. Same database, same accounts, same leaderboards, same saved games, same ads-removed flag. Nothing in the app depends on Supabase cloud. Full explanation in the "Off Supabase" tab.</p></div>
+      <ul>
+        <li>Docker stack on the VPS: Postgres 17, API gateway, auth server, REST layer, realtime server, functions runtime, admin UI. Remove file storage, image proxy, analytics and log shipper to save about 1.5 GB RAM.</li>
+        <li>nginx in front with TLS on <code>api.letterlock.raltech.dev</code>, WebSocket headers for realtime, admin UI behind basic auth, firewall 22/80/443 only, IPv6 record.</li>
+        <li>Auth config: site URL, redirect allowlist, Google callback on our domain (added in Google Cloud too), Apple provider, Resend SMTP for auth mails.</li>
+        <li>Copy the <code>send-otp</code> function into the functions volume.</li>
+        <li>Data: three dumps (roles, schema, data) restored into the VPS. Password hashes and Google identities survive. <b>Users sign in again once.</b></li>
+        <li>Test the host + phone lobby on the VPS first: a known self-host realtime bug can crash broadcast on the default tenant.</li>
+        <li>Rewrite CI: build, rsync, migrations by connection string, functions by scp. Point the QA cleanup workflow at the new admin URL.</li>
+        <li>Cutover on a quiet evening, keep the cloud project two weeks as rollback, then delete it. From then on there is no Supabase account.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="phase" id="ph3">
+    <summary><span class="hex">3</span><h3>The Capacitor apps</h3><span class="eta">5 dev days</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <ul>
+        <li>Capacitor 8, bundle id <code>dev.raltech.letterlock</code>, web assets bundled inside the app (never loading the live URL).</li>
+        <li>Plugins: app (deep links, Android back), browser, haptics, share, network, status bar, splash, keyboard, preferences, screen orientation.</li>
+        <li>Native Google and Apple sign-in via ID tokens. Google blocks OAuth inside embedded web views, and the native sheet shows no domain text at all.</li>
+        <li>Deep links: association files on our domain so QR codes open the app if installed, the website otherwise.</li>
+        <li>Mirror saves and settings into native preferences (iOS can evict web storage). Handle inline video, first-tap audio unlock, no pinch zoom, Android 16 edge-to-edge.</li>
+        <li>iOS builds on Codemagic (500 free macOS minutes a month) straight to TestFlight; Android bundles to the Play internal track. No Mac needed.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="phase" id="ph4">
+    <summary><span class="hex">4</span><h3>Ads</h3><span class="eta">2 dev days + AdMob approval 1 to 2 weeks after launch</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <ul>
+        <li>AdMob via the Capacitor community plugin. AdMob only, no mediation until real volume.</li>
+        <li>Consent form on every launch before ads (EU/UK/US messages), a "Privacy options" entry in Settings, and the iOS tracking prompt with a short explainer. Declining is fine: ads stay, just untargeted.</li>
+        <li>Placement: interstitial on the result screen and between games only, capped; rewarded ad for an extra skip or hint; banner on Home, Category menu, Settings, Lobby. Never on the board, never on the phone controller during a question.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="phase" id="ph5">
+    <summary><span class="hex">5</span><h3>Remove Ads purchase</h3><span class="eta">3 dev days</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <ul>
+        <li>One non-consumable product in both stores, $3.99 tier, Family Sharing on for iOS.</li>
+        <li>RevenueCat SDK, entitlement <code>no_ads</code>, linked to our user id at sign-in, restore behavior "transfer".</li>
+        <li>Restore Purchases button (Apple requires it). RevenueCat webhook writes <code>profiles.ads_removed</code> in our database; refunds revoke it automatically.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="phase" id="ph6">
+    <summary><span class="hex">6</span><h3>Store submission</h3><span class="eta">2 dev days + 2 to 4 weeks waiting</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <ul>
+        <li>Assets from the real build: iPhone 6.9" and iPad 13" screenshots, Play phone and tablet screenshots, 1024×500 feature graphic. No logos or franchise names in screenshots.</li>
+        <li>Forms: App Privacy labels, the new age-rating questionnaire, Play Data safety, content rating, "Contains ads", target audience 13+.</li>
+        <li>Reviewer notes with a demo room flow and test account. Budget one rejection round.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="phase" id="ph7">
+    <summary><span class="hex">7</span><h3>Keep it alive</h3><span class="eta">2 dev days, then ongoing</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <div class="grid2">
+        <div class="card"><h4>Backups first</h4><p>Nightly database dump + volumes to offsite storage, 30-day retention, quarterly restore test. Nobody backs up our VPS but us.</p></div>
+        <div class="card"><h4>Uptime</h4><p>Uptime Kuma probing the site, auth, REST, realtime and the app-config endpoint, alerting your phone.</p></div>
+        <div class="card"><h4>Crashes and errors</h4><p>Sentry free tier plus the stores' own vitals. Play hides apps above a 1.09% crash rate.</p></div>
+        <div class="card"><h4>Network in the app</h4><p>Yes, we need it: a connectivity listener, an offline banner, queued writes, and a maintenance flag during VPS work.</p></div>
+        <div class="card"><h4>Updates</h4><p>Pinned Docker image tags, manual upgrades, log rotation, fail2ban. Yearly Play API and Xcode bumps. Apple sign-in secret every 6 months.</p></div>
+        <div class="card"><h4>Takedowns</h4><p>A published legal contact and a 48-hour removal routine for any logo or fandom complaint.</p></div>
+      </div>
+    </div>
+  </details>
+</section>
+
+<!-- BACKEND -->
+<section role="tabpanel" id="p-backend" aria-labelledby="tab-backend" hidden>
+  <h2 class="panel-title">Off Supabase: what that means exactly</h2>
+  <p class="panel-sub">You said "we will migrate off of Supabase". Here is precisely what leaves, what stays, and the one choice inside it.</p>
+  <div class="tablewrap stack"><table>
+  <thead><tr><th></th><th>Today</th><th>After the move</th></tr></thead>
+  <tbody>
+  <tr><td>Where the data lives</td><td>Supabase's servers (their cloud project)</td><td><b>Our VPS</b>, plain Postgres in Docker</td></tr>
+  <tr><td>Supabase account / bill</td><td>Yes</td><td><b>None.</b> Project deleted after cutover.</td></tr>
+  <tr><td>Domain users see</td><td><code>lkudntyvngwwlzuciocd.supabase.co</code></td><td><code>api.letterlock.raltech.dev</code></td></tr>
+  <tr><td>Who can switch it off</td><td>Supabase</td><td>Only us</td></tr>
+  <tr><td>Server software</td><td>Supabase's hosted stack</td><td><b>Option A:</b> the same open-source stack, run by us. <b>Option B:</b> our own custom code.</td></tr>
+  <tr><td>App code changes</td><td></td><td>Option A: the URL and key. Option B: rewrite of auth, ~30 data calls, realtime sync, leaderboards.</td></tr>
+  </tbody></table></div>
+
+  <h2>Decision D14: Option A or Option B</h2>
+  <div class="grid2">
+    <div class="card"><h4>A · Run the open-source stack ourselves (recommended)</h4><p>Supabase publishes its server as free open-source software (Postgres + an auth server + a REST layer + a realtime server). We run those containers on our VPS. No account, no bill, no supabase.co, our domain, our disks. ~3 days. The app keeps working unchanged. This is what the plan assumes.</p></div>
+    <div class="card"><h4>B · Fully custom backend</h4><p>Write our own API (Node), own login system (email codes, Google, Apple), own websocket server for host + phone rooms, port ~30 database functions. Same end result for users, 4 to 6 extra weeks, more code to maintain. Possible later at any time because the database is plain Postgres in both options.</p></div>
+  </div>
+  <div class="callout"><p><b>Either way, "Supabase" as a company disappears from the picture.</b> The only question is whether we reuse their free server software (A) or write our own (B). Wherever this page or the repo doc says "the backend on the VPS", it means Option A unless you pick B.</p></div>
+
+  <h2>Fixing the "xxxx.supabase.co will access" text</h2>
+  <p><b>Why it happens:</b> Google shows the domain of the login callback until the app's branding is verified. Today that callback is on the Supabase project domain.</p>
+  <div class="flow">
+    <div><span class="k">1</span><span>Move the callback to <code>api.letterlock.raltech.dev</code>. Automatic with Phase 2.</span></div>
+    <div><span class="k">2</span><span>Verify <code>raltech.dev</code> in Google Search Console.</span></div>
+    <div><span class="k">3</span><span>Google Cloud branding: app name Letterlock, logo, homepage, privacy and terms URLs on that same domain, authorized domain.</span></div>
+    <div><span class="k">4</span><span>Set the audience to External and publish. Testing mode hides branding.</span></div>
+    <div><span class="k">5</span><span>Click Verify Branding. Minutes to three business days. Result: "Sign in to continue to Letterlock" with our logo. In the mobile apps the native Google sheet shows no domain at all.</span></div>
+  </div>
+</section>
+
+<!-- PURCHASES -->
+<section role="tabpanel" id="p-purchases" aria-labelledby="tab-purchases" hidden>
+  <h2 class="panel-title">How do we know who bought Remove Ads?</h2>
+  <p class="panel-sub"><b>Short answer:</b> the store account (Apple ID on iPhone, Google account on Android) owns the purchase. Our login does not, unless we copy it there ourselves. We do both.</p>
+  <div class="flow">
+    <div><span class="k">1</span><span>Someone taps Remove Ads on an iPhone. Apple charges their Apple ID and records "this Apple ID owns remove_ads". Our account is invisible to Apple and Google.</span></div>
+    <div><span class="k">2</span><span>Same Apple ID, new phone or reinstall: Restore Purchases re-grants it with no login of ours. Apple requires that button. Android re-grants automatically.</span></div>
+    <div><span class="k">3</span><span>An iPhone purchase does not appear on Android, and neither appears on the website. Only our server can bridge them.</span></div>
+    <div><span class="k">4</span><span>Receipts can be faked on a jailbroken phone, so the flag is written only after server-side verification. RevenueCat verifies with Apple or Google and calls our webhook, which sets <code>ads_removed = true</code> on the account in our database.</span></div>
+    <div><span class="k">5</span><span>iPhone, Android and web all read that one flag when signed in. <b>Ads are hidden if either the store says this device owns it, or the signed-in account has the flag.</b></span></div>
+  </div>
+  <h2>The rule set</h2>
+  <div class="tablewrap"><table>
+  <thead><tr><th>Situation</th><th>What happens</th></tr></thead>
+  <tbody>
+  <tr><td>Buys as a guest, signs in later</td><td>The anonymous purchase merges into the account at sign-in; flag set.</td></tr>
+  <tr><td>Second device, different Apple ID or Android</td><td>Store restore fails, but the account flag is true, so no ads. This is the whole point of the flag.</td></tr>
+  <tr><td>Two of our accounts share one Apple ID</td><td>The entitlement transfers to whoever restores last. One account at a time, so one purchase cannot unlock unlimited accounts.</td></tr>
+  <tr><td>Refund or chargeback</td><td>Apple or Google notify RevenueCat, the webhook sets the flag back to false.</td></tr>
+  <tr><td>Family Sharing (iOS only)</td><td>Family devices get it through the store; we do not write the flag to their accounts.</td></tr>
+  <tr><td>User deletes their account</td><td>Flag is gone. Restore Purchases re-creates it on that store account.</td></tr>
+  <tr><td>Buys on web (later)</td><td>Server sets the flag directly; apps honor it when signed in.</td></tr>
+  </tbody></table></div>
+  <h2>What we chose</h2>
+  <div class="tablewrap"><table>
+  <thead><tr><th>Choice</th><th>Picked</th><th>Rejected</th></tr></thead>
+  <tbody>
+  <tr><td>Billing</td><td>Apple In-App Purchase + Google Play Billing (mandatory for digital goods)</td><td>Stripe inside the app (instant rejection)</td></tr>
+  <tr><td>SDK</td><td>RevenueCat: free under $2.5k/mo, does receipt checks, refunds, restore, cross-platform, webhooks</td><td>Free plugins where we host receipt verification, Apple notifications, Google Pub/Sub and reconciliation ourselves</td></tr>
+  <tr><td>Type</td><td>One-time, about $3.99</td><td>Subscription (wrong vibe for a family game)</td></tr>
+  <tr><td>Web</td><td>Flag honored; optional web purchase later via a merchant of record</td><td>Advertising web prices inside the iOS app (Apple 3.1.3 outside the US)</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- ADS -->
+<section role="tabpanel" id="p-ads" aria-labelledby="tab-ads" hidden>
+  <h2 class="panel-title">Ads: what to know</h2>
+  <ul>
+    <li><b>Placement rules are law, not taste.</b> Play forbids interstitials at app open, before a level, mid-action, or on exit. End of a game is the allowed natural break. Rewarded ads are always fine because the user opts in.</li>
+    <li><b>Consent is mandatory</b> in the EU and UK through Google's own consent SDK, and recommended everywhere.</li>
+    <li><b>AdMob approval happens after launch.</b> They check <code>app-ads.txt</code> on our domain and the live listing.</li>
+    <li><b>Money reality.</b> Revenue per 1,000 ad views: interstitial about $10 in the US, $5 in the EU, $1 to $4 in MENA; rewarded $16 to $20 in the US; banners about $1. A party game shows two or three interstitials per half-hour session for a whole room on one device.</li>
+  </ul>
+  <div class="total">
+    <div><div class="big">$10 to $40</div><small>per month at 300 daily players</small></div>
+    <div><div class="big">$100 to $400</div><small>per month at 3,000 daily players</small></div>
+    <div><div class="big">$3.99</div><small>Remove Ads, likely the bigger line early</small></div>
+  </div>
+  <h2>Where ads go</h2>
+  <div class="tablewrap"><table>
+  <thead><tr><th>Format</th><th>Where</th><th>Never</th></tr></thead>
+  <tbody>
+  <tr><td>Interstitial</td><td>Result screen, between games in a best-of series, max 1 per 3 to 5 minutes</td><td>Mid-question, during the timer, at app open, on the host pad, on the phone controller while a question is live</td></tr>
+  <tr><td>Rewarded (opt-in)</td><td>Extra skip, a hint, unlock a category for one match</td><td>Anything that blocks the turn</td></tr>
+  <tr><td>Banner</td><td>Home, Category menu, Settings, Lobby waiting</td><td>The board screen (shared TV screen)</td></tr>
+  <tr><td>Web</td><td>None at launch</td><td></td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- COPYRIGHT -->
+<section role="tabpanel" id="p-copyright" aria-labelledby="tab-copyright" hidden>
+  <h2 class="panel-title">Copyright verdicts</h2>
+  <p class="panel-sub">Ads and a purchase make the app commercial, which changes what we can use.</p>
+  <div class="tablewrap"><table>
+  <thead><tr><th>Content</th><th>Legal</th><th>Store</th><th>Verdict</th></tr></thead>
+  <tbody>
+  <tr><td>Guess the Song (1,624 iTunes previews)</td><td><span class="chip hi">High</span></td><td><span class="chip hi">High</span></td><td><b>Remove from store build.</b> Apple 5.2.5: previews "may not be used for their entertainment value, e.g. the soundtrack to a game". The API terms require showing the track name and a buy link, which would spoil the answer.</td></tr>
+  <tr><td>TV Show and Sitcom clips (296)</td><td><span class="chip hi">High</span></td><td><span class="chip hi">High</span></td><td><b>Remove.</b> TV previews are not even listed as permitted promo content. Convert to text trivia.</td></tr>
+  <tr><td>Melody, iTunes part (~212)</td><td><span class="chip hi">High</span></td><td><span class="chip hi">High</span></td><td><b>Remove.</b></td></tr>
+  <tr><td>Melody, our 23 synthesized public-domain tunes</td><td><span class="chip lo">Low</span></td><td><span class="chip lo">Low</span></td><td><b>Keep, bundle, grow to 200+</b>: classical, folk, anthems, nursery, pre-1930 songs.</td></tr>
+  <tr><td>Logos (~600)</td><td><span class="chip md">Medium</span></td><td><span class="chip md">Medium</span></td><td>Keep with disclaimer, bundle the SVGs, drop the Apple logo, no logos in marketing, removal contact.</td></tr>
+  <tr><td>Flags</td><td><span class="chip lo">Low</span></td><td><span class="chip lo">Low</span></td><td>Bundle everything; Sports pack still hotlinks a flag CDN, switch to local.</td></tr>
+  <tr><td>Charades images (random Flickr)</td><td><span class="chip hi">High</span></td><td><span class="chip md">Medium</span></td><td><b>Drop images, word only.</b> Unmoderated photos in a family game plus licenses we cannot honor.</td></tr>
+  <tr><td>Fandom packs (17, text only)</td><td><span class="chip md">Medium</span></td><td><span class="chip lo">Low</span></td><td>Keep with "Unofficial fan trivia" label, rename Harry Potter and Pokémon packs, franchise names never in store metadata, 48-hour takedown routine.</td></tr>
+  <tr><td>Movies, TV, Music text trivia</td><td><span class="chip lo">Low</span></td><td><span class="chip lo">Low</span></td><td>Keep.</td></tr>
+  </tbody></table></div>
+  <div class="callout warn"><p><b>Why there is no cheaper music path.</b> Spotify removed preview URLs for new apps in 2024. Deezer's API is non-commercial only and stopped issuing tokens. Apple's MusicKit needs every player to hold an Apple Music subscription and forbids indirect monetization. Every surviving music-quiz app either licenses clips (SongPop) or gates behind Apple Music. Licensed clip vendors exist if music packs ever justify the cost.</p></div>
+</section>
+
+<!-- REVIEW -->
+<section role="tabpanel" id="p-review" aria-labelledby="tab-review" hidden>
+  <h2 class="panel-title">"Will Apple ban it for looking AI-made?"</h2>
+  <p class="panel-sub"><b>No.</b> Neither store has any rule about who or what wrote the code, and reviewers never see the source. They judge the product. Here is what actually gets apps rejected, and our answer to each.</p>
+  <div class="tablewrap"><table>
+  <thead><tr><th>Real rejection reason</th><th>Our answer</th></tr></thead>
+  <tbody>
+  <tr><td>4.2 "Repackaged website"</td><td>Bundle the build inside the app, native haptics, share sheet, deep links, native login, offline mode, in-app purchase.</td></tr>
+  <tr><td>4.3 Spam or clone (tightened June 2026)</td><td>Original mechanic, 40k questions, differentiated name, original icon, honest screenshots.</td></tr>
+  <tr><td>2.1 Crashes, blank screens, placeholders, IPv6-only failure</td><td>Offline banner, hostnames only, no test ads, every URL live.</td></tr>
+  <tr><td>2.3 Metadata mismatch</td><td>Screenshots from the real build; dev seams already inert in production.</td></tr>
+  <tr><td>5.1.1 No privacy policy or account deletion</td><td>Phase 1 adds both.</td></tr>
+  <tr><td>4.8 Google login without an equivalent private option</td><td>Sign in with Apple.</td></tr>
+  <tr><td>3.1.1 Digital goods outside in-app purchase</td><td>Native purchases only, no web pricing mentioned in-app.</td></tr>
+  <tr><td>5.2 Intellectual property</td><td>Copyright tab changes.</td></tr>
+  <tr><td>Play: personal account skipped the closed test</td><td>Organization account, or start the 14-day test early.</td></tr>
+  </tbody></table></div>
+  <h2>Native-feel checklist before submitting</h2>
+  <ul>
+    <li>Splash and icon, styled status bar, no browser chrome, no pinch zoom, no text selection on game surfaces, no link previews.</li>
+    <li>Android back button always does something sensible: close modal, exit confirm, go home.</li>
+    <li>Safe areas on notch phones and Android 16 edge-to-edge; landscape phones verified with the existing no-scroll checker.</li>
+    <li>Haptics through the native plugin, native share sheet, in-app purchase, offline path.</li>
+    <li>Privacy policy, support page, in-app account deletion, Sign in with Apple.</li>
+    <li>Honest metadata, screenshots from the real build, age rating, privacy labels, data safety form, 13+ audience.</li>
+    <li>Reviewer notes: demo room code, test account, how to play host and player.</li>
+  </ul>
+</section>
+
+<!-- MONEY -->
+<section role="tabpanel" id="p-money" aria-labelledby="tab-money" hidden>
+  <h2 class="panel-title">Costs, timeline, risks</h2>
+  <h2>Costs</h2>
+  <div class="tablewrap"><table>
+  <thead><tr><th>Item</th><th>Cost</th></tr></thead>
+  <tbody>
+  <tr><td>Apple Developer Program</td><td class="num">$99 per year</td></tr>
+  <tr><td>Google Play Console</td><td class="num">$25 once</td></tr>
+  <tr><td>D-U-N-S number</td><td>Free</td></tr>
+  <tr><td>AdMob, RevenueCat under $2.5k/mo, Sentry, Uptime Kuma, Codemagic 500 min/mo, the open-source backend stack</td><td>Free</td></tr>
+  <tr><td>VPS with 8 GB RAM</td><td>What you pay today, or about $20 to $40/mo if upgraded</td></tr>
+  <tr><td>Offsite backups</td><td class="num">$1 to $2 per month</td></tr>
+  <tr><td>Store cut</td><td>15% of purchases</td></tr>
+  <tr><td>Optional later</td><td>Capgo OTA $12/mo, licensed music clips (quote), Paddle or Lemon Squeezy about 5% + $0.50 per web sale</td></tr>
+  </tbody></table></div>
+
+  <h2>Timeline</h2>
+  <div class="tablewrap"><table>
+  <thead><tr><th>Phase</th><th>Dev days</th><th>Wall-clock</th><th>Depends on</th></tr></thead>
+  <tbody>
+  <tr><td>0 Paperwork</td><td class="num">0.5 + your forms</td><td>1 to 2 weeks</td><td>You</td></tr>
+  <tr><td>1 Store-ready web app</td><td class="num">5</td><td>Weeks 1 to 2</td><td>Nothing, can start now</td></tr>
+  <tr><td>2 Backend to VPS</td><td class="num">3 + cutover</td><td>Weeks 1 to 3</td><td>VPS access</td></tr>
+  <tr><td>3 Capacitor apps</td><td class="num">5</td><td>Weeks 3 to 4</td><td>Phase 1, Apple account</td></tr>
+  <tr><td>4 Ads</td><td class="num">2</td><td>Weeks 4 to 5</td><td>Phase 3, AdMob account</td></tr>
+  <tr><td>5 Remove Ads</td><td class="num">3</td><td>Week 5</td><td>Phase 3, store products</td></tr>
+  <tr><td>6 Submission</td><td class="num">2 + waiting</td><td>Weeks 6 to 8</td><td>Everything above</td></tr>
+  <tr><td>7 Ops</td><td class="num">2</td><td>Week 2 onward</td><td>Phase 2</td></tr>
+  <tr><td><b>Total</b></td><td class="num"><b>~22</b></td><td><b>6 to 8 weeks to live</b></td><td></td></tr>
+  </tbody></table></div>
+
+  <h2>Risks and unverified items</h2>
+  <ul>
+    <li>Apple accepting a Bahraini bank for payouts is unverified. Fallback: a bank in another country or the company's bank.</li>
+    <li>A self-hosted realtime bug can crash broadcast on the default tenant. We test the host + phone lobby before any cutover.</li>
+    <li>Exact "Letterlock" name is taken. Reserve the chosen name as soon as the Apple account exists.</li>
+    <li>Apple universal links with query strings are unreliable, hence <code>/join/CODE</code>.</li>
+    <li>Anti-steering rules in the US and EU keep changing. We never mention web purchases in-app, so changes cannot hurt us.</li>
+    <li>MENA ad rates are low. Remove Ads is the revenue line.</li>
+    <li>No managed backups on the VPS. Backups are the first ops task, before cutover.</li>
+  </ul>
+</section>
+
+<footer>Canonical version with all sources: <code>LAUNCH_PLAN.md</code> in the repo. No code changed yet; decisions D1 to D14 are pending.</footer>
+</div>
+
+<script>
+(function(){
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role=tab]'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('[role=tabpanel]'));
+  function show(name, push){
+    var found = false;
+    tabs.forEach(function(t){
+      var on = t.dataset.tab === name;
+      if(on) found = true;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+    });
+    if(!found){ return show('overview', push); }
+    panels.forEach(function(p){ p.hidden = (p.id !== 'p-' + name); });
+    try{ localStorage.setItem('ll-plan-tab', name); }catch(e){}
+    if(push){ try{ history.replaceState(null, '', '#' + name); }catch(e){} }
+  }
+  tabs.forEach(function(t, i){
+    t.addEventListener('click', function(){ show(t.dataset.tab, true); });
+    t.addEventListener('keydown', function(e){
+      var j = i;
+      if(e.key === 'ArrowRight') j = (i + 1) % tabs.length;
+      else if(e.key === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length;
+      else if(e.key === 'Home') j = 0;
+      else if(e.key === 'End') j = tabs.length - 1;
+      else return;
+      e.preventDefault(); tabs[j].focus(); show(tabs[j].dataset.tab, true);
+    });
+  });
+  // phase rail links: open the phase and scroll to it
+  document.querySelectorAll('.rail a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      var d = document.querySelector(a.getAttribute('href'));
+      if(d){ d.open = true; d.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
+  var initial = (location.hash || '').replace('#','');
+  if(initial && /^ph\d$/.test(initial)){ show('phases', false); var d = document.getElementById(initial); if(d){ d.open = true; } }
+  else if(initial){ show(initial, false); }
+  else { var saved = null; try{ saved = localStorage.getItem('ll-plan-tab'); }catch(e){} show(saved || 'overview', false); }
+})();
+</script>
