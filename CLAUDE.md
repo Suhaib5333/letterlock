@@ -527,6 +527,16 @@ tokens: content authored by a cheap model passed every scriptable gate and was 6
 factually wrong, so all ten of those packs were deleted. Never author content with a cheap
 model.
 
+## 🚀 Store launch, ads, purchases, VPS migration: see `LAUNCH_PLAN.md`
+
+The App Store + Play Store launch has its own living doc, **`LAUNCH_PLAN.md`** (2026-09-03):
+Capacitor wrapper, self-hosted Supabase on the VPS (also fixes the "xxxx.supabase.co" Google
+consent text), AdMob ads, the RevenueCat "Remove Ads" purchase and how entitlements follow the
+login (not just the Apple ID), the copyright verdicts (iTunes song/TV previews cannot ship in a
+store build), the store-blocker list (account deletion, privacy/terms, Sign in with Apple), the
+phase plan with ETAs, costs, and the open decisions D1-D13. **Read it before touching any of
+those topics, and update its change log when you do.**
+
 ## 🧩 Repo conventions for the new project (set these up day one)
 - Mirror this file as `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`. Keep it a **living document**.
 - Commit messages: **no AI attribution** (Suhaib-authored only).

@@ -5,6 +5,7 @@ to use them, and the standing rules — so you don't need fresh instructions eac
 Companion docs: `TECH.md` (the "everything" reference — every technology, decision, media source &
 change log), `CLAUDE.md` (full plan + build log), `QUESTION_AUTHORING.md` (content rules),
 `DEFERRED.md` (blocked work + what unblocks it), `HANDOFF.md` (quick orientation).
+**`LAUNCH_PLAN.md`** = the App Store / Play Store launch plan (Capacitor, VPS migration, ads, Remove-Ads purchase, copyright verdicts): read it before any store/monetization/VPS work.
 
 ---
 
