@@ -1,14 +1,14 @@
 // Renders docs/launch-plan/index.html (the tabbed launch plan) to a shareable A4 PDF.
 // Usage: node docs/launch-plan/pdf.mjs [out.pdf]   (default: Letterlock-Launch-Plan.pdf on the Desktop)
 import { chromium } from 'playwright';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 import os from 'node:os';
-const S = path.dirname(fileURLToPath(import.meta.url)).replace(/\/g, '/');
+const S = path.dirname(fileURLToPath(import.meta.url));
 const OUT = process.argv[2] || path.join(os.homedir(), 'Desktop', 'Letterlock-Launch-Plan.pdf');
 const b = await chromium.launch();
 const p = await b.newPage({ viewport: { width: 794, height: 1123 } });
-await p.goto('file:///' + S + '/index.html');
+await p.goto(pathToFileURL(path.join(S, 'index.html')).href);
 await p.addStyleTag({ content: `
   :root{color-scheme:light}
   html,body{background:#fff !important}
