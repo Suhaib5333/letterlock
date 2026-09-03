@@ -13,7 +13,7 @@
 ## 0. 🍬 The whole plan in 12 lines
 
 1. **Wrap, don't rewrite.** The React app ships inside a Capacitor 8 shell. One codebase = web + iOS + Android.
-2. **Backend moves to our VPS** as a self-hosted Supabase (Docker). Zero app-code rewrite, only the URL changes. Web and apps share one database, so accounts, leaderboards, saves and "ads removed" are identical everywhere.
+2. **Backend leaves Supabase cloud and runs on our VPS.** We run the open-source server software ourselves (Postgres, auth, API, realtime) in Docker: no Supabase account, no bill, no supabase.co anywhere. Zero app-code rewrite, only the URL changes. Web and apps share one database, so accounts, leaderboards, saves and "ads removed" are identical everywhere. See §2b for what "off Supabase" means exactly and decision D14.
 3. **That same move fixes the Google login text.** The consent screen shows the *callback domain*. Ours becomes `api.letterlock.raltech.dev`, then we verify the brand so it reads "Letterlock".
 4. **Ads = Google AdMob.** Interstitial only between games, rewarded ads for an extra skip/hint, banner only on menus. Never during a question.
 5. **Remove Ads = one non-consumable purchase (~$3.99)** through Apple/Google billing via RevenueCat, mirrored to a `profiles.ads_removed` flag so it follows the *login*, not just the phone.
@@ -67,6 +67,25 @@ Recommendation is listed first. Say "go with the recommendations" and the plan p
 | D11 | **Fandom packs** | Keep as text trivia, label "Unofficial fan trivia, not affiliated", rename the Harry Potter and Pokémon packs to descriptive titles, never in store metadata | Those two rights-holders are the most aggressive. Facts are not copyrightable. |
 | D12 | **Web ads (AdSense)** | **Skip at launch**; honor `ads_removed` on web anyway | AdSense rejects thin-text game pages; a rejection can complicate later approval. |
 | D13 | **Web Remove-Ads purchase** | Optional, later, via a merchant-of-record (Paddle / Lemon Squeezy) | They handle VAT. Never mention web pricing inside the iOS/Android app (Apple 3.1.3 outside the US). |
+| D14 | **What runs on the VPS** | **Option A: run the open-source Supabase server stack ourselves** (no Supabase account, no bill, our domain). ~3 days, zero app rewrite. | Option B is a fully custom backend (own Node API, own auth, own websockets, port ~30 database functions): 4-6 extra weeks for the same user-facing result. The database is plain Postgres either way, so B stays possible later. See §2b. |
+
+### 2b. 🧾 "Off Supabase" means exactly this
+
+Suhaib's standing instruction: **we are migrating off Supabase.** Precisely:
+
+| | Today | After the move |
+|---|---|---|
+| Where the data lives | Supabase's servers (their cloud project) | **Our VPS**, plain Postgres in Docker |
+| Supabase account / bill | Yes | **None.** Project deleted after cutover. |
+| Domain users see | `lkudntyvngwwlzuciocd.supabase.co` | `api.letterlock.raltech.dev` |
+| Who can switch it off | Supabase | Only us |
+| Server software | Supabase's hosted stack | **A:** the same open-source stack, run by us (recommended). **B:** our own custom code. |
+| App code changes | | A: the URL and key. B: rewrite auth, ~30 data calls, realtime sync, leaderboards. |
+
+Either way, Supabase-the-company disappears from the picture. The only choice (D14) is whether we
+reuse their free open-source server software (A) or write our own (B). Wherever this doc says
+"the backend on the VPS" or "self-hosted stack", it means Option A unless Suhaib picks B. Do not
+describe the end state as "on Supabase"; describe it as "on our VPS".
 
 ---
 
@@ -106,13 +125,13 @@ Everything here ships to the website too, so it is useful even before the apps e
 | **`app-ads.txt`** placeholder | `public/app-ads.txt` (AdMob gives the exact line) | AdMob requires it since Jan 2025 |
 | Tests | e2e for account deletion, Apple button present, `/join/CODE`, offline banner; noscroll matrix unchanged | Testing mandate |
 
-### Phase 2: Off Supabase cloud, onto the VPS (~3 dev days + a cutover evening)
+### Phase 2: Backend off Supabase cloud, onto the VPS (~3 dev days + a cutover evening)
 
-**Answer to "will this continue for our app?" Yes.** The apps and the website all talk to `https://api.letterlock.raltech.dev`. Same database, same accounts, same leaderboards, same saved games, same `ads_removed` flag. Nothing in the app is Supabase-cloud-specific.
+**Answer to "will this continue for our app?" Yes.** The apps and the website all talk to `https://api.letterlock.raltech.dev`. Same database, same accounts, same leaderboards, same saved games, same `ads_removed` flag. Nothing in the app depends on Supabase cloud, and after cutover no Supabase account exists (§2b).
 
 | Step | Detail |
 |---|---|
-| Install self-hosted Supabase | Official Docker Compose (Postgres 17, Envoy gateway, Auth, PostgREST, Realtime, Edge Runtime, Studio). **Remove** Storage, imgproxy, Logflare/analytics, Vector to save ~1.5 GB RAM. |
+| Install the open-source backend stack (Option A) | Official Docker Compose (Postgres 17, Envoy gateway, Auth, PostgREST, Realtime, Edge Runtime, Studio). **Remove** Storage, imgproxy, Logflare/analytics, Vector to save ~1.5 GB RAM. |
 | Secrets | `generate-keys.sh`: JWT secret, anon + service keys, Postgres password, dashboard password. Store in a password manager, never in git. |
 | Domains + TLS | `api.letterlock.raltech.dev` → nginx → gateway :8000. WebSocket upgrade headers + long `proxy_read_timeout` on `/realtime/v1/`. Studio only behind basic auth or Tailscale. Firewall: 22/80/443 only. Add an AAAA (IPv6) record. |
 | Auth config | `SITE_URL=https://letterlock.raltech.dev`, `GOTRUE_URI_ALLOW_LIST` (web + `/join/*` + app deep link), `GOTRUE_EXTERNAL_GOOGLE_*` with new callback `https://api.letterlock.raltech.dev/auth/v1/callback` (add it in Google Cloud Console), `GOTRUE_EXTERNAL_APPLE_*`, **SMTP = Resend SMTP** (`smtp.resend.com`) so built-in auth mails work too. |
@@ -378,3 +397,4 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 ## 15. 📝 Change log for this plan
 
 - 2026-09-03: created after the research sweep. No code changed yet. Awaiting decisions D1-D13 (recommendations given).
+- 2026-09-03 (later): Suhaib confirmed "we will migrate off Supabase": added §2b (what off-Supabase means, no Supabase account after cutover) + D14 (open-source stack self-run vs. custom backend). Readable artifact rebuilt as a tabbed page.
