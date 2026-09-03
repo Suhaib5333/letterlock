@@ -10,7 +10,7 @@
 
 ---
 
-## 0. 🍬 The whole plan in 12 lines
+## 0. 🍬 The whole plan in 13 lines
 
 1. **Wrap, don't rewrite.** The React app ships inside a Capacitor 8 shell. One codebase = web + iOS + Android.
 2. **Backend leaves Supabase cloud and runs on our VPS.** We run the open-source server software ourselves (Postgres, auth, API, realtime) in Docker: no Supabase account, no bill, no supabase.co anywhere. Zero app-code rewrite, only the URL changes. Web and apps share one database, so accounts, leaderboards, saves and "ads removed" are identical everywhere. See §2b for what "off Supabase" means exactly and decision D14.
@@ -24,8 +24,9 @@
 10. **Paperwork first:** Apple Developer ($99/yr), Google Play ($25 once), AdMob, RevenueCat, a differentiated store name (exact "Letterlock" is already used by other apps).
 11. **Ops we must add:** backups, uptime monitoring, crash reporting, a version gate, `app-ads.txt`.
 12. **Realistic money:** ads earn tens of dollars a month at hundreds of daily players. The $3.99 purchase will likely out-earn ads early. Do it for reach and polish, not for quick revenue.
+13. **Mobile and TV are first-class targets.** A full mobile experience rehaul (portrait + landscape, no browser bar: native app, PWA standalone, fullscreen) built with the `frontend-stack` pipeline before submission, plus an **Android TV / Google TV** build controlled with the remote (D-pad focus, on-screen keyboard on inputs, 10-foot UI). See §3 Phases 1b and 3b and §16.
 
-**Total effort: ~22 dev days of code + ~6-8 weeks wall-clock** (store reviews, Play's 14-day closed test, AdMob approval). Detail in §12.
+**Total effort: ~33 dev days of code + ~8-10 weeks wall-clock** (store reviews, Play's 14-day closed test, AdMob approval, TV review). Detail in §12.
 
 ---
 
@@ -68,6 +69,8 @@ Recommendation is listed first. Say "go with the recommendations" and the plan p
 | D12 | **Web ads (AdSense)** | **Skip at launch**; honor `ads_removed` on web anyway | AdSense rejects thin-text game pages; a rejection can complicate later approval. |
 | D13 | **Web Remove-Ads purchase** | Optional, later, via a merchant-of-record (Paddle / Lemon Squeezy) | They handle VAT. Never mention web pricing inside the iOS/Android app (Apple 3.1.3 outside the US). |
 | D14 | **What runs on the VPS** | **Option A: run the open-source Supabase server stack ourselves** (no Supabase account, no bill, our domain). ~3 days, zero app rewrite. | Option B is a fully custom backend (own Node API, own auth, own websockets, port ~30 database functions): 4-6 extra weeks for the same user-facing result. The database is plain Postgres either way, so B stays possible later. See §2b. |
+| D15 | **TV scope at launch** | **Android TV / Google TV only** (Sony, Philips, TCL, Hisense, Xiaomi, Chromecast, Nvidia Shield) via the same Android project. LG (webOS) and Samsung (Tizen) later as HTML5 TV apps; Apple TV not feasible with web tech. | LG and Samsung TVs have no Play Store. Their stores accept HTML5 apps, so our web build can be packaged for them later. Apple TV has no web view at all. |
+| D16 | **Mobile rehaul before submission** | **Yes**, Phase 1b runs before the store builds, using the `frontend-stack` skill pipeline (style pick, taste floor, guidelines review, Playwright device-matrix verify). | Store screenshots and first reviews are made from the mobile UI. Shipping the current mobile experience and fixing later burns the launch. |
 
 ### 2b. 🧾 "Off Supabase" means exactly this
 
@@ -125,6 +128,24 @@ Everything here ships to the website too, so it is useful even before the apps e
 | **`app-ads.txt`** placeholder | `public/app-ads.txt` (AdMob gives the exact line) | AdMob requires it since Jan 2025 |
 | Tests | e2e for account deletion, Apple button present, `/join/CODE`, offline banner; noscroll matrix unchanged | Testing mandate |
 
+### Phase 1b: Mobile experience rehaul, portrait + landscape (~6 dev days, `frontend-stack` pipeline)
+
+Suhaib's report: playing on a phone is not great, and in the browser the URL bar eats the screen
+in portrait **and** landscape. This phase is a full optimization / revamp / rehaul of the mobile
+experience, run through the **`frontend-stack` skill** (style pick, taste floor, guidelines review,
+Playwright verify on the device matrix), before any store screenshot is taken.
+
+| Problem | Fix |
+|---|---|
+| Browser URL bar steals space (portrait and landscape) | Three layers, all shipped: **(1) the native app has no browser chrome at all** (the real fix); **(2) PWA standalone**: an in-app "Add to Home Screen" prompt (iOS Safari share-sheet steps, Android install prompt) so the web version opens full-screen with no bar today; **(3) in-browser**: a "⛶ Fullscreen" button on the board screen using the Fullscreen API on Android Chrome (iPhone Safari does not allow it, so iPhone gets the PWA route), `100dvh`-aware layout so the bar collapsing/expanding never shifts the board. |
+| Landscape is cramped | Landscape-first host layout: board left at max height, question + host pad right as one column, header collapses to a slim strip, timer becomes a thin top bar. Phone controller locks to portrait (`screen-orientation` plugin in the app, CSS in browser). |
+| Touch targets and thumb reach | Every tappable ≥ 44 pt; host pad and controller answer button anchored to the bottom thumb zone; destructive actions (exit, undo) moved away from the primary thumb path. |
+| Small text at arm's length | Type scale re-tuned per breakpoint; question text ≥ 18 px on phones; hex letters scale with the board. |
+| Screen dims / locks mid-match | Keep-awake during a match (`@capacitor-community/keep-awake` in the app, Wake Lock API in Chrome). |
+| Audio on mobile | Audio unlock on first tap (exists), duck for clips (exists), respect the silent switch on iOS in the app. |
+| Low-end Android jank | Motion budget: claim animation + trace stay, ambient particles reduced on `saveData` / low-memory devices; measure with Playwright CPU throttling. |
+| Verification | `scripts/noscroll.mjs` matrix (17 devices, incl. landscape phones) stays the gate, plus before/after screenshots per screen per orientation, plus a real-device pass on an iPhone and a mid-range Android. |
+
 ### Phase 2: Backend off Supabase cloud, onto the VPS (~3 dev days + a cutover evening)
 
 **Answer to "will this continue for our app?" Yes.** The apps and the website all talk to `https://api.letterlock.raltech.dev`. Same database, same accounts, same leaderboards, same saved games, same `ads_removed` flag. Nothing in the app depends on Supabase cloud, and after cutover no Supabase account exists (§2b).
@@ -156,6 +177,25 @@ Everything here ships to the website too, so it is useful even before the apps e
 | CI builds | **Codemagic** (500 free macOS minutes/month) with `codemagic.yaml`: iOS signing via App Store Connect API key → TestFlight; Android AAB → Play internal track. Ionic Appflow is shutting down (do not use). |
 | Versioning | One semver for the web bundle; a separate native version bumped only when native code/plugins change. Every app release = same commit as the web release. |
 | Tests | Playwright still drives the web build (same DOM). Add a device pass on a real iPhone + Android for audio, video fullscreen, deep link, back button, offline. |
+
+### Phase 3b: TV support, Android TV / Google TV, controlled with the remote (~5 dev days)
+
+**Which TVs have the Play Store:** Android TV / Google TV sets: **Sony, Philips (TP Vision models
+sold in Europe, Middle East, Asia), TCL, Hisense (most), Sharp, Xiaomi, Nvidia Shield, Chromecast
+with Google TV, onn.** **Not:** LG (webOS, LG Content Store), Samsung (Tizen, Samsung TV Apps),
+Roku TVs, Apple TV. LG and Samsung both accept HTML5 apps in their own stores, so the same web
+build can be packaged for them later (§16). Apple TV has no web view, so it is out; AirPlay
+mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work for the board screen.
+
+| Area | What we do |
+|---|---|
+| Play Store TV listing | Same Android project, TV-enabled: `LEANBACK_LAUNCHER` intent filter, `android.software.leanback` (required=false) + `android.hardware.touchscreen` (required=false) so one app serves phones, tablets and TVs; 320×180 TV banner; 1920×1080 TV screenshots; opt into the Android TV track (separate TV review against the Android TV quality checklist: D-pad navigable, focus always visible, no touch-only paths, no portrait, Back behaves). |
+| Remote control (D-pad) | The TV remote arrives in the WebView as keyboard events (Arrow keys, Enter, Back). Add a **spatial focus manager**: arrows move focus to the nearest focusable control in that direction, Enter activates, Back closes the top-most modal or asks to exit. The hex board already supports keyboard play: arrows move a cursor across hexes, Enter picks. Roving `tabindex`, one focus ring style that is big and high-contrast. Ponytail rung: a small nearest-rectangle function first; a spatial-navigation library only if it falls short. |
+| Text and numbers on TV | Focusing an `<input>` on Android TV opens the system on-screen keyboard automatically; Enter submits, Back dismisses. We keep TV inputs to the minimum (room code, username) and add a big on-screen **number pad** for the room code as a remote-friendly alternative. Never rely on hover. |
+| 10-foot UI | Body text ≥ 24 sp, headings ≥ 48 sp, 5 % overscan margin (TV safe area, already planned), high-contrast palette (blue/amber already TV-safe), no small chips, no scroll-only lists: everything reachable by focus. Ads: banner off on TV, interstitials still between games only. |
+| Roles on a TV | (a) TV as the **shared board** while phones are controllers (the Phase-2 model, best experience); (b) TV alone with the remote in host-adjudicated mode. Both must work with remote only. |
+| Audio | A remote press counts as the user gesture for audio unlock. |
+| Testing | Android TV emulator (1080p) in Android Studio for the real remote path; Playwright at 1920×1080 with **keyboard-only navigation** as a permanent e2e ("TV mode": no mouse, no touch, every screen completable with arrows + Enter + Escape); the noscroll matrix already has TV 1080p and 4K profiles. |
 
 ### Phase 4: Ads (~2 dev days + AdMob approval 1-2 weeks after store launch)
 
@@ -345,13 +385,15 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 |---|---|---|---|
 | 0 Paperwork | 0.5 (me) + forms (you) | 1-2 weeks (D-U-N-S, Apple enrollment) | you |
 | 1 Store-readiness in web app | 5 | week 1-2 | nothing, start now |
+| 1b Mobile experience rehaul (`frontend-stack`) | 6 | week 2-3 | Phase 1 |
 | 2 Supabase → VPS | 3 + cutover | week 1-3 | VPS access (D8) |
-| 3 Capacitor apps | 5 | week 3-4 | Phase 1, Apple account for signing |
-| 4 Ads | 2 | week 4-5 | Phase 3, AdMob account |
-| 5 Remove Ads | 3 | week 5 | Phase 3, store products created |
-| 6 Submission | 2 + waiting | week 6-8 | all above; Play closed test 14 days if personal account |
+| 3 Capacitor apps | 5 | week 4-5 | Phases 1, 1b, Apple account for signing |
+| 3b TV support (Android TV / Google TV, remote) | 5 | week 5-6 | Phase 3 |
+| 4 Ads | 2 | week 6 | Phase 3, AdMob account |
+| 5 Remove Ads | 3 | week 6-7 | Phase 3, store products created |
+| 6 Submission | 2 + waiting | week 7-10 | all above; Play closed test 14 days if personal account; TV track review |
 | 7 Ops | 2 | week 2 onward (backups first) | Phase 2 |
-| **Total** | **~22 dev days** | **~6-8 weeks to live** | |
+| **Total** | **~33 dev days** | **~8-10 weeks to live** | |
 
 ---
 
@@ -397,9 +439,16 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 ## 15. 📄 Shareable versions
 
 - `docs/launch-plan/index.html`: the tabbed, plain-words version of this doc (also published as a Claude artifact).
-- `node docs/launch-plan/pdf.mjs`: renders it to an A4 PDF (default output: `Letterlock-Launch-Plan.pdf` on the Desktop) for WhatsApp / email. Regenerate after editing the HTML; keep the HTML in step with this file.
+- `docs/launch-plan/Letterlock-Launch-Plan.pdf`: the A4 PDF for WhatsApp / email (kept in the repo, not on the Desktop). Regenerate with `node docs/launch-plan/pdf.mjs` after editing the HTML; keep the HTML in step with this file.
 
-## 16. 📝 Change log for this plan
+## 16. 📺 TV platforms: Future TODO
+
+- **LG webOS** and **Samsung Tizen**: both stores accept HTML5 apps, so package the same web build (webOS: `appinfo.json` + ares CLI; Tizen: `config.xml` + Tizen Studio). Remote handling is the same key-event model as Android TV. Do after the Android TV build proves the 10-foot UI.
+- **Amazon Fire TV**: Android-based; the Android TV build can be submitted to the Amazon Appstore with minor changes.
+- **Apple TV**: no web view, no Capacitor. Not planned. AirPlay mirroring covers it.
+
+## 17. 📝 Change log for this plan
 
 - 2026-09-03: created after the research sweep. No code changed yet. Awaiting decisions D1-D13 (recommendations given).
 - 2026-09-03 (later): Suhaib confirmed "we will migrate off Supabase": added §2b (what off-Supabase means, no Supabase account after cutover) + D14 (open-source stack self-run vs. custom backend). Readable artifact rebuilt as a tabbed page; HTML + PDF generator committed under `docs/launch-plan/`.
+- 2026-09-03 (later): added Phase 1b (mobile experience rehaul, portrait + landscape, URL-bar problem, via `frontend-stack`) and Phase 3b (Android TV / Google TV with remote control), decisions D15-D16, §16 TV platforms; totals now ~33 dev days / 8-10 weeks. PDF now lives in the repo.

@@ -1,11 +1,10 @@
 // Renders docs/launch-plan/index.html (the tabbed launch plan) to a shareable A4 PDF.
-// Usage: node docs/launch-plan/pdf.mjs [out.pdf]   (default: Letterlock-Launch-Plan.pdf on the Desktop)
+// Usage: node docs/launch-plan/pdf.mjs [out.pdf]   (default: docs/launch-plan/Letterlock-Launch-Plan.pdf)
 import { chromium } from 'playwright';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
-import os from 'node:os';
 const S = path.dirname(fileURLToPath(import.meta.url));
-const OUT = process.argv[2] || path.join(os.homedir(), 'Desktop', 'Letterlock-Launch-Plan.pdf');
+const OUT = process.argv[2] || path.join(S, 'Letterlock-Launch-Plan.pdf');
 const b = await chromium.launch();
 const p = await b.newPage({ viewport: { width: 794, height: 1123 } });
 await p.goto(pathToFileURL(path.join(S, 'index.html')).href);
@@ -22,8 +21,9 @@ await p.addStyleTag({ content: `
   h3{break-after:avoid}
   .panel-sub, h2 + p, .panel-title + p{break-after:avoid}
   .panel-title, h2{break-inside:avoid}
-  #p-decisions, #p-phases, #p-copyright, #p-review, #p-purchases{break-before:page;margin-top:0;padding-top:0;border-top:0}
+  #p-decisions, #p-copyright, #p-review, #p-purchases, #p-mobiletv, #p-backend{break-before:page;margin-top:0;padding-top:0;border-top:0}
   .flow, .tablewrap, .rail, .total{break-before:avoid}
+  #p-decisions .tablewrap{break-inside:auto}
   .lede{font-size:14px}
   details.phase summary .arrow{display:none}
   details.phase summary{cursor:default}

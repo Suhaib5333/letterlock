@@ -81,12 +81,12 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:
 .callout p{max-width:none}
 .callout p:last-child{margin:0}
 
-.rail{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:0 0 22px}
+.rail{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:0 0 22px}
 .rail a{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 8px;font-size:12px;line-height:1.35;color:var(--ink-2);display:grid;gap:4px;text-decoration:none}
 .rail a:hover{border-color:var(--blue)}
 .rail a b{color:var(--ink);font-weight:600;display:block}
 .rail a small{color:var(--ink-3);font-variant-numeric:tabular-nums}
-@media (max-width:720px){.rail{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:720px){.rail{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:420px){.rail{grid-template-columns:repeat(2,1fr)}}
 
 details.phase{background:var(--surface);border:1px solid var(--line);border-radius:6px;margin:0 0 10px}
@@ -137,7 +137,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <div class="eyebrow">Letterlock · Store launch plan · 3 Sep 2026</div>
   <h1>From web game to <span>App Store and Play Store</span>, on our own VPS</h1>
   <p class="lede">The plain-words version of <code>LAUNCH_PLAN.md</code>. Pick a tab.</p>
-  <div class="meta"><span><b>~22</b> dev days</span><span><b>6 to 8</b> weeks to live</span><span><b>14</b> decisions waiting on you</span><span><b>7</b> phases</span></div>
+  <div class="meta"><span><b>~33</b> dev days</span><span><b>8 to 10</b> weeks to live</span><span><b>16</b> decisions waiting on you</span><span><b>9</b> phases</span></div>
 </header>
 
 <nav class="tabs" aria-label="Plan sections">
@@ -145,6 +145,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     <button role="tab" id="tab-overview" aria-controls="p-overview" aria-selected="true" data-tab="overview">Overview</button>
     <button role="tab" id="tab-decisions" aria-controls="p-decisions" aria-selected="false" tabindex="-1" data-tab="decisions">Your decisions</button>
     <button role="tab" id="tab-phases" aria-controls="p-phases" aria-selected="false" tabindex="-1" data-tab="phases">Phases</button>
+    <button role="tab" id="tab-mobiletv" aria-controls="p-mobiletv" aria-selected="false" tabindex="-1" data-tab="mobiletv">Mobile &amp; TV</button>
     <button role="tab" id="tab-backend" aria-controls="p-backend" aria-selected="false" tabindex="-1" data-tab="backend">Off Supabase</button>
     <button role="tab" id="tab-purchases" aria-controls="p-purchases" aria-selected="false" tabindex="-1" data-tab="purchases">Remove Ads</button>
     <button role="tab" id="tab-ads" aria-controls="p-ads" aria-selected="false" tabindex="-1" data-tab="ads">Ads</button>
@@ -156,7 +157,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
 <!-- OVERVIEW -->
 <section role="tabpanel" id="p-overview" aria-labelledby="tab-overview">
-  <h2 class="panel-title">The whole plan in 12 lines</h2>
+  <h2 class="panel-title">The whole plan in 13 lines</h2>
   <ol class="tl">
     <li><span><b>Wrap, don't rewrite.</b> The React app ships inside a Capacitor shell. One codebase for web, iOS and Android.</span></li>
     <li><span><b>Backend leaves Supabase cloud and runs on our VPS.</b> We run the open-source server software ourselves (Postgres, auth, API, realtime). No Supabase account, no bill, no supabase.co anywhere. Only the URL changes in the app. Web and apps share one database. See the "Off Supabase" tab.</span></li>
@@ -170,6 +171,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     <li><span><b>Paperwork first:</b> Apple Developer ($99/yr), Google Play ($25 once), AdMob, RevenueCat, and a differentiated store name because exact "Letterlock" is already taken.</span></li>
     <li><span><b>Ops we must add:</b> backups, uptime monitoring, crash reporting, a version gate, <code>app-ads.txt</code>.</span></li>
     <li><span><b>Realistic money:</b> ads earn tens of dollars a month at hundreds of daily players. The $3.99 purchase will likely out-earn ads early. Do it for reach and polish, not quick revenue.</span></li>
+    <li><span><b>Mobile and TV are first-class targets.</b> A full mobile experience rehaul (portrait and landscape, no browser bar) built with the frontend-stack pipeline before submission, plus an Android TV / Google TV build controlled with the remote. See the "Mobile &amp; TV" tab.</span></li>
   </ol>
 
   <h2>Where we actually are today</h2>
@@ -209,22 +211,26 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <tr><td>D11</td><td>Fandom packs</td><td>Keep as text, label "Unofficial fan trivia", rename the Harry Potter and Pokémon packs, never in store metadata</td><td>Those two rights-holders are the most aggressive. Facts are not copyrightable.</td></tr>
   <tr><td>D12</td><td>Web ads</td><td><b>Skip at launch</b></td><td>AdSense rejects thin-text game pages; a rejection complicates later approval.</td></tr>
   <tr><td>D13</td><td>Web Remove-Ads purchase</td><td>Optional, later, via Paddle or Lemon Squeezy</td><td>They handle VAT. Never mention web pricing inside the apps.</td></tr>
+  <tr><td>D15</td><td>TV scope at launch</td><td><b>Android TV / Google TV only</b> (Sony, Philips, TCL, Hisense, Xiaomi, Chromecast, Nvidia Shield), same Android project. LG and Samsung later as HTML5 TV apps. Apple TV not feasible.</td><td>LG (webOS) and Samsung (Tizen) have no Play Store but accept HTML5 apps, so our web build can be packaged for them later. Apple TV has no web view at all.</td></tr>
+  <tr><td>D16</td><td>Mobile rehaul before submission</td><td><b>Yes</b>, Phase 1b runs before the store builds, through the frontend-stack pipeline (style pick, taste floor, guidelines review, Playwright device-matrix verify).</td><td>Store screenshots and first reviews come from the mobile UI. Shipping the current mobile experience and fixing later burns the launch.</td></tr>
   <tr><td>D14</td><td><b>What runs on the VPS</b></td><td><b>Option A:</b> run the open-source Supabase server stack ourselves (no Supabase account, no bill, our domain). ~3 days, zero app rewrite.</td><td><b>Option B</b> is a fully custom backend (own API, own auth, own websockets): 4 to 6 weeks of rewrite for the same result. The database is plain Postgres either way, so B stays possible later. See the "Off Supabase" tab.</td></tr>
   </tbody></table></div>
 </section>
 
 <!-- PHASES -->
 <section role="tabpanel" id="p-phases" aria-labelledby="tab-phases" hidden>
-  <h2 class="panel-title">The seven phases</h2>
+  <h2 class="panel-title">The nine phases</h2>
   <p class="panel-sub">Phases 1 and 2 run in parallel. Phase 0 starts today because it is mostly waiting. Click a phase to open it.</p>
   <div class="rail">
     <a href="#ph0"><b>0 Paperwork</b><small>1 to 2 weeks wait</small></a>
     <a href="#ph1"><b>1 Store-ready web</b><small>5 days</small></a>
+    <a href="#ph1b"><b>1b Mobile rehaul</b><small>6 days</small></a>
     <a href="#ph2"><b>2 Backend to VPS</b><small>3 days + cutover</small></a>
     <a href="#ph3"><b>3 Capacitor apps</b><small>5 days</small></a>
+    <a href="#ph3b"><b>3b TV support</b><small>5 days</small></a>
     <a href="#ph4"><b>4 Ads</b><small>2 days</small></a>
     <a href="#ph5"><b>5 Remove Ads</b><small>3 days</small></a>
-    <a href="#ph6"><b>6 Submission</b><small>2 days + 2 to 4 weeks</small></a>
+    <a href="#ph6"><b>6 Submission</b><small>2 days + 3 to 4 weeks</small></a>
     <a href="#ph7"><b>7 Ops</b><small>2 days, ongoing</small></a>
   </div>
 
@@ -264,6 +270,20 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     </div>
   </details>
 
+  <details class="phase" id="ph1b">
+    <summary><span class="hex">1b</span><h3>Mobile experience rehaul, portrait and landscape</h3><span class="eta">6 dev days · frontend-stack</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <p>Playing on a phone is not great today, and in the browser the URL bar eats the screen in both orientations. This is a full optimization and rehaul of the mobile experience, run through the frontend-stack pipeline before any store screenshot is taken. Details in the "Mobile &amp; TV" section.</p>
+      <ul>
+        <li>URL bar: the native app has none; the web version gets an "Add to Home Screen" prompt (full-screen PWA) and a Fullscreen button on Android Chrome; layout never shifts when the bar collapses.</li>
+        <li>Landscape-first host layout: board left at max height, question and host pad right; slim header; thin timer bar. The phone controller locks to portrait.</li>
+        <li>Touch targets at least 44 pt, primary actions in the thumb zone, destructive actions out of the way, type scale re-tuned per breakpoint.</li>
+        <li>Keep the screen awake during a match; audio and motion tuned for low-end Android.</li>
+        <li>Verified with the 17-device no-scroll matrix, before/after screenshots per orientation, and a real iPhone plus a mid-range Android.</li>
+      </ul>
+    </div>
+  </details>
+
   <details class="phase" id="ph2">
     <summary><span class="hex">2</span><h3>Backend off Supabase cloud, onto the VPS</h3><span class="eta">3 dev days + a cutover evening</span><span class="arrow">▸</span></summary>
     <div class="body">
@@ -291,6 +311,20 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
         <li>Deep links: association files on our domain so QR codes open the app if installed, the website otherwise.</li>
         <li>Mirror saves and settings into native preferences (iOS can evict web storage). Handle inline video, first-tap audio unlock, no pinch zoom, Android 16 edge-to-edge.</li>
         <li>iOS builds on Codemagic (500 free macOS minutes a month) straight to TestFlight; Android bundles to the Play internal track. No Mac needed.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="phase" id="ph3b">
+    <summary><span class="hex">3b</span><h3>TV support: Android TV / Google TV with the remote</h3><span class="eta">5 dev days</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <ul>
+        <li>Same Android project, TV-enabled: leanback launcher entry, touchscreen not required, 320×180 TV banner, 1080p TV screenshots, Android TV track review (D-pad navigable, focus always visible, no touch-only paths).</li>
+        <li>Remote control: arrows move focus to the nearest control, Enter activates, Back closes the top modal. Arrow keys already move a cursor across the hex board.</li>
+        <li>Text and numbers: focusing a field on Android TV opens the system on-screen keyboard; we keep TV inputs minimal (room code, username) and add a big remote-friendly number pad for room codes.</li>
+        <li>10-foot UI: big type, 5% overscan margin, high contrast, nothing reachable only by hover or scroll. No banner ads on TV.</li>
+        <li>Works as the shared board with phones as controllers, or alone with the remote in host-adjudicated mode.</li>
+        <li>Tested on the Android TV emulator and with a permanent keyboard-only Playwright run at 1920×1080.</li>
       </ul>
     </div>
   </details>
@@ -341,6 +375,51 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       </div>
     </div>
   </details>
+</section>
+
+<!-- MOBILE + TV -->
+<section role="tabpanel" id="p-mobiletv" aria-labelledby="tab-mobiletv" hidden>
+  <h2 class="panel-title">Mobile and TV: first-class targets</h2>
+  <p class="panel-sub">Two additions to the plan: a full rehaul of the phone experience in both orientations, and a TV build you control with the remote.</p>
+
+  <h2>Mobile: the problems and the fixes</h2>
+  <div class="tablewrap"><table>
+  <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
+  <tbody>
+  <tr><td>Browser URL bar steals space, portrait and landscape</td><td>Three layers, all shipped. <b>1.</b> The native app has no browser chrome at all (the real fix). <b>2.</b> PWA standalone: an in-app "Add to Home Screen" prompt (iOS Safari steps, Android install prompt) so the web version opens full-screen with no bar, today. <b>3.</b> In the browser: a Fullscreen button on the board screen for Android Chrome (iPhone Safari does not allow it, so iPhone gets the PWA route), and a layout that never shifts when the bar collapses or expands.</td></tr>
+  <tr><td>Landscape is cramped</td><td>Landscape-first host layout: board left at max height, question and host pad right as one column, header collapses to a slim strip, timer becomes a thin top bar. The phone controller locks to portrait.</td></tr>
+  <tr><td>Touch targets and thumb reach</td><td>Every tappable at least 44 pt; host pad and the controller answer button anchored to the bottom thumb zone; exit and undo moved away from the primary thumb path.</td></tr>
+  <tr><td>Small text at arm's length</td><td>Type scale re-tuned per breakpoint; question text at least 18 px on phones; hex letters scale with the board.</td></tr>
+  <tr><td>Screen dims or locks mid-match</td><td>Keep-awake during a match (native plugin in the app, Wake Lock in Chrome).</td></tr>
+  <tr><td>Low-end Android jank</td><td>Motion budget: claim animation and winning trace stay, ambient particles reduced on data-saver and low-memory devices; measured with CPU throttling.</td></tr>
+  <tr><td>How we verify</td><td>The 17-device no-scroll matrix (including landscape phones) stays the gate, plus before/after screenshots per screen per orientation, plus a real iPhone and a mid-range Android.</td></tr>
+  </tbody></table></div>
+  <div class="callout"><p><b>Process:</b> this phase runs through the frontend-stack pipeline: style pick, taste floor, guidelines review, Playwright verification. It happens before any store screenshot is taken (decision D16).</p></div>
+
+  <h2>TV: which TVs have the Play Store</h2>
+  <div class="tablewrap"><table>
+  <thead><tr><th>TV</th><th>Play Store?</th><th>What that means for us</th></tr></thead>
+  <tbody>
+  <tr><td>Philips (TP Vision models sold in Europe, Middle East, Asia)</td><td><span class="chip lo">Yes</span></td><td>Android TV / Google TV. Our Android build runs, downloaded from the Play Store on the TV.</td></tr>
+  <tr><td>Sony, TCL, Hisense (most), Sharp, Xiaomi, Nvidia Shield, Chromecast with Google TV, onn</td><td><span class="chip lo">Yes</span></td><td>Same.</td></tr>
+  <tr><td>LG</td><td><span class="chip hi">No</span></td><td>webOS with the LG Content Store. It accepts HTML5 apps, so the same web build can be packaged later.</td></tr>
+  <tr><td>Samsung</td><td><span class="chip hi">No</span></td><td>Tizen with Samsung TV Apps. Also accepts HTML5 apps; same later path.</td></tr>
+  <tr><td>Roku TVs</td><td><span class="chip hi">No</span></td><td>Not planned.</td></tr>
+  <tr><td>Apple TV</td><td><span class="chip hi">No</span></td><td>No web view, no Capacitor. AirPlay mirroring from an iPhone or iPad already shows the board.</td></tr>
+  <tr><td>Amazon Fire TV</td><td><span class="chip md">Own store</span></td><td>Android-based; the Android TV build can go to the Amazon Appstore later.</td></tr>
+  </tbody></table></div>
+
+  <h2>TV: how it will work with the remote</h2>
+  <div class="tablewrap"><table>
+  <thead><tr><th>Area</th><th>What we do</th></tr></thead>
+  <tbody>
+  <tr><td>Store listing</td><td>Same Android project, TV-enabled: leanback launcher entry, touchscreen not required so one app serves phones, tablets and TVs, 320×180 TV banner, 1080p TV screenshots, Android TV track with its own review (D-pad navigable, focus always visible, no touch-only paths, no portrait, Back behaves).</td></tr>
+  <tr><td>Remote (D-pad)</td><td>Remote presses arrive as keyboard events. A spatial focus manager moves focus to the nearest control in the arrow's direction, Enter activates, Back closes the top-most modal or asks to exit. The hex board already supports arrow-key play. One big, high-contrast focus ring everywhere.</td></tr>
+  <tr><td>Typing text and numbers</td><td>Focusing a text field on Android TV pops the system on-screen keyboard automatically; Enter submits, Back dismisses. TV inputs stay minimal (room code, username), plus a big remote-friendly number pad for room codes. Nothing depends on hover.</td></tr>
+  <tr><td>10-foot UI</td><td>Body text at least 24 sp, headings at least 48 sp, 5% overscan margin, blue/amber palette (already TV-safe), no small chips, no scroll-only lists. No banner ads on TV; interstitials still only between games.</td></tr>
+  <tr><td>Roles on a TV</td><td>TV as the shared board while phones are controllers (best), or TV alone with the remote in host-adjudicated mode. Both must work with the remote only.</td></tr>
+  <tr><td>Testing</td><td>Android TV emulator for the real remote path, plus a permanent keyboard-only Playwright run at 1920×1080: every screen completable with arrows, Enter and Escape.</td></tr>
+  </tbody></table></div>
 </section>
 
 <!-- BACKEND -->
@@ -507,13 +586,15 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <tbody>
   <tr><td>0 Paperwork</td><td class="num">0.5 + your forms</td><td>1 to 2 weeks</td><td>You</td></tr>
   <tr><td>1 Store-ready web app</td><td class="num">5</td><td>Weeks 1 to 2</td><td>Nothing, can start now</td></tr>
+  <tr><td>1b Mobile experience rehaul</td><td class="num">6</td><td>Weeks 2 to 3</td><td>Phase 1</td></tr>
   <tr><td>2 Backend to VPS</td><td class="num">3 + cutover</td><td>Weeks 1 to 3</td><td>VPS access</td></tr>
-  <tr><td>3 Capacitor apps</td><td class="num">5</td><td>Weeks 3 to 4</td><td>Phase 1, Apple account</td></tr>
-  <tr><td>4 Ads</td><td class="num">2</td><td>Weeks 4 to 5</td><td>Phase 3, AdMob account</td></tr>
-  <tr><td>5 Remove Ads</td><td class="num">3</td><td>Week 5</td><td>Phase 3, store products</td></tr>
-  <tr><td>6 Submission</td><td class="num">2 + waiting</td><td>Weeks 6 to 8</td><td>Everything above</td></tr>
+  <tr><td>3 Capacitor apps</td><td class="num">5</td><td>Weeks 4 to 5</td><td>Phases 1 and 1b, Apple account</td></tr>
+  <tr><td>3b TV support (Android TV, remote)</td><td class="num">5</td><td>Weeks 5 to 6</td><td>Phase 3</td></tr>
+  <tr><td>4 Ads</td><td class="num">2</td><td>Week 6</td><td>Phase 3, AdMob account</td></tr>
+  <tr><td>5 Remove Ads</td><td class="num">3</td><td>Weeks 6 to 7</td><td>Phase 3, store products</td></tr>
+  <tr><td>6 Submission</td><td class="num">2 + waiting</td><td>Weeks 7 to 10</td><td>Everything above, TV track review</td></tr>
   <tr><td>7 Ops</td><td class="num">2</td><td>Week 2 onward</td><td>Phase 2</td></tr>
-  <tr><td><b>Total</b></td><td class="num"><b>~22</b></td><td><b>6 to 8 weeks to live</b></td><td></td></tr>
+  <tr><td><b>Total</b></td><td class="num"><b>~33</b></td><td><b>8 to 10 weeks to live</b></td><td></td></tr>
   </tbody></table></div>
 
   <h2>Risks and unverified items</h2>
@@ -528,7 +609,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   </ul>
 </section>
 
-<footer>Canonical version with all sources: <code>LAUNCH_PLAN.md</code> in the repo. No code changed yet; decisions D1 to D14 are pending.</footer>
+<footer>Canonical version with all sources: <code>LAUNCH_PLAN.md</code> in the repo. No code changed yet; decisions D1 to D16 are pending.</footer>
 </div>
 
 <script>
