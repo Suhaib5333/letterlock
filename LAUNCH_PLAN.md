@@ -7,26 +7,28 @@
 > **Any session that touches store launch, ads, purchases, VPS migration, copyright of media,
 > or Google sign-in branding must read this first and keep it updated.**
 > Companion docs: `TECH.md` (stack reference), `DEFERRED.md` (blocked work), `CLAUDE.md` (build log).
+>
+> ✅ **All decisions D1-D16 were LOCKED by Suhaib on 2026-09-05 (§2).** This plan is now the build order: any session that starts a phase follows it as written and logs progress in §17.
 
 ---
 
 ## 0. 🍬 The whole plan in 13 lines
 
 1. **Wrap, don't rewrite.** The React app ships inside a Capacitor 8 shell. One codebase = web + iOS + Android.
-2. **Backend leaves Supabase cloud and runs on our VPS.** We run the open-source server software ourselves (Postgres, auth, API, realtime) in Docker: no Supabase account, no bill, no supabase.co anywhere. Zero app-code rewrite, only the URL changes. Web and apps share one database, so accounts, leaderboards, saves and "ads removed" are identical everywhere. See §2b for what "off Supabase" means exactly and decision D14.
+2. **Backend leaves Supabase and runs on our VPS, the palmandplate way.** Our own API (NestJS + Prisma) and a plain Postgres database on the Hostinger KVM2 we already run, behind the shared Traefik proxy, deployed by GitHub Actions over SSH. No Supabase software anywhere, no supabase.co in any URL. Web and apps share that one database, so accounts, leaderboards, saves and "ads removed" are identical everywhere. Detail in §2b and Phase 2.
 3. **That same move fixes the Google login text.** The consent screen shows the *callback domain*. Ours becomes `api.letterlock.raltech.dev`, then we verify the brand so it reads "Letterlock".
 4. **Ads = Google AdMob.** Interstitial only between games, rewarded ads for an extra skip/hint, banner only on menus. Never during a question.
 5. **Remove Ads = one non-consumable purchase (~$3.99)** through Apple/Google billing via RevenueCat, mirrored to a `profiles.ads_removed` flag so it follows the *login*, not just the phone.
 6. **Purchases are owned by the Apple ID / Google account by default.** Our server flag is what makes them follow the user across iPhone, Android and web. §8 explains this in plain words.
-7. **The song, TV-clip and iTunes-melody packs cannot ship in the store build.** Apple's guideline 5.2.5 literally forbids using iTunes previews "as the soundtrack to a game". Replace with self-made public-domain melodies + text clues.
+7. **The song, TV-clip and iTunes-melody packs stay on the web and are hidden in the store builds.** Apple's guideline 5.2.5 forbids using iTunes previews "as the soundtrack to a game", and the number of clips does not change that, so the packs are platform-gated (web yes, apps no). The self-made public-domain melodies grow to 200+ for both. Charades images stay, but from licensed, bundled sources (D9).
 8. **Hard store requirements we do not have yet:** in-app account deletion, privacy policy + terms pages, Sign in with Apple (mandatory because we offer Google login), PNG icons, offline handling.
 9. **"AI-looking code" is a myth.** Neither store checks who wrote the code. They reject thin web wrappers, crashes, placeholders and missing privacy features. §10 is the real checklist.
 10. **Paperwork first:** Apple Developer ($99/yr), Google Play ($25 once), AdMob, RevenueCat, a differentiated store name (exact "Letterlock" is already used by other apps).
-11. **Ops we must add:** backups, uptime monitoring, crash reporting, a version gate, `app-ads.txt`.
+11. **Ops we must add:** backups, uptime monitoring, crash reporting, a version gate, `app-ads.txt`, and **over-the-air JS updates from day one** (D7) so content waves never wait for a store review.
 12. **Realistic money:** ads earn tens of dollars a month at hundreds of daily players. The $3.99 purchase will likely out-earn ads early. Do it for reach and polish, not for quick revenue.
 13. **Mobile and TV are first-class targets.** A full mobile experience rehaul (portrait + landscape, no browser bar: native app, PWA standalone, fullscreen) built with the `frontend-stack` pipeline before submission, plus an **Android TV / Google TV** build controlled with the remote (D-pad focus, on-screen keyboard on inputs, 10-foot UI). See §3 Phases 1b and 3b and §16.
 
-**Total effort: ~33 dev days of code + ~8-10 weeks wall-clock** (store reviews, Play's 14-day closed test, AdMob approval, TV review). Detail in §12.
+**Total effort: ~52 dev days of code + ~12-14 weeks wall-clock to store launch** (store reviews, AdMob approval, TV review), then web ads as the last step. The jump from the earlier ~33 days is the custom backend (D14: ~14 dev days instead of 3), OTA updates now (D7), and licensed charades images (D9). Detail in §12.
 
 ---
 
@@ -36,7 +38,7 @@
 |---|---|---|
 | Web hosting | **Cloudflare Pages**, not the VPS (`deploy.yml`). `CLAUDE.md` prose about nginx on the VPS was aspirational. | The VPS currently hosts nothing for Letterlock. Migration = build it from scratch. |
 | Backend | Supabase **cloud** project `lkudntyvngwwlzuciocd` (URL + anon key committed in `.env.production`). | The Google consent screen shows that random ref. |
-| Supabase surface | Auth (email OTP via Resend edge function, Google OAuth), 9 tables, ~30 RPCs, 12 migrations, Realtime broadcast + presence (3 topics), 2 edge functions, **no Storage**, no `postgres_changes`. | Small and portable. Self-hosting is realistic. |
+| Supabase surface | Auth (email OTP via Resend edge function, Google OAuth), 9 tables, ~30 RPCs, 12 migrations, Realtime broadcast + presence (3 topics), 2 edge functions, **no Storage**, no `postgres_changes`. | Small and portable: ~30 endpoints + 3 realtime channels to rebuild in our own API (Phase 2). |
 | Account deletion | **None** for users (only admin QA cleanup). | Store blocker (Apple 5.1.1(v), Play policy). |
 | Privacy policy / terms | **None** anywhere. | Store blocker (both stores + AdMob + Google brand verification). |
 | Sign in with Apple | Not implemented. | Required by Apple 4.8 because Google login exists. |
@@ -49,46 +51,92 @@
 
 ---
 
-## 2. 🧭 Decisions you (Suhaib) need to make
+## 2. 🧭 Decisions: LOCKED by Suhaib on 2026-09-05
 
-Recommendation is listed first. Say "go with the recommendations" and the plan proceeds as written.
+Every row below is final. "Locked" = what Suhaib chose; "Means" = what the build does because of it.
 
-| # | Decision | Recommendation | Why |
+| # | Decision | Locked | Means |
 |---|---|---|---|
-| D1 | **Store listing name** | `Letterlock: Trivia Hex Duel` (or `Letterlock Party Quiz`) | Exact "Letterlock"/"LetterLock" is taken on both stores (word-puzzle apps). Apple names must be unique. Bundle id stays `dev.raltech.letterlock`. |
-| D2 | **Developer account type** | **Organization** (RAL, needs a free D-U-N-S number) on both stores | Shows the company name, and Play organization accounts skip the "12 testers for 14 days" closed-test rule. Individual works too but is slower on Play. |
-| D3 | **Song / TV-clip / iTunes-melody packs** | **Remove from the store build.** Keep the 23 self-made PD melodies and grow them to 200+; convert songs/TV to text-clue trivia. | Apple 5.2.5 + iTunes API terms forbid game use. Licensed clips (Feed.fm etc.) can come later if music proves popular. |
-| D4 | **Ads placement + price** | Interstitial between games (1 per 3-5 min max), rewarded for extra skip/hint, banner on Home/menus only. Remove Ads at **$3.99** one-time. | Matches Play "Better Ads" rules and Apple's UX rules. $2.99-$4.99 is the casual-game norm. |
-| D5 | **Static web hosting** | Move the static site to the VPS (nginx) too, keep Cloudflare only as DNS/proxy | You asked for "fully on our VPS". It is a 1-hour job once the API is there. |
-| D6 | **Target audience** | **13+ / not directed at children** on both stores. Keep the Kids pack but no child-directed marketing. | Kids Category forbids third-party ads; Play Families adds constraints. A general trivia game with one Kids pack is normal. |
-| D7 | **OTA (over-the-air) JS updates** | **Later.** Launch with store builds only; add Capgo (self-hostable) when release cadence hurts. | Every content wave otherwise needs a store update (Play ~hours, Apple ~1-2 days). Acceptable at first. |
-| D8 | **VPS size** | **8 GB RAM** (4 GB is the hard minimum with analytics off) | Self-hosted Supabase idles at ~3-4 GB. Tell me the current VPS spec. |
-| D9 | **Charades images (loremflickr)** | **Drop images, show the word only** | Random unmoderated Flickr photos are a content-safety and license risk. Curated bundled images can come later. |
-| D10 | **Logo packs** | Keep, but **bundle** the SVGs, add a trademark disclaimer, drop the Apple logo, publish a removal contact | This is how every Logo Quiz app survives. |
-| D11 | **Fandom packs** | Keep as text trivia, label "Unofficial fan trivia, not affiliated", rename the Harry Potter and Pokémon packs to descriptive titles, never in store metadata | Those two rights-holders are the most aggressive. Facts are not copyrightable. |
-| D12 | **Web ads (AdSense)** | **Skip at launch**; honor `ads_removed` on web anyway | AdSense rejects thin-text game pages; a rejection can complicate later approval. |
-| D13 | **Web Remove-Ads purchase** | Optional, later, via a merchant-of-record (Paddle / Lemon Squeezy) | They handle VAT. Never mention web pricing inside the iOS/Android app (Apple 3.1.3 outside the US). |
-| D14 | **What runs on the VPS** | **Option A: run the open-source Supabase server stack ourselves** (no Supabase account, no bill, our domain). ~3 days, zero app rewrite. | Option B is a fully custom backend (own Node API, own auth, own websockets, port ~30 database functions): 4-6 extra weeks for the same user-facing result. The database is plain Postgres either way, so B stays possible later. See §2b. |
-| D15 | **TV scope at launch** | **Android TV / Google TV only** (Sony, Philips, TCL, Hisense, Xiaomi, Chromecast, Nvidia Shield) via the same Android project. LG (webOS) and Samsung (Tizen) later as HTML5 TV apps; Apple TV not feasible with web tech. | LG and Samsung TVs have no Play Store. Their stores accept HTML5 apps, so our web build can be packaged for them later. Apple TV has no web view at all. |
-| D16 | **Mobile rehaul before submission** | **Yes**, Phase 1b runs before the store builds, using the `frontend-stack` skill pipeline (style pick, taste floor, guidelines review, Playwright device-matrix verify). | Store screenshots and first reviews are made from the mobile UI. Shipping the current mobile experience and fixing later burns the launch. |
+| D1 | **Store listing name** | **`Letterlock: Party Quiz`** | Reserve it in App Store Connect + Play Console the day the accounts exist. Bundle id stays `dev.raltech.letterlock`. |
+| D2 | **Developer account** | **Organization: RAL Technologies** on both stores (free D-U-N-S number first) | Company name on the listing; Play organization accounts skip the 12-testers / 14-day closed-test rule. |
+| D3 | **Song / TV-clip / iTunes-melody packs** | **Web only.** Hidden in the iOS/Android/TV builds. Workaround check done: the clip *count* is irrelevant, the *source* (iTunes previews) is what Apple 5.2.5 and the iTunes API terms forbid, so no reduction makes them store-safe. | Packs get `platforms: ['web']`; the category browser hides them when `Capacitor.isNativePlatform()`. Self-made public-domain melodies grow to 200+ and ship everywhere. A licensed clip vendor (Feed.fm Clips) stays a future option if music packs prove popular. |
+| D4 | **Ads placement + Remove Ads price** | **Interstitial after each game**, rewarded ads for an extra skip/hint, banner only on Home/menus. **Remove Ads = $3.99 one-time.** | Never during a question, never on the board, never at app open. Play "Better Ads" + Apple UX rules satisfied. |
+| D5 | **Static web hosting** | **Move to the VPS** (same box, served by PM2 behind Traefik). Cloudflare stays DNS only. | Cloudflare Pages is retired at cutover. Everything Letterlock runs on our VPS. |
+| D6 | **Target audience** | **13+, not directed at children** | Kids pack stays; no child-directed marketing; standard AdMob ads allowed. |
+| D7 | **Over-the-air (OTA) JS updates** | **Yes, now, fully working at launch** | Phase 3c: `@capgo/capacitor-updater` in manual mode pulling bundles from **our own VPS** (no Capgo account needed); Capgo cloud ($12/mo) only as a fallback if the manual path misbehaves. Content waves reach installed apps within minutes; native changes still go through the stores. |
+| D8 | **VPS** | **The existing Hostinger KVM2** (srv1167964, 2 vCPU, 8 GB RAM, 100 GB NVMe, Ubuntu, ~5 GB RAM free) that already runs palmandplate, jawhara and custompc. Details pulled from those repos are in §2c. | No new server. Letterlock joins the shared Traefik, uses the existing native Postgres with its own role + databases, and its own PM2 processes. Credentials live only in gitignored `infra/vps-creds` and GitHub Actions secrets, never in tracked files. |
+| D9 | **Charades images** | **Keep images, make them clean and legal.** No random Flickr photos. | Phase 1c: one build script fetches a reviewed image per prompt from licensed sources (Pixabay Content License: commercial use, no attribution; Openverse CC0/public-domain as fallback; our own generated illustrations for abstract prompts), resizes to WebP, **bundles them in the apps** (works offline, reviewer-proof) and serves them from our domain on web. Human contact-sheet review before shipping; a credits file per image. |
+| D10 | **Logo packs** | **Keep**: bundle the SVGs, trademark disclaimer, drop the Apple logo, removal contact published | How every Logo Quiz app operates. |
+| D11 | **Fandom packs** | **Keep** as text trivia, "Unofficial fan trivia, not affiliated" label, rename the Harry Potter and Pokémon packs to descriptive titles, franchise names never in store metadata | Facts are not copyrightable; the two most aggressive rights-holders get extra distance. |
+| D12 | **Web ads** | **Yes, but as the very last step**, after the apps are live and AdMob is approved. | Phase 8: Google **AdSense "H5 Games Ads"** (the Ad Placement API made for browser games), same placements as the apps, consent banner, honors `ads_removed`. Plain-words explanation in §6b. |
+| D13 | **Web Remove-Ads purchase** | **No.** | The `ads_removed` flag earned in an app still hides web ads for that account. No web checkout, no Paddle/Lemon Squeezy. |
+| D14 | **What runs on the VPS** | **Option B, the palmandplate way: our own backend.** No Supabase software at all (not the cloud, not the open-source stack). NestJS 11 API + Prisma 7 + the native Postgres already on the box + Socket.IO for realtime, PM2 processes, Traefik routing, GitHub Actions deploy over SSH. | Phase 2 is a real rewrite of the data layer (~14 dev days): auth (email OTP + Google + Apple) with self-issued JWTs, ~30 REST endpoints replacing the RPC calls, a websocket gateway replacing Supabase Realtime, every row-security policy becoming an explicit `where userId` in a service. The database schema itself carries over (same tables, same UUIDs), so users keep their accounts, XP, friends and saves. |
+| D15 | **TV scope at launch** | **Android TV / Google TV only** (Sony, Philips, TCL, Hisense, Xiaomi, Chromecast, Nvidia Shield). LG (webOS) and Samsung (Tizen) later as HTML5 apps. Apple TV not feasible. | Same Android project, TV-enabled, Play TV track. Remote (D-pad) navigation, on-screen keyboard on inputs. |
+| D16 | **Mobile rehaul before submission** | **Yes, top priority: beautiful and fully playable.** Phase 1b via the `frontend-stack` pipeline. | Runs before the store builds; store screenshots come from the rehauled UI. |
+
+### Also requested by Suhaib (now in the plan)
+
+| Ask | Where |
+|---|---|
+| Web home screen pops up "Get the app" with App Store / Play Store links, only after the apps are live | Phase 6b |
+| Ads on the web too, at the very end | Phase 8 + §6b |
+| OTA updates fully functioning at launch | Phase 3c |
+| Full mobile rehaul, portrait + landscape, using `frontend-stack` | Phase 1b |
+| TVs with the Play Store, remote control, keyboard pops on text fields | Phase 3b |
+| VPS details and config recorded from the jawhara / custompc / palmandplate repos, secrets gitignored | §2c + Phase 2 |
+| Charades images kept and made to work properly | Phase 1c |
 
 ### 2b. 🧾 "Off Supabase" means exactly this
 
-Suhaib's standing instruction: **we are migrating off Supabase.** Precisely:
+Suhaib's standing instruction: **we are migrating off Supabase, fully.** Locked as D14 = our own backend.
 
-| | Today | After the move |
+| | Today | After Phase 2 |
 |---|---|---|
-| Where the data lives | Supabase's servers (their cloud project) | **Our VPS**, plain Postgres in Docker |
-| Supabase account / bill | Yes | **None.** Project deleted after cutover. |
+| Where the data lives | Supabase's servers (their cloud project) | **Our VPS**, plain Postgres |
+| Supabase account / bill / software | Cloud project | **None.** No Supabase cloud, no Supabase open-source stack, no `@supabase/supabase-js` in the app. Project deleted 2 weeks after cutover. |
 | Domain users see | `lkudntyvngwwlzuciocd.supabase.co` | `api.letterlock.raltech.dev` |
 | Who can switch it off | Supabase | Only us |
-| Server software | Supabase's hosted stack | **A:** the same open-source stack, run by us (recommended). **B:** our own custom code. |
-| App code changes | | A: the URL and key. B: rewrite auth, ~30 data calls, realtime sync, leaderboards. |
+| Server software | Supabase's hosted stack | **Our NestJS API + Prisma + Postgres + Socket.IO**, the same shape as palmandplate and jawhara |
+| Auth | Supabase Auth (GoTrue) | Our own: email OTP (scrypt-hashed codes, copied from palmandplate), Google (web redirect + native id-token), Apple (native + web), 15-min access JWT + 90-day rotating refresh token |
+| Data access | `supabase.from()` / `.rpc()` + row-level security | REST endpoints; every policy becomes an explicit `where: { userId }` in a service |
+| Realtime | Supabase Realtime broadcast + presence | Socket.IO gateway (JWT or guest token on the handshake, rooms assigned server-side) |
+| Email | `send-otp` edge function → Resend | Resend over SMTP from the API (`@nestjs-modules/mailer`), same as palmandplate |
 
-Either way, Supabase-the-company disappears from the picture. The only choice (D14) is whether we
-reuse their free open-source server software (A) or write our own (B). Wherever this doc says
-"the backend on the VPS" or "self-hosted stack", it means Option A unless Suhaib picks B. Do not
-describe the end state as "on Supabase"; describe it as "on our VPS".
+Wherever this doc says "the backend" or "the API", it means this custom backend on our VPS. Never describe the end state as "on Supabase".
+
+### 2c. 🖥️ Our VPS, as documented in the palmandplate / jawhara / custompc repos (2026-09-05)
+
+**The box** (shared by all RAL projects; nothing here is a secret, the passwords are not in any tracked file):
+
+| Fact | Value | Source |
+|---|---|---|
+| Provider / plan | Hostinger **KVM2**: 2 vCPU, 8 GB RAM, 100 GB NVMe, ~$8.49/mo | palmandplate `docs/architecture-research.md` |
+| Host | `srv1167964`, IPv4 `72.62.16.1`, IPv6 `2a02:4780:28:e6c1::1` | jawhara `infra/vps-creds` (names only), custompc `docs/DEPLOYMENT.md` |
+| OS | Ubuntu (24.x; SSH is socket-activated, listens on **22 and 2222**) | jawhara `docs/TROUBLESHOOTING.md` |
+| Access | `root` over SSH with a password (key auth still a TODO across RAL). Office IPv4 is ISP-blackholed to this box: the helper scripts fall back to IPv6 automatically. | jawhara `infra/vps.py`, custompc `scripts/kvm.py` |
+| Free resources | ~5 GB RAM, ~63 GB disk (mid-2026) | jawhara `PLAN.md` |
+| Reverse proxy | **Traefik** in Docker (`root-traefik-1`, owns :80/:443), Let's Encrypt via the `mytlschallenge` TLS-ALPN resolver, dynamic file config in **`/root/traefik-dynamic/`** (hot-reloaded), Docker network `root_default` | custompc `docs/CLAUDE-WORKING-STYLE.md`, palmandplate `deploy/traefik/palmandplate.yml` |
+| Postgres | **Native apt install, one instance on localhost:5432**, one role + database per project (palmandplate holds `palmandplate` + `palmandplate_dev`). Jawhara runs its own Postgres 16 containers on :5433/:5434. | palmandplate `scripts/server-setup.sh`, jawhara `PLAN.md` |
+| Process model | palmandplate: **PM2** (API on :3000/:3001, SPAs via `pm2 serve dist --spa` on :5173/:5174/:5183/:5184/:4322). jawhara + custompc: Docker containers with Traefik labels. | palmandplate `apps/api/ecosystem.config.js` |
+| Deploy | GitHub Actions → SSH → git pull / upload bundle → `prisma migrate deploy` → build → restart. Jawhara's workflow retries SSH 5× across ports 22/2222 because Hostinger intermittently drops fresh connections from GitHub runners. | palmandplate `.github/workflows/deploy-prod.yml`, jawhara `.github/workflows/deploy-staging.yml` |
+| DNS | Cloudflare zone `raltech.dev`, A records to the VPS. Traefik's TLS challenge needs **DNS-only (grey cloud)** until the first cert exists; jawhara then flipped to proxied and it kept working. | jawhara `HANDOFF.md`, `PROGRESS.md` |
+| Backups | jawhara: `pg_dump` cron 03:30 Bahrain, 14-day rotation, `pg_restore`-verified, no off-box copy yet. palmandplate: none. | jawhara `PROGRESS.md` |
+| Existing tenants (do not touch) | palmandplate (API + 2 SPAs), jawhara (db + api containers, pgweb :8081), custompc (frontend container), n8n, docuseal, onecli + its Postgres | custompc `docs/CLAUDE-WORKING-STYLE.md` |
+
+**What Letterlock adds to that box (Phase 2):**
+
+| Item | Value |
+|---|---|
+| Stack root | `/opt/letterlock` (prod) and `/opt/letterlock-dev` (dev, deployed from the `uat` branch) |
+| Database | Two databases on the existing native Postgres: `letterlock` and `letterlock_dev`, role `letterlock`, password generated once with `openssl rand -base64 24` during setup, pasted into GitHub secrets. Postgres never exposed outside localhost. |
+| Processes (PM2) | `letterlock-api` :3100, `letterlock-api-dev` :3101 (bound to **127.0.0.1**, not 0.0.0.0), `letterlock-web` :5190, `letterlock-web-dev` :5191 (`pm2 serve dist --spa`). Ports chosen to avoid every port already in use. |
+| Traefik | `/root/traefik-dynamic/letterlock.yml` (committed in this repo as `deploy/traefik/letterlock.yml`): routers on `websecure` with `certResolver: mytlschallenge`, services at `http://host.docker.internal:<port>`, `passHostHeader: true`. Websocket upgrade works out of the box in Traefik. |
+| Domains | `letterlock.raltech.dev` (web), `api.letterlock.raltech.dev` (API + websockets), `dev.letterlock.raltech.dev`, `api.dev.letterlock.raltech.dev`. Cloudflare A records, grey cloud first. |
+| Firewall | `ufw`: OpenSSH (22 + 2222), 80, 443 only. Never open the API ports (palmandplate has 3000 open to the world; do not copy that). |
+| Committed config (no secrets) | `deploy/traefik/letterlock.yml`, `deploy/ecosystem.config.js`, `deploy/server-setup.sh` (adapted from palmandplate), `apps/api/.env.example` (variable names), `.github/workflows/deploy-prod.yml` + `deploy-dev.yml` (jawhara's retrying SSH loop), `infra/vps.py` (paramiko helper, reads the gitignored creds file), `deploy/backup.sh` + cron line. |
+| Gitignored (secrets) | `infra/vps-creds` (`KVM_HOST`, `KVM_HOST6`, `KVM_USER`, `KVM_PORT`, `KVM_PASS`, `STACK_ROOT`), `infra/db-creds` (`PROD_DB_URL`, `DEV_DB_URL`), `infra/.kvm-known-hosts`, `.env`, `.env.*` except `.env.example`. **Unlike jawhara, Letterlock never commits credentials, private repo or not.** |
+| GitHub Actions secrets (names) | `VPS_HOST`, `VPS_USER`, `VPS_PASS`, `DATABASE_URL`, `DATABASE_URL_DEV`, `JWT_SECRET`, `RESEND_API_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`, `REVENUECAT_WEBHOOK_SECRET`, `CORS_ORIGINS`, `MAIL_REPLY_TO` |
+| RAM budget | ~200-300 MB for the API + ~60 MB per `pm2 serve`; Postgres is already running. Fits comfortably in the ~5 GB free. |
 
 ---
 
@@ -117,7 +165,7 @@ Everything here ships to the website too, so it is useful even before the apps e
 |---|---|---|
 | **Account deletion** (in-app button + confirmation + a web page URL for Play) | New RPC `delete_my_account()` (SECURITY DEFINER: deletes profile rows, leaderboard, friendships, saved game, then `auth.users`), button in `AuthModal.tsx` profile view, page at `/account/delete` | Apple 5.1.1(v), Play account-deletion policy |
 | **Privacy Policy + Terms pages** | `public/privacy.html`, `public/terms.html` (static, plain), links in Settings + footer + store listings | Both stores, AdMob, Google brand verification (must be on the same domain as the homepage) |
-| **Sign in with Apple** (web + later native) | `auth.tsx`: `signInWithOAuth({provider:'apple'})`; Supabase Apple provider config (Services ID, Team ID, `.p8` key; the client secret must be regenerated every 6 months, put a reminder in `MIGRATIONS.md`) | Apple 4.8 |
+| **Sign in with Apple** (web + later native) | `auth.tsx`: web Sign in with Apple JS → `POST /auth/apple` on our API (Phase 2.4); Apple config (Services ID, Team ID, `.p8` key; the client secret must be regenerated every 6 months, put a reminder in `MIGRATIONS.md`) | Apple 4.8 |
 | **`/join/CODE` path** (keep `?room=` as alias) | `main.tsx` router switch, `LobbyHost.tsx` QR + copy link, nginx SPA fallback | Universal Links / App Links match paths reliably |
 | **Offline handling** | `navigator.onLine` + (later) Capacitor Network; non-blocking banner; local play works offline; hide remote-media packs offline; disable Create/Join room; queue `submit_score`/`award_xp` and flush on reconnect | Apple 2.1 (reviewers test in airplane mode and IPv6-only) |
 | **Version gate** | `GET /api/app-config` → `{minNative, minBundle, maintenance, message}`; cached locally; "Update required" screen | Lets us retire old app versions and show maintenance notices |
@@ -146,22 +194,41 @@ Playwright verify on the device matrix), before any store screenshot is taken.
 | Low-end Android jank | Motion budget: claim animation + trace stay, ambient particles reduced on `saveData` / low-memory devices; measure with Playwright CPU throttling. |
 | Verification | `scripts/noscroll.mjs` matrix (17 devices, incl. landscape phones) stays the gate, plus before/after screenshots per screen per orientation, plus a real-device pass on an iPhone and a mid-range Android. |
 
-### Phase 2: Backend off Supabase cloud, onto the VPS (~3 dev days + a cutover evening)
+### Phase 1c: Charades images, kept and made legal (~3 dev days)
 
-**Answer to "will this continue for our app?" Yes.** The apps and the website all talk to `https://api.letterlock.raltech.dev`. Same database, same accounts, same leaderboards, same saved games, same `ads_removed` flag. Nothing in the app depends on Supabase cloud, and after cutover no Supabase account exists (§2b).
+Today the 5 charades packs (~1,100 prompts) load a random Flickr photo at runtime from loremflickr by keyword: unmoderated content in a family game, licenses we cannot honor, and a remote fetch that fails on reviewer networks. D9 says keep the images. So:
 
 | Step | Detail |
 |---|---|
-| Install the open-source backend stack (Option A) | Official Docker Compose (Postgres 17, Envoy gateway, Auth, PostgREST, Realtime, Edge Runtime, Studio). **Remove** Storage, imgproxy, Logflare/analytics, Vector to save ~1.5 GB RAM. |
-| Secrets | `generate-keys.sh`: JWT secret, anon + service keys, Postgres password, dashboard password. Store in a password manager, never in git. |
-| Domains + TLS | `api.letterlock.raltech.dev` → nginx → gateway :8000. WebSocket upgrade headers + long `proxy_read_timeout` on `/realtime/v1/`. Studio only behind basic auth or Tailscale. Firewall: 22/80/443 only. Add an AAAA (IPv6) record. |
-| Auth config | `SITE_URL=https://letterlock.raltech.dev`, `GOTRUE_URI_ALLOW_LIST` (web + `/join/*` + app deep link), `GOTRUE_EXTERNAL_GOOGLE_*` with new callback `https://api.letterlock.raltech.dev/auth/v1/callback` (add it in Google Cloud Console), `GOTRUE_EXTERNAL_APPLE_*`, **SMTP = Resend SMTP** (`smtp.resend.com`) so built-in auth mails work too. |
-| Edge functions | Copy `send-otp` (and drop `send-email` if unused) into `volumes/functions/`, secrets in `.env.functions`, `run.sh restart functions`. No `supabase functions deploy` on self-host. |
-| Data migration | `supabase db dump --role-only`, `--schema`, `--data-only --use-copy` from cloud → `psql --single-transaction` into the VPS. `auth.users` (password hashes) and `auth.identities` (Google links) survive. **Users must sign in again once** (new JWT secret). |
-| Realtime check **before** cutover | Known self-host bug #1617: default tenant crashes Broadcast/Presence. Test host + phone lobby on day one; rename the default tenant if needed. |
-| CI rewrite | `deploy.yml`: build → rsync `dist/` to VPS (or Pages, D5) → `supabase db push --db-url postgres://…@vps:5432` → scp functions + restart. `qa-cleanup.yml` → new admin URL. `.env.production` → new URL + anon key. Remove the Cloudflare + Supabase Management API steps. |
-| Cutover | Low-traffic evening: final dump → restore → flip `VITE_SUPABASE_URL` → deploy → smoke test (OTP, Google, room, leaderboard). Keep the cloud project alive 2 weeks as rollback. Then downgrade/delete it. |
-| Ops (see Phase 7) | Backups before anything else. |
+| Source order | 1) **Pixabay API** (`safesearch=true`, `editors_choice` first; Pixabay Content License allows commercial use with no attribution and requires downloading rather than hotlinking, which is what we want anyway). 2) **Openverse API** filtered to `license=cc0,pdm` for prompts Pixabay misses. 3) **Our own generated illustration** (flat, consistent style) for abstract prompts such as actions and emotions, where photo search fails. |
+| Script | `scripts/genimages.mjs`: one candidate per prompt → resize to 512 px WebP (≤ 40 KB) → `public/charades/<packId>/<slug>.webp` + `credits.json` (source, author, license, URL) per image. Re-runnable; only fetches missing prompts. |
+| Human review | Contact sheets (20 per page) rendered to PDF for a quick scan; a `reject.txt` list forces a re-fetch or a generated fallback. Nothing ships unreviewed. |
+| Delivery | **Bundled in the app builds** (~1,100 × 35 KB ≈ 40 MB, fine for both stores) so the QR secret-prompt page works offline and on Apple's review network; **served from our domain on web**, lazy-loaded, cached by the service worker. |
+| Fallback | `onError` still shows the word only (existing behavior), so a missing file can never break a game. |
+| Credits | Settings → "Image credits" screen generated from `credits.json` (Openverse CC-BY items would need it; CC0/Pixabay/own do not, we show them anyway). |
+| Gate | `scripts/checkmedia.mjs` extended: every charades prompt has a local image, every image ≤ 60 KB, no remote URL left in any pack. |
+
+### Phase 2: Backend off Supabase, onto our VPS, the palmandplate way (~14 dev days + a cutover evening)
+
+**Answer to "will this continue for our app?" Yes.** The website, the phone apps and the TV build all talk to `https://api.letterlock.raltech.dev`, our own API. Same database, same accounts, same leaderboards, same saved games, same `ads_removed` flag. After cutover there is no Supabase anything (§2b). The VPS facts and the exact ports/paths are in §2c.
+
+**What we copy (proven in palmandplate + jawhara, same box):** NestJS 11 + Prisma 7 with `@prisma/adapter-pg`, native Postgres, the scrypt email-OTP auth service, refresh-token rotation with replay detection, Resend over SMTP, global `ValidationPipe` + throttler + Swagger, PM2 + Traefik file-provider routing, GitHub Actions deploy over retrying SSH, `/healthz` deploy gate, Socket.IO gateway with the token verified on the handshake, nightly `pg_dump` cron. **What we add that neither repo has:** Google + Apple sign-in, guest tokens for phones that join a room without an account, an off-box backup copy, uptime monitoring.
+
+| Step | Detail |
+|---|---|
+| 2.1 Provision (0.5 d) | Adapted `deploy/server-setup.sh`: create role `letterlock` + databases `letterlock`, `letterlock_dev` on the existing Postgres; `/opt/letterlock{,-dev}`; PM2 already installed; `ufw` unchanged (22/2222/80/443). Add `deploy/traefik/letterlock.yml` to `/root/traefik-dynamic/`. Cloudflare A records (grey cloud until certs exist). |
+| 2.2 API skeleton (1 d) | `apps/api` (NestJS 11, Prisma 7, Node 20, Bun for install/build like palmandplate). `GET /healthz` (`SELECT 1`), Swagger at `/docs`, `CORS_ORIGINS` env-driven from day one, RFC-7807 error filter + Prisma exception filters copied from jawhara. |
+| 2.3 Schema (1 d) | `prisma db pull` against a dump of today's `public` schema → `schema.prisma` with the same 9 tables and UUID keys, plus `users` (id = the old `auth.users.id`, email, google_sub, apple_sub, created_at), `otp_codes`, `refresh_tokens`, `guest_tokens`. Drop `otp_attempts` (throttler replaces it). The 34 SQL functions are kept **as SQL** in the first migration where they are pure data logic (leaderboard paging, global ranks, username cooldown, XP award) and called through `$queryRaw` with the user id passed as a parameter instead of `auth.uid()`; only the trivial ones become TypeScript. Fastest correct port, and the fuzz-tested logic stays intact. |
+| 2.4 Auth (3 d) | Copy palmandplate's `auth.service.ts`: `POST /auth/otp/request` (6-digit code, scrypt-hashed, 10-min expiry, 60-s resend lock, 3 per email and per IP per 5 min like today), `POST /auth/otp/verify` (5 attempts, `timingSafeEqual`), 15-min access JWT + 90-day opaque refresh token stored as SHA-256 with rotation + replay detection, `POST /auth/refresh`, `POST /auth/logout`, `DELETE /auth/me` (store-required account deletion, cascades). **New:** `GET /auth/google` → Google with `redirect_uri=https://api.letterlock.raltech.dev/auth/google/callback` (this is the consent-screen fix, §11) → one-time code handed to the SPA → tokens; `POST /auth/google/native {idToken}` verified with `google-auth-library`; `POST /auth/apple {identityToken}` verified against Apple's JWKS with `jose` (native + web Sign in with Apple JS). `POST /auth/guest` issues a 24-h guest token for phones joining a room without an account. `JwtAuthGuard` + `RolesGuard` (`player` / `moderator` / `admin`) + `@CurrentUser()`. |
+| 2.5 Data endpoints (3 d) | ~30 routes replacing the 22 RPC calls + 6 table accesses: `/me` (profile, username claim/change with the 30-day rule, avatar), `/leaderboard/:pack` (paged), `/ranks` (+ mine), `/xp` (award, prestige), `/friends` (list, request, respond, remove, block, find), `/saves` (one per user), `/progress` (question progress), `/packs/custom`, `/rooms/:code/members` + awards, `/admin/*` (list users, role, ban, grant XP, reset, full access). **Every one of today's 23 row-security policies becomes an explicit `where: { userId }` in a service method**, enumerated in a checklist before cutover, because that is where migrations silently lose authorization. Input validation with class-validator DTOs; `award_xp` clamps stay server-side. |
+| 2.6 Realtime (2 d) | `@nestjs/websockets` + `@nestjs/platform-socket.io` gateway copied from jawhara: token (user or guest) verified on the handshake, rooms assigned server-side (`room:<CODE>`, `user:<id>`, `presence:online`). Events mirror today's three channels: lobby broadcast + presence (host ↔ phones), friends presence, friend notifications. Host reconnect re-sends the current `match_started` / `question_served` state exactly as today. Single instance; Redis adapter only if we ever run two. |
+| 2.7 Client rewrite (3 d) | Remove `@supabase/supabase-js`. `src/lib/api.ts` (axios, `VITE_API_URL`, single-flight refresh queue copied from palmandplate), `AuthProvider` on React Context, tokens in localStorage under `ll_*` (Capacitor Preferences in the apps). `src/lib/lobby.ts` and `friends.ts` on `socket.io-client`. Every `.rpc()` / `.from()` call becomes a typed API call. The `auth-username-gate` and reconnect-matrix e2e suites are re-pointed at a mocked API and must stay green. |
+| 2.8 Data migration (0.5 d) | From Supabase: `pg_dump --data-only --use-copy` of the 9 public tables + a CSV of `auth.users` (id, email, created_at) and `auth.identities` (Google `sub`) → `psql --single-transaction` into `letterlock`. UUIDs preserved, so every foreign key survives. **Users sign in again once** (new token system); their username, XP, friends, saves and leaderboard rows are all there. |
+| 2.9 CI/CD (1 d) | `deploy-prod.yml` (push to `main`) and `deploy-dev.yml` (push to `uat`): build on the runner, upload a bundle, SSH with jawhara's 5× retry over ports 22/2222, `bunx prisma migrate deploy`, `pm2 start deploy/ecosystem.config.js`, `pm2 save`, poll `/healthz` for `db:true`, print the last 50 log lines on failure. Web: `pm2 serve dist 5190 --spa`. `qa-cleanup.yml` → `DELETE /admin/users` with a CI token. Remove every Cloudflare Pages and Supabase step. |
+| 2.10 Backups + monitoring (part of Phase 7, but first) | `deploy/backup.sh`: nightly `pg_dump -Fc` of both databases, 14-day local rotation (jawhara's script) **plus** `rclone` copy to B2/S3 (the piece jawhara never finished). Uptime Kuma on `/healthz` and the websocket. |
+| 2.11 Cutover (an evening) | Low-traffic evening: final dump → restore → deploy web with `VITE_API_URL` → smoke test (OTP, Google, Apple, room host + phone, leaderboard, save/resume) → flip DNS `letterlock.raltech.dev` from Cloudflare Pages to the VPS. Keep the Supabase project alive 2 weeks as rollback, then delete it. |
+
+**Why ~14 days and not 3:** Option A (running Supabase's open-source stack) would have been a URL change. Suhaib chose no Supabase software at all, so auth, data access and realtime are rewritten. The upside is one house pattern across RAL (palmandplate, jawhara, Letterlock), zero dependence on Supabase's roadmap, and a backend any RAL developer already knows.
 
 ### Phase 3: The Capacitor apps (~5 dev days)
 
@@ -169,7 +236,7 @@ Playwright verify on the device matrix), before any store screenshot is taken.
 |---|---|
 | Add Capacitor 8 | `npm i @capacitor/core @capacitor/cli`, `npx cap init "Letterlock" dev.raltech.letterlock --web-dir dist`, `npx cap add ios android`. Requirements: Node 22+, Xcode 26 (via Codemagic), Android Studio, minSdk 24, targetSdk 36. `server.hostname: "letterlock.raltech.dev"` so the WebView origin matches our domain. |
 | Plugins | `@capacitor/app` (deep links, Android back button), `browser`, `haptics` (web `vibrate` is a no-op in iOS WebView), `share`, `network`, `status-bar`, `splash-screen`, `keyboard`, `preferences`, `screen-orientation`. |
-| Native sign-in | `@capgo/capacitor-social-login` → Google + Apple ID tokens → `supabase.auth.signInWithIdToken`. Never OAuth inside the WebView (Google returns `403 disallowed_useragent`). This also removes any consent-screen domain text on mobile entirely. |
+| Native sign-in | `@capgo/capacitor-social-login` → Google + Apple ID tokens → `POST /auth/google/native` / `POST /auth/apple` on our API, which verifies them and issues our tokens. Never OAuth inside the WebView (Google returns `403 disallowed_useragent`). This also removes any consent-screen domain text on mobile entirely. |
 | Deep links | `apple-app-site-association` at `/.well-known/` (paths `/join/*`), `assetlinks.json` with the Play App Signing SHA-256, `App.addListener('appUrlOpen')` → join room. QR codes point at `https://letterlock.raltech.dev/join/CODE`: app opens if installed, website otherwise. |
 | Storage durability | iOS can evict WebView localStorage under disk pressure. Mirror settings/saves/progress to `@capacitor/preferences`; the account save on the server stays the durable copy. |
 | WebView specifics | `allowsInlineMediaPlayback` on iOS, Web Audio unlock on first tap (already done), `user-scalable=no`, `touch-action: manipulation`, `user-select: none` on game surfaces, `allowsLinkPreview: false`, Android 16 edge-to-edge (safe-area CSS already there). nginx must send CORS for `capacitor://localhost` and `https://localhost` on anything the app fetches from our domain. |
@@ -197,6 +264,16 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 | Audio | A remote press counts as the user gesture for audio unlock. |
 | Testing | Android TV emulator (1080p) in Android Studio for the real remote path; Playwright at 1920×1080 with **keyboard-only navigation** as a permanent e2e ("TV mode": no mouse, no touch, every screen completable with arrows + Enter + Escape); the noscroll matrix already has TV 1080p and 4K profiles. |
 
+### Phase 3c: Over-the-air updates, live at launch (D7, ~2 dev days)
+
+| Item | What |
+|---|---|
+| Plugin | `@capgo/capacitor-updater` in **manual mode** (no Capgo account): the app asks **our API** `GET /app-config` → `{ latestBundle: { version, url, sha256, minNative } }`, downloads the zip from `https://api.letterlock.raltech.dev/bundles/<version>.zip`, verifies the checksum, `set()`s it, and calls `notifyAppReady()` once the new bundle boots. If the new bundle fails to call `notifyAppReady()` within 10 s the plugin **auto-rolls back** to the previous one. |
+| Release flow | CI on an `ota-*` tag (or every push to `main`, flagged): `npm run build` → zip `dist/` → upload to `/opt/letterlock/bundles/` → update `app-config`. Web and apps get the same commit within minutes. |
+| Rules | OTA changes **JS, CSS, content and images only**. Anything native (new Capacitor plugin, permissions, SDK bump) goes through the stores, and `minNative` blocks old shells from loading a bundle they cannot run. Apple allows this (guideline 3.3.2: interpreted code that does not change the app's primary purpose). |
+| Channels | `production` and `beta` (RAL team phones) so a wave is tested on real devices before everyone gets it. |
+| Fallback | If the manual path proves flaky in testing, switch to Capgo cloud (Solo, $12/mo, 2,000 MAU) with the same plugin. Decision recorded here so no session re-debates it. |
+
 ### Phase 4: Ads (~2 dev days + AdMob approval 1-2 weeks after store launch)
 
 | Step | Detail |
@@ -204,7 +281,7 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 | SDK | `@capacitor-community/admob` (banner, interstitial, rewarded, UMP consent, ATT helper). AdMob only, no mediation until real volume. |
 | Consent | UMP form on every launch before ads (GDPR/EEA + UK + US states messages configured in AdMob), "Privacy options" entry in Settings so consent can be revoked. iOS: ATT prompt with a short pre-prompt; most users deny, ads become non-personalized (lower eCPM, still allowed). Add SKAdNetwork ids to Info.plist. |
 | Placement (D4) | `Victory` / between games in Bo3-Bo5: interstitial, capped 1 per 3-5 min, never at app open, never mid-question, never on the phone controller while a question is live. Rewarded: "watch to get an extra skip" (host) / "hint". Banner: Home, Category menu, Settings, Lobby waiting. **Never on the board.** |
-| Gate | `if (!adsRemoved && isNative && consentDone) show()`. Web shows no ads (D12). |
+| Gate | `if (!adsRemoved && consentDone) show()` with the platform SDK chosen by `isNative` (AdMob in the apps, AdSense H5 on web after Phase 8). Until Phase 8 the web shows no ads. |
 | Compliance | `app-ads.txt` on the domain listed in the store; declare "Contains ads"; App Privacy labels + Play Data safety include AdMob's collection; age rating consistent with ad content. |
 | Test | AdMob test unit ids in dev; never ship test ads (Apple 2.1). |
 
@@ -213,11 +290,11 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 | Step | Detail |
 |---|---|
 | Products | App Store Connect + Play Console: non-consumable `remove_ads`, $3.99 tier (auto per-country pricing). Enable Family Sharing on iOS (Play has no IAP family sharing). |
-| SDK | `@revenuecat/purchases-capacitor`. Entitlement `no_ads`. `Purchases.logIn(supabaseUserId)` at sign-in so anonymous purchases merge into the account. Restore behavior: **Transfer** (entitlement follows the last account that restores; prevents one purchase unlocking unlimited accounts). |
+| SDK | `@revenuecat/purchases-capacitor`. Entitlement `no_ads`. `Purchases.logIn(letterlockUserId)` at sign-in so anonymous purchases merge into the account. Restore behavior: **Transfer** (entitlement follows the last account that restores; prevents one purchase unlocking unlimited accounts). |
 | UI | "Remove Ads" card in Settings + a small button near ads; **"Restore Purchases"** button (Apple requires it). Success = ads gone instantly + confetti. |
-| Server sync | RevenueCat webhook → our endpoint (self-hosted edge function `rc-webhook`) → `profiles.ads_removed = true/false` + `ads_removed_source`, `ads_removed_at`. Handles refunds automatically (RevenueCat consumes Apple Server Notifications v2 + Google RTDN). RLS: user can read the flag, only service role writes it. |
+| Server sync | RevenueCat webhook → `POST /webhooks/revenuecat` on our API (shared-secret header) → `profiles.ads_removed = true/false` + `ads_removed_source`, `ads_removed_at`, `rc_app_user_id`. Handles refunds automatically (RevenueCat consumes Apple Server Notifications v2 + Google RTDN). Only the webhook handler writes the flag; users read it via `/me`. |
 | Client rule | **Ads hidden if the store says this device's store account owns it OR the signed-in account has `ads_removed = true`.** Cached locally for offline. |
-| Web | Same flag hides web ads (if ever added). Optional later: web purchase via Paddle/Lemon Squeezy writes the same flag (D13). |
+| Web | The same flag hides web ads once Phase 8 ships. No web purchase (D13). |
 | Test | Sandbox testers (Apple) + license testers (Play): buy, restore, refund → revoked, second device with same account → still no ads. |
 
 ### Phase 6: Store submission (~2 dev days of work + 2-4 weeks waiting)
@@ -226,25 +303,48 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 |---|---|
 | Assets | Icon 1024 (iOS) / 512 (Play), Play feature graphic 1024×500, screenshots from the **real build**: iPhone 6.9" (1320×2868), iPad 13" (2064×2752, we support iPad since it is the shared screen), Play phone + 7"/10" tablet. No logos or franchise names in screenshots. |
 | Listing | Name (D1), subtitle, description, keywords, support URL, marketing URL (same domain as `app-ads.txt`), privacy policy URL, account-deletion URL (Play). |
-| Forms | Apple: App Privacy labels (Supabase + AdMob + RevenueCat data), new 2025 age-rating questionnaire, `ITSAppUsesNonExemptEncryption = false`. Play: Data safety, IARC content rating, target audience 13+, "Contains ads", Play Billing declaration. |
+| Forms | Apple: App Privacy labels (our backend + AdMob + RevenueCat data), new 2025 age-rating questionnaire, `ITSAppUsesNonExemptEncryption = false`. Play: Data safety, IARC content rating, target audience 13+, "Contains ads", Play Billing declaration. |
 | Review notes | Demo room code flow, a test account, how to play host and player, explanation of offline behavior. Reviewers must be able to reach every feature. |
 | Play closed test | Personal account: 12 testers opted in for 14 days before production. Organization account: exempt. Start the internal/closed track the day Phase 3 builds. |
 | TestFlight | Internal testers immediately; external testers need a light TestFlight review. |
 | Submit | Play review hours to days; Apple 24-48 h typical. First submissions often get one rejection round: budget a week. |
 
+### Phase 6b: Web → app funnel, switched on after both stores approve (~0.5 dev day)
+
+| Item | What |
+|---|---|
+| iOS Safari | `<meta name="apple-itunes-app" content="app-id=<id>, app-argument=https://letterlock.raltech.dev/join/CODE">`: Safari's native Smart App Banner, free, and it deep-links into the same room. |
+| Everyone else on a phone browser | A dismissible bottom sheet on **Home** only: "Play Letterlock in the app" with the official App Store and Google Play badges (used per their brand guidelines), shown only on mobile browsers (not inside the apps, not on desktop, not on TV), remembered for 14 days after dismissal, never blocking the game. Links carry `utm_source=web` so the stores show where installs come from. |
+| Switch | `app-config.storeLinks` from the API: empty until both apps are live, so nothing shows before launch. |
+| Rule | Never mention prices or "cheaper than the app" anywhere (Apple 3.1.3). The popup promotes the app, nothing else. |
+
 ### Phase 7: Keep it alive (ops, ~2 dev days, then ongoing)
 
 | Item | What |
 |---|---|
-| Backups | Nightly `pg_dump -Fc` + tar of `volumes/` + `.env` → `rclone` to B2/S3, 30-day retention, quarterly restore test. Self-hosted Supabase has **no built-in backups**. |
-| Uptime | Uptime Kuma container: website, `/auth/v1/health`, `/rest/v1/`, Realtime WebSocket, `/api/app-config`. Alerts to your phone. |
+| Backups | Nightly `pg_dump -Fc` of `letterlock` + `letterlock_dev` + a copy of the env files → 14-day local rotation + `rclone` to B2/S3, 30-day retention, quarterly restore test. Neither palmandplate nor jawhara has the off-box copy yet; Letterlock ships it first. |
+| Uptime | Uptime Kuma (Docker, joins the Traefik network): website, `GET /healthz` (`db:true`), a Socket.IO connect probe, `/app-config`. Alerts to your phone. |
 | Crashes / errors | Sentry free tier (`@sentry/capacitor` + `@sentry/react`), plus Play Console vitals (Play hides apps above 1.09% crash / 0.47% ANR) and Xcode Organizer. |
 | Analytics | Store built-ins first (free, no consent prompts). PostHog (free tier or self-hosted) if we want funnels. No Firebase Analytics (ad-id consent burden). |
 | Network monitoring in-app | Capacitor Network listener + banner + queued writes (Phase 1/3). Yes, we need it: reviewers and real users both hit offline. |
 | Maintenance flag | `/api/app-config.maintenance` shows a banner and blocks online rooms during VPS maintenance. |
-| Updates | Pin every Docker image tag; upgrade manually with `run.sh recreate`; never auto-pull `latest`. Docker log rotation (`max-size 50m`). fail2ban + SSH keys only. |
+| Updates | Node/PM2/Postgres upgrades are manual and announced; `npm audit` in CI; fail2ban + move to SSH keys (a TODO shared with the other RAL repos). |
 | Recurring chores | Apple client secret for Sign in with Apple every 6 months; Play target API bump yearly (API 36 required since Aug 2026); Xcode major bump yearly (Xcode 26 required since Apr 2026); Apple age-rating and privacy label updates when SDKs change. |
 | Content takedowns | Publish `legal@` contact + a removal SOP: pull a pack within 48 h of a rights-holder complaint (logos, fandoms). |
+
+---
+
+### Phase 8: Web ads, the very last step (D12, ~2 dev days + AdSense approval)
+
+Runs only after the apps are live, AdMob is approved, and `app-ads.txt` / `ads.txt` sit on the domain. Plain-words explanation of how web ads differ from app ads is in §6b.
+
+| Step | Detail |
+|---|---|
+| Account | Apply for **Google AdSense** on `letterlock.raltech.dev` (needs the privacy policy, terms, real content pages, no placeholders). Then request **H5 Games Ads** access (a second gate inside AdSense, made for browser games). Approval days to weeks; a rejection can be re-applied after fixes. |
+| Integration | The **Ad Placement API**: one `adsbygoogle.js` tag with `data-ad-frequency-hint="120s"`, `adConfig()` at boot, `adBreak({type:'next', ...})` at the exact same moments as the apps (after a game), `adBreak({type:'reward', ...})` for the extra skip/hint. Google handles the consent message for EEA/UK (Consent Management enabled in AdSense). |
+| Gate | Same `ads_removed` flag: a signed-in player who bought Remove Ads in an app sees no web ads either. Never on the board, never during a question, never on the TV build. |
+| Files | `ads.txt` next to `app-ads.txt`; both list the AdSense and AdMob publisher lines. |
+| Reality | eCPM on web games is lower than in apps; expect pocket money at current traffic. It is done for completeness and because it costs two days, not for revenue. |
 
 ---
 
@@ -252,7 +352,7 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 
 - **One repo, one build.** `npm run build` produces `dist/`; the website serves it, `npx cap sync` copies the same `dist/` into the iOS and Android projects. Same commit = same game.
 - **One backend.** Everything reads `api.letterlock.raltech.dev`. A leaderboard row posted from an iPhone appears on the web instantly.
-- **Release rule.** Web deploys on every push (as today). App builds go out on a tag (`app-v1.2.0`). Content-only waves can wait and batch into the next app build; the web gets them immediately. If that gap hurts, add Capgo OTA (D7), which is allowed by Apple for JS/content that does not change the app's purpose.
+- **Release rule.** Web deploys on every push (as today, now to the VPS). App **bundles** go out over the air on the same push (Phase 3c), so content waves reach installed apps in minutes. Native shells go out on a tag (`app-v1.2.0`) only when something native changed; `minNative` keeps old shells from loading a bundle they cannot run.
 - **Version gate.** Old app versions can be forced to update via `minNative` when the API changes in a breaking way.
 - **Feature flags by platform.** `isNative` (Capacitor) gates ads, IAP, haptics plugin, native login. Web keeps the current behavior.
 
@@ -265,11 +365,11 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 | Apple Developer Program | $99 / year |
 | Google Play Console | $25 once |
 | D-U-N-S number | free |
-| AdMob, RevenueCat (<$2.5k/mo), Sentry (5k errors/mo), Uptime Kuma, Codemagic (500 min/mo), self-hosted Supabase | free |
-| VPS 8 GB | whatever you already pay (or ~$20-40/mo if upgraded) |
+| AdMob, AdSense, RevenueCat (<$2.5k/mo), Sentry (5k errors/mo), Uptime Kuma, Codemagic (500 min/mo), our own backend, OTA from our VPS | free |
+| VPS | already paid (the shared Hostinger KVM2, ~$8.49/mo across all RAL projects); Letterlock adds ~300 MB RAM |
 | Offsite backups (B2/S3) | ~$1-2 / month |
 | Store cut | 15% of purchases (Apple Small Business Program, Google first $1M) |
-| Optional later: Capgo OTA $12/mo, licensed music clips (quote needed), Paddle/Lemon Squeezy ~5% + $0.50 per web sale |
+| Optional later: Capgo cloud $12/mo (only if manual OTA misbehaves), licensed music clips (quote needed), Pixabay API is free |
 
 ---
 
@@ -283,6 +383,17 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 
 ---
 
+## 6b. 🌐 Web ads explained (D12), and why they come last
+
+- **Apps and websites use different Google products.** Apps use **AdMob** (an SDK inside the app). Websites use **AdSense** (a script on the page). Same Google account, two separate approvals, two separate publisher ids, two separate payout lines.
+- **Normal AdSense hates game pages.** Its reviewers look for text content; a page that is one canvas and a few buttons gets "low value content" rejections. Google built a special program for this: **H5 Games Ads** (the "Ad Placement API"). It shows full-screen ads between rounds and rewarded ads on request, exactly like the app placements. You need AdSense approval first, then H5 program access.
+- **Why last:** (1) approval needs the finished privacy/terms pages and a live, polished site; (2) a rejected AdSense application leaves a mark that slows later approvals, so we apply once, when everything is ready; (3) AdMob approval and the store listings must exist for `app-ads.txt` anyway, and both files live on the same domain; (4) money: web game eCPM is roughly half of app interstitials, and most of our traffic will move to the apps.
+- **Consent:** Google's own consent message (built into AdSense) covers EEA/UK; nothing else to build.
+- **Remove Ads on web:** honored through the account flag (bought once in an app, gone everywhere). No web checkout (D13).
+- **Never:** ads on the board, during a question, on the TV build, or in the phone controller while a question is live. Same rules as the apps.
+
+---
+
 ## 7. 🛒 Remove Ads: options chosen
 
 | Choice | Picked | Rejected |
@@ -290,7 +401,7 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 | Billing | Apple In-App Purchase + Google Play Billing (mandatory for digital goods) | Stripe inside the app (instant rejection) |
 | SDK | RevenueCat (free under $2.5k/mo, does receipt verification, refunds, restore, cross-platform entitlements, webhooks) | `cordova-plugin-purchase` / `@capgo/native-purchases` (free, but we would write and host receipt verification, Apple notifications, Google Pub/Sub RTDN, reconciliation jobs) |
 | Type | Non-consumable, one-time, ~$3.99 | Subscription (wrong vibe for a family game) |
-| Web | No web ads at launch; flag honored anyway; optional web purchase later via a merchant of record | Selling on web and advertising it inside the iOS app (Apple 3.1.3 outside the US) |
+| Web | Web ads as the last phase (AdSense H5 Games Ads); the account flag hides them for buyers; **no web purchase** (D13) | Selling on web and advertising it inside the iOS app (Apple 3.1.3 outside the US) |
 
 ---
 
@@ -300,7 +411,7 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 
 **Plain-English model:**
 
-1. Someone taps "Remove Ads" on an iPhone. Apple charges their Apple ID and records "Apple ID X owns `remove_ads`". Google does the same on Android with the Google account. Our Supabase account is invisible to Apple and Google.
+1. Someone taps "Remove Ads" on an iPhone. Apple charges their Apple ID and records "Apple ID X owns `remove_ads`". Google does the same on Android with the Google account. Our Letterlock account is invisible to Apple and Google.
 2. On the same Apple ID, a new phone or a reinstall: tap **Restore Purchases** and Apple re-grants it, no login of ours needed. Apple requires this button to exist. On Android the billing library re-grants automatically.
 3. An iPhone purchase does **not** appear on Android, and neither appears on the website. Different stores, no bridge. **Only our server can bridge them.**
 4. Store receipts can be faked on a jailbroken phone, so the thing that matters (our `ads_removed` flag) is only ever written after **server-side verification**. RevenueCat verifies with Apple/Google and calls our webhook; we write `profiles.ads_removed = true`.
@@ -326,13 +437,13 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 
 | Content | Legal risk | Store risk | Verdict |
 |---|---|---|---|
-| Guess the Song (1,624 iTunes 30-s previews) | HIGH | HIGH | **Remove from store build.** Apple 5.2.5: previews "may not be used for their entertainment value (e.g. ... the soundtrack to a game)". iTunes API terms: promo use only, must show the track name + buy link (which would spoil the answer), no monetization. |
-| TV Show / Sitcom clips (296 iTunes video previews) | HIGH | HIGH | **Remove.** Same terms; TV episode previews are not even listed as permitted promo content. Convert to text trivia. |
-| Guess the Melody, iTunes part (~212) | HIGH | HIGH | **Remove.** |
+| Guess the Song (1,624 iTunes 30-s previews) | HIGH | HIGH | **Web only (D3).** Hidden in every store build via `platforms: ['web']`. Apple 5.2.5: previews "may not be used for their entertainment value (e.g. ... the soundtrack to a game)"; iTunes API terms: promo use only, must show the track name + buy link (which would spoil the answer). The clip count does not change this, so no reduced version is store-safe. |
+| TV Show / Sitcom clips (296 iTunes video previews) | HIGH | HIGH | **Web only (D3).** Same terms. |
+| Guess the Melody, iTunes part (~212) | HIGH | HIGH | **Web only (D3).** |
 | Guess the Melody, our 23 synthesized public-domain WAVs | LOW | LOW | **Keep, bundle, grow to 200+** (classical, folk, anthems, nursery, pre-1930 songs). Compositions are PD, the recording is ours. |
 | Logos (~600 SimpleIcons SVGs) | MEDIUM | MEDIUM | **Keep** with disclaimer ("all logos are trademarks of their owners"), bundle the SVGs (CC0), remove the Apple logo, no logos in marketing, removal-on-request contact. Logo Quiz apps with 60M downloads live this way. |
 | Flags | LOW | LOW | Bundle everything (public domain). Sports pack still hotlinks flagcdn: switch to local files. |
-| Charades images (loremflickr) | HIGH | MED-HIGH | **Drop images, word only.** Random Flickr photos: unmoderated content in a family game + CC-BY-SA/NC licenses we cannot honor. |
+| Charades images (loremflickr today) | HIGH | MED-HIGH | **Keep images, change the source (D9, Phase 1c):** licensed (Pixabay Content License / CC0 / our own illustrations), human-reviewed, bundled in the apps, credits screen. loremflickr removed entirely. |
 | Fandom packs (17, text only) | MEDIUM | LOW-MED | **Keep** with "Unofficial fan trivia, not affiliated" label, franchise names never in store metadata, rename the Harry Potter and Pokémon packs to descriptive titles, publish a takedown contact, remove within 48 h on complaint. Facts are not copyrightable. |
 | Movies & TV / Music text trivia | LOW | LOW | Keep. |
 | Google Fonts | LOW | LOW | Bundle the font files (OFL/Apache). |
@@ -356,7 +467,7 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 | 5.1.1 No privacy policy / no in-app account deletion | Phase 1 adds both. |
 | 4.8 Google login without an equivalent private option | Sign in with Apple. |
 | 3.1.1 Digital goods sold outside IAP, or steering to web prices | RevenueCat native IAP, no web pricing mentioned in-app. |
-| 5.1.2 Privacy labels wrong with an ad SDK | Declare AdMob/RevenueCat/Supabase data honestly, ATT prompt in place. |
+| 5.1.2 Privacy labels wrong with an ad SDK | Declare AdMob/RevenueCat/our-backend data honestly, ATT prompt in place. |
 | 5.2 Intellectual property | §9 content changes. |
 | 2.5.2 Remote code changing app purpose | No `server.url` wrapper; OTA (if added) only for content/fixes. |
 | Play: personal account skipped the 12-tester/14-day test | Organization account (D2) or start the closed test early. |
@@ -370,7 +481,7 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 **Why it happens:** Google shows the **domain of the OAuth callback** until the app's branding is verified. Our callback is `lkudntyvngwwlzuciocd.supabase.co/auth/v1/callback`, so that is what users see. Supabase's own docs say: use a custom domain and verify your brand.
 
 **Fix (in order):**
-1. Move the callback to our domain: `https://api.letterlock.raltech.dev/auth/v1/callback` (automatic with Phase 2 self-hosting; the paid alternative is Supabase's Custom Domain add-on at $10/mo on the $25/mo Pro plan).
+1. Move the callback to our domain: `https://api.letterlock.raltech.dev/auth/google/callback`, served by our own API (Phase 2.4). The Google Cloud OAuth client gets this redirect URI; the old supabase.co one is removed at cutover.
 2. Verify `raltech.dev` in Google Search Console.
 3. Google Cloud → Google Auth Platform → Branding: app name **Letterlock**, logo, homepage `https://letterlock.raltech.dev`, privacy + terms URLs on that same domain (Phase 1 pages), authorized domain `raltech.dev`.
 4. Audience: External → **Publish** (Testing mode caps users and hides branding).
@@ -386,14 +497,18 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 | 0 Paperwork | 0.5 (me) + forms (you) | 1-2 weeks (D-U-N-S, Apple enrollment) | you |
 | 1 Store-readiness in web app | 5 | week 1-2 | nothing, start now |
 | 1b Mobile experience rehaul (`frontend-stack`) | 6 | week 2-3 | Phase 1 |
-| 2 Supabase → VPS | 3 + cutover | week 1-3 | VPS access (D8) |
-| 3 Capacitor apps | 5 | week 4-5 | Phases 1, 1b, Apple account for signing |
-| 3b TV support (Android TV / Google TV, remote) | 5 | week 5-6 | Phase 3 |
-| 4 Ads | 2 | week 6 | Phase 3, AdMob account |
-| 5 Remove Ads | 3 | week 6-7 | Phase 3, store products created |
-| 6 Submission | 2 + waiting | week 7-10 | all above; Play closed test 14 days if personal account; TV track review |
+| 1c Charades images (licensed, bundled) | 3 | week 3 | nothing |
+| 2 Backend to our VPS (custom API, the palmandplate way) | 14 + cutover | week 1-6 (in parallel with 1/1b/1c) | VPS access (§2c) |
+| 3 Capacitor apps | 5 | week 6-7 | Phases 1, 1b, 2, Apple account for signing |
+| 3b TV support (Android TV / Google TV, remote) | 5 | week 7-8 | Phase 3 |
+| 3c OTA updates from our VPS | 2 | week 8 | Phases 2, 3 |
+| 4 Ads (AdMob) | 2 | week 8-9 | Phase 3, AdMob account |
+| 5 Remove Ads | 3 | week 9 | Phase 3, store products created |
+| 6 Submission | 2 + waiting | week 10-13 | all above; TV track review |
+| 6b Web → app popup | 0.5 | after both approvals | Phase 6 |
 | 7 Ops | 2 | week 2 onward (backups first) | Phase 2 |
-| **Total** | **~33 dev days** | **~8-10 weeks to live** | |
+| 8 Web ads (AdSense H5) | 2 + approval | after launch, the last step | Phases 4, 6 |
+| **Total** | **~52 dev days** | **~12-14 weeks to store launch**, web ads after | |
 
 ---
 
@@ -402,13 +517,16 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 | Risk | Mitigation |
 |---|---|
 | Apple accepting a Bahraini bank for payouts is unverified (no published exclusion) | Try it; fallback is a bank in another country or the company entity's bank. |
-| Self-hosted Realtime bug #1617 (Broadcast/Presence crash on default tenant) | Test the host+phone lobby on the VPS on day one, rename tenant if needed, before any cutover. |
+| The custom backend is the critical path (~14 days, touches auth, data and realtime) | Build it first and in parallel with the UI phases; keep the two-client Playwright reconnect matrix green against the new API before cutover; Supabase project stays alive 2 weeks as rollback. |
 | Exact "Letterlock" name availability | Pick D1 name; reserve it in App Store Connect as soon as the account exists. |
 | Apple Universal Links with query strings are unreliable | We move to `/join/CODE` paths. |
 | Anti-steering rules (US ruling under Supreme Court review from Oct 2026; EU terms change Oct 2026) | We never mention web purchases in-app, so changes cannot hurt us. |
 | AdMob eCPM in MENA is low | Expectations set in §6; remove-ads is the revenue line. |
 | Rights-holder complaint on a logo or fandom pack | Takedown contact + 48 h removal SOP. |
-| Losing the VPS = losing everything (no managed backups) | Phase 7 backups are the first ops task, before cutover. |
+| Losing the VPS = losing everything (no managed backups) | Phase 7 backups (local + off-box) are the first ops task, before cutover. |
+| One shared box for every RAL project | Letterlock binds its API to localhost, uses its own DB role, its own PM2 names and ports (§2c), and never touches another tenant's files, Traefik entries or `acme.json`. |
+| AdSense rejects the site (Phase 8) | Apply once, late, with the finished pages; fix and re-apply; web ads are a nice-to-have. |
+| Hostinger intermittently drops SSH from GitHub runners | Jawhara's 5× retry over ports 22/2222 is copied into the deploy workflow. |
 | Sign in with Apple secret expires every 6 months | Calendar reminder + note in `MIGRATIONS.md`. |
 | Play 12-tester rule if the account ends up personal | Recruit testers early (friends, RAL team), start the closed track the day builds exist. |
 
@@ -428,7 +546,10 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 - Capacitor: `@capacitor-community/admob` https://github.com/capacitor-community/admob, deep links https://capacitorjs.com/docs/guides/deep-links, storage caveat https://capacitorjs.com/docs/guides/storage, Capacitor 8 https://capacitorjs.com/docs/updating/8-0
 - RevenueCat: Capacitor SDK https://www.revenuecat.com/docs/getting-started/installation/capacitor, identifying customers https://www.revenuecat.com/docs/customers/identifying-customers, restore behavior https://www.revenuecat.com/docs/projects/restore-behavior
 - Apple Server Notifications v2 https://developer.apple.com/documentation/AppStoreServerNotifications/App-Store-Server-Notifications-V2, Google RTDN https://developer.android.com/google/play/billing/rtdn-reference
-- Supabase self-hosting https://supabase.com/docs/guides/self-hosting/docker, restore from platform https://supabase.com/docs/guides/self-hosting/restore-from-platform, proxy/HTTPS https://supabase.com/docs/guides/self-hosting/self-hosted-proxy-https, self-hosted functions https://supabase.com/docs/guides/self-hosting/self-hosted-functions, Realtime issue https://github.com/supabase/realtime/issues/1617, Google provider https://supabase.com/docs/guides/auth/social-login/auth-google
+- Our own backend pattern: palmandplate `docs/architecture-research.md`, `apps/api/src/modules/auth/auth.service.ts`, `.github/workflows/deploy-prod.yml`; jawhara `.github/workflows/deploy-staging.yml`, `apps/api/src/realtime/realtime.gateway.ts`, `docs/TROUBLESHOOTING.md`; custompc `docs/CLAUDE-WORKING-STYLE.md` (Traefik layout)
+- OTA: Capgo updater plugin (manual mode) https://capgo.app/docs/plugin/self-hosted/manual-update/, pricing https://capgo.app/pricing/
+- Web ads: AdSense H5 Games Ads https://support.google.com/adsense/answer/9959170, Ad Placement API https://developers.google.com/ad-placement/docs/html5-game-structure
+- Images: Pixabay API + Content License https://pixabay.com/service/about/api/ and https://pixabay.com/service/terms/, Openverse API https://api.openverse.org/
 - Google brand verification https://developers.google.com/identity/protocols/oauth2/production-readiness/brand-verification, WebView OAuth block https://developers.googleblog.com/upcoming-security-changes-to-googles-oauth-20-authorization-endpoint-in-embedded-webviews/
 - Codemagic pricing https://docs.codemagic.io/billing/pricing/, Ionic Appflow sunset https://ionic.io/blog/important-announcement-the-future-of-ionics-commercial-products
 - SimpleIcons disclaimer https://github.com/simple-icons/simple-icons/blob/develop/DISCLAIMER.md, Flagpedia terms https://flagpedia.net/terms, loremflickr https://loremflickr.com/
@@ -452,3 +573,4 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 - 2026-09-03: created after the research sweep. No code changed yet. Awaiting decisions D1-D13 (recommendations given).
 - 2026-09-03 (later): Suhaib confirmed "we will migrate off Supabase": added §2b (what off-Supabase means, no Supabase account after cutover) + D14 (open-source stack self-run vs. custom backend). Readable artifact rebuilt as a tabbed page; HTML + PDF generator committed under `docs/launch-plan/`.
 - 2026-09-03 (later): added Phase 1b (mobile experience rehaul, portrait + landscape, URL-bar problem, via `frontend-stack`) and Phase 3b (Android TV / Google TV with remote control), decisions D15-D16, §16 TV platforms; totals now ~33 dev days / 8-10 weeks. PDF now lives in the repo.
+- 2026-09-05: **all decisions D1-D16 locked by Suhaib** (§2). D14 flipped to Option B (our own backend, the palmandplate way, no Supabase software), D7 to OTA now, D9 to keep images from licensed sources, D12 to web ads last, D13 to no web purchase, D3 to web-only media packs. Added §2c (VPS facts from the palmandplate / jawhara / custompc repos), Phase 1c (charades images), Phase 3c (OTA), Phase 6b (web → app popup), Phase 8 (web ads), §6b (web ads explained). Phase 2 rewritten for the custom backend. Totals now ~52 dev days / 12-14 weeks. Next step: clear the chat and start building in phase order.

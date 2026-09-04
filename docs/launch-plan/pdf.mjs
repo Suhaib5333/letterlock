@@ -22,7 +22,7 @@ await p.addStyleTag({ content: `
   .panel-sub, h2 + p, .panel-title + p{break-after:avoid}
   .panel-title, h2{break-inside:avoid}
   #p-decisions, #p-copyright, #p-review, #p-purchases, #p-mobiletv, #p-backend{break-before:page;margin-top:0;padding-top:0;border-top:0}
-  .flow, .tablewrap, .rail, .total{break-before:avoid}
+  .flow, .tablewrap, .rail, .total{break-before:avoid} footer{display:none}
   #p-decisions .tablewrap{break-inside:auto}
   .lede{font-size:14px}
   details.phase summary .arrow{display:none}
@@ -54,6 +54,6 @@ await p.waitForTimeout(500);
 await p.pdf({ path: OUT, format: 'A4', printBackground: true,
   margin: { top: '16mm', bottom: '16mm', left: '14mm', right: '14mm' },
   displayHeaderFooter: true, headerTemplate: '<div></div>',
-  footerTemplate: '<div style="width:100%;font-size:8.5px;color:#737b99;font-family:sans-serif;padding:0 14mm;display:flex;justify-content:space-between"><span>Letterlock · Store launch plan · 3 Sep 2026</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>'
+  footerTemplate: '<div style="width:100%;font-size:8.5px;color:#737b99;font-family:sans-serif;padding:0 14mm;display:flex;justify-content:space-between"><span>Letterlock · Store launch plan · 5 Sep 2026</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>'
 });
 await b.close(); console.log('pdf ok');

@@ -51,3 +51,10 @@ verify-shots/
 
 # Playwright MCP scratch (screenshots/snapshots)
 .playwright-mcp/
+
+# VPS / DB credentials for the Phase-2 backend (LAUNCH_PLAN.md §2c). Names only
+# live in the plan; values live here and in GitHub Actions secrets. Never commit.
+infra/vps-creds
+infra/db-creds
+infra/.kvm-known-hosts
+infra/*.backup

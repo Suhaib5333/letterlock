@@ -137,7 +137,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <div class="eyebrow">Letterlock · Store launch plan · 3 Sep 2026</div>
   <h1>From web game to <span>App Store and Play Store</span>, on our own VPS</h1>
   <p class="lede">The plain-words version of <code>LAUNCH_PLAN.md</code>. Pick a tab.</p>
-  <div class="meta"><span><b>~33</b> dev days</span><span><b>8 to 10</b> weeks to live</span><span><b>16</b> decisions waiting on you</span><span><b>9</b> phases</span></div>
+  <div class="meta"><span><b>~52</b> dev days</span><span><b>12 to 14</b> weeks to store launch</span><span><b>16</b> decisions locked</span><span><b>14</b> phases</span></div>
 </header>
 
 <nav class="tabs" aria-label="Plan sections">
@@ -157,19 +157,20 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
 <!-- OVERVIEW -->
 <section role="tabpanel" id="p-overview" aria-labelledby="tab-overview">
+  <div class="callout"><p><b>✅ Locked.</b> Suhaib made every decision (D1 to D16) on 5 Sep 2026. The "Your decisions" tab now shows what was chosen and what it changes. Building starts in phase order.</p></div>
   <h2 class="panel-title">The whole plan in 13 lines</h2>
   <ol class="tl">
     <li><span><b>Wrap, don't rewrite.</b> The React app ships inside a Capacitor shell. One codebase for web, iOS and Android.</span></li>
-    <li><span><b>Backend leaves Supabase cloud and runs on our VPS.</b> We run the open-source server software ourselves (Postgres, auth, API, realtime). No Supabase account, no bill, no supabase.co anywhere. Only the URL changes in the app. Web and apps share one database. See the "Off Supabase" tab.</span></li>
+    <li><span><b>Backend leaves Supabase and runs on our VPS, the palmandplate way.</b> Our own API (NestJS + Prisma) and a plain Postgres database on the Hostinger server we already run, behind the shared Traefik proxy, deployed by GitHub Actions over SSH. No Supabase software anywhere. Web and apps share that one database, so accounts, leaderboards, saves and "ads removed" are identical everywhere.</span></li>
     <li><span><b>That same move fixes the Google login text.</b> The consent screen shows the callback domain. Ours becomes <code>api.letterlock.raltech.dev</code>, then we verify the brand so it reads "Letterlock".</span></li>
     <li><span><b>Ads = Google AdMob.</b> Interstitial only between games, rewarded ads for an extra skip or hint, banner only on menus. Never during a question.</span></li>
     <li><span><b>Remove Ads = one purchase, about $3.99,</b> through Apple and Google billing via RevenueCat, mirrored to a flag on the account so it follows the login, not just the phone.</span></li>
     <li><span><b>Purchases belong to the Apple ID or Google account by default.</b> Our server flag is what makes them follow the user across iPhone, Android and web. The "Remove Ads" tab explains it.</span></li>
-    <li><span><b>The song, TV-clip and iTunes-melody packs cannot ship in the store build.</b> Apple's guideline 5.2.5 forbids using iTunes previews "as the soundtrack to a game". Replace with self-made public-domain melodies and text clues.</span></li>
+    <li><span><b>The song, TV-clip and iTunes-melody packs stay on the web and are hidden in the store builds.</b> Apple's guideline 5.2.5 forbids using iTunes previews "as the soundtrack to a game", and the number of clips does not change that. Self-made public-domain melodies grow to 200+ for both. Charades keep their images, from licensed, bundled sources.</span></li>
     <li><span><b>Store requirements we do not have yet:</b> in-app account deletion, privacy policy and terms pages, Sign in with Apple (mandatory because we offer Google login), real PNG icons, offline handling.</span></li>
     <li><span><b>"AI-looking code" is a myth.</b> Neither store checks who wrote the code. They reject thin web wrappers, crashes, placeholders and missing privacy features. The "Store review" tab is the real checklist.</span></li>
     <li><span><b>Paperwork first:</b> Apple Developer ($99/yr), Google Play ($25 once), AdMob, RevenueCat, and a differentiated store name because exact "Letterlock" is already taken.</span></li>
-    <li><span><b>Ops we must add:</b> backups, uptime monitoring, crash reporting, a version gate, <code>app-ads.txt</code>.</span></li>
+    <li><span><b>Ops we must add:</b> backups, uptime monitoring, crash reporting, a version gate, <code>app-ads.txt</code>, and over-the-air updates from day one so content waves never wait for a store review.</span></li>
     <li><span><b>Realistic money:</b> ads earn tens of dollars a month at hundreds of daily players. The $3.99 purchase will likely out-earn ads early. Do it for reach and polish, not quick revenue.</span></li>
     <li><span><b>Mobile and TV are first-class targets.</b> A full mobile experience rehaul (portrait and landscape, no browser bar) built with the frontend-stack pipeline before submission, plus an Android TV / Google TV build controlled with the remote. See the "Mobile &amp; TV" tab.</span></li>
   </ol>
@@ -180,7 +181,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <tbody>
   <tr><td>Web hosting</td><td><b>Cloudflare Pages</b>, not the VPS. The VPS hosts nothing for Letterlock yet.</td><td>The migration builds the VPS side from scratch.</td></tr>
   <tr><td>Backend</td><td>Supabase <b>cloud</b> project, ref committed in <code>.env.production</code>.</td><td>That ref is the random text on the Google consent screen. We leave it.</td></tr>
-  <tr><td>Backend footprint</td><td>Auth (email code via Resend, Google), 9 tables, ~30 database functions, 12 migrations, realtime broadcast + presence, 2 edge functions, no file storage.</td><td>Small and portable. Moving it is realistic.</td></tr>
+  <tr><td>Backend footprint</td><td>Auth (email code via Resend, Google), 9 tables, ~30 database functions, 12 migrations, realtime broadcast + presence, 2 edge functions, no file storage.</td><td>Small and portable: about 30 endpoints and 3 realtime channels to rebuild in our own API.</td></tr>
   <tr><td>Account deletion</td><td>None for users.</td><td>Store blocker on both stores.</td></tr>
   <tr><td>Privacy policy, terms</td><td>None anywhere.</td><td>Store blocker, also needed by AdMob and Google brand verification.</td></tr>
   <tr><td>Sign in with Apple</td><td>Not built.</td><td>Required by Apple 4.8 because Google login exists.</td></tr>
@@ -193,46 +194,63 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
 <!-- DECISIONS -->
 <section role="tabpanel" id="p-decisions" aria-labelledby="tab-decisions" hidden>
-  <h2 class="panel-title">Decisions waiting on you</h2>
-  <p class="panel-sub">Recommendation is listed first. Say "go with the recommendations" and the plan proceeds as written.</p>
+  <h2 class="panel-title">Decisions: locked on 5 Sep 2026</h2>
+  <p class="panel-sub">Every row is final. "Locked" is what Suhaib chose, "Means" is what the build does because of it.</p>
   <div class="tablewrap"><table>
-  <thead><tr><th>#</th><th>Decision</th><th>Recommendation</th><th>Why</th></tr></thead>
+  <thead><tr><th>#</th><th>Decision</th><th>Locked</th><th>Means</th></tr></thead>
   <tbody>
-  <tr><td>D1</td><td>Store listing name</td><td><b>Letterlock: Trivia Hex Duel</b> (or Letterlock Party Quiz)</td><td>Exact "Letterlock" is taken on both stores by word-puzzle apps. Apple names must be unique.</td></tr>
-  <tr><td>D2</td><td>Developer account type</td><td><b>Organization</b> (RAL, free D-U-N-S number)</td><td>Shows the company name; Play organization accounts skip the 12-testers-for-14-days rule.</td></tr>
-  <tr><td>D3</td><td>Song / TV / iTunes-melody packs</td><td><b>Remove from the store build.</b> Grow the 23 self-made melodies to 200+, convert songs and TV to text clues.</td><td>Apple 5.2.5 and the iTunes API terms forbid game use. Licensed clips can come later.</td></tr>
-  <tr><td>D4</td><td>Ads placement and price</td><td>Interstitial between games (max 1 per 3 to 5 min), rewarded for skip/hint, banner on menus. Remove Ads at <b>$3.99</b>.</td><td>Matches Play "Better Ads" and Apple UX rules. $2.99 to $4.99 is the norm.</td></tr>
-  <tr><td>D5</td><td>Static web hosting</td><td>Move the site to the VPS too, keep Cloudflare as DNS only</td><td>You asked for "fully on our VPS". One hour once the API is there.</td></tr>
-  <tr><td>D6</td><td>Target audience</td><td><b>13+, not directed at children</b></td><td>Kids Category forbids third-party ads. Keep the Kids pack, skip child-directed marketing.</td></tr>
-  <tr><td>D7</td><td>Over-the-air JS updates</td><td><b>Later.</b> Store builds only at launch.</td><td>Content waves need a store update (Play hours, Apple 1 to 2 days). Add Capgo when that hurts.</td></tr>
-  <tr><td>D8</td><td>VPS size</td><td><b>8 GB RAM</b> (4 GB hard minimum)</td><td>The backend stack idles near 3 to 4 GB. Tell me the current spec.</td></tr>
-  <tr><td>D9</td><td>Charades images</td><td><b>Drop images, show the word only</b></td><td>Random Flickr photos: content-safety and license risk.</td></tr>
-  <tr><td>D10</td><td>Logo packs</td><td>Keep: bundle SVGs, trademark disclaimer, drop the Apple logo, removal contact</td><td>How every Logo Quiz app survives.</td></tr>
-  <tr><td>D11</td><td>Fandom packs</td><td>Keep as text, label "Unofficial fan trivia", rename the Harry Potter and Pokémon packs, never in store metadata</td><td>Those two rights-holders are the most aggressive. Facts are not copyrightable.</td></tr>
-  <tr><td>D12</td><td>Web ads</td><td><b>Skip at launch</b></td><td>AdSense rejects thin-text game pages; a rejection complicates later approval.</td></tr>
-  <tr><td>D13</td><td>Web Remove-Ads purchase</td><td>Optional, later, via Paddle or Lemon Squeezy</td><td>They handle VAT. Never mention web pricing inside the apps.</td></tr>
-  <tr><td>D15</td><td>TV scope at launch</td><td><b>Android TV / Google TV only</b> (Sony, Philips, TCL, Hisense, Xiaomi, Chromecast, Nvidia Shield), same Android project. LG and Samsung later as HTML5 TV apps. Apple TV not feasible.</td><td>LG (webOS) and Samsung (Tizen) have no Play Store but accept HTML5 apps, so our web build can be packaged for them later. Apple TV has no web view at all.</td></tr>
-  <tr><td>D16</td><td>Mobile rehaul before submission</td><td><b>Yes</b>, Phase 1b runs before the store builds, through the frontend-stack pipeline (style pick, taste floor, guidelines review, Playwright device-matrix verify).</td><td>Store screenshots and first reviews come from the mobile UI. Shipping the current mobile experience and fixing later burns the launch.</td></tr>
-  <tr><td>D14</td><td><b>What runs on the VPS</b></td><td><b>Option A:</b> run the open-source Supabase server stack ourselves (no Supabase account, no bill, our domain). ~3 days, zero app rewrite.</td><td><b>Option B</b> is a fully custom backend (own API, own auth, own websockets): 4 to 6 weeks of rewrite for the same result. The database is plain Postgres either way, so B stays possible later. See the "Off Supabase" tab.</td></tr>
+  <tr><td>D1</td><td>Store listing name</td><td><b>Letterlock: Party Quiz</b></td><td>Reserve it in both consoles the day the accounts exist. Bundle id stays <code>dev.raltech.letterlock</code>.</td></tr>
+  <tr><td>D2</td><td>Developer account</td><td><b>Organization: RAL Technologies</b> on both stores (free D-U-N-S number first)</td><td>Company name on the listing; Play organization accounts skip the 12-testers / 14-day closed test.</td></tr>
+  <tr><td>D3</td><td>Song / TV / iTunes-melody packs</td><td><b>Web only.</b> Hidden in the iOS, Android and TV builds.</td><td>Workaround checked: the clip <i>count</i> is irrelevant, the <i>source</i> (iTunes previews) is what Apple forbids, so no reduced version is store-safe. Packs are platform-gated; public-domain melodies grow to 200+ and ship everywhere.</td></tr>
+  <tr><td>D4</td><td>Ads placement and price</td><td><b>Interstitial after each game</b>, rewarded for an extra skip or hint, banner on menus. <b>Remove Ads $3.99</b> one-time.</td><td>Never during a question, never on the board, never at app open.</td></tr>
+  <tr><td>D5</td><td>Static web hosting</td><td><b>Move to the VPS</b> (PM2 behind Traefik). Cloudflare stays DNS only.</td><td>Cloudflare Pages retired at cutover. Everything Letterlock runs on our VPS.</td></tr>
+  <tr><td>D6</td><td>Target audience</td><td><b>13+, not directed at children</b></td><td>Kids pack stays, no child-directed marketing, standard ads allowed.</td></tr>
+  <tr><td>D7</td><td>Over-the-air updates</td><td><b>Yes, fully working at launch</b></td><td>Phase 3c: the Capgo updater plugin in manual mode pulling bundles from <b>our own VPS</b> (no Capgo account). Content reaches installed apps in minutes; native changes still go through the stores.</td></tr>
+  <tr><td>D8</td><td>VPS</td><td><b>The existing Hostinger KVM2</b> (2 vCPU, 8 GB RAM, 100 GB NVMe) that already runs palmandplate, jawhara and custompc</td><td>No new server. Details from those repos are in the "Off Supabase" tab. Credentials only in gitignored files and GitHub secrets.</td></tr>
+  <tr><td>D9</td><td>Charades images</td><td><b>Keep images, make them clean and legal</b></td><td>Phase 1c: licensed sources (Pixabay, CC0, our own illustrations), human-reviewed, bundled in the apps, served from our domain on web, credits screen. No random Flickr photos.</td></tr>
+  <tr><td>D10</td><td>Logo packs</td><td><b>Keep</b>: bundle SVGs, trademark disclaimer, drop the Apple logo, removal contact</td><td>How every Logo Quiz app operates.</td></tr>
+  <tr><td>D11</td><td>Fandom packs</td><td><b>Keep</b> as text, "Unofficial fan trivia" label, rename the Harry Potter and Pokémon packs, never in store metadata</td><td>Facts are not copyrightable; the two most aggressive rights-holders get extra distance.</td></tr>
+  <tr><td>D12</td><td>Web ads</td><td><b>Yes, as the very last step</b>, after the apps are live and AdMob is approved</td><td>Phase 8: AdSense "H5 Games Ads", same placements as the apps, honors the Remove Ads flag. Explained in the Ads tab.</td></tr>
+  <tr><td>D13</td><td>Web Remove-Ads purchase</td><td><b>No</b></td><td>A purchase made in an app still hides web ads for that account. No web checkout.</td></tr>
+  <tr><td>D14</td><td><b>What runs on the VPS</b></td><td><b>Our own backend, the palmandplate way.</b> No Supabase software at all.</td><td>NestJS API + Prisma + the Postgres already on the box + Socket.IO realtime, PM2, Traefik, GitHub Actions over SSH. Phase 2 grows from 3 to about 14 dev days; users keep accounts, XP, friends and saves.</td></tr>
+  <tr><td>D15</td><td>TV scope at launch</td><td><b>Android TV / Google TV only</b></td><td>Same Android project, Play TV track, remote navigation, on-screen keyboard on inputs. LG and Samsung later as HTML5 apps.</td></tr>
+  <tr><td>D16</td><td>Mobile rehaul before submission</td><td><b>Yes, top priority: beautiful and fully playable</b></td><td>Phase 1b through the frontend-stack pipeline, before the store builds.</td></tr>
+  </tbody></table></div>
+
+  <h2>Also requested, now in the plan</h2>
+  <div class="tablewrap stack"><table>
+  <thead><tr><th>Ask</th><th>Where</th></tr></thead>
+  <tbody>
+  <tr><td>Web home screen pops up "Get the app" with store links, only after the apps are live</td><td>Phase 6b</td></tr>
+  <tr><td>Ads on the web too, at the very end</td><td>Phase 8, Ads tab</td></tr>
+  <tr><td>Over-the-air updates fully functioning at launch</td><td>Phase 3c</td></tr>
+  <tr><td>Full mobile rehaul, portrait and landscape, with frontend-stack</td><td>Phase 1b, Mobile &amp; TV tab</td></tr>
+  <tr><td>TVs with the Play Store, remote control, keyboard pops on text fields</td><td>Phase 3b, Mobile &amp; TV tab</td></tr>
+  <tr><td>VPS details and config from the jawhara / custompc / palmandplate repos, secrets gitignored</td><td>Off Supabase tab, Phase 2</td></tr>
+  <tr><td>Charades images kept and made to work properly</td><td>Phase 1c</td></tr>
   </tbody></table></div>
 </section>
 
 <!-- PHASES -->
 <section role="tabpanel" id="p-phases" aria-labelledby="tab-phases" hidden>
-  <h2 class="panel-title">The nine phases</h2>
-  <p class="panel-sub">Phases 1 and 2 run in parallel. Phase 0 starts today because it is mostly waiting. Click a phase to open it.</p>
+  <h2 class="panel-title">Every phase, in build order</h2>
+  <p class="panel-sub">Phase 2 (the backend) is the critical path and runs in parallel with 1, 1b and 1c. Phase 0 starts today because it is mostly waiting. Click a phase to open it.</p>
   <div class="rail">
     <a href="#ph0"><b>0 Paperwork</b><small>1 to 2 weeks wait</small></a>
     <a href="#ph1"><b>1 Store-ready web</b><small>5 days</small></a>
     <a href="#ph1b"><b>1b Mobile rehaul</b><small>6 days</small></a>
-    <a href="#ph2"><b>2 Backend to VPS</b><small>3 days + cutover</small></a>
+    <a href="#ph1c"><b>1c Charades images</b><small>3 days</small></a>
+    <a href="#ph2"><b>2 Our backend on the VPS</b><small>14 days + cutover</small></a>
     <a href="#ph3"><b>3 Capacitor apps</b><small>5 days</small></a>
     <a href="#ph3b"><b>3b TV support</b><small>5 days</small></a>
+    <a href="#ph3c"><b>3c OTA updates</b><small>2 days</small></a>
     <a href="#ph4"><b>4 Ads</b><small>2 days</small></a>
     <a href="#ph5"><b>5 Remove Ads</b><small>3 days</small></a>
     <a href="#ph6"><b>6 Submission</b><small>2 days + 3 to 4 weeks</small></a>
+    <a href="#ph6b"><b>6b Get-the-app popup</b><small>half a day</small></a>
     <a href="#ph7"><b>7 Ops</b><small>2 days, ongoing</small></a>
-  </div>
+    <a href="#ph8"><b>8 Web ads</b><small>2 days, last</small></a>
+  </div></div>
 
   <details class="phase" id="ph0" open>
     <summary><span class="hex">0</span><h3>Paperwork and accounts</h3><span class="eta">you · 1 hour of forms · 1 to 2 weeks wait</span><span class="arrow">▸</span></summary>
@@ -244,7 +262,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
         <li>AdMob account (Bahrain supported, $100 payout threshold). Apps get approved only once live in a store.</li>
         <li>RevenueCat account (free under $2,500/month).</li>
         <li>Google Cloud consent screen: app name Letterlock, logo, homepage, privacy URL, authorized domain, Search Console verification.</li>
-        <li>Pick the store name (D1), decide the VPS (D8), give me SSH access.</li>
+        <li>Done on 5 Sep: name (D1) and VPS (D8) locked. Still needed from you: the D-U-N-S number, the store enrollments, and the VPS password in the gitignored <code>infra/vps-creds</code> file.</li>
       </ul>
     </div>
   </details>
@@ -264,7 +282,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       <tr><td>Version gate</td><td><code>/api/app-config</code> with min version + maintenance flag</td><td>Retire old app versions, show maintenance notices</td></tr>
       <tr><td>Icons + splash</td><td>1024 PNG master, generated sets, PWA icons</td><td>Stores + PWA</td></tr>
       <tr><td>Bundle media</td><td>Flags, logo SVGs, fonts served locally</td><td>Offline, review reliability</td></tr>
-      <tr><td>Content changes</td><td>D3, D9, D10, D11 applied</td><td>Copyright tab</td></tr>
+      <tr><td>Content changes</td><td>D3 (media packs web-only via a platform flag), D10, D11 applied; D9 is Phase 1c</td><td>Copyright tab</td></tr>
       <tr><td><code>app-ads.txt</code></td><td>Root of the domain listed in the stores</td><td>AdMob requires it since Jan 2025</td></tr>
       </tbody></table></div>
     </div>
@@ -284,20 +302,41 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     </div>
   </details>
 
-  <details class="phase" id="ph2">
-    <summary><span class="hex">2</span><h3>Backend off Supabase cloud, onto the VPS</h3><span class="eta">3 dev days + a cutover evening</span><span class="arrow">▸</span></summary>
+  <details class="phase" id="ph1c">
+    <summary><span class="hex">1c</span><h3>Charades images, kept and made legal</h3><span class="eta">3 dev days</span><span class="arrow">▸</span></summary>
     <div class="body">
-      <div class="callout"><p><b>Will this continue for our app? Yes.</b> The apps and the website all talk to <code>api.letterlock.raltech.dev</code>. Same database, same accounts, same leaderboards, same saved games, same ads-removed flag. Nothing in the app depends on Supabase cloud. Full explanation in the "Off Supabase" tab.</p></div>
+      <p>Today the five charades packs (about 1,100 prompts) load a random Flickr photo at play time: unmoderated content in a family game, licenses we cannot honor, and a remote fetch that fails on reviewer networks. Suhaib wants the images kept, so the source changes.</p>
       <ul>
-        <li>Docker stack on the VPS: Postgres 17, API gateway, auth server, REST layer, realtime server, functions runtime, admin UI. Remove file storage, image proxy, analytics and log shipper to save about 1.5 GB RAM.</li>
-        <li>nginx in front with TLS on <code>api.letterlock.raltech.dev</code>, WebSocket headers for realtime, admin UI behind basic auth, firewall 22/80/443 only, IPv6 record.</li>
-        <li>Auth config: site URL, redirect allowlist, Google callback on our domain (added in Google Cloud too), Apple provider, Resend SMTP for auth mails.</li>
-        <li>Copy the <code>send-otp</code> function into the functions volume.</li>
-        <li>Data: three dumps (roles, schema, data) restored into the VPS. Password hashes and Google identities survive. <b>Users sign in again once.</b></li>
-        <li>Test the host + phone lobby on the VPS first: a known self-host realtime bug can crash broadcast on the default tenant.</li>
-        <li>Rewrite CI: build, rsync, migrations by connection string, functions by scp. Point the QA cleanup workflow at the new admin URL.</li>
-        <li>Cutover on a quiet evening, keep the cloud project two weeks as rollback, then delete it. From then on there is no Supabase account.</li>
+        <li><b>Sources, in order:</b> Pixabay (safe search on, commercial use, no attribution needed), then Openverse filtered to CC0 / public domain, then our own generated flat illustrations for abstract prompts such as actions and emotions where photo search fails.</li>
+        <li><b>One script</b> fetches a candidate per prompt, resizes to 512 px WebP under 40 KB, writes a credits file per image, and only re-fetches what is missing.</li>
+        <li><b>Human review</b> on contact sheets before anything ships; a reject list forces a re-fetch or a generated fallback.</li>
+        <li><b>Bundled in the apps</b> (about 40 MB, fine for both stores) so the QR secret-prompt page works offline and on Apple's review network; served from our domain on web and cached.</li>
+        <li>If an image is missing the word still shows, exactly as today. A build check refuses any pack with a remote image URL left in it.</li>
       </ul>
+    </div>
+  </details>
+
+  <details class="phase" id="ph2">
+    <summary><span class="hex">2</span><h3>Backend off Supabase, onto our VPS, the palmandplate way</h3><span class="eta">14 dev days + a cutover evening</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <div class="callout"><p><b>Will this continue for our app? Yes.</b> The website, the phone apps and the TV build all talk to <code>api.letterlock.raltech.dev</code>, our own API. Same database, same accounts, same leaderboards, same saved games, same "ads removed" flag. After cutover there is no Supabase anything. The VPS facts, ports and paths are in the "Off Supabase" tab.</p></div>
+      <p><b>What we copy from palmandplate and jawhara (same server, proven):</b> NestJS + Prisma, the native Postgres, the email-code login service, refresh-token rotation, Resend for mail, PM2 processes, Traefik routing, GitHub Actions deploy over retrying SSH, a health check that gates every deploy, a Socket.IO realtime gateway, a nightly database dump. <b>What we add:</b> Google and Apple sign-in, guest tokens for phones that join a room without an account, an off-server backup copy, uptime monitoring.</p>
+      <div class="tablewrap"><table>
+      <thead><tr><th>Step</th><th>Days</th><th>What</th></tr></thead>
+      <tbody>
+      <tr><td>Provision</td><td class="num">0.5</td><td>Database role + two databases on the existing Postgres, folders, Traefik routing file, DNS records.</td></tr>
+      <tr><td>API skeleton</td><td class="num">1</td><td>NestJS project, health endpoint, API docs page, environment-driven allowed origins, error filters.</td></tr>
+      <tr><td>Schema</td><td class="num">1</td><td>Same 9 tables and the same ids as today, plus users, login codes, refresh tokens, guest tokens. The proven database functions (leaderboard paging, ranks, username cooldown, XP) stay as SQL and are called from the API.</td></tr>
+      <tr><td>Auth</td><td class="num">3</td><td>Email code login (copied), Google on the web through <b>our</b> callback URL (this is the consent-screen fix), Google and Apple ID tokens from the apps, Sign in with Apple on web, account deletion, guest tokens, roles.</td></tr>
+      <tr><td>Data endpoints</td><td class="num">3</td><td>About 30 routes replacing today's database calls: profile, username, leaderboard, ranks, XP, friends, saves, progress, custom packs, room members, admin. <b>Every one of today's 23 row-security policies becomes an explicit "only your own rows" check</b>, ticked off a checklist before cutover.</td></tr>
+      <tr><td>Realtime</td><td class="num">2</td><td>Socket.IO gateway: token checked on connect, rooms assigned by the server. Mirrors today's lobby broadcast + presence, friends presence and notifications. Host reconnect re-sends the live question exactly as today.</td></tr>
+      <tr><td>Client rewrite</td><td class="num">3</td><td>Remove the Supabase library. One API client with automatic token refresh, an auth provider, the lobby and friends code on Socket.IO. The existing username-gate and reconnect e2e suites must stay green.</td></tr>
+      <tr><td>Data migration</td><td class="num">0.5</td><td>Dump the 9 tables plus user ids, emails and Google links; restore with the same ids so every link survives. <b>Users sign in again once</b>; username, XP, friends, saves and leaderboard rows are all there.</td></tr>
+      <tr><td>CI/CD</td><td class="num">1</td><td>Two workflows (main → prod, uat → dev): build, upload, SSH with 5 retries across two ports, apply migrations, restart PM2, poll the health check. Remove every Cloudflare Pages and Supabase step.</td></tr>
+      <tr><td>Backups + monitoring</td><td class="num">(Phase 7)</td><td>Nightly dumps, 14-day local + 30-day off-server copy, Uptime Kuma. Done before cutover.</td></tr>
+      <tr><td>Cutover</td><td class="num">evening</td><td>Final dump, restore, deploy, smoke test (code login, Google, Apple, room host + phone, leaderboard, resume), flip DNS. Supabase project kept two weeks as rollback, then deleted.</td></tr>
+      </tbody></table></div>
+      <p><b>Why 14 days and not 3:</b> running Supabase's open-source stack would have been a URL change. Suhaib chose no Supabase software at all, so login, data access and realtime are rewritten. The upside is one house pattern across RAL (palmandplate, jawhara, Letterlock), zero dependence on Supabase's roadmap, and a backend any RAL developer already knows.</p>
     </div>
   </details>
 
@@ -329,6 +368,19 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     </div>
   </details>
 
+  <details class="phase" id="ph3c">
+    <summary><span class="hex">3c</span><h3>Over-the-air updates, live at launch</h3><span class="eta">2 dev days</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <ul>
+        <li>The Capgo updater plugin in <b>manual mode</b>, no Capgo account: the app asks our API for the latest bundle, downloads the zip from our VPS, checks the checksum, switches to it, and reports "ready". If the new bundle fails to boot within 10 seconds it rolls back by itself.</li>
+        <li>CI zips the web build and publishes it on the same push that deploys the website, so web and installed apps run the same commit within minutes.</li>
+        <li>OTA moves <b>JS, CSS, content and images only</b>. Anything native (a new plugin, a permission, an SDK bump) goes through the stores, and a minimum-native-version gate keeps old shells from loading a bundle they cannot run. Apple allows this (guideline 3.3.2).</li>
+        <li>Two channels: production, and beta for RAL team phones so a wave is tested on real devices first.</li>
+        <li>Fallback, decided now so nobody re-debates it: if the manual path is flaky in testing, switch to Capgo cloud ($12/mo) with the same plugin.</li>
+      </ul>
+    </div>
+  </details>
+
   <details class="phase" id="ph4">
     <summary><span class="hex">4</span><h3>Ads</h3><span class="eta">2 dev days + AdMob approval 1 to 2 weeks after launch</span><span class="arrow">▸</span></summary>
     <div class="body">
@@ -346,7 +398,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       <ul>
         <li>One non-consumable product in both stores, $3.99 tier, Family Sharing on for iOS.</li>
         <li>RevenueCat SDK, entitlement <code>no_ads</code>, linked to our user id at sign-in, restore behavior "transfer".</li>
-        <li>Restore Purchases button (Apple requires it). RevenueCat webhook writes <code>profiles.ads_removed</code> in our database; refunds revoke it automatically.</li>
+        <li>Restore Purchases button (Apple requires it). RevenueCat calls a webhook on <b>our API</b>, which writes <code>profiles.ads_removed</code> in our database; refunds revoke it automatically. The same flag hides web ads once Phase 8 ships.</li>
       </ul>
     </div>
   </details>
@@ -362,17 +414,42 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     </div>
   </details>
 
+  <details class="phase" id="ph6b">
+    <summary><span class="hex">6b</span><h3>Web → app funnel, switched on after both stores approve</h3><span class="eta">half a dev day</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <ul>
+        <li><b>iPhone Safari:</b> Apple's own Smart App Banner (one meta tag), which also deep-links into the same room.</li>
+        <li><b>Every other phone browser:</b> a dismissible sheet on Home only: "Play Letterlock in the app" with the official App Store and Google Play badges. Mobile browsers only (never inside the apps, never on desktop or TV), remembered for 14 days after dismissal, never blocking the game.</li>
+        <li><b>Switch:</b> the store links come from the API and stay empty until both apps are live, so nothing shows before launch.</li>
+        <li><b>Rule:</b> the popup promotes the app and nothing else. No prices, no "cheaper here" (Apple 3.1.3).</li>
+      </ul>
+    </div>
+  </details>
+
   <details class="phase" id="ph7">
     <summary><span class="hex">7</span><h3>Keep it alive</h3><span class="eta">2 dev days, then ongoing</span><span class="arrow">▸</span></summary>
     <div class="body">
       <div class="grid2">
-        <div class="card"><h4>Backups first</h4><p>Nightly database dump + volumes to offsite storage, 30-day retention, quarterly restore test. Nobody backs up our VPS but us.</p></div>
-        <div class="card"><h4>Uptime</h4><p>Uptime Kuma probing the site, auth, REST, realtime and the app-config endpoint, alerting your phone.</p></div>
+        <div class="card"><h4>Backups first</h4><p>Nightly dumps of both databases plus the env files, 14 days local and 30 days off-server, quarterly restore test. Neither palmandplate nor jawhara has the off-server copy yet; Letterlock ships it first.</p></div>
+        <div class="card"><h4>Uptime</h4><p>Uptime Kuma probing the site, the API health check, a realtime connect and the app-config endpoint, alerting your phone.</p></div>
         <div class="card"><h4>Crashes and errors</h4><p>Sentry free tier plus the stores' own vitals. Play hides apps above a 1.09% crash rate.</p></div>
         <div class="card"><h4>Network in the app</h4><p>Yes, we need it: a connectivity listener, an offline banner, queued writes, and a maintenance flag during VPS work.</p></div>
-        <div class="card"><h4>Updates</h4><p>Pinned Docker image tags, manual upgrades, log rotation, fail2ban. Yearly Play API and Xcode bumps. Apple sign-in secret every 6 months.</p></div>
+        <div class="card"><h4>Updates</h4><p>Node, PM2 and Postgres upgrades are manual and announced; dependency audit in CI; fail2ban and a move to SSH keys. Yearly Play API and Xcode bumps. Apple sign-in secret every 6 months.</p></div>
         <div class="card"><h4>Takedowns</h4><p>A published legal contact and a 48-hour removal routine for any logo or fandom complaint.</p></div>
       </div>
+    </div>
+  </details>
+
+  <details class="phase" id="ph8">
+    <summary><span class="hex">8</span><h3>Web ads, the very last step</h3><span class="eta">2 dev days + AdSense approval</span><span class="arrow">▸</span></summary>
+    <div class="body">
+      <ul>
+        <li>Only after the apps are live, AdMob is approved, and <code>app-ads.txt</code> / <code>ads.txt</code> sit on the domain.</li>
+        <li>Apply for Google AdSense on the domain, then for the <b>H5 Games Ads</b> program (a second approval, made for browser games).</li>
+        <li>Integration: the Ad Placement API, with a full-screen ad at the same moments as the apps (after a game) and a rewarded ad for the extra skip or hint. Google's built-in consent message covers the EU and UK.</li>
+        <li>Same rules and the same Remove Ads flag: a signed-in buyer sees no web ads either. Never on the board, never during a question, never on TV.</li>
+        <li>Reality: web game ad rates are about half of app interstitials. This is done for completeness because it costs two days, not for revenue.</li>
+      </ul>
     </div>
   </details>
 </section>
@@ -425,33 +502,61 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 <!-- BACKEND -->
 <section role="tabpanel" id="p-backend" aria-labelledby="tab-backend" hidden>
   <h2 class="panel-title">Off Supabase: what that means exactly</h2>
-  <p class="panel-sub">You said "we will migrate off of Supabase". Here is precisely what leaves, what stays, and the one choice inside it.</p>
+  <p class="panel-sub">You said "we will migrate off Supabase" and then locked D14: our own backend, the palmandplate way. Here is precisely what leaves and what replaces it.</p>
   <div class="tablewrap stack"><table>
-  <thead><tr><th></th><th>Today</th><th>After the move</th></tr></thead>
+  <thead><tr><th></th><th>Today</th><th>After Phase 2</th></tr></thead>
   <tbody>
-  <tr><td>Where the data lives</td><td>Supabase's servers (their cloud project)</td><td><b>Our VPS</b>, plain Postgres in Docker</td></tr>
-  <tr><td>Supabase account / bill</td><td>Yes</td><td><b>None.</b> Project deleted after cutover.</td></tr>
+  <tr><td>Where the data lives</td><td>Supabase's servers (their cloud project)</td><td><b>Our VPS</b>, plain Postgres</td></tr>
+  <tr><td>Supabase account, bill, software</td><td>Cloud project</td><td><b>None.</b> No Supabase cloud, no Supabase open-source stack, no Supabase library in the app. Project deleted two weeks after cutover.</td></tr>
   <tr><td>Domain users see</td><td><code>lkudntyvngwwlzuciocd.supabase.co</code></td><td><code>api.letterlock.raltech.dev</code></td></tr>
   <tr><td>Who can switch it off</td><td>Supabase</td><td>Only us</td></tr>
-  <tr><td>Server software</td><td>Supabase's hosted stack</td><td><b>Option A:</b> the same open-source stack, run by us. <b>Option B:</b> our own custom code.</td></tr>
-  <tr><td>App code changes</td><td></td><td>Option A: the URL and key. Option B: rewrite of auth, ~30 data calls, realtime sync, leaderboards.</td></tr>
+  <tr><td>Server software</td><td>Supabase's hosted stack</td><td><b>Our NestJS API + Prisma + Postgres + Socket.IO</b>, the same shape as palmandplate and jawhara</td></tr>
+  <tr><td>Login</td><td>Supabase Auth</td><td>Our own: email code, Google (web redirect and native token), Apple, 15-minute access tokens with rotating 90-day refresh tokens</td></tr>
+  <tr><td>Data access</td><td>Supabase client + row-level security</td><td>REST endpoints; every policy becomes an explicit "only your own rows" check in the API</td></tr>
+  <tr><td>Realtime</td><td>Supabase Realtime</td><td>Socket.IO gateway, token checked on connect, rooms assigned server-side</td></tr>
+  <tr><td>Email</td><td>Edge function → Resend</td><td>Resend over SMTP from the API, as palmandplate does</td></tr>
   </tbody></table></div>
 
-  <h2>Decision D14: Option A or Option B</h2>
-  <div class="grid2">
-    <div class="card"><h4>A · Run the open-source stack ourselves (recommended)</h4><p>Supabase publishes its server as free open-source software (Postgres + an auth server + a REST layer + a realtime server). We run those containers on our VPS. No account, no bill, no supabase.co, our domain, our disks. ~3 days. The app keeps working unchanged. This is what the plan assumes.</p></div>
-    <div class="card"><h4>B · Fully custom backend</h4><p>Write our own API (Node), own login system (email codes, Google, Apple), own websocket server for host + phone rooms, port ~30 database functions. Same end result for users, 4 to 6 extra weeks, more code to maintain. Possible later at any time because the database is plain Postgres in both options.</p></div>
-  </div>
-  <div class="callout"><p><b>Either way, "Supabase" as a company disappears from the picture.</b> The only question is whether we reuse their free server software (A) or write our own (B). Wherever this page or the repo doc says "the backend on the VPS", it means Option A unless you pick B.</p></div>
+  <h2>Our VPS, as documented in the palmandplate, jawhara and custompc repos</h2>
+  <p>Read on 5 Sep 2026 from those three repos. Nothing here is a secret; passwords live only in gitignored files and GitHub Actions secrets.</p>
+  <div class="tablewrap stack"><table>
+  <thead><tr><th>Fact</th><th>Value</th></tr></thead>
+  <tbody>
+  <tr><td>Provider, plan</td><td>Hostinger <b>KVM2</b>: 2 vCPU, 8 GB RAM, 100 GB NVMe, about $8.49 a month, shared by every RAL project</td></tr>
+  <tr><td>Host</td><td><code>srv1167964</code>, IPv4 <code>72.62.16.1</code>, IPv6 available (the office network cannot reach the IPv4, so the helper scripts fall back to IPv6)</td></tr>
+  <tr><td>OS, access</td><td>Ubuntu 24, SSH on ports 22 and 2222, root with a password (moving to keys is a shared RAL TODO)</td></tr>
+  <tr><td>Free today</td><td>About 5 GB RAM and 63 GB disk</td></tr>
+  <tr><td>Reverse proxy</td><td><b>Traefik</b> in Docker owning ports 80/443, Let's Encrypt certificates, hot-reloaded routing files in <code>/root/traefik-dynamic/</code></td></tr>
+  <tr><td>Postgres</td><td>Native install, one instance on localhost, one role and database per project (palmandplate style). Jawhara runs its own Postgres containers on other ports.</td></tr>
+  <tr><td>Processes</td><td>palmandplate: PM2 (API + static sites). jawhara and custompc: Docker containers behind Traefik.</td></tr>
+  <tr><td>Deploy</td><td>GitHub Actions → SSH → apply migrations → build → restart. Jawhara retries SSH five times across both ports because Hostinger sometimes drops fresh connections from GitHub.</td></tr>
+  <tr><td>DNS</td><td>Cloudflare zone <code>raltech.dev</code>, plain A records to the VPS. DNS-only (grey cloud) until the first certificate exists.</td></tr>
+  <tr><td>Backups</td><td>jawhara: nightly dump, 14-day rotation, no off-server copy yet. palmandplate: none.</td></tr>
+  <tr><td>Other tenants (never touch)</td><td>palmandplate, jawhara, custompc, n8n, docuseal, onecli and its Postgres</td></tr>
+  </tbody></table></div>
+
+  <h2>What Letterlock adds to that server</h2>
+  <div class="tablewrap stack"><table>
+  <thead><tr><th>Item</th><th>Value</th></tr></thead>
+  <tbody>
+  <tr><td>Folders</td><td><code>/opt/letterlock</code> (prod) and <code>/opt/letterlock-dev</code> (dev, from the <code>uat</code> branch)</td></tr>
+  <tr><td>Database</td><td>Two databases on the existing Postgres, <code>letterlock</code> and <code>letterlock_dev</code>, one role, a generated password pasted into GitHub secrets. Never reachable from outside the server.</td></tr>
+  <tr><td>Processes (PM2)</td><td>API on ports 3100 / 3101 bound to localhost only, static web on 5190 / 5191. Ports chosen to avoid everything already in use.</td></tr>
+  <tr><td>Domains</td><td><code>letterlock.raltech.dev</code>, <code>api.letterlock.raltech.dev</code>, and <code>dev.</code> / <code>api.dev.</code> twins</td></tr>
+  <tr><td>Firewall</td><td>SSH, 80, 443 only. The API ports are never opened (palmandplate has its API port open to the world; we do not copy that).</td></tr>
+  <tr><td>Committed config (no secrets)</td><td>Traefik routing file, PM2 ecosystem file, server setup script, <code>.env.example</code> with variable names, both deploy workflows, the SSH helper script, the backup script</td></tr>
+  <tr><td>Gitignored secrets</td><td><code>infra/vps-creds</code>, <code>infra/db-creds</code>, known-hosts pins, every <code>.env</code>. Unlike jawhara, Letterlock never commits credentials, private repo or not.</td></tr>
+  <tr><td>RAM</td><td>About 300 MB for the API plus the static servers. Postgres is already running.</td></tr>
+  </tbody></table></div>
 
   <h2>Fixing the "xxxx.supabase.co will access" text</h2>
-  <p><b>Why it happens:</b> Google shows the domain of the login callback until the app's branding is verified. Today that callback is on the Supabase project domain.</p>
+  <p><b>Why it happens:</b> Google shows the domain of the login callback until the app's branding is verified. Today that callback is on the Supabase domain, so users see the random project ref.</p>
   <div class="flow">
-    <div><span class="k">1</span><span>Move the callback to <code>api.letterlock.raltech.dev</code>. Automatic with Phase 2.</span></div>
+    <div><span class="k">1</span><span>Move the callback to <code>api.letterlock.raltech.dev</code>, served by our own API (Phase 2). The old supabase.co redirect is removed at cutover.</span></div>
     <div><span class="k">2</span><span>Verify <code>raltech.dev</code> in Google Search Console.</span></div>
-    <div><span class="k">3</span><span>Google Cloud branding: app name Letterlock, logo, homepage, privacy and terms URLs on that same domain, authorized domain.</span></div>
+    <div><span class="k">3</span><span>Google Cloud branding: app name Letterlock, logo, homepage, privacy and terms URLs on that same domain.</span></div>
     <div><span class="k">4</span><span>Set the audience to External and publish. Testing mode hides branding.</span></div>
-    <div><span class="k">5</span><span>Click Verify Branding. Minutes to three business days. Result: "Sign in to continue to Letterlock" with our logo. In the mobile apps the native Google sheet shows no domain at all.</span></div>
+    <div><span class="k">5</span><span>Click Verify Branding. Minutes to three business days. Result: "Sign in to continue to Letterlock" with our logo. In the apps the native Google sheet shows no domain at all.</span></div>
   </div>
 </section>
 
@@ -476,7 +581,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <tr><td>Refund or chargeback</td><td>Apple or Google notify RevenueCat, the webhook sets the flag back to false.</td></tr>
   <tr><td>Family Sharing (iOS only)</td><td>Family devices get it through the store; we do not write the flag to their accounts.</td></tr>
   <tr><td>User deletes their account</td><td>Flag is gone. Restore Purchases re-creates it on that store account.</td></tr>
-  <tr><td>Buys on web (later)</td><td>Server sets the flag directly; apps honor it when signed in.</td></tr>
+  <tr><td>Wants to buy on the web</td><td>No web purchase (D13). A purchase made in an app hides web ads for that account through the same flag.</td></tr>
   </tbody></table></div>
   <h2>What we chose</h2>
   <div class="tablewrap"><table>
@@ -485,7 +590,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <tr><td>Billing</td><td>Apple In-App Purchase + Google Play Billing (mandatory for digital goods)</td><td>Stripe inside the app (instant rejection)</td></tr>
   <tr><td>SDK</td><td>RevenueCat: free under $2.5k/mo, does receipt checks, refunds, restore, cross-platform, webhooks</td><td>Free plugins where we host receipt verification, Apple notifications, Google Pub/Sub and reconciliation ourselves</td></tr>
   <tr><td>Type</td><td>One-time, about $3.99</td><td>Subscription (wrong vibe for a family game)</td></tr>
-  <tr><td>Web</td><td>Flag honored; optional web purchase later via a merchant of record</td><td>Advertising web prices inside the iOS app (Apple 3.1.3 outside the US)</td></tr>
+  <tr><td>Web</td><td>Web ads as the last phase; the account flag hides them for buyers; no web purchase (D13)</td><td>Advertising web prices inside the iOS app (Apple 3.1.3 outside the US)</td></tr>
   </tbody></table></div>
 </section>
 
@@ -510,8 +615,17 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <tr><td>Interstitial</td><td>Result screen, between games in a best-of series, max 1 per 3 to 5 minutes</td><td>Mid-question, during the timer, at app open, on the host pad, on the phone controller while a question is live</td></tr>
   <tr><td>Rewarded (opt-in)</td><td>Extra skip, a hint, unlock a category for one match</td><td>Anything that blocks the turn</td></tr>
   <tr><td>Banner</td><td>Home, Category menu, Settings, Lobby waiting</td><td>The board screen (shared TV screen)</td></tr>
-  <tr><td>Web</td><td>None at launch</td><td></td></tr>
+  <tr><td>Web (Phase 8, last)</td><td>AdSense H5 Games Ads: full-screen after a game, rewarded for a skip or hint, same caps</td><td>Before the apps are live; on the board; during a question</td></tr>
   </tbody></table></div>
+
+  <h2>Web ads explained (D12), and why they come last</h2>
+  <ul>
+    <li><b>Apps and websites use different Google products.</b> Apps use AdMob (a kit inside the app). Websites use AdSense (a script on the page). Same Google account, two separate approvals, two publisher ids, two payout lines.</li>
+    <li><b>Normal AdSense hates game pages.</b> Its reviewers look for text; a page that is one board and a few buttons gets "low value content" rejections. Google built a special program for this, <b>H5 Games Ads</b>, which shows full-screen ads between rounds and rewarded ads on request, like the app placements. AdSense approval first, then H5 program access.</li>
+    <li><b>Why last:</b> approval needs the finished privacy and terms pages and a polished live site; a rejected application slows later approvals, so we apply once when everything is ready; AdMob approval and the store listings must exist anyway for <code>app-ads.txt</code>, and both files live on the same domain; and money: web game rates are about half of app interstitials, and most traffic will move to the apps.</li>
+    <li><b>Consent:</b> Google's own consent message inside AdSense covers the EU and UK. Nothing else to build.</li>
+    <li><b>Remove Ads on web:</b> honored through the account flag, bought once in an app, gone everywhere. No web checkout (D13).</li>
+  </ul>
 </section>
 
 <!-- COPYRIGHT -->
@@ -521,13 +635,13 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <div class="tablewrap"><table>
   <thead><tr><th>Content</th><th>Legal</th><th>Store</th><th>Verdict</th></tr></thead>
   <tbody>
-  <tr><td>Guess the Song (1,624 iTunes previews)</td><td><span class="chip hi">High</span></td><td><span class="chip hi">High</span></td><td><b>Remove from store build.</b> Apple 5.2.5: previews "may not be used for their entertainment value, e.g. the soundtrack to a game". The API terms require showing the track name and a buy link, which would spoil the answer.</td></tr>
-  <tr><td>TV Show and Sitcom clips (296)</td><td><span class="chip hi">High</span></td><td><span class="chip hi">High</span></td><td><b>Remove.</b> TV previews are not even listed as permitted promo content. Convert to text trivia.</td></tr>
-  <tr><td>Melody, iTunes part (~212)</td><td><span class="chip hi">High</span></td><td><span class="chip hi">High</span></td><td><b>Remove.</b></td></tr>
+  <tr><td>Guess the Song (1,624 iTunes previews)</td><td><span class="chip hi">High</span></td><td><span class="chip hi">High</span></td><td><b>Web only (D3).</b> Hidden in every store build. Apple 5.2.5: previews "may not be used for their entertainment value (e.g. the soundtrack to a game)"; iTunes API terms: promo use only, must show the track name and a buy link, which would spoil the answer. The clip count does not change this.</td></tr>
+  <tr><td>TV Show and Sitcom clips (296)</td><td><span class="chip hi">High</span></td><td><span class="chip hi">High</span></td><td><b>Web only (D3).</b> Same terms.</td></tr>
+  <tr><td>Melody, iTunes part (~212)</td><td><span class="chip hi">High</span></td><td><span class="chip hi">High</span></td><td><b>Web only (D3).</b></td></tr>
   <tr><td>Melody, our 23 synthesized public-domain tunes</td><td><span class="chip lo">Low</span></td><td><span class="chip lo">Low</span></td><td><b>Keep, bundle, grow to 200+</b>: classical, folk, anthems, nursery, pre-1930 songs.</td></tr>
   <tr><td>Logos (~600)</td><td><span class="chip md">Medium</span></td><td><span class="chip md">Medium</span></td><td>Keep with disclaimer, bundle the SVGs, drop the Apple logo, no logos in marketing, removal contact.</td></tr>
   <tr><td>Flags</td><td><span class="chip lo">Low</span></td><td><span class="chip lo">Low</span></td><td>Bundle everything; Sports pack still hotlinks a flag CDN, switch to local.</td></tr>
-  <tr><td>Charades images (random Flickr)</td><td><span class="chip hi">High</span></td><td><span class="chip md">Medium</span></td><td><b>Drop images, word only.</b> Unmoderated photos in a family game plus licenses we cannot honor.</td></tr>
+  <tr><td>Charades images (random Flickr today)</td><td><span class="chip hi">High</span></td><td><span class="chip md">Medium</span></td><td><b>Keep the images, change the source (D9, Phase 1c):</b> licensed (Pixabay, CC0, our own illustrations), human-reviewed, bundled in the apps, credits screen. Flickr removed entirely.</td></tr>
   <tr><td>Fandom packs (17, text only)</td><td><span class="chip md">Medium</span></td><td><span class="chip lo">Low</span></td><td>Keep with "Unofficial fan trivia" label, rename Harry Potter and Pokémon packs, franchise names never in store metadata, 48-hour takedown routine.</td></tr>
   <tr><td>Movies, TV, Music text trivia</td><td><span class="chip lo">Low</span></td><td><span class="chip lo">Low</span></td><td>Keep.</td></tr>
   </tbody></table></div>
@@ -573,11 +687,11 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <tr><td>Apple Developer Program</td><td class="num">$99 per year</td></tr>
   <tr><td>Google Play Console</td><td class="num">$25 once</td></tr>
   <tr><td>D-U-N-S number</td><td>Free</td></tr>
-  <tr><td>AdMob, RevenueCat under $2.5k/mo, Sentry, Uptime Kuma, Codemagic 500 min/mo, the open-source backend stack</td><td>Free</td></tr>
-  <tr><td>VPS with 8 GB RAM</td><td>What you pay today, or about $20 to $40/mo if upgraded</td></tr>
+  <tr><td>AdMob, AdSense, RevenueCat under $2.5k/mo, Sentry, Uptime Kuma, Codemagic 500 min/mo, our own backend, OTA from our VPS</td><td>Free</td></tr>
+  <tr><td>VPS</td><td>Already paid: the shared Hostinger KVM2, about $8.49/mo across all RAL projects. Letterlock adds about 300 MB of RAM.</td></tr>
   <tr><td>Offsite backups</td><td class="num">$1 to $2 per month</td></tr>
   <tr><td>Store cut</td><td>15% of purchases</td></tr>
-  <tr><td>Optional later</td><td>Capgo OTA $12/mo, licensed music clips (quote), Paddle or Lemon Squeezy about 5% + $0.50 per web sale</td></tr>
+  <tr><td>Optional later</td><td>Capgo cloud $12/mo only if manual OTA misbehaves, licensed music clips (quote). Pixabay API is free.</td></tr>
   </tbody></table></div>
 
   <h2>Timeline</h2>
@@ -587,20 +701,26 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <tr><td>0 Paperwork</td><td class="num">0.5 + your forms</td><td>1 to 2 weeks</td><td>You</td></tr>
   <tr><td>1 Store-ready web app</td><td class="num">5</td><td>Weeks 1 to 2</td><td>Nothing, can start now</td></tr>
   <tr><td>1b Mobile experience rehaul</td><td class="num">6</td><td>Weeks 2 to 3</td><td>Phase 1</td></tr>
-  <tr><td>2 Backend to VPS</td><td class="num">3 + cutover</td><td>Weeks 1 to 3</td><td>VPS access</td></tr>
-  <tr><td>3 Capacitor apps</td><td class="num">5</td><td>Weeks 4 to 5</td><td>Phases 1 and 1b, Apple account</td></tr>
-  <tr><td>3b TV support (Android TV, remote)</td><td class="num">5</td><td>Weeks 5 to 6</td><td>Phase 3</td></tr>
-  <tr><td>4 Ads</td><td class="num">2</td><td>Week 6</td><td>Phase 3, AdMob account</td></tr>
-  <tr><td>5 Remove Ads</td><td class="num">3</td><td>Weeks 6 to 7</td><td>Phase 3, store products</td></tr>
-  <tr><td>6 Submission</td><td class="num">2 + waiting</td><td>Weeks 7 to 10</td><td>Everything above, TV track review</td></tr>
+  <tr><td>1c Charades images</td><td class="num">3</td><td>Week 3</td><td>Nothing</td></tr>
+  <tr><td>2 Our backend on the VPS</td><td class="num">14 + cutover</td><td>Weeks 1 to 6, in parallel</td><td>VPS access</td></tr>
+  <tr><td>3 Capacitor apps</td><td class="num">5</td><td>Weeks 6 to 7</td><td>Phases 1, 1b, 2, Apple account</td></tr>
+  <tr><td>3b TV support (Android TV, remote)</td><td class="num">5</td><td>Weeks 7 to 8</td><td>Phase 3</td></tr>
+  <tr><td>3c OTA updates</td><td class="num">2</td><td>Week 8</td><td>Phases 2 and 3</td></tr>
+  <tr><td>4 Ads (AdMob)</td><td class="num">2</td><td>Weeks 8 to 9</td><td>Phase 3, AdMob account</td></tr>
+  <tr><td>5 Remove Ads</td><td class="num">3</td><td>Week 9</td><td>Phase 3, store products</td></tr>
+  <tr><td>6 Submission</td><td class="num">2 + waiting</td><td>Weeks 10 to 13</td><td>Everything above, TV track review</td></tr>
+  <tr><td>6b Get-the-app popup</td><td class="num">0.5</td><td>After both approvals</td><td>Phase 6</td></tr>
   <tr><td>7 Ops</td><td class="num">2</td><td>Week 2 onward</td><td>Phase 2</td></tr>
-  <tr><td><b>Total</b></td><td class="num"><b>~33</b></td><td><b>8 to 10 weeks to live</b></td><td></td></tr>
+  <tr><td>8 Web ads (AdSense H5)</td><td class="num">2 + approval</td><td>After launch, last</td><td>Phases 4 and 6</td></tr>
+  <tr><td><b>Total</b></td><td class="num"><b>~52</b></td><td><b>12 to 14 weeks to store launch</b>, web ads after</td><td></td></tr>
   </tbody></table></div>
 
   <h2>Risks and unverified items</h2>
   <ul>
     <li>Apple accepting a Bahraini bank for payouts is unverified. Fallback: a bank in another country or the company's bank.</li>
-    <li>A self-hosted realtime bug can crash broadcast on the default tenant. We test the host + phone lobby before any cutover.</li>
+    <li>The custom backend is the critical path (14 days, touches login, data and realtime). It starts first and runs in parallel with the UI phases; the two-client reconnect tests must pass against the new API before cutover; the Supabase project stays two weeks as rollback.</li>
+    <li>One shared server for every RAL project. Letterlock binds its API to localhost, uses its own database role, its own process names and ports, and never touches another tenant's files or routing.</li>
+    <li>AdSense may reject the site. We apply once, late, with finished pages; web ads are a nice-to-have.</li>
     <li>Exact "Letterlock" name is taken. Reserve the chosen name as soon as the Apple account exists.</li>
     <li>Apple universal links with query strings are unreliable, hence <code>/join/CODE</code>.</li>
     <li>Anti-steering rules in the US and EU keep changing. We never mention web purchases in-app, so changes cannot hurt us.</li>
@@ -609,7 +729,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   </ul>
 </section>
 
-<footer>Canonical version with all sources: <code>LAUNCH_PLAN.md</code> in the repo. No code changed yet; decisions D1 to D16 are pending.</footer>
+<footer>Canonical version with all sources: <code>LAUNCH_PLAN.md</code> in the repo. Decisions D1 to D16 locked on 5 Sep 2026; building starts in phase order.</footer>
 </div>
 
 <script>
@@ -650,7 +770,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     });
   });
   var initial = (location.hash || '').replace('#','');
-  if(initial && /^ph\d$/.test(initial)){ show('phases', false); var d = document.getElementById(initial); if(d){ d.open = true; } }
+  if(initial && /^ph\d[a-z]?$/.test(initial)){ show('phases', false); var d = document.getElementById(initial); if(d){ d.open = true; } }
   else if(initial){ show(initial, false); }
   else { var saved = null; try{ saved = localStorage.getItem('ll-plan-tab'); }catch(e){} show(saved || 'overview', false); }
 })();
