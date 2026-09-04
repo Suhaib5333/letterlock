@@ -1,5 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// E2E_PORT lets several agents/sessions run e2e side by side (each gets its own
+// preview server + build dir). Default stays 4173.
+const PORT = Number(process.env.E2E_PORT || 4173);
+const OUT = PORT === 4173 ? 'dist' : `dist-e2e-${PORT}`;
+
 export default defineConfig({
   testDir: './tests-e2e',
   fullyParallel: true,
@@ -11,7 +16,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [['html', { open: 'never' }], ['list']],
   use: {
-    baseURL: 'http://localhost:4173',
+    baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -21,8 +26,8 @@ export default defineConfig({
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
   ],
   webServer: {
-    command: 'npm run build && npm run preview',
-    url: 'http://localhost:4173',
+    command: PORT === 4173 ? 'npm run build && npm run preview' : `npx vite build --outDir ${OUT} && npx vite preview --outDir ${OUT} --port ${PORT} --strictPort`,
+    url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
   },

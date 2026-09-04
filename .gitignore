@@ -58,3 +58,4 @@ infra/vps-creds
 infra/db-creds
 infra/.kvm-known-hosts
 infra/*.backup
+dist-e2e-*/
