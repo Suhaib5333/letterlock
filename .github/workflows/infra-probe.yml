@@ -1,0 +1,13 @@
+name: infra-probe
+on: { workflow_dispatch: {} }
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Cloudflare token + DNS scope (names only, no values)
+        env: { CF: "${{ secrets.CLOUDFLARE_API_TOKEN }}" }
+        run: |
+          curl -s -H "Authorization: Bearer $CF" https://api.cloudflare.com/client/v4/user/tokens/verify | jq -c '{success, status: .result.status}'
+          Z=$(curl -s -H "Authorization: Bearer $CF" "https://api.cloudflare.com/client/v4/zones?name=raltech.dev" | jq -r '.result[0].id // "none"')
+          echo "zone=$Z"
+          curl -s -H "Authorization: Bearer $CF" "https://api.cloudflare.com/client/v4/zones/$Z/dns_records?per_page=100" | jq -c '{success, errors, names: [.result[]? | "\(.type) \(.name) proxied=\(.proxied)"]}'
