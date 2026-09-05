@@ -11,7 +11,10 @@ on:
   workflow_call: {}
   workflow_dispatch: {}
 
-concurrency: { group: "ci-${{ github.ref }}", cancel-in-progress: true }
+# Keyed on the CALLER too. With just the ref, the CI that gates a deploy and the CI
+# that gates an OTA release share a group on the same branch and cancel each other:
+# dispatching the OTA dry run killed the deploy's gate mid-run, and vice versa.
+concurrency: { group: "ci-${{ github.workflow }}-${{ github.ref }}", cancel-in-progress: true }
 
 jobs:
   web:
