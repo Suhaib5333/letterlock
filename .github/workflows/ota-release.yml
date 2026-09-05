@@ -28,6 +28,11 @@ on:
       min_native:
         description: 'Minimum native shell version (semver). Empty = OTA_MIN_NATIVE variable or 1.0.0.'
         required: false
+      dry_run:
+        description: 'Build, zip and checksum only. Nothing is uploaded and no app ever sees it.'
+        type: boolean
+        default: false
+        required: false
         default: ''
 
 permissions:
@@ -72,14 +77,20 @@ jobs:
           missing=()
           [ -z "$VPS_HOST" ] && missing+=(VPS_HOST); [ -z "$VPS_USER" ] && missing+=(VPS_USER)
           [ -z "$VPS_PASS" ] && missing+=(VPS_PASS); [ -z "$API_ADMIN_TOKEN" ] && missing+=(API_ADMIN_TOKEN)
-          if [ ${#missing[@]} -gt 0 ]; then echo "::error ::missing secrets: ${missing[*]}"; exit 1; fi
+          if [ ${#missing[@]} -gt 0 ]; then
+            if [ "${{ inputs.dry_run }}" = "true" ]; then
+              echo "::notice ::dry run: ignoring missing secrets (${missing[*]}), nothing will be uploaded"
+            else
+              echo "::error ::missing secrets: ${missing[*]}"; exit 1
+            fi
+          fi
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "MIN_NATIVE=$MIN_NATIVE" >> "$GITHUB_ENV"
           echo "OTA bundle $VERSION (minNative $MIN_NATIVE)"
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - run: npm ci
@@ -101,6 +112,7 @@ jobs:
           ls -la "letterlock-$VERSION.zip"; echo "sha256 $SHA256"
 
       - name: Upload to the VPS (retry over ports 22 and 2222)
+        if: inputs.dry_run != true
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
@@ -127,6 +139,7 @@ jobs:
           echo "uploaded $BUNDLES_DIR/$VERSION.zip"
 
       - name: Verify the API serves the bundle byte-for-byte
+        if: inputs.dry_run != true
         run: |
           set -euo pipefail
           URL="$API_URL/bundles/$VERSION.zip"
@@ -137,6 +150,7 @@ jobs:
           echo "OK $URL"
 
       - name: Publish latestBundle to app-config
+        if: inputs.dry_run != true
         env:
           API_ADMIN_TOKEN: ${{ secrets.API_ADMIN_TOKEN }}
         run: |
