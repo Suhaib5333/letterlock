@@ -46,6 +46,9 @@ http:
       rule: "Host(`dev.letterlock.raltech.dev`)"
       entryPoints: [websecure]
       service: letterlock-web-dev
+      # Staging is not public. Only the three accounts in the dev-gate middleware
+      # get in; everyone else gets a 401 before a single byte of the app is served.
+      middlewares: [letterlock-dev-gate]
       tls:
         certResolver: mytlschallenge
 
@@ -67,6 +70,22 @@ http:
         certResolver: mytlschallenge
 
   middlewares:
+    # Basic auth on the staging SITE only, at the proxy, deliberately NOT in the app:
+    # dev must run byte-identical code to prod or testing against it proves nothing.
+    # `api.dev` is intentionally left open, exactly like prod: every route there
+    # already requires a JWT, and a cross-origin XHR would not carry these
+    # credentials anyway, which would break the phone-controller and QR flows.
+    # Passwords are apr1 hashes (safe to commit); the plaintext lives only in the
+    # gitignored infra/dev-gate-creds.
+    letterlock-dev-gate:
+      basicAuth:
+        realm: "Letterlock staging"
+        removeHeader: true
+        users:
+          - "revenueautomationlab@gmail.com:$apr1$cf2ScI30$v5GAutVosKk7wEvDBLmJQ/"
+          - "suhaibrajabo@gmail.com:$apr1$VA/iZKbj$8i7lnxo94dyAJo5WXtxav1"
+          - "saeedalsaeedbusiness@gmail.com:$apr1$E/lqx38n$UOVSoSEcXhFNN1/0wPxRd1"
+
     letterlock-json:
       headers:
         customResponseHeaders:

@@ -56,3 +56,5 @@ dist-e2e-*/
 
 __pycache__/
 *.pyc
+infra/dev-gate-creds
+infra/dev-gate-hashes.txt
