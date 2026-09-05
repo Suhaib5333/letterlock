@@ -54,5 +54,47 @@ echo "== PM2 =="
 command -v pm2 >/dev/null || npm install -g pm2
 pm2 startup systemd -u root --hp /root >/dev/null 2>&1 || true
 
+# LAUNCH_PLAN Phase 7 "Uptime". Uptime Kuma in Docker, bound to LOCALHOST only and
+# published through the existing Traefik entry for status.letterlock.raltech.dev, so
+# it never opens another port on a box shared with the other RAL projects. Idempotent:
+# re-running server-setup leaves a healthy container alone.
+echo "== Uptime Kuma =="
+if command -v docker >/dev/null; then
+  if [ -z "$(docker ps -q -f name=^letterlock-kuma$)" ]; then
+    docker rm -f letterlock-kuma >/dev/null 2>&1 || true
+    mkdir -p /opt/letterlock/kuma
+    docker run -d --restart unless-stopped --name letterlock-kuma       -p 127.0.0.1:3201:3001 -v /opt/letterlock/kuma:/app/data louislam/uptime-kuma:1
+    echo "started; open https://status.letterlock.raltech.dev and add the monitors:"
+    echo "  https://letterlock.raltech.dev/            HTTP 200"
+    echo "  https://api.letterlock.raltech.dev/healthz keyword \"db\":true"
+    echo "  https://api.letterlock.raltech.dev/app-config HTTP 200"
+    echo "  api.letterlock.raltech.dev:443 TCP (Socket.IO reachability)"
+  else
+    echo "already running"
+  fi
+else
+  echo "docker not installed; skipping (apt-get install docker.io, then re-run)"
+fi
+
+# Phase 7 "Updates": fail2ban on sshd. Moving to SSH keys is still a manual TODO
+# shared with the other RAL repos, so until then this blunts password guessing.
+echo "== fail2ban =="
+if ! command -v fail2ban-server >/dev/null; then
+  DEBIAN_FRONTEND=noninteractive apt-get install -y fail2ban >/dev/null 2>&1 || true
+fi
+if [ -d /etc/fail2ban ] && [ ! -f /etc/fail2ban/jail.d/sshd.local ]; then
+  printf '[sshd]
+enabled = true
+port = 22,2222
+maxretry = 5
+bantime = 1h
+findtime = 10m
+'     > /etc/fail2ban/jail.d/sshd.local
+  systemctl restart fail2ban >/dev/null 2>&1 || true
+  echo "sshd jail installed (5 tries, 1h ban)"
+else
+  echo "already configured"
+fi
+
 echo "== Done. Databases: =="
 sudo -u postgres psql -Atc "select datname from pg_database where datname like 'letterlock%'"
