@@ -1346,6 +1346,36 @@ re-passes `scripts/checkpack.mjs`.
    sweeps; do not fan out subagents unless the task genuinely needs them; run long
    suites in the background rather than re-reading large files.
 
+### 🔻 Cutover: what "off Supabase" actually requires
+
+Being off Supabase is NOT the same as the client no longer importing it. As of
+2026-09-05 the client is clean (only the Supabase *logo* survives, in a logos pack),
+the API is ours and the database is ours, and yet **every real player was still on
+Supabase**, because:
+
+1. the live `letterlock.raltech.dev` is served by Cloudflare Pages running an OLD
+   build that still talks to Supabase, and
+2. our own databases were empty. `letterlock` had **0 tables**; `letterlock_dev` had
+   the 15-table schema and **0 rows**. An earlier "successful" migrate-supabase run
+   had only EXPORTED.
+
+Real data in Supabase at cutover: ~23 users, 13 profiles, ~219 leaderboard scores,
+4 friendships, ~143 question_progress, ~5 saved games.
+
+The order that actually finishes it:
+1. push `main` → prod API + web exist, `prisma migrate deploy` creates the schema;
+2. `gh workflow run migrate-supabase.yml -f target=prod` → copies the rows in
+   (idempotent, `ON CONFLICT DO NOTHING`, so it is safe to run twice);
+3. verify the printed counts match Supabase;
+4. **B1b**: move the apex DNS so real users reach the new stack;
+5. only then retire Supabase (the plan keeps it 2 weeks as rollback).
+
+🐛 **Rehearse the migration on dev first, always.** The dev rehearsal failed five
+times with `Permission denied`: `psql` runs as the `postgres` user, the uploaded dump
+is root-owned, and `-f` makes postgres open the file itself. Piping with `<` lets the
+root shell open it and postgres read stdin. That bug would otherwise have surfaced on
+cutover evening against the real database.
+
 ### ⛔ ORDERING RULE: do NOT push `main` before B1 (DNS) is done
 
 `main` → prod: `deploy-vps.yml` releases the API and `deploy.yml` publishes the web build
