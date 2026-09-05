@@ -1439,3 +1439,36 @@ committed as `86f0e3a`, then the e2e suite was run and every failure fixed.
   full row and forces its label onto a separate line; the other rows are 51-55px each. The real
   fix is a design decision, not more CSS: give that one preference a compact control (or move
   it under the Music toggle). ~113px must come off for iphone-se to pass.
+
+## II.3w Round-25: the things that were "done" but had never actually run (2026-09-05)
+
+Three items in the launch batch looked complete in code and were not. All three were found by
+running the thing rather than reading it, which is the whole point of the testing mandate.
+
+- 🐛 **The Android app had never been built.** Both CI configs provisioned **JDK 17**, but
+  Capacitor 8's own `android` module compiles with source/target **21**, so
+  `:capacitor-android:compileDebugJavaWithJavac` died with `invalid source release: 21`.
+  Fixed in `.github/workflows/android-build.yml` **and `codemagic.yaml`** — the second is the
+  one that would have failed on the first store build, after the Apple and Play accounts were
+  already paid for. The retry produced a real **30.9 MB `app-debug.apk`** plus the unsigned AAB.
+  Note `workflow_dispatch` reads the DEFAULT branch, so while `main` is behind, the Android
+  workflow can only be triggered by an `app-v*` tag (tags fire from any ref).
+- 🐛 **Phase 1c had barely run.** `charades-movies` had **0 images of 210**, `charades-actions`
+  1 of 215, `charades-hard` 1 of 222 — four of five packs were effectively word-only. A
+  12-prompt smoke test hit **12/12**, proving the earlier run had never reached those packs
+  rather than failing on them. `RETRY_MISSING=1 node scripts/genimages.mjs` took it from 284 to
+  **1090 images of 1107 prompts**, keyless (Wikimedia Commons first, Openverse for the rest,
+  its anonymous 60-call cap used in full). The 17 left are abstract words like "zeal" where
+  photo search legitimately finds nothing and word-only is the designed fallback. ~32 MB, inside
+  the ~40 MB budget.
+- 🐛 **The store screenshots were pictures of the wrong screen** (see II.3v).
+- 🧠 **The finding: "the config reads correct" is worth nothing until it runs.** The Android
+  Gradle setup read fine for weeks. The same is now flagged for iOS as **B13** — it also reads
+  correct (Capacitor 8 uses SPM, not CocoaPods; the `pod install` line is guarded; Xcode 26;
+  deployment target 15.0) and it has also never run, because it needs a Mac.
+- ✅ **API e2e run locally for the first time**: `bun run test` in `apps/api` against a real
+  Postgres in Docker (`ll-pg` on :55432) → **27/27 across 6 suites** (auth, realtime,
+  leaderboard/XP, social data, me, admin webhooks).
+- ✅ **Media gate CLEAN** after fixing a cry-wolf: the scan grepped raw lines, so the flag packs'
+  own comments explaining they moved OFF flagcdn.com counted as three violations. It now strips
+  comments and requires the match to sit inside something URL-shaped.
