@@ -1350,6 +1350,8 @@ re-passes `scripts/checkpack.mjs`.
 | B8 | **Play app-signing SHA-256** | `public/.well-known/assetlinks.json` has a `TODO:REPLACE:...` fingerprint. Copy it from Play Console → Setup → App signing. | Android App Links (`/join/CODE` opening the app) |
 | B9 | **Off-box backup remote** | `deploy/backup.sh` already runs nightly with a 14-day rotation AND a restore check, but the off-box copy only happens when an rclone remote named `letterlock-backup` exists. On the VPS: `rclone config` against Backblaze B2 or S3, name it `letterlock-backup`, set 30-day bucket retention. | "Losing the VPS = losing everything" risk in LAUNCH_PLAN §13 |
 | B10 | **`app-ads.txt` real line** | `public/app-ads.txt` is a placeholder; AdMob gives the exact line once the account exists. | AdMob monetisation of the apps |
+| B11 | **Pixabay API key (optional, 1 min, free)** | `scripts/genimages.mjs` works keyless (Wikimedia Commons + Openverse) but Pixabay is tried first when `PIXABAY_KEY` is set and gives better, more on-topic photos for abstract charades prompts. Get one at https://pixabay.com/api/docs/ and re-run `RETRY_MISSING=1 node scripts/genimages.mjs`. | Image QUALITY only, not coverage |
+| B12 | **Human review of the charades images** | LAUNCH_PLAN Phase 1c says "nothing ships unreviewed". Open `docs/charades-review/index.html` (contact sheets, 20 per page), and for anything unsuitable add its slug to `public/charades/<packId>/reject.txt` (`<slug>` to refetch, `<slug> !` to force word-only), then re-run the script. | Shipping user-facing images in a family game |
 
 ## II.3v Round-24: launch-phase batch committed and the suite made green again (2026-09-05)
 

@@ -119,7 +119,13 @@ function walk(dir, out = []) {
 for (const file of [...walk(join(ROOT, 'src')), join(ROOT, 'index.html')]) {
   const lines = readFileSync(file, 'utf8').split('\n');
   lines.forEach((line, i) => {
-    if (FORBIDDEN.test(line)) fail(`forbidden host in ${relative(ROOT, file)}:${i + 1}: ${line.trim().slice(0, 100)}`);
+    // Only a host inside an actual URL counts. A comment is allowed to NAME a
+    // banned CDN — the flag packs' comments explain why they moved off flagcdn —
+    // and flagging those made the gate cry wolf on three lines of prose.
+    const code = line.replace(/\/\/.*$/, '').replace(/^\s*\*.*$/, '');
+    if (FORBIDDEN.test(code) && /(https?:)?\/\//.test(code)) {
+      fail(`forbidden host in ${relative(ROOT, file)}:${i + 1}: ${line.trim().slice(0, 100)}`);
+    }
   });
 }
 
