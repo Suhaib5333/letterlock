@@ -1,0 +1,4 @@
+# Cloudflare Pages SPA fallback: /join/CODE (and any other app path) serves index.html.
+# Static files under public/ (privacy.html, terms.html, account/delete/, ads.txt, ...)
+# are matched first, so they are never swallowed. The VPS uses `pm2 serve dist --spa`.
+/* /index.html 200

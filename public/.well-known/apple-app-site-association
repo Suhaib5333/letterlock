@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["TEAMID.dev.raltech.letterlock"],
+        "components": [
+          { "/": "/join/*", "comment": "Join a Letterlock room by code (QR / share link)" }
+        ],
+        "paths": ["/join/*"]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["TEAMID.dev.raltech.letterlock"]
+  },
+  "_TODO": "Replace TEAMID with the 10-character Apple Developer Team ID (App Store Connect > Membership). Serve this file at https://letterlock.raltech.dev/.well-known/apple-app-site-association with Content-Type application/json and no redirect. See docs/MOBILE_BUILD.md."
+}

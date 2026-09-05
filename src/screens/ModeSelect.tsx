@@ -1,5 +1,7 @@
 import { motion } from 'motion/react';
+import { useAppConfig } from '../lib/appConfig';
 import { useAuth } from '../lib/auth';
+import { useOnlineRooms } from '../lib/online';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { play } from '../services/audio';
 import { useStore } from '../state/store';
@@ -17,8 +19,11 @@ import { useStore } from '../state/store';
 export function ModeSelect() {
   const { dispatch } = useStore();
   const { user } = useAuth();
-  const online = isSupabaseConfigured();
+  const rooms = useOnlineRooms(useAppConfig());
+  const online = isSupabaseConfigured() && rooms.ok;
   const signedOut = online && !user;
+  const offlineTag =
+    rooms.reason === 'offline' ? 'Offline: reconnect to play online' : rooms.reason === 'maintenance' ? 'Paused for maintenance' : null;
 
   return (
     <div className="mode-select" data-testid="mode-select">
@@ -88,7 +93,7 @@ export function ModeSelect() {
           <span className="mode-card-emoji" aria-hidden="true">🛜</span>
           <span className="mode-card-name">Party Mode</span>
           <span className="mode-card-tag">
-            {online ? 'Phones as controllers · room code' : 'Needs Supabase — set VITE_SUPABASE_URL'}
+            {online ? 'Phones as controllers · room code' : offlineTag ?? 'Needs Supabase — set VITE_SUPABASE_URL'}
           </span>
           <span className="mode-card-desc">
             Players join from their phones with a code or QR.
@@ -113,7 +118,7 @@ export function ModeSelect() {
           <span className="mode-card-emoji" aria-hidden="true">📱</span>
           <span className="mode-card-name">Join a room</span>
           <span className="mode-card-tag">
-            {online ? 'I have a 6-letter code' : 'Needs Supabase'}
+            {online ? 'I have a 6-letter code' : offlineTag ?? 'Needs Supabase'}
           </span>
           <span className="mode-card-desc">
             Got a 6-letter code from the host? Enter it to join the lobby on this device.

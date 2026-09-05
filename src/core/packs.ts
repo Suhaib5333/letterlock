@@ -28,7 +28,33 @@ export interface QuestionPack {
   accent?: string; // optional theme accent for the pack card
   group?: string; // category group for the browse menu (e.g. 'Movies & TV')
   hideBoardLetters?: boolean; // hide letters on the board (e.g. flags — no first-letter hint)
+  /** Where the pack may be played. Absent = everywhere. `['web']` hides it inside the
+   *  iOS / Android / TV apps (LAUNCH_PLAN D3: iTunes-preview packs are web only). */
+  platforms?: Array<'web' | 'native'>;
   letters: Record<string, Question[]>; // 'A'..'Z' -> questions whose answer starts with the letter
+}
+
+/** True when a media URL is remote (http(s) on another origin), i.e. needs the network. */
+export function isRemoteMediaUrl(url: string | undefined, origin?: string): boolean {
+  if (!url || !/^https?:\/\//i.test(url)) return false;
+  const o = origin ?? (typeof window !== 'undefined' ? window.location.origin : '');
+  return !o || !url.startsWith(o + '/');
+}
+
+/** True when any question's image/audio/video is remote (the pack cannot play offline). */
+export function packNeedsRemoteMedia(pack: QuestionPack, origin?: string): boolean {
+  for (const qs of Object.values(pack.letters)) {
+    for (const q of qs) {
+      if (q.youtube) return true;
+      if (isRemoteMediaUrl(q.image, origin) || isRemoteMediaUrl(q.audio, origin) || isRemoteMediaUrl(q.video, origin)) return true;
+    }
+  }
+  return false;
+}
+
+/** True when a pack may be played on the given platform (absent `platforms` = all). */
+export function packAllowedOn(pack: Pick<QuestionPack, 'platforms'>, platform: 'web' | 'native'): boolean {
+  return !pack.platforms || pack.platforms.includes(platform);
 }
 
 /** Authoring shape: ids are optional and assigned by {@link normalizePack}. */

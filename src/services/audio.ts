@@ -4,6 +4,7 @@
  * wrong = a soft "whomp", never a harsh buzzer. Initialised on first user gesture
  * (browser autoplay rule). Every sound has a captioned/visual counterpart in UI.
  */
+import { nativeHaptic } from '../lib/native';
 type SoundName =
   | 'tap'
   | 'pick'
@@ -519,6 +520,8 @@ export function isMusicOn() {
 }
 
 export function haptic(ms = 12) {
+  // In the Capacitor apps the Haptics plugin fires (iOS WebView ignores vibrate).
+  if (nativeHaptic(ms)) return;
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     try {
       navigator.vibrate(ms);

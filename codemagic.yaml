@@ -1,0 +1,137 @@
+# Codemagic CI for the Letterlock store builds (LAUNCH_PLAN.md Phase 3, D-decisions).
+#
+# Two workflows, both from the same commit as the web release:
+#   ios-testflight   Xcode 26 on an M2 Mac mini, signed with the App Store Connect
+#                    API key integration, uploaded to TestFlight.
+#   android-release  Signed AAB with the upload keystore, pushed to the Play
+#                    internal track as a draft.
+#
+# One-time setup in the Codemagic UI (Team settings > Integrations / Code signing):
+#   1. App Store Connect integration named `letterlock_asc` (Issuer ID, Key ID, .p8).
+#      Codemagic exposes it to scripts as APP_STORE_CONNECT_ISSUER_ID,
+#      APP_STORE_CONNECT_KEY_IDENTIFIER, APP_STORE_CONNECT_PRIVATE_KEY.
+#   2. Android keystore uploaded under the reference name `letterlock_upload`.
+#      It is mounted at build time as CM_KEYSTORE_PATH with CM_KEYSTORE_PASSWORD,
+#      CM_KEY_ALIAS and CM_KEY_PASSWORD (android/app/build.gradle reads them).
+#   3. Environment group `google_play` holding GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
+#      (the JSON of a Play Console service account with release rights).
+#   4. Environment group `letterlock_ios` holding APP_STORE_APPLE_ID (the numeric
+#      App ID from App Store Connect > App > General > App Information).
+# Everything else (bundle id, scheme, paths) is fixed below.
+
+definitions:
+  web_build: &web_build
+    - name: Install npm dependencies
+      script: npm ci
+    - name: Build web bundle (same dist/ as letterlock.raltech.dev)
+      script: npm run build
+
+workflows:
+  ios-testflight:
+    name: iOS TestFlight
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: letterlock_asc
+    environment:
+      xcode: 26.0
+      node: 22
+      groups:
+        - letterlock_ios
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: dev.raltech.letterlock
+      vars:
+        XCODE_PROJECT: ios/App/App.xcodeproj
+        XCODE_SCHEME: App
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'app-v*'
+          include: true
+      cancel_previous_builds: true
+    scripts:
+      - *web_build
+      - name: Add the iOS platform if this checkout has none (cannot run on Windows)
+        script: |
+          if [ ! -d ios/App ]; then npx cap add ios; fi
+      - name: Sync web bundle + plugins into ios/
+        script: npx cap sync ios
+      - name: CocoaPods (only if a Podfile exists; Capacitor 8 uses Swift Package Manager)
+        script: |
+          if [ -f ios/App/Podfile ]; then (cd ios/App && pod install); fi
+      - name: Resolve Swift packages
+        script: |
+          xcodebuild -resolvePackageDependencies -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME"
+      - name: Set up code signing
+        script: xcode-project use-profiles
+      - name: Export compliance flag (no custom encryption)
+        script: |
+          PLIST="$CM_BUILD_DIR/ios/App/App/Info.plist"
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST" || true
+      - name: Increment build number
+        script: |
+          cd "$CM_BUILD_DIR/ios/App"
+          LATEST=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          agvtool new-version -all $((LATEST + 1))
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - RAL team
+        submit_to_app_store: false
+
+  android-release:
+    name: Android Play internal
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      java: 17
+      node: 22
+      groups:
+        - google_play
+      android_signing:
+        - letterlock_upload
+      vars:
+        PACKAGE_NAME: dev.raltech.letterlock
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'app-v*'
+          include: true
+      cancel_previous_builds: true
+    scripts:
+      - *web_build
+      - name: Sync web bundle + plugins into android/
+        script: npx cap sync android
+      - name: Android SDK location
+        script: echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Build signed release AAB
+        script: |
+          cd "$CM_BUILD_DIR/android"
+          LATEST=$(google-play get-latest-build-number --package-name "$PACKAGE_NAME" || echo "")
+          if [ -z "$LATEST" ]; then CODE=$BUILD_NUMBER; else CODE=$((LATEST + 1)); fi
+          TAG="${CM_TAG:-}"
+          if [[ "$TAG" == app-v* ]]; then NAME="${TAG#app-v}"; else NAME="1.0.$CODE"; fi
+          chmod +x gradlew
+          ./gradlew bundleRelease -PversionCode=$CODE -PversionName=$NAME
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/mapping.txt
+    publishing:
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true

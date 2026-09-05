@@ -2,9 +2,11 @@ import { motion } from 'motion/react';
 import { useMemo, useRef, useState } from 'react';
 import { useModalDismiss } from '../lib/useModalDismiss';
 import { AR_GROUPS, EN_GROUPS, PACKS } from '../content';
-import { type QuestionPack, totalQuestions } from '../core/packs';
+import { packAllowedOn, packNeedsRemoteMedia, type QuestionPack, totalQuestions } from '../core/packs';
 import { type Difficulty, difficultyUnlocked, difficultyUnlockLevel } from '../core/progression';
 import { useAuth } from '../lib/auth';
+import { useOnline } from '../lib/online';
+import { isNative } from '../lib/platform';
 import { accessFromProfile } from '../lib/progressionClient';
 import { play } from '../services/audio';
 import { remaining } from '../state/progress';
@@ -52,6 +54,24 @@ function stemName(name: string): string {
 // placeholders on Windows. Mirrors the map in Home.tsx.
 const PACK_FLAG: Record<string, string> = { bahrain: 'bh', 'saudi-arabia': 'sa', uae: 'ae' };
 
+// Small legal captions per browse group (LAUNCH_PLAN D10 / D11).
+const GROUP_NOTE: Record<string, string> = {
+  Fandoms: 'Unofficial fan trivia, not affiliated',
+  'Logos & Brands': 'All logos are trademarks of their owners',
+};
+
+// Scanning every question of every pack for remote media is ~40k string tests;
+// memoised per pack so the offline filter costs nothing after the first pass.
+const remoteMediaCache = new Map<string, boolean>();
+function needsRemoteMedia(p: QuestionPack): boolean {
+  let v = remoteMediaCache.get(p.id);
+  if (v === undefined) {
+    v = packNeedsRemoteMedia(p);
+    remoteMediaCache.set(p.id, v);
+  }
+  return v;
+}
+
 const DIFF_LABEL: Record<string, string> = {
   kids: 'Kids', easy: 'Easy', medium: 'Medium', hard: 'Hard', expert: 'Expert', extreme: 'Extreme',
 };
@@ -85,9 +105,15 @@ export function CategoryMenu({
   const autoFocusSearch = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: fine)').matches;
 
   const q = query.trim().toLowerCase();
+  // Store builds hide web-only packs (D3); offline hides packs whose clips/images
+  // live on another origin (they could not play anyway).
+  const online = useOnline();
+  const native = isNative;
   const filtered = useMemo(
     () =>
       PACKS.filter((p) => {
+        if (native && !packAllowedOn(p, 'native')) return false;
+        if (!online && needsRemoteMedia(p)) return false;
         if (p.locale.startsWith('ar') !== (lang === 'ar')) return false;
         if (group !== 'All' && p.group !== group) return false;
         if (!q) return true;
@@ -98,7 +124,7 @@ export function CategoryMenu({
           p.difficulty.toLowerCase().includes(q)
         );
       }),
-    [q, group, lang],
+    [q, group, lang, online, native],
   );
 
   // Each user has a tier preference per stem — clicking a tier button on a
@@ -265,6 +291,9 @@ export function CategoryMenu({
                             {hasTiers ? stemName(pack.name) : pack.name}
                           </div>
                           {pack.description && <div className="cat-card-desc">{pack.description}</div>}
+                          {GROUP_NOTE[pack.group ?? ''] && (
+                            <div className="cat-card-note" data-testid="cat-card-note">{GROUP_NOTE[pack.group ?? '']}</div>
+                          )}
                           <div className="cat-card-meta">
                             <span className={`chip diff-${pack.difficulty}`}>{DIFF_LABEL[pack.difficulty] ?? pack.difficulty}</span>
                             <span className="chip ghost">{total} Qs</span>

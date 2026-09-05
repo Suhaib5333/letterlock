@@ -1,14 +1,19 @@
 {
+  "id": "/",
   "name": "Letterlock",
   "short_name": "Letterlock",
   "description": "Letterlock (letter lock): the free online trivia board game. Two teams claim and lock letters on a hex board to connect their edges. A fair, modern take on Blockbusters.",
   "categories": ["games", "entertainment", "education"],
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#070912",
   "theme_color": "#0a0e1f",
   "icons": [
-    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

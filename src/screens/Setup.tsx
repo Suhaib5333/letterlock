@@ -7,7 +7,9 @@ import {
   modeUnlocked,
   modeUnlockLevel,
 } from '../core/progression';
+import { useAppConfig } from '../lib/appConfig';
 import { useAuth } from '../lib/auth';
+import { useOnlineRooms } from '../lib/online';
 import { accessFromProfile } from '../lib/progressionClient';
 import { play } from '../services/audio';
 import { colorById, TEAM_COLORS } from '../state/palette';
@@ -77,6 +79,7 @@ export function Setup() {
   const online = state.online;
   const playMode = state.playMode;
   const isParty = playMode === 'party';
+  const rooms = useOnlineRooms(useAppConfig());
   const set = (patch: Partial<SetupForm>) => dispatch({ type: 'UPDATE_SETUP', patch });
   const pack = packById(f.packId);
 
@@ -241,6 +244,8 @@ export function Setup() {
         <button
           className="btn btn-primary btn-lg block start-btn"
           data-testid="start-match"
+          disabled={isParty && !rooms.ok}
+          title={isParty && !rooms.ok ? 'Online rooms are paused while offline' : undefined}
           onClick={() => {
             play('pick');
             // Party: go to the lobby to share the code (match starts from there).

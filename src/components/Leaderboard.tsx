@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { PACKS } from '../content';
 import { useModalDismiss } from '../lib/useModalDismiss';
+import { enqueue, isNetworkError, registerRunner } from '../lib/offlineQueue';
+import { isOnline } from '../lib/online';
 import { supabase } from '../lib/supabase';
 import { RankBadge } from './RankBadge';
 
@@ -252,6 +254,31 @@ export async function submitScore(args: {
   durationMs: number;
 }): Promise<void> {
   if (!supabase) return;
+  // Offline: queue the score and replay it on reconnect (offlineQueue.ts).
+  if (!isOnline()) {
+    enqueue('submit_score', args);
+    return;
+  }
+  try {
+    await submitScoreNow(args);
+  } catch (err) {
+    if (isNetworkError(err)) enqueue('submit_score', args);
+  }
+}
+
+registerRunner('submit_score', async (payload) => {
+  const args = payload as Parameters<typeof submitScoreNow>[0] | null;
+  if (!args || typeof args.packId !== 'string') return;
+  await submitScoreNow(args);
+});
+
+async function submitScoreNow(args: {
+  packId: string;
+  score: number;
+  moves: number;
+  durationMs: number;
+}): Promise<void> {
+  if (!supabase) return;
   const { data: session } = await supabase.auth.getSession();
   const user = session.session?.user;
   if (!user) return;
@@ -271,6 +298,7 @@ export async function submitScore(args: {
     p_moves: args.moves,
     p_duration_ms: args.durationMs,
   });
+  if (error && isNetworkError(error)) throw error;
   if (error && (error.code === 'PGRST202' || /could not find the function/i.test(error.message))) {
     await supabase.from('leaderboard').insert({
       user_id: user.id,

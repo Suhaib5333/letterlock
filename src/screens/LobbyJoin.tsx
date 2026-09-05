@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { play } from '../services/audio';
 import { useStore } from '../state/store';
+import { useAppConfig } from '../lib/appConfig';
 import { useAuth } from '../lib/auth';
+import { useOnlineRooms } from '../lib/online';
 
 /**
  * Join an existing room by code. We use a URL param (`?room=CODE`) to hand off
@@ -20,7 +22,8 @@ export function LobbyJoin() {
 
   const normalized = code.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
   const effectiveName = (accountName ?? name).trim();
-  const valid = normalized.length === 6 && effectiveName.length > 0;
+  const rooms = useOnlineRooms(useAppConfig());
+  const valid = normalized.length === 6 && effectiveName.length > 0 && rooms.ok;
 
   function submit() {
     if (!valid) return;

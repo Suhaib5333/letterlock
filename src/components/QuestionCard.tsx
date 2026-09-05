@@ -251,6 +251,11 @@ export function QuestionCard({
             >
               ⛶ Fullscreen
             </button>
+            {served.question.category === 'logos' && (
+              <div className="qcard-trademark" data-testid="qcard-trademark">
+                All logos are trademarks of their owners
+              </div>
+            )}
           </div>
         ))
       )}

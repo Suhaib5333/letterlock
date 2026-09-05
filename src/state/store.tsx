@@ -15,6 +15,7 @@ import { allQuestionIds, allQuestions, type Question, type QuestionPack } from '
 import { mulberry32 } from '../core/rng';
 import { newMatch, startGameEvent, type NewMatchOptions } from '../core/match';
 import { DEFAULT_PACK_ID, packById } from '../content';
+import { registerScreenHooks, setMatchActive } from '../lib/native';
 import { markServed, usedSet } from './progress';
 import {
   clearSave,
@@ -510,6 +511,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       markRef.current = servedIds.length;
     }
   }, [state.log, state.opts]);
+
+  // Native shell (Capacitor apps only; both calls are no-ops on the web): keep
+  // the screen awake while a match is live, and tell the Android back button
+  // where the app is so it can leave a screen for Home instead of dead-ending.
+  useEffect(() => {
+    setMatchActive(state.screen === 'game');
+    registerScreenHooks({ getScreen: () => state.screen, goHome: () => dispatch({ type: 'EXIT_HOME' }) });
+    return () => registerScreenHooks(null);
+  }, [state.screen]);
 
   // Apply accessibility settings to <html> so CSS + reduced-motion react globally.
   useEffect(() => {

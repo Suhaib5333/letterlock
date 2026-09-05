@@ -56,12 +56,11 @@ export function LobbyHost() {
   const handleRef = useRef<LobbyHandle | null>(null);
 
   const joinUrl = useMemo(() => {
-    const u = new URL(window.location.href);
-    // `view=controller` is REQUIRED — without it the link loads the full game
-    // app (Home) instead of the phone controller (see main.tsx routing).
-    u.search = `?room=${code}&view=controller`;
-    u.hash = '';
-    return u.toString();
+    // Path form `/join/CODE` (main.tsx rewrites it to `?room=CODE&view=controller`,
+    // which loads the phone controller, not the full game app). The query form
+    // keeps working for old links and the in-app Join screen.
+    const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+    return `${window.location.origin}${base}/join/${code}`;
   }, [code]);
 
   // Open the channel as host on mount; clean up on unmount.

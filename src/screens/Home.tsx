@@ -1,16 +1,20 @@
 import { motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
-import { PACKS, packById } from '../content';
-import { totalQuestions } from '../core/packs';
+import { DEFAULT_PACK_ID, PACKS, packById } from '../content';
+import { packAllowedOn, totalQuestions } from '../core/packs';
 import { AdminPanel } from '../components/AdminPanel';
 import { AuthModal } from '../components/AuthModal';
 import { CategoryMenu } from '../components/CategoryMenu';
 import { FriendsModal } from '../components/FriendsModal';
 import { Leaderboard } from '../components/Leaderboard';
+import { LegalLinks } from '../components/LegalLinks';
 import { Logo, Wordmark } from '../components/Logo';
 import { PackEditor } from '../components/PackEditor';
 import { RankBar } from '../components/RankBadge';
 import { SettingsModal } from '../components/SettingsModal';
+import { StoreSheet } from '../components/StoreSheet';
+import { useAppConfig } from '../lib/appConfig';
+import { isNative } from '../lib/platform';
 import { useAuth } from '../lib/auth';
 import { hasDevSeam } from '../lib/devSeams';
 import { subscribePendingRequests } from '../lib/friends';
@@ -77,6 +81,14 @@ export function Home() {
   const [pendingReq, setPendingReq] = useState(0);
   useEffect(() => subscribePendingRequests(setPendingReq), []);
   const selectedPack = packById(state.setup.packId);
+  const appConfig = useAppConfig();
+  // A store build must never keep a web-only pack selected (persisted setup from
+  // the web, or a stale default): fall back to the default pack (D3).
+  useEffect(() => {
+    if (isNative && !packAllowedOn(selectedPack, 'native')) {
+      dispatch({ type: 'UPDATE_SETUP', patch: { packId: DEFAULT_PACK_ID } });
+    }
+  }, [selectedPack, dispatch]);
   const total = totalQuestions(selectedPack);
   const left = remaining(selectedPack.id, total);
 
@@ -275,7 +287,10 @@ export function Home() {
 
       <footer className="home-foot">
         <span>Best on a TV or tablet · colorblind-safe · keyboard friendly</span>
+        <LegalLinks className="home-legal" />
       </footer>
+
+      <StoreSheet config={appConfig} />
 
       {/* Loud, dismiss-not-allowed warning on Home when the Supabase env vars
           are missing in the live build. Without this the auth/leaderboard

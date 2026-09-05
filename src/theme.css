@@ -242,3 +242,46 @@ html[data-motion='reduced'] *::after {
     transform: rotate(8deg) scale(1.05);
   }
 }
+
+/* ── Native shell polish (Capacitor apps only; initNative() adds html.is-native).
+   The web build never matches these rules, so browser behaviour is unchanged. */
+html.is-native,
+html.is-native body {
+  /* No rubber-band / pull-to-refresh bounce behind the fixed 100svh shell. */
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: auto;
+}
+html.is-native .ll-app,
+html.is-native .ll-screen,
+html.is-native .board-wrap,
+html.is-native .board,
+html.is-native .hex,
+html.is-native .host-pad,
+html.is-native .scoreboard,
+html.is-native .timer,
+html.is-native button,
+html.is-native [role='button'],
+html.is-native [role='gridcell'],
+html.is-native a,
+html.is-native img,
+html.is-native svg {
+  /* Game surfaces are not text: no selection highlight, no long-press callout. */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+html.is-native * {
+  /* Kill the 300 ms double-tap delay; still allows panning inside scroll areas. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+html.is-native input,
+html.is-native textarea,
+html.is-native [contenteditable='true'],
+html.is-native .question-text,
+html.is-native .qcard-answer {
+  /* Fields and the question / answer copy stay selectable (host may copy an answer). */
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}

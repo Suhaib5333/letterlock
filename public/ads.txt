@@ -1,0 +1,4 @@
+# Letterlock ads.txt (web ads via Google AdSense H5 Games Ads, LAUNCH_PLAN Phase 8).
+# Placeholder until AdSense is approved: AdSense supplies the exact line under
+# AdSense > Sites > ads.txt. It will look like the line below (pub id differs).
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

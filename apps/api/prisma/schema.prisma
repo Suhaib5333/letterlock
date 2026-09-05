@@ -1,0 +1,227 @@
+// Letterlock schema. Same public tables, UUID keys and column names as the
+// Supabase migrations (supabase/migrations/0001..0012), plus the auth tables the
+// custom backend owns. Connection URL lives in prisma.config.ts (Prisma 7).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  player
+  moderator
+  admin
+
+  @@map("user_role")
+}
+
+// Replaces Supabase auth.users. id is preserved from the old auth.users.id so
+// every foreign key (profiles, leaderboard, friendships, ...) survives migration.
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String?  @unique
+  googleSub String?  @unique @map("google_sub")
+  appleSub  String?  @unique @map("apple_sub")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  profile          Profile?
+  leaderboard      LeaderboardRow[]
+  savedGame        SavedGame?
+  questionProgress QuestionProgress[]
+  customPacks      CustomPack[]
+  roomMembers      RoomMember[]
+  refreshTokens    RefreshToken[]
+  loginCodes       LoginCode[]
+  friendshipsLow   Friendship[]       @relation("FriendLow")
+  friendshipsHigh  Friendship[]       @relation("FriendHigh")
+
+  @@map("users")
+}
+
+model Profile {
+  id                String    @id @db.Uuid
+  user              User      @relation(fields: [id], references: [id], onDelete: Cascade)
+  username          String    @unique
+  displayName       String?   @map("display_name")
+  avatarUrl         String?   @map("avatar_url")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  role              UserRole  @default(player)
+  bannedAt          DateTime? @map("banned_at") @db.Timestamptz(6)
+  xp                Int       @default(0)
+  level             Int       @default(1)
+  prestige          Int       @default(0)
+  totalXp           BigInt    @default(0) @map("total_xp")
+  fullAccess        Boolean   @default(false) @map("full_access")
+  usernameChangedAt DateTime? @map("username_changed_at") @db.Timestamptz(6)
+  // Remove Ads (LAUNCH_PLAN Phase 5). Written only by the RevenueCat webhook.
+  adsRemoved        Boolean   @default(false) @map("ads_removed")
+  adsRemovedSource  String?   @map("ads_removed_source")
+  adsRemovedAt      DateTime? @map("ads_removed_at") @db.Timestamptz(6)
+  rcAppUserId       String?   @map("rc_app_user_id")
+
+  @@index([username], map: "profiles_username_idx")
+  @@index([role], map: "profiles_role_idx")
+  @@index([totalXp(sort: Desc)], map: "profiles_total_xp_idx")
+  @@map("profiles")
+}
+
+model LeaderboardRow {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  username   String
+  packId     String   @map("pack_id")
+  score      Int
+  moves      Int
+  durationMs Int      @map("duration_ms")
+  playedAt   DateTime @default(now()) @map("played_at") @db.Timestamptz(6)
+
+  @@index([packId, score(sort: Desc), moves, durationMs], map: "leaderboard_pack_score_idx")
+  @@index([userId, playedAt(sort: Desc)], map: "leaderboard_user_idx")
+  @@map("leaderboard")
+}
+
+// One row per pair, ordered (user_low < user_high). status: pending | accepted | blocked.
+model Friendship {
+  userLow   String   @map("user_low") @db.Uuid
+  userHigh  String   @map("user_high") @db.Uuid
+  low       User     @relation("FriendLow", fields: [userLow], references: [id], onDelete: Cascade)
+  high      User     @relation("FriendHigh", fields: [userHigh], references: [id], onDelete: Cascade)
+  status    String
+  actionBy  String   @map("action_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@id([userLow, userHigh])
+  @@index([userHigh], map: "friendships_high_idx")
+  @@map("friendships")
+}
+
+model QuestionProgress {
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  packId    String   @map("pack_id")
+  served    String[] @default([])
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@id([userId, packId])
+  @@map("question_progress")
+}
+
+model SavedGame {
+  userId    String   @id @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  state     Json
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@map("saved_games")
+}
+
+model CustomPack {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId     String    @map("owner_id") @db.Uuid
+  owner       User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  emoji       String    @default("✨")
+  difficulty  String    @default("medium")
+  body        Json
+  published   Boolean   @default(false)
+  publishedAt DateTime? @map("published_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@index([ownerId], map: "custom_packs_owner_idx")
+  @@map("custom_packs")
+}
+
+// Couch-Mode "link for XP" membership: one row per (room, signed-in user).
+model RoomMember {
+  roomCode String   @map("room_code")
+  userId   String   @map("user_id") @db.Uuid
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team     String
+  name     String?
+  joinedAt DateTime @default(now()) @map("joined_at") @db.Timestamptz(6)
+
+  @@id([roomCode, userId])
+  @@map("room_members")
+}
+
+// Dedupe log so a game's XP is credited at most once per (room, game_key).
+model RoomAward {
+  roomCode  String   @map("room_code")
+  gameKey   String   @map("game_key")
+  awardedAt DateTime @default(now()) @map("awarded_at") @db.Timestamptz(6)
+
+  @@id([roomCode, gameKey])
+  @@map("room_awards")
+}
+
+// ---- Auth tables owned by the custom backend ----
+
+model OtpCode {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String
+  codeHash  String   @map("code_hash") // scrypt "salt:hex"
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([email], map: "otp_codes_email_idx")
+  @@map("otp_codes")
+}
+
+model RefreshToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique @map("token_hash") // sha256 hex of the opaque token
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([userId], map: "refresh_tokens_user_idx")
+  @@map("refresh_tokens")
+}
+
+// 24-hour guest identities for phones joining a room without an account.
+model GuestToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String?
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("guest_tokens")
+}
+
+// One-time codes handed to the SPA after the Google web redirect (5 min).
+model LoginCode {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String   @unique @map("code_hash")
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("login_codes")
+}
+
+// Single row (id = 1): version gate, maintenance flag, store links, OTA bundle.
+model AppConfig {
+  id           Int      @id @default(1)
+  minNative    String   @default("0.0.0") @map("min_native")
+  minBundle    String   @default("0.0.0") @map("min_bundle")
+  maintenance  Boolean  @default(false)
+  message      String?
+  storeLinks   Json     @default("{}") @map("store_links")
+  latestBundle Json?    @map("latest_bundle")
+  updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@map("app_config")
+}

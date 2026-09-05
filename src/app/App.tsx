@@ -1,6 +1,9 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from './ErrorBoundary';
+import { StatusBanners, UpdateRequired } from '../components/StatusBanner';
+import { updateRequired, useAppConfig } from '../lib/appConfig';
+import { useOnline } from '../lib/online';
 import { useAuth } from '../lib/auth';
 import { hasDevSeam } from '../lib/devSeams';
 import { clearRoom } from '../lib/couchXp';
@@ -31,6 +34,11 @@ export function App() {
   const { state } = useStore();
   const { user, profile } = useAuth();
   const [notif, setNotif] = useState<Notification | null>(null);
+  // Remote config (version gate, maintenance, store links). Never blocks render:
+  // starts from the cached copy and re-renders when the fetch lands.
+  const appConfig = useAppConfig();
+  const online = useOnline();
+  const hasBanner = !online || !!appConfig?.maintenance;
 
   // Start presence + the notification inbox while signed in; tear down on sign-out.
   useEffect(() => {
@@ -127,8 +135,17 @@ export function App() {
     applyTeamColors(aColor, bColor);
   }, [aColor, bColor]);
 
+  if (updateRequired(appConfig)) {
+    return (
+      <div className="ll-app" data-screen="update-required">
+        <UpdateRequired config={appConfig!} />
+      </div>
+    );
+  }
+
   return (
-    <div className="ll-app" data-screen={screen}>
+    <div className={`ll-app ${hasBanner ? 'has-banner' : ''}`} data-screen={screen}>
+      <StatusBanners config={appConfig} />
       <AnimatePresence>
         {notif && (
           <motion.div

@@ -1,0 +1,99 @@
+# Builds the Android app from the same web bundle that ships to letterlock.raltech.dev.
+#
+#   gh workflow run android-build.yml          (manual)
+#   git tag app-v1.0.0 && git push --tags      (release tag)
+#
+# Outputs (workflow artifacts, 14 days):
+#   letterlock-debug-apk      app-debug.apk   install on any phone / TV (adb install)
+#   letterlock-release-aab    app-release.aab UNSIGNED; Play upload needs the signed
+#                                             one from Codemagic (codemagic.yaml)
+#
+# The store-signed builds come from Codemagic; this workflow exists so every
+# push can be smoke-installed without a Mac or a keystore. No Android SDK or
+# Java is needed on the developer machine (see docs/MOBILE_BUILD.md).
+name: Android build
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['app-v*']
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Debug APK + unsigned AAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # ubuntu-latest ships the Android SDK at $ANDROID_HOME; this keeps the
+      # platform / build-tools that compileSdk 36 needs current and accepts licences.
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools platforms;android-36 build-tools;36.0.0
+          accept-android-sdk-licenses: true
+          log-accepted-android-sdk-licenses: false
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Install
+        run: npm ci
+
+      - name: Build web bundle
+        run: npm run build
+
+      - name: Sync web bundle into android/
+        run: npx cap sync android
+
+      - name: Version
+        id: ver
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if [[ "$TAG" == app-v* ]]; then NAME="${TAG#app-v}"; else NAME="0.0.${GITHUB_RUN_NUMBER}"; fi
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "code=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "versionName=$NAME versionCode=${GITHUB_RUN_NUMBER}"
+
+      - name: Gradle assembleDebug + bundleRelease
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug bundleRelease \
+            -PversionCode=${{ steps.ver.outputs.code }} \
+            -PversionName=${{ steps.ver.outputs.name }}
+
+      - name: List outputs
+        run: |
+          ls -la android/app/build/outputs/apk/debug/
+          ls -la android/app/build/outputs/bundle/release/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: letterlock-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: letterlock-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 14
+          if-no-files-found: error

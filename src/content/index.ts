@@ -658,6 +658,27 @@ export const PACKS: QuestionPack[] = [
   .map((p) => ({ ...normalizePack(rebucketByAnswer(p)), group: groupOf(p.id) }))
   .sort((a, b) => DIFFICULTY_RANK[a.difficulty] - DIFFICULTY_RANK[b.difficulty]);
 
+// LAUNCH_PLAN D3: packs built on iTunes 30-second previews are WEB ONLY (Apple
+// 5.2.5 + the iTunes API terms forbid them in a store build). Gated by their media
+// source rather than by hand-listing ids, so a new clip file can never slip into a
+// native build unnoticed: songs*, tv-clips, the sitcom clip extras, the decade
+// music clip extras, and the iTunes half of Guess the Melody.
+// TODO(melodies split): once another agent splits melodies into a public-domain pack
+// and a `melodies-itunes` pack, this predicate gates only the iTunes one and the PD
+// pack ships everywhere automatically (its clips live under /clips/, same origin).
+const ITUNES_MEDIA = /(^|\.)(itunes\.apple\.com|mzstatic\.com)\//i;
+function usesItunesPreviews(pack: QuestionPack): boolean {
+  for (const qs of Object.values(pack.letters)) {
+    for (const q of qs) {
+      if (ITUNES_MEDIA.test(q.audio ?? '') || ITUNES_MEDIA.test(q.video ?? '') || ITUNES_MEDIA.test(q.image ?? '')) return true;
+    }
+  }
+  return false;
+}
+for (const p of PACKS) {
+  if (usesItunesPreviews(p)) p.platforms = ['web'];
+}
+
 export const DEFAULT_PACK_ID = fullGeneralKnowledge.id;
 
 export function packById(id: string): QuestionPack {

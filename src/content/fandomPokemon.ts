@@ -2,7 +2,7 @@ import type { RawPack } from '../core/packs';
 
 export const fandomPokemonPack: RawPack = {
   id: 'fandom-pokemon',
-  name: 'Pokemon',
+  name: 'Pocket Monsters Trivia',
   description: 'Creatures, evolutions, types, regions, gyms and legendaries across the games and anime.',
   locale: 'en',
   difficulty: 'medium',

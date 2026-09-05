@@ -1,0 +1,4 @@
+# Letterlock app-ads.txt (AdMob authorized sellers for the iOS / Android apps).
+# Placeholder until the AdMob account exists: AdMob supplies the exact line under
+# AdMob > Apps > app-ads.txt. It will look like the line below (pub id differs).
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
