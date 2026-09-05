@@ -42,7 +42,13 @@ env:
   BUNDLES_DIR: /opt/letterlock/bundles
 
 jobs:
+  # An OTA bundle goes straight to every installed app on its next launch, so it is
+  # the LAST place to ship something untested.
+  test:
+    uses: ./.github/workflows/ci.yml
+
   release:
+    needs: test
     name: Build, upload, publish
     runs-on: ubuntu-latest
     steps:

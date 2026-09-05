@@ -1332,7 +1332,17 @@ re-passes `scripts/checkpack.mjs`.
 2. **Keep this file updated as you go**, not only at the end of a task. After each
    milestone, append what changed, what is verified, and what moved to or off the
    blocked list. The next session reads this file first, so it is the handover.
-3. **Session-budget discipline.** Prefer few, cheap, targeted commands over broad
+3. **ALWAYS check CI/CD, every time.** Never report "CI green" from a green tick alone —
+   open the run and confirm WHICH jobs ran. After every push: `gh run list --limit 5`, then
+   `gh run view <id>` on anything not green, and `--log-failed` for the actual error. Before
+   claiming a pipeline works, confirm the gate exists at all: this rule was written after a
+   session reported "CI green" seven times when **no workflow ran a single test** —
+   `deploy-vps.yml` built and shipped to the VPS, so the tick only ever meant "the deploy
+   script finished". The gate is now `.github/workflows/ci.yml` (typecheck, unit + content
+   tests, leak gate, build, Playwright e2e, noscroll matrix, and the API suite against a real
+   Postgres service), and both `deploy-vps.yml` and `ota-release.yml` `needs:` it. Anything
+   that ships to a user or a server must sit behind it.
+4. **Session-budget discipline.** Prefer few, cheap, targeted commands over broad
    sweeps; do not fan out subagents unless the task genuinely needs them; run long
    suites in the background rather than re-reading large files.
 

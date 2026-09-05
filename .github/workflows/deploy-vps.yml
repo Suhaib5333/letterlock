@@ -12,7 +12,13 @@ on:
 concurrency: { group: "deploy-vps-${{ github.ref }}", cancel-in-progress: true }
 
 jobs:
+  # Nothing reaches the VPS unless the suites pass. Before this gate existed a green
+  # tick on this workflow only meant the deploy script finished.
+  test:
+    uses: ./.github/workflows/ci.yml
+
   deploy:
+    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
