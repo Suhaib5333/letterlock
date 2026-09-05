@@ -84,6 +84,39 @@ jobs:
           sys.exit(1 if bad else 0)
           PY
 
+      # Traefik's dynamic config is only ever validated by Traefik itself, at which
+      # point a bad file means every Letterlock host 404s. Two real incidents on
+      # 2026-09-05: a duplicate `middlewares:` key silently deleted the existing
+      # middleware, and a hand-transferred copy arrived missing two routers. Both
+      # would have been caught here.
+      - name: Traefik config references resolve
+        run: |
+          python3 - <<'PY'
+          import sys, yaml
+          d = yaml.safe_load(open('deploy/traefik/letterlock.yml', encoding='utf-8'))
+          http = (d or {}).get('http') or {}
+          routers = http.get('routers') or {}
+          services = set(http.get('services') or {})
+          middlewares = set(http.get('middlewares') or {})
+          bad = 0
+          for name, r in routers.items():
+              svc = r.get('service')
+              if svc not in services:
+                  print(f'::error ::router {name} points at missing service {svc!r}'); bad += 1
+              for mw in r.get('middlewares') or []:
+                  if mw not in middlewares:
+                      print(f'::error ::router {name} uses missing middleware {mw!r}'); bad += 1
+          # Every host we serve must still have a router, so a lost one is loud.
+          rules = ' '.join(str(r.get('rule', '')) for r in routers.values())
+          for host in ['letterlock.raltech.dev', 'api.letterlock.raltech.dev',
+                       'dev.letterlock.raltech.dev', 'api.dev.letterlock.raltech.dev',
+                       'status.letterlock.raltech.dev']:
+              if host not in rules:
+                  print(f'::error ::no router serves {host}'); bad += 1
+          print(f'{len(routers)} routers, {len(services)} services, {len(middlewares)} middlewares')
+          sys.exit(1 if bad else 0)
+          PY
+
       - name: Typecheck
         run: npm run typecheck
 
