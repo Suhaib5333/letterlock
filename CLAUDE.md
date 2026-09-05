@@ -1376,6 +1376,7 @@ any ref).
 | B11 | **Pixabay API key (optional, 1 min, free)** | `scripts/genimages.mjs` works keyless (Wikimedia Commons + Openverse) but Pixabay is tried first when `PIXABAY_KEY` is set and gives better, more on-topic photos for abstract charades prompts. Get one at https://pixabay.com/api/docs/ and re-run `RETRY_MISSING=1 node scripts/genimages.mjs`. | Image QUALITY only, not coverage |
 | B12 | **Human review of the charades images** | LAUNCH_PLAN Phase 1c says "nothing ships unreviewed". Open `docs/charades-review/index.html` (contact sheets, 20 per page), and for anything unsuitable add its slug to `public/charades/<packId>/reject.txt` (`<slug>` to refetch, `<slug> !` to force word-only), then re-run the script. | Shipping user-facing images in a family game |
 | B13 | **The iOS build has never been run** | It needs a Mac, so only Codemagic can prove it (`codemagic.yaml`, `mac_mini_m2`, Xcode 26). The config reads correct — Capacitor 8 uses **SPM**, not CocoaPods, `xcodebuild -resolvePackageDependencies` is the right step and the `pod install` line is guarded by `if [ -f ios/App/Podfile ]`, so it is a no-op; `IPHONEOS_DEPLOYMENT_TARGET = 15.0`. But "reads correct" is exactly what the Android build did before it failed on JDK 17, so treat it as unverified until a real Codemagic run. Needs the Apple account (B3). | First store build |
+| B14 | **Sentry DSN** | Crash reporting is wired and inert: create a free Sentry project (JavaScript → React), copy the DSN, set `VITE_SENTRY_DSN` in `.env.production` and as a GitHub Actions variable. Until then a crash still logs to the console, and the 453 KB Sentry chunk is never even fetched (dynamic import). | Seeing white-screen crashes in the wild |
 
 ## II.3v Round-24: launch-phase batch committed and the suite made green again (2026-09-05)
 
@@ -1482,3 +1483,38 @@ running the thing rather than reading it, which is the whole point of the testin
 - ✅ **Media gate CLEAN** after fixing a cry-wolf: the scan grepped raw lines, so the flag packs'
   own comments explaining they moved OFF flagcdn.com counted as three violations. It now strips
   comments and requires the match to sit inside something URL-shaped.
+
+## II.3x Round-26: the CI gate, and what it immediately caught (2026-09-05)
+
+Prompted by Suhaib asking, twice, whether everything really was done. It was not.
+
+- 🚨 **NOTHING in CI ran a test.** `deploy-vps.yml` built the bundle and shipped it to the VPS
+  and `ota-release.yml` pushed a bundle straight to every installed app, so a green tick only
+  ever meant "the deploy script finished". `.github/workflows/ci.yml` now runs typecheck, unit +
+  content tests, the answer-leak gate, `npm audit`, the build, the full Playwright suite and the
+  17-device noscroll matrix, plus the API suite against a real Postgres service. Both the deploy
+  and the OTA workflow `needs:` it.
+- 🐛 **Three "works on my machine" bugs, all found by the gate on its first runs.** (1) The API
+  e2e suite never creates its schema, so it only ever passed on a database somebody had migrated
+  by hand — `prisma migrate deploy` added. (2) The Playwright suite boots the REAL API and needs
+  `pg`, which resolved from `apps/api/node_modules`, present locally only because someone once
+  ran `bun install` there — the web job now provisions Postgres and the API's deps. (3)
+  `prisma.config.ts` resolves `DATABASE_URL` at load time, so even `prisma generate` needs it.
+- 🐛 **The gate then caught ME.** After switching the countdown-suspense control to a `<select>`
+  I re-ran vitest, noscroll and checksettings but not the e2e suite, and broke the test that
+  clicked its buttons. **Running "the tests that seem relevant" is not running the suite.**
+- ✅ **Settings now fit one screen on all 15 viewports** (`settings: ALL CLEAR`), after I had
+  wrongly written it off as a design problem. A Segment with more than four options renders a
+  native `<select>` (six buttons at phone width wrapped four ragged times and pushed their own
+  label onto a second line — that one row was 130px of a ~540px budget); short portrait phones
+  drop the Done button as landscape already did; landscape rows put label and control on one
+  line. Every number measured with a CSS-injection sweep rather than guessed.
+- ✅ **Phase 7 gaps closed**: Uptime Kuma (localhost-bound behind the existing `status.letterlock`
+  Traefik entry, with the monitors listed), a fail2ban sshd jail, `npm audit` in CI, and
+  **crash reporting** (`src/lib/crash.ts`) — Sentry behind a dynamic import so a build with no
+  `VITE_SENTRY_DSN` never fetches the 453 KB chunk, no PII, errors only, and `reportError` always
+  logs and never throws. Wired into `ErrorBoundary.componentDidCatch` and boot. DSN is B14.
+- ✅ **Phase 1b evidence completed**: `docs/mobile-rehaul/after/` (28 shots) now diffs 1:1 with
+  `before/`; the plan asked for both and only `before/` existed.
+- 🧠 **The rule this round bought:** never report CI green from a tick — open the run and confirm
+  which jobs ran. It is now standing rule 3 at the top of this file.

@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { clearSavedGame } from '../state/store';
+import { reportError } from '../lib/crash';
 
 interface Props {
   children: ReactNode;
@@ -24,7 +25,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     // Surface for diagnostics; never rethrow (that would re-blank the screen).
-    console.error('Letterlock recovered from an error:', error, info.componentStack);
+    // reportError always logs, and additionally reaches Sentry when a DSN is set,
+    // so a white screen in the wild is visible instead of silent.
+    const frame = info.componentStack?.split(String.fromCharCode(10))[1]?.trim();
+    reportError(error, frame ? `render:${frame}` : 'render');
   }
 
   private recover = () => {

@@ -2,6 +2,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App';
 import { initWebAdsIfConfigured } from './lib/ads';
+import { APP_VERSION } from './lib/appConfig';
+import { initCrashReporting } from './lib/crash';
 import { AuthProvider } from './lib/auth';
 import { initNative, nativeReady } from './lib/native';
 import { isNative, isTV } from './lib/platform';
@@ -74,6 +76,7 @@ function boot() {
   );
   // Capacitor apps: drop the native splash once React has painted (no-op on web).
   requestAnimationFrame(() => nativeReady());
+  initCrashReporting(APP_VERSION); // Phase 7: inert until VITE_SENTRY_DSN is set
   initWebAdsIfConfigured(); // Phase 8 web ads: inert until VITE_ADSENSE_CLIENT is set
 }
 
