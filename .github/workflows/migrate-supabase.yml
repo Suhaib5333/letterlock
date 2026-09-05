@@ -31,6 +31,10 @@ jobs:
         run: node scripts/migrate-supabase/export.mjs migration.sql
       - uses: actions/upload-artifact@v4
         with: { name: "migration-sql-${{ inputs.target }}", path: migration.sql, retention-days: 7 }
+      # The dump is piped in rather than passed with -f: psql runs as the postgres
+      # user, the uploaded file is root-owned, and `-f` makes postgres open it, which
+      # failed with "Permission denied" through five SSH retries. With `<` the root
+      # shell opens the file and postgres only reads stdin.
       - name: Load into ${{ inputs.target }} (retried SSH)
         if: ${{ !inputs.dry_run }}
         env:
@@ -44,4 +48,4 @@ jobs:
               if [ "$1" = scp ]; then sshpass -e scp -P $p $SSH_OPTS "${@:2}" && return 0; else sshpass -e ssh -p $p $SSH_OPTS "${@:2}" && return 0; fi
               echo "attempt $i via port $p failed"; done; sleep $((i * 15)); done; return 1; }
           retry scp migration.sql "$VPS:/opt/letterlock/incoming/migration-$DB.sql"
-          retry ssh "$VPS" "sudo -u postgres psql -v ON_ERROR_STOP=1 -1 -q -d $DB -f /opt/letterlock/incoming/migration-$DB.sql && sudo -u postgres psql -d $DB -Atc \"select 'users '||count(*) from users union all select 'profiles '||count(*) from profiles union all select 'leaderboard '||count(*) from leaderboard union all select 'friendships '||count(*) from friendships union all select 'saved_games '||count(*) from saved_games union all select 'question_progress '||count(*) from question_progress union all select 'custom_packs '||count(*) from custom_packs\" && rm -f /opt/letterlock/incoming/migration-$DB.sql"
+          retry ssh "$VPS" "sudo -u postgres psql -v ON_ERROR_STOP=1 -1 -q -d $DB < /opt/letterlock/incoming/migration-$DB.sql && sudo -u postgres psql -d $DB -Atc \"select 'users '||count(*) from users union all select 'profiles '||count(*) from profiles union all select 'leaderboard '||count(*) from leaderboard union all select 'friendships '||count(*) from friendships union all select 'saved_games '||count(*) from saved_games union all select 'question_progress '||count(*) from question_progress union all select 'custom_packs '||count(*) from custom_packs\" && rm -f /opt/letterlock/incoming/migration-$DB.sql"
