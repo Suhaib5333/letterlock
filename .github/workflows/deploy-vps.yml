@@ -123,14 +123,19 @@ jobs:
           [ -n "$SSHPASS" ] || { echo "::error ::VPS_PASS secret missing"; exit 1; }
           sudo apt-get update -q && sudo apt-get install -yq sshpass
           SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=15"
-          retry() { # retry ssh|scp <args...>; port injected per attempt (22 then 2222)
-            for i in 1 2 3 4 5; do
-              for p in 22 2222; do
-                if [ "$1" = scp ]; then sshpass -e scp -P $p $SSH_OPTS "${@:2}" && return 0
-                else sshpass -e ssh -p $p $SSH_OPTS "${@:2}" && return 0; fi
-                echo "attempt $i via port $p failed"
-              done
-              echo "retrying in $((i * 15))s"; sleep $((i * 15))
+          # Hostinger intermittently drops fresh connections from GitHub runners, so this
+          # retries rather than failing on the first refusal. Port 2222 was dropped from
+          # the rotation on 2026-09-05: ssh-probe.yml showed it TCP BLOCKED from runners
+          # while 22 was open, so trying it burned half of every round on a dead port and
+          # doubled the time to give up. 8 rounds with a longer backoff now, because the
+          # drops observed lasted a couple of minutes.
+          retry() { # retry ssh|scp <args...>
+            for i in 1 2 3 4 5 6 7 8; do
+              if [ "$1" = scp ]; then sshpass -e scp -P 22 $SSH_OPTS "${@:2}" && return 0
+              else sshpass -e ssh -p 22 $SSH_OPTS "${@:2}" && return 0; fi
+              echo "attempt $i failed"
+              [ "$i" = 8 ] && break
+              echo "retrying in $((i * 20))s"; sleep $((i * 20))
             done
             echo "all attempts failed"; return 1
           }
