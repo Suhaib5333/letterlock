@@ -15,6 +15,16 @@ export interface AppConfig {
   maintenance?: boolean;
   message?: string;
   storeLinks?: { ios?: string; android?: string };
+  /** Newest OTA web bundle (Phase 3c); null/absent = nothing published. */
+  latestBundle?: LatestBundle | null;
+}
+
+/** Published by .github/workflows/ota-release.yml, consumed by lib/ota.ts. */
+export interface LatestBundle {
+  version: string;
+  url: string;
+  sha256: string;
+  minNative?: string;
 }
 
 /** Injected from package.json `version` by vite `define` (see vite.config.ts). */

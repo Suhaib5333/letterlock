@@ -1,9 +1,9 @@
-﻿import { expect, test, type Browser, type Page } from '@playwright/test';
+import { expect, test, type Browser, type Page } from '@playwright/test';
 
 // Connection-resilience matrix: lose connection / refresh / go offline at every
 // phase of an online match and confirm the player is restored and can continue.
-// Online needs Supabase; these run on localhost where it's configured + the dev
-// seams are enabled (beforeEach unlock not needed â€” online uses default 5Ã—5).
+// Online runs against the real local API + Socket.IO gateway (playwright.config.ts);
+// the dev seams are enabled on localhost (no unlock needed: online uses the default 5x5).
 
 const CONTROLLER = (code: string) => `/?room=${code}&view=controller&name=Tester`;
 

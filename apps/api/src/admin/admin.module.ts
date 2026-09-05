@@ -67,8 +67,9 @@ export interface AdminUserRow {
 }
 
 /**
- * DELETE /admin/users/:target accepts either an admin bearer token or the CI
- * header `x-qa-token: <QA_ADMIN_TOKEN>` (qa-cleanup-api.yml). Exact matches only.
+ * DELETE /admin/users/:target and PATCH /app-config accept either an admin bearer
+ * token or the CI header `x-qa-token: <QA_ADMIN_TOKEN>` (qa-cleanup-api.yml,
+ * ota-release.yml). Exact matches only.
  */
 @Injectable()
 export class AdminOrQaGuard implements CanActivate {

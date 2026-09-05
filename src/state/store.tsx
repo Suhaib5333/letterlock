@@ -110,6 +110,7 @@ type Action =
   | { type: 'START_MATCH' }
   | { type: 'PICK_CELL'; cell: number }
   | { type: 'REVEAL_ANSWER' }
+  | { type: 'GRANT_SKIP' }
   | { type: 'SKIP_QUESTION' }
   | { type: 'AUTO_SKIP' }
   | { type: 'ADJUDICATE'; team: TeamId | null }
@@ -285,6 +286,12 @@ function reducer(state: StoreState, action: Action): StoreState {
 
     case 'REVEAL_ANSWER':
       return { ...state, ui: { ...state.ui, answerRevealed: true } };
+
+    case 'GRANT_SKIP': {
+      // Rewarded ad watched (lib/ads.ts): refund ONE skip on the current pick.
+      if (!state.ui.served || state.ui.skipsUsed === 0) return state;
+      return { ...state, ui: { ...state.ui, skipsUsed: state.ui.skipsUsed - 1 } };
+    }
 
     case 'SKIP_QUESTION': {
       if (!state.opts || !state.ui.served) return state;

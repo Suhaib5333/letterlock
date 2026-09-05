@@ -142,10 +142,12 @@ When authoring an expansion, check new clues against the base file too — write
 ### 14. Media / image-by-identifier packs (flags, logos, songs, melodies)
 These render an asset by an external identifier, so the answer and the identifier are
 **two facts that must agree** — a wrong id silently shows the wrong asset (no test catches it).
-- **Flags** (`flagcdn.com/<iso2>`): the code must be the country's real ISO 3166-1 alpha-2.
+- **Flags** (`/flags/<iso2>.svg`, bundled in `public/flags/`; never hotlink flagcdn): the code
+  must be the country's real ISO 3166-1 alpha-2.
   Watch look-alikes: Congo `cg` vs DR Congo `cd`; Niger `ne` vs Nigeria `ng`;
   Guinea `gn` vs Equatorial Guinea `gq` vs Guinea-Bissau `gw`.
-- **Logos** (`cdn.simpleicons.org/<slug>`): the slug = the *Simple Icons brand title*
+- **Logos** (`/logos/<slug>.svg`, bundled by `scripts/genlogos.mjs`; never hotlink the CDN,
+  and never the Apple logo): the slug = the *Simple Icons brand title*
   (lowercased, punctuation/spaces stripped, `.`→`dot`, `&`→`and`). A generic-looking slug
   is often a specific product — `rocket` = **WP Rocket**, `origin` = EA's Origin,
   `delta` = the airline. Set `a` to that exact brand; everyday name → `alt`.
@@ -200,6 +202,14 @@ no clue describing one specific thing). Additional rules for charade answers:
   everyday objects/simple mimes → Easy). `rebucketByAnswer` only de-dupes the *exact*
   `q|a` pair *within one merged pack*, so it will NOT catch a same-answer/different-
   instruction or cross-pack repeat — author these out by hand.
+- **Images are bundled, not searched at runtime.** After adding charade prompts run
+  `node scripts/genimages.mjs`: it fetches one licensed photo per NEW prompt (Pixabay with
+  `PIXABAY_KEY`, else Wikimedia Commons PD/CC, else Openverse CC0) into
+  `public/charades/<packId>/<slug>.webp`, records the credit in `credits.json`, regenerates
+  `src/content/charadesImageManifest.ts` and the review sheets in `docs/charades-review/`.
+  Scan the sheet; list any bad slug in that pack's `reject.txt` (`slug` = fetch another,
+  `slug !` = keep word-only) and re-run. A prompt with no image is simply word-only.
+  Never put an `image:` URL on a charade question by hand.
 - **Movie/TV titles must be real and broadly known.** Prefer the canonical English
   title ("The Matrix", not "Matrix"; avoid foreign-release names like "Vaiana" for
   "Moana"). The board key letter is ignored (titles rebucket by the title's first
@@ -222,12 +232,17 @@ answer away and never strands the game:
      `artistName` = show. (Movie clips have **no** safe source — iTunes' movie API is
      dead and YouTube is banned — so movie *content* lives in the trivia packs instead.)
    - ✅ iTunes `entity=song` previews (`.m4a`) for audio.
-   - ✅ Bundled flag SVGs / Simple-Icons logos / synthesized melodies.
+   - ✅ Bundled flag SVGs / Simple Icons logos / synthesized melodies / charades photos.
+   - ⛔ iTunes previews make a pack **web only** (D3): `content/index.ts` sets
+     `platforms: ['web']` on any pack carrying an iTunes URL. Keep iTunes clips in their own
+     pack (e.g. `melodies-itunes`) so the bundle-safe content still ships in the apps.
 2. **Use the native `<audio>`/`<video controls>`** — they support fullscreen and have no
    spoiler chrome. Don't embed third-party iframes for clips.
 3. **Every clip element must have an `onError`** → the game **auto-advances** to another
    question (`AUTO_SKIP`, capped 12/pick) and Skip stays enabled. Verify reachability with
-   `npx vite-node scripts/checkmedia.mjs` (clip packs must be **0 dead**).
+   `node scripts/checkmedia.mjs` (the media gate: clip packs must be **0 dead**, every local
+   media path must exist, and no loremflickr / flagcdn / simpleicons / Google Fonts URL may
+   remain in `src/`).
 4. **The answer timer starts on the clip's first play** (audio/video), not when the
    question is served — so watching/listening isn't on the clock. (Image clips start
    immediately.) Handled by `onMediaPlay` → `timerActive` in `Game.tsx`.

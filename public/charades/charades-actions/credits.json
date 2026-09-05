@@ -1,0 +1,1081 @@
+[
+ {
+  "slug": "accountant",
+  "prompt": "Accountant",
+  "source": "word-only"
+ },
+ {
+  "slug": "acrobat",
+  "prompt": "Acrobat",
+  "source": "word-only"
+ },
+ {
+  "slug": "applauding",
+  "prompt": "Applauding",
+  "source": "word-only"
+ },
+ {
+  "slug": "archaeologist",
+  "prompt": "Archaeologist",
+  "source": "word-only"
+ },
+ {
+  "slug": "archery",
+  "prompt": "Archery",
+  "source": "word-only"
+ },
+ {
+  "slug": "arm-wrestling",
+  "prompt": "Arm wrestling",
+  "source": "word-only"
+ },
+ {
+  "slug": "astronaut",
+  "prompt": "Astronaut",
+  "source": "word-only"
+ },
+ {
+  "slug": "astronomer",
+  "prompt": "Astronomer",
+  "source": "word-only"
+ },
+ {
+  "slug": "auctioneer",
+  "prompt": "Auctioneer",
+  "source": "word-only"
+ },
+ {
+  "slug": "auto-racing",
+  "prompt": "Auto racing",
+  "source": "word-only"
+ },
+ {
+  "slug": "badminton",
+  "prompt": "Badminton",
+  "source": "word-only"
+ },
+ {
+  "slug": "baker",
+  "prompt": "Baker",
+  "source": "word-only"
+ },
+ {
+  "slug": "baking",
+  "prompt": "Baking",
+  "source": "word-only"
+ },
+ {
+  "slug": "barber",
+  "prompt": "Barber",
+  "source": "word-only"
+ },
+ {
+  "slug": "bartender",
+  "prompt": "Bartender",
+  "source": "word-only"
+ },
+ {
+  "slug": "baseball",
+  "prompt": "Baseball",
+  "source": "word-only"
+ },
+ {
+  "slug": "basketball",
+  "prompt": "Basketball",
+  "source": "word-only"
+ },
+ {
+  "slug": "beekeeper",
+  "prompt": "Beekeeper",
+  "source": "word-only"
+ },
+ {
+  "slug": "blacksmith",
+  "prompt": "Blacksmith",
+  "source": "word-only"
+ },
+ {
+  "slug": "bobsledding",
+  "prompt": "Bobsledding",
+  "source": "word-only"
+ },
+ {
+  "slug": "bowling",
+  "prompt": "Bowling",
+  "source": "word-only"
+ },
+ {
+  "slug": "boxing",
+  "prompt": "Boxing",
+  "source": "word-only"
+ },
+ {
+  "slug": "bricklaying",
+  "prompt": "Bricklaying",
+  "source": "word-only"
+ },
+ {
+  "slug": "brushing-a-dog",
+  "prompt": "Brushing a dog",
+  "source": "word-only"
+ },
+ {
+  "slug": "builder",
+  "prompt": "Builder",
+  "source": "word-only"
+ },
+ {
+  "slug": "bungee-jumping",
+  "prompt": "Bungee jumping",
+  "source": "word-only"
+ },
+ {
+  "slug": "butcher",
+  "prompt": "Butcher",
+  "source": "word-only"
+ },
+ {
+  "slug": "canoeing",
+  "prompt": "Canoeing",
+  "source": "word-only"
+ },
+ {
+  "slug": "carpenter",
+  "prompt": "Carpenter",
+  "source": "word-only"
+ },
+ {
+  "slug": "carpentry",
+  "prompt": "Carpentry",
+  "source": "word-only"
+ },
+ {
+  "slug": "carrying-groceries",
+  "prompt": "Carrying groceries",
+  "source": "word-only"
+ },
+ {
+  "slug": "cartographer",
+  "prompt": "Cartographer",
+  "source": "word-only"
+ },
+ {
+  "slug": "cashier",
+  "prompt": "Cashier",
+  "source": "word-only"
+ },
+ {
+  "slug": "chef",
+  "prompt": "Chef",
+  "source": "wikimedia-commons",
+  "author": "Suyash Jagtap official",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chef_suyash_nestle_young_chef_contest.jpg"
+ },
+ {
+  "slug": "cleaning-windows",
+  "prompt": "Cleaning windows",
+  "source": "word-only"
+ },
+ {
+  "slug": "climbing",
+  "prompt": "Climbing",
+  "source": "word-only"
+ },
+ {
+  "slug": "conductor",
+  "prompt": "Conductor",
+  "source": "word-only"
+ },
+ {
+  "slug": "cowboy",
+  "prompt": "Cowboy",
+  "source": "word-only"
+ },
+ {
+  "slug": "cricket",
+  "prompt": "Cricket",
+  "source": "word-only"
+ },
+ {
+  "slug": "croquet",
+  "prompt": "Croquet",
+  "source": "word-only"
+ },
+ {
+  "slug": "curling",
+  "prompt": "Curling",
+  "source": "word-only"
+ },
+ {
+  "slug": "cycling",
+  "prompt": "Cycling",
+  "source": "word-only"
+ },
+ {
+  "slug": "dancer",
+  "prompt": "Dancer",
+  "source": "word-only"
+ },
+ {
+  "slug": "darts",
+  "prompt": "Darts",
+  "source": "word-only"
+ },
+ {
+  "slug": "decorator",
+  "prompt": "Decorator",
+  "source": "word-only"
+ },
+ {
+  "slug": "dentist",
+  "prompt": "Dentist",
+  "source": "word-only"
+ },
+ {
+  "slug": "detective",
+  "prompt": "Detective",
+  "source": "word-only"
+ },
+ {
+  "slug": "digging",
+  "prompt": "Digging",
+  "source": "word-only"
+ },
+ {
+  "slug": "dishwashing",
+  "prompt": "Dishwashing",
+  "source": "word-only"
+ },
+ {
+  "slug": "diving",
+  "prompt": "Diving",
+  "source": "word-only"
+ },
+ {
+  "slug": "doctor",
+  "prompt": "Doctor",
+  "source": "word-only"
+ },
+ {
+  "slug": "dog-walking",
+  "prompt": "Dog walking",
+  "source": "word-only"
+ },
+ {
+  "slug": "drawing",
+  "prompt": "Drawing",
+  "source": "word-only"
+ },
+ {
+  "slug": "dribbling",
+  "prompt": "Dribbling",
+  "source": "word-only"
+ },
+ {
+  "slug": "drilling",
+  "prompt": "Drilling",
+  "source": "word-only"
+ },
+ {
+  "slug": "drumming",
+  "prompt": "Drumming",
+  "source": "word-only"
+ },
+ {
+  "slug": "electrician",
+  "prompt": "Electrician",
+  "source": "word-only"
+ },
+ {
+  "slug": "embroidery",
+  "prompt": "Embroidery",
+  "source": "word-only"
+ },
+ {
+  "slug": "emptying-the-trash",
+  "prompt": "Emptying the trash",
+  "source": "word-only"
+ },
+ {
+  "slug": "engineer",
+  "prompt": "Engineer",
+  "source": "word-only"
+ },
+ {
+  "slug": "escaping-a-maze",
+  "prompt": "Escaping a maze",
+  "source": "word-only"
+ },
+ {
+  "slug": "farmer",
+  "prompt": "Farmer",
+  "source": "word-only"
+ },
+ {
+  "slug": "fencing",
+  "prompt": "Fencing",
+  "source": "word-only"
+ },
+ {
+  "slug": "figure-skating",
+  "prompt": "Figure skating",
+  "source": "word-only"
+ },
+ {
+  "slug": "firefighter",
+  "prompt": "Firefighter",
+  "source": "word-only"
+ },
+ {
+  "slug": "fishing",
+  "prompt": "Fishing",
+  "source": "word-only"
+ },
+ {
+  "slug": "florist",
+  "prompt": "Florist",
+  "source": "word-only"
+ },
+ {
+  "slug": "fly-fishing",
+  "prompt": "Fly fishing",
+  "source": "word-only"
+ },
+ {
+  "slug": "flying-a-kite",
+  "prompt": "Flying a kite",
+  "source": "word-only"
+ },
+ {
+  "slug": "folding-laundry",
+  "prompt": "Folding laundry",
+  "source": "word-only"
+ },
+ {
+  "slug": "fortune-teller",
+  "prompt": "Fortune teller",
+  "source": "word-only"
+ },
+ {
+  "slug": "gardening",
+  "prompt": "Gardening",
+  "source": "word-only"
+ },
+ {
+  "slug": "glassblowing",
+  "prompt": "Glassblowing",
+  "source": "word-only"
+ },
+ {
+  "slug": "goalkeeper",
+  "prompt": "Goalkeeper",
+  "source": "word-only"
+ },
+ {
+  "slug": "golfer",
+  "prompt": "Golfer",
+  "source": "word-only"
+ },
+ {
+  "slug": "golfing",
+  "prompt": "Golfing",
+  "source": "word-only"
+ },
+ {
+  "slug": "greengrocer",
+  "prompt": "Greengrocer",
+  "source": "word-only"
+ },
+ {
+  "slug": "grilling",
+  "prompt": "Grilling",
+  "source": "word-only"
+ },
+ {
+  "slug": "gymnastics",
+  "prompt": "Gymnastics",
+  "source": "word-only"
+ },
+ {
+  "slug": "hairdresser",
+  "prompt": "Hairdresser",
+  "source": "word-only"
+ },
+ {
+  "slug": "hammering-a-nail",
+  "prompt": "Hammering a nail",
+  "source": "word-only"
+ },
+ {
+  "slug": "hang-gliding",
+  "prompt": "Hang gliding",
+  "source": "word-only"
+ },
+ {
+  "slug": "harvesting",
+  "prompt": "Harvesting",
+  "source": "word-only"
+ },
+ {
+  "slug": "hiking",
+  "prompt": "Hiking",
+  "source": "word-only"
+ },
+ {
+  "slug": "hockey",
+  "prompt": "Hockey",
+  "source": "word-only"
+ },
+ {
+  "slug": "hopscotch",
+  "prompt": "Hopscotch",
+  "source": "word-only"
+ },
+ {
+  "slug": "horse-riding",
+  "prompt": "Horse riding",
+  "source": "word-only"
+ },
+ {
+  "slug": "hunter",
+  "prompt": "Hunter",
+  "source": "word-only"
+ },
+ {
+  "slug": "hurdling",
+  "prompt": "Hurdling",
+  "source": "word-only"
+ },
+ {
+  "slug": "ice-fishing",
+  "prompt": "Ice fishing",
+  "source": "word-only"
+ },
+ {
+  "slug": "illustrator",
+  "prompt": "Illustrator",
+  "source": "word-only"
+ },
+ {
+  "slug": "inventor",
+  "prompt": "Inventor",
+  "source": "word-only"
+ },
+ {
+  "slug": "ironing",
+  "prompt": "Ironing",
+  "source": "word-only"
+ },
+ {
+  "slug": "janitor",
+  "prompt": "Janitor",
+  "source": "word-only"
+ },
+ {
+  "slug": "javelin-throw",
+  "prompt": "Javelin throw",
+  "source": "word-only"
+ },
+ {
+  "slug": "jeweler",
+  "prompt": "Jeweler",
+  "source": "word-only"
+ },
+ {
+  "slug": "jogging",
+  "prompt": "Jogging",
+  "source": "word-only"
+ },
+ {
+  "slug": "jousting",
+  "prompt": "Jousting",
+  "source": "word-only"
+ },
+ {
+  "slug": "judge",
+  "prompt": "Judge",
+  "source": "word-only"
+ },
+ {
+  "slug": "juggling",
+  "prompt": "Juggling",
+  "source": "word-only"
+ },
+ {
+  "slug": "karate",
+  "prompt": "Karate",
+  "source": "word-only"
+ },
+ {
+  "slug": "kayaking",
+  "prompt": "Kayaking",
+  "source": "word-only"
+ },
+ {
+  "slug": "kickboxing",
+  "prompt": "Kickboxing",
+  "source": "word-only"
+ },
+ {
+  "slug": "kneading-dough",
+  "prompt": "Kneading dough",
+  "source": "word-only"
+ },
+ {
+  "slug": "knight",
+  "prompt": "Knight",
+  "source": "word-only"
+ },
+ {
+  "slug": "knitting",
+  "prompt": "Knitting",
+  "source": "word-only"
+ },
+ {
+  "slug": "lawyer",
+  "prompt": "Lawyer",
+  "source": "word-only"
+ },
+ {
+  "slug": "librarian",
+  "prompt": "Librarian",
+  "source": "word-only"
+ },
+ {
+  "slug": "lifeguard",
+  "prompt": "Lifeguard",
+  "source": "word-only"
+ },
+ {
+  "slug": "limbo-dancing",
+  "prompt": "Limbo dancing",
+  "source": "word-only"
+ },
+ {
+  "slug": "locksmith",
+  "prompt": "Locksmith",
+  "source": "word-only"
+ },
+ {
+  "slug": "long-jump",
+  "prompt": "Long jump",
+  "source": "word-only"
+ },
+ {
+  "slug": "lumberjack",
+  "prompt": "Lumberjack",
+  "source": "word-only"
+ },
+ {
+  "slug": "magician",
+  "prompt": "Magician",
+  "source": "word-only"
+ },
+ {
+  "slug": "mailman",
+  "prompt": "Mailman",
+  "source": "word-only"
+ },
+ {
+  "slug": "marathon",
+  "prompt": "Marathon",
+  "source": "word-only"
+ },
+ {
+  "slug": "massage-therapist",
+  "prompt": "Massage therapist",
+  "source": "word-only"
+ },
+ {
+  "slug": "mechanic",
+  "prompt": "Mechanic",
+  "source": "word-only"
+ },
+ {
+  "slug": "milking-a-cow",
+  "prompt": "Milking a cow",
+  "source": "word-only"
+ },
+ {
+  "slug": "miner",
+  "prompt": "Miner",
+  "source": "word-only"
+ },
+ {
+  "slug": "mopping",
+  "prompt": "Mopping",
+  "source": "word-only"
+ },
+ {
+  "slug": "mountaineer",
+  "prompt": "Mountaineer",
+  "source": "word-only"
+ },
+ {
+  "slug": "mowing-the-lawn",
+  "prompt": "Mowing the lawn",
+  "source": "word-only"
+ },
+ {
+  "slug": "musician",
+  "prompt": "Musician",
+  "source": "word-only"
+ },
+ {
+  "slug": "nailing",
+  "prompt": "Nailing",
+  "source": "word-only"
+ },
+ {
+  "slug": "navigator",
+  "prompt": "Navigator",
+  "source": "word-only"
+ },
+ {
+  "slug": "newscaster",
+  "prompt": "Newscaster",
+  "source": "word-only"
+ },
+ {
+  "slug": "nurse",
+  "prompt": "Nurse",
+  "source": "word-only"
+ },
+ {
+  "slug": "optician",
+  "prompt": "Optician",
+  "source": "word-only"
+ },
+ {
+  "slug": "orchestra-conductor",
+  "prompt": "Orchestra conductor",
+  "source": "word-only"
+ },
+ {
+  "slug": "origami",
+  "prompt": "Origami",
+  "source": "word-only"
+ },
+ {
+  "slug": "paddleboarding",
+  "prompt": "Paddleboarding",
+  "source": "word-only"
+ },
+ {
+  "slug": "painter",
+  "prompt": "Painter",
+  "source": "word-only"
+ },
+ {
+  "slug": "parasailing",
+  "prompt": "Parasailing",
+  "source": "word-only"
+ },
+ {
+  "slug": "pharmacist",
+  "prompt": "Pharmacist",
+  "source": "word-only"
+ },
+ {
+  "slug": "photographer",
+  "prompt": "Photographer",
+  "source": "word-only"
+ },
+ {
+  "slug": "pilot",
+  "prompt": "Pilot",
+  "source": "word-only"
+ },
+ {
+  "slug": "ping-pong",
+  "prompt": "Ping pong",
+  "source": "word-only"
+ },
+ {
+  "slug": "plowing",
+  "prompt": "Plowing",
+  "source": "word-only"
+ },
+ {
+  "slug": "plumber",
+  "prompt": "Plumber",
+  "source": "word-only"
+ },
+ {
+  "slug": "pole-vault",
+  "prompt": "Pole vault",
+  "source": "word-only"
+ },
+ {
+  "slug": "police-officer",
+  "prompt": "Police officer",
+  "source": "word-only"
+ },
+ {
+  "slug": "polishing-shoes",
+  "prompt": "Polishing shoes",
+  "source": "word-only"
+ },
+ {
+  "slug": "potter",
+  "prompt": "Potter",
+  "source": "word-only"
+ },
+ {
+  "slug": "pottery-wheel",
+  "prompt": "Pottery wheel",
+  "source": "word-only"
+ },
+ {
+  "slug": "pruning",
+  "prompt": "Pruning",
+  "source": "word-only"
+ },
+ {
+  "slug": "quarterback",
+  "prompt": "Quarterback",
+  "source": "word-only"
+ },
+ {
+  "slug": "racquetball",
+  "prompt": "Racquetball",
+  "source": "word-only"
+ },
+ {
+  "slug": "ranger",
+  "prompt": "Ranger",
+  "source": "word-only"
+ },
+ {
+  "slug": "receptionist",
+  "prompt": "Receptionist",
+  "source": "word-only"
+ },
+ {
+  "slug": "referee",
+  "prompt": "Referee",
+  "source": "word-only"
+ },
+ {
+  "slug": "reporter",
+  "prompt": "Reporter",
+  "source": "word-only"
+ },
+ {
+  "slug": "rock-climbing",
+  "prompt": "Rock climbing",
+  "source": "word-only"
+ },
+ {
+  "slug": "roller-skating",
+  "prompt": "Roller skating",
+  "source": "word-only"
+ },
+ {
+  "slug": "rollerblading",
+  "prompt": "Rollerblading",
+  "source": "word-only"
+ },
+ {
+  "slug": "roofer",
+  "prompt": "Roofer",
+  "source": "word-only"
+ },
+ {
+  "slug": "rowing",
+  "prompt": "Rowing",
+  "source": "word-only"
+ },
+ {
+  "slug": "rugby",
+  "prompt": "Rugby",
+  "source": "word-only"
+ },
+ {
+  "slug": "running",
+  "prompt": "Running",
+  "source": "word-only"
+ },
+ {
+  "slug": "sailor",
+  "prompt": "Sailor",
+  "source": "word-only"
+ },
+ {
+  "slug": "saluting",
+  "prompt": "Saluting",
+  "source": "word-only"
+ },
+ {
+  "slug": "scientist",
+  "prompt": "Scientist",
+  "source": "word-only"
+ },
+ {
+  "slug": "sculpting",
+  "prompt": "Sculpting",
+  "source": "word-only"
+ },
+ {
+  "slug": "sculptor",
+  "prompt": "Sculptor",
+  "source": "word-only"
+ },
+ {
+  "slug": "sewing",
+  "prompt": "Sewing",
+  "source": "word-only"
+ },
+ {
+  "slug": "shepherd",
+  "prompt": "Shepherd",
+  "source": "word-only"
+ },
+ {
+  "slug": "shoveling-snow",
+  "prompt": "Shoveling snow",
+  "source": "word-only"
+ },
+ {
+  "slug": "singer",
+  "prompt": "Singer",
+  "source": "word-only"
+ },
+ {
+  "slug": "skateboarding",
+  "prompt": "Skateboarding",
+  "source": "word-only"
+ },
+ {
+  "slug": "skiing",
+  "prompt": "Skiing",
+  "source": "word-only"
+ },
+ {
+  "slug": "skydiving",
+  "prompt": "Skydiving",
+  "source": "word-only"
+ },
+ {
+  "slug": "snorkeling",
+  "prompt": "Snorkeling",
+  "source": "word-only"
+ },
+ {
+  "slug": "soldier",
+  "prompt": "Soldier",
+  "source": "word-only"
+ },
+ {
+  "slug": "squash",
+  "prompt": "Squash",
+  "source": "word-only"
+ },
+ {
+  "slug": "sumo-wrestling",
+  "prompt": "Sumo wrestling",
+  "source": "word-only"
+ },
+ {
+  "slug": "surfing",
+  "prompt": "Surfing",
+  "source": "word-only"
+ },
+ {
+  "slug": "surgeon",
+  "prompt": "Surgeon",
+  "source": "word-only"
+ },
+ {
+  "slug": "sweeping",
+  "prompt": "Sweeping",
+  "source": "word-only"
+ },
+ {
+  "slug": "sweeping-a-chimney",
+  "prompt": "Sweeping a chimney",
+  "source": "word-only"
+ },
+ {
+  "slug": "table-tennis",
+  "prompt": "Table tennis",
+  "source": "word-only"
+ },
+ {
+  "slug": "tailor",
+  "prompt": "Tailor",
+  "source": "word-only"
+ },
+ {
+  "slug": "tap-dancing",
+  "prompt": "Tap dancing",
+  "source": "word-only"
+ },
+ {
+  "slug": "teacher",
+  "prompt": "Teacher",
+  "source": "word-only"
+ },
+ {
+  "slug": "tennis",
+  "prompt": "Tennis",
+  "source": "word-only"
+ },
+ {
+  "slug": "tightrope-walking",
+  "prompt": "Tightrope walking",
+  "source": "word-only"
+ },
+ {
+  "slug": "tobogganing",
+  "prompt": "Tobogganing",
+  "source": "word-only"
+ },
+ {
+  "slug": "tour-guide",
+  "prompt": "Tour guide",
+  "source": "word-only"
+ },
+ {
+  "slug": "trampolining",
+  "prompt": "Trampolining",
+  "source": "word-only"
+ },
+ {
+  "slug": "translator",
+  "prompt": "Translator",
+  "source": "word-only"
+ },
+ {
+  "slug": "truck-driver",
+  "prompt": "Truck driver",
+  "source": "word-only"
+ },
+ {
+  "slug": "tying-a-tie",
+  "prompt": "Tying a tie",
+  "source": "word-only"
+ },
+ {
+  "slug": "typing",
+  "prompt": "Typing",
+  "source": "word-only"
+ },
+ {
+  "slug": "umpire",
+  "prompt": "Umpire",
+  "source": "word-only"
+ },
+ {
+  "slug": "unpacking",
+  "prompt": "Unpacking",
+  "source": "word-only"
+ },
+ {
+  "slug": "upholsterer",
+  "prompt": "Upholsterer",
+  "source": "word-only"
+ },
+ {
+  "slug": "vacuuming-the-car",
+  "prompt": "Vacuuming the car",
+  "source": "word-only"
+ },
+ {
+  "slug": "vaulting",
+  "prompt": "Vaulting",
+  "source": "word-only"
+ },
+ {
+  "slug": "veterinarian",
+  "prompt": "Veterinarian",
+  "source": "word-only"
+ },
+ {
+  "slug": "volleyball",
+  "prompt": "Volleyball",
+  "source": "word-only"
+ },
+ {
+  "slug": "voting",
+  "prompt": "Voting",
+  "source": "word-only"
+ },
+ {
+  "slug": "waiter",
+  "prompt": "Waiter",
+  "source": "word-only"
+ },
+ {
+  "slug": "wallpapering",
+  "prompt": "Wallpapering",
+  "source": "word-only"
+ },
+ {
+  "slug": "water-skiing",
+  "prompt": "Water skiing",
+  "source": "word-only"
+ },
+ {
+  "slug": "watering-plants",
+  "prompt": "Watering plants",
+  "source": "word-only"
+ },
+ {
+  "slug": "waxing-a-car",
+  "prompt": "Waxing a car",
+  "source": "word-only"
+ },
+ {
+  "slug": "weightlifting",
+  "prompt": "Weightlifting",
+  "source": "word-only"
+ },
+ {
+  "slug": "welding",
+  "prompt": "Welding",
+  "source": "word-only"
+ },
+ {
+  "slug": "whittling",
+  "prompt": "Whittling",
+  "source": "word-only"
+ },
+ {
+  "slug": "window-washing",
+  "prompt": "Window washing",
+  "source": "word-only"
+ },
+ {
+  "slug": "woodcutting",
+  "prompt": "Woodcutting",
+  "source": "word-only"
+ },
+ {
+  "slug": "wrestling",
+  "prompt": "Wrestling",
+  "source": "word-only"
+ },
+ {
+  "slug": "yarn-spinning",
+  "prompt": "Yarn spinning",
+  "source": "word-only"
+ },
+ {
+  "slug": "yodeling",
+  "prompt": "Yodeling",
+  "source": "word-only"
+ },
+ {
+  "slug": "yoga",
+  "prompt": "Yoga",
+  "source": "word-only"
+ },
+ {
+  "slug": "zookeeper",
+  "prompt": "Zookeeper",
+  "source": "word-only"
+ }
+]

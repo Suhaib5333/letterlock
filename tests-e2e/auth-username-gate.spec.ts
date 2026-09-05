@@ -1,137 +1,122 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
 // Regression guard for the swallowed "Choose a username" gate:
 // a first-time sign-in (email OTP here; a Google redirect exercises the same
-// session-arrives-then-profile-fetch path) must land on the username claim
-// IMMEDIATELY — the modal used to close itself mid-profile-fetch and a
+// session-arrives-then-profile-known path) must land on the username claim
+// IMMEDIATELY. The modal used to close itself mid-profile-fetch and a
 // once-per-session flag then blocked it from ever reopening.
 //
-// Supabase's network is mocked (deterministic, no real emails), but the whole
-// UI flow is the real app: send code → verify → claim → signed in.
+// Runs against the REAL local API (playwright.config.ts starts apps/api in dev
+// mode, where the emailed code is captured and readable via /auth/otp/dev-code).
+// Every account created here is deleted at the end through the QA cleanup route.
 
-const USER_ID = '00000000-0000-4000-8000-00000000e2e0'.replace('e2e0', 'aaaa');
-const EMAIL = 'gate-test@example.com';
+const API = `http://localhost:${Number(process.env.E2E_API_PORT || Number(process.env.E2E_PORT || 4173) - 1000)}`;
+const QA_TOKEN = 'qa-e2e-token';
 
-const b64url = (o: object) =>
-  Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-// Unsigned-but-well-formed JWT — supabase-js only decodes it client-side.
-const JWT = `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({
-  sub: USER_ID,
-  email: EMAIL,
-  role: 'authenticated',
-  aud: 'authenticated',
-  exp: 4102444800,
-})}.e2e`;
+const uniqueEmail = (tag: string) => `gate-${tag}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}@example.com`;
 
-const authUser = {
-  id: USER_ID,
-  aud: 'authenticated',
-  role: 'authenticated',
-  email: EMAIL,
-  app_metadata: { provider: 'email' },
-  user_metadata: {},
-  created_at: '2026-01-01T00:00:00Z',
-};
-
-const session = {
-  access_token: JWT,
-  token_type: 'bearer',
-  expires_in: 3600,
-  expires_at: Math.floor(Date.now() / 1000) + 3600,
-  refresh_token: 'e2e-refresh',
-  user: authUser,
-};
-
-/** Mock every Supabase endpoint the sign-in → claim flow touches. The `state`
- * object is shared across routes so an INSERT into profiles makes later GETs
- * return the row (exactly what refreshProfile relies on). */
-async function mockSupabase(page: Page, state: { profile: Record<string, unknown> | null }) {
-  await page.route('**/functions/v1/send-otp', (r) =>
-    r.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }),
-  );
-  await page.route('**/auth/v1/verify', (r) =>
-    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(session) }),
-  );
-  await page.route('**/auth/v1/token**', (r) =>
-    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(session) }),
-  );
-  await page.route('**/auth/v1/user**', (r) =>
-    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(authUser) }),
-  );
-  await page.route('**/auth/v1/logout**', (r) => r.fulfill({ status: 204, body: '' }));
-  await page.route('**/rest/v1/**', (r) => {
-    const url = r.request().url();
-    const method = r.request().method();
-    const json = (status: number, body: unknown) =>
-      r.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
-    if (url.includes('/rpc/username_available')) return json(200, true);
-    if (url.includes('/rest/v1/profiles')) {
-      if (method === 'POST') {
-        const sent = r.request().postDataJSON() as { username?: string };
-        state.profile = {
-          id: USER_ID,
-          username: sent?.username ?? 'e2e_player',
-          xp: 0,
-          level: 1,
-          prestige: 0,
-          role: 'player',
-          banned_at: null,
-          username_changed_at: null,
-          created_at: '2026-01-01T00:00:00Z',
-        };
-        return json(201, [state.profile]);
-      }
-      // maybeSingle() sends Accept: application/vnd.pgrst.object — a bare
-      // object (or 406-with-null) is expected; an array also parses fine.
-      return json(200, state.profile ? [state.profile] : []);
-    }
-    if (method === 'GET' || method === 'HEAD') return json(200, []);
-    return json(204, null);
-  });
+async function devCode(request: APIRequestContext, email: string): Promise<string> {
+  const res = await request.get(`${API}/auth/otp/dev-code?email=${encodeURIComponent(email)}`);
+  expect(res.ok()).toBeTruthy();
+  const { code } = (await res.json()) as { code: string | null };
+  expect(code).toMatch(/^\d{6}$/);
+  return code!;
 }
 
-test('first email-OTP sign-in lands on "Choose a username" immediately', async ({ page }) => {
-  const state = { profile: null as Record<string, unknown> | null };
-  await mockSupabase(page, state);
+async function deleteAccount(request: APIRequestContext, target: string) {
+  await request.delete(`${API}/admin/users/${encodeURIComponent(target)}`, { headers: { 'x-qa-token': QA_TOKEN } });
+}
+
+async function expectSignedOut(page: Page) {
+  await expect(page.getByTestId('open-auth')).toBeVisible();
+}
+
+test('first email-OTP sign-in lands on "Choose a username" immediately', async ({ page, request }) => {
+  const email = uniqueEmail('otp');
   await page.goto('/');
+  await expectSignedOut(page);
 
   await page.getByTestId('open-auth').click();
   await expect(page.getByTestId('auth-modal')).toBeVisible();
-  await page.getByTestId('signin-email-input').fill(EMAIL);
+  await page.getByTestId('signin-email-input').fill(email);
   await page.getByTestId('signin-email').click();
+  await expect(page.getByTestId('signin-otp-input')).toBeVisible();
 
-  await page.getByTestId('signin-otp-input').fill('123456');
+  await page.getByTestId('signin-otp-input').fill(await devCode(request, email));
   await page.getByTestId('signin-otp-verify').click();
 
-  // THE regression: the modal must stay open and show the username claim —
-  // it used to close silently here and never come back.
+  // THE regression: the modal must stay open and show the username claim.
   await expect(page.getByTestId('username-input')).toBeVisible({ timeout: 10_000 });
   await expect(page.getByTestId('auth-modal')).toBeVisible();
 
-  // Claim goes through and the (auto-opened) gate closes itself.
-  await page.getByTestId('username-input').fill('gate_test_player');
+  // Claim goes through (real uniqueness check + POST /me/username) and the
+  // auto-opened gate closes itself.
+  const username = `gate_${Date.now().toString(36)}`.slice(0, 20);
+  await page.getByTestId('username-input').fill(username);
   await expect(page.getByTestId('username-status')).toHaveAttribute('data-status', 'ok');
   await page.getByTestId('username-claim').click();
   await expect(page.getByTestId('auth-modal')).toHaveCount(0, { timeout: 10_000 });
+  await expect(page.getByTestId('hero-signed')).toContainText(`@${username}`);
+
+  // QA cleanup (CLAUDE.md testing mandate): the account must not outlive the test.
+  await deleteAccount(request, email);
 });
 
-test('page load with a session but no profile auto-opens the username claim (Google-redirect path)', async ({ page }) => {
-  const state = { profile: null as Record<string, unknown> | null };
-  await mockSupabase(page, state);
+test('page load with a session but no profile auto-opens the username claim (Google-redirect path)', async ({ page, request }) => {
+  // Mint a real session through the API (what /auth/exchange hands the SPA after
+  // the Google round-trip) and seed its tokens BEFORE the app boots.
+  const email = uniqueEmail('seed');
+  expect((await request.post(`${API}/auth/otp/request`, { data: { email } })).ok()).toBeTruthy();
+  const verify = await request.post(`${API}/auth/otp/verify`, { data: { email, code: await devCode(request, email) } });
+  expect(verify.ok()).toBeTruthy();
+  const tokens = (await verify.json()) as { accessToken: string; refreshToken: string; profile: null };
+  expect(tokens.profile).toBeNull();
 
-  // Seed the persisted session BEFORE the app boots — exactly the state a
-  // Google OAuth redirect (or any reload mid-claim) lands in.
   await page.addInitScript(
-    ([key, value]) => localStorage.setItem(key, value),
-    [
-      // supabase-js v2 default storage key: sb-<project-ref>-auth-token
-      'sb-lkudntyvngwwlzuciocd-auth-token',
-      JSON.stringify(session),
-    ] as const,
+    ([a, r]) => {
+      localStorage.setItem('ll_access', a);
+      localStorage.setItem('ll_refresh', r);
+    },
+    [tokens.accessToken, tokens.refreshToken] as const,
   );
   await page.goto('/');
 
   // No clicks: the app itself must force the claim open.
   await expect(page.getByTestId('auth-modal')).toBeVisible({ timeout: 10_000 });
   await expect(page.getByTestId('username-input')).toBeVisible();
+
+  await deleteAccount(request, email);
+});
+
+test('an expired access token is refreshed transparently and the account can delete itself in-app', async ({ page, request }) => {
+  const email = uniqueEmail('refresh');
+  await request.post(`${API}/auth/otp/request`, { data: { email } });
+  const verify = await request.post(`${API}/auth/otp/verify`, { data: { email, code: await devCode(request, email) } });
+  const tokens = (await verify.json()) as { accessToken: string; refreshToken: string };
+  const username = `del_${Date.now().toString(36)}`.slice(0, 20);
+  expect((await request.post(`${API}/me/username`, { data: { username }, headers: { Authorization: `Bearer ${tokens.accessToken}` } })).status()).toBe(201);
+
+  // A garbage access token + a valid refresh token: the app must recover the
+  // session through POST /auth/refresh (single-flight, retry once), not sign out.
+  await page.addInitScript(
+    ([r]) => {
+      localStorage.setItem('ll_access', 'expired.access.token');
+      localStorage.setItem('ll_refresh', r);
+    },
+    [tokens.refreshToken] as const,
+  );
+  await page.goto('/');
+  await expect(page.getByTestId('hero-signed')).toContainText(`@${username}`, { timeout: 10_000 });
+
+  // In-app account deletion (Apple 5.1.1(v) / Play policy): two-step confirm.
+  await page.getByTestId('open-auth').click();
+  await expect(page.getByTestId('auth-username')).toHaveText(`@${username}`);
+  await page.getByTestId('account-delete').click();
+  await expect(page.getByTestId('account-delete-confirm')).toBeVisible();
+  await page.getByTestId('account-delete-confirm').click();
+  await expect(page.getByTestId('auth-modal')).toHaveCount(0, { timeout: 10_000 });
+  await expectSignedOut(page);
+  // The account is really gone server-side (QA delete finds nothing).
+  const gone = await request.delete(`${API}/admin/users/${encodeURIComponent(email)}`, { headers: { 'x-qa-token': QA_TOKEN } });
+  expect(gone.status()).toBe(404);
 });

@@ -13,8 +13,8 @@ import { sportsEasyPack, sportsMediumPack } from './sports';
 import { moviesPack, moviesHardPack } from './screen';
 import { tvClipsEasyPack, tvClipsMediumPack, tvClipsHardPack } from './movieClips';
 import { musicMediumPack, musicHardPack } from './musicpack';
-import { melodiesPack } from './melodies';
-import { melodiesExtra } from './melodiesExtra';
+import { melodiesItunesPack, melodiesPack } from './melodies';
+import { charadeImage } from './charadesImages';
 import { songsPack } from './songs';
 import { songsExtra } from './songsExtra';
 // Expansions authored to push every pack past 200 questions.
@@ -338,19 +338,16 @@ const fullTvClips: RawPack = {
   difficulty: 'medium',
 };
 
-/** Auto-attach a keyword image to charade prompts (the secret prompt shown via QR). */
-function charadeImg(answer: string): string {
-  const tags = answer
-    .toLowerCase()
-    .replace(/^(the|a|an)\s+/, '')
-    .split(/\s+/)
-    .join(',');
-  return `https://loremflickr.com/640/480/${encodeURIComponent(tags)}`;
-}
+/** Attach the BUNDLED secret-prompt image to each charade prompt that has one
+ *  (public/charades/<packId>/<slug>.webp, built by scripts/genimages.mjs); the rest
+ *  stay word-only. See content/charadesImages.ts. */
 function withCharadeImages(pack: RawPack): RawPack {
   const letters: RawPack['letters'] = {};
   for (const [letter, qs] of Object.entries(pack.letters)) {
-    letters[letter] = qs.map((q) => ({ ...q, image: q.image ?? charadeImg(q.a) }));
+    letters[letter] = qs.map((q) => {
+      const image = q.image ?? charadeImage(pack.id, q.a);
+      return image ? { ...q, image } : q;
+    });
   }
   return { ...pack, letters };
 }
@@ -473,7 +470,8 @@ export const PACKS: QuestionPack[] = [
   fullMoviesHard,
   fullMusic,
   fullMusicHard,
-  withExtra(melodiesPack, melodiesExtra),
+  melodiesPack, // synthesized public-domain WAVs (/clips/), ships everywhere
+  melodiesItunesPack, // iTunes previews, web only (D3, gated below by media source)
   withExtra(songsPack, songsExtra),
   // Genre-based song clip packs (iTunes 30-second previews).
   songsRockPack,
@@ -662,10 +660,8 @@ export const PACKS: QuestionPack[] = [
 // 5.2.5 + the iTunes API terms forbid them in a store build). Gated by their media
 // source rather than by hand-listing ids, so a new clip file can never slip into a
 // native build unnoticed: songs*, tv-clips, the sitcom clip extras, the decade
-// music clip extras, and the iTunes half of Guess the Melody.
-// TODO(melodies split): once another agent splits melodies into a public-domain pack
-// and a `melodies-itunes` pack, this predicate gates only the iTunes one and the PD
-// pack ships everywhere automatically (its clips live under /clips/, same origin).
+// music clip extras, and `melodies-itunes` (the public-domain `melodies` pack ships
+// everywhere: its clips live under /clips/, same origin).
 const ITUNES_MEDIA = /(^|\.)(itunes\.apple\.com|mzstatic\.com)\//i;
 function usesItunesPreviews(pack: QuestionPack): boolean {
   for (const qs of Object.values(pack.letters)) {

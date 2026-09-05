@@ -1,0 +1,1116 @@
+[
+ {
+  "slug": "absent-mindedness",
+  "prompt": "Absent-mindedness",
+  "source": "word-only"
+ },
+ {
+  "slug": "acceleration",
+  "prompt": "Acceleration",
+  "source": "word-only"
+ },
+ {
+  "slug": "adrenaline",
+  "prompt": "Adrenaline",
+  "source": "word-only"
+ },
+ {
+  "slug": "allergy",
+  "prompt": "Allergy",
+  "source": "word-only"
+ },
+ {
+  "slug": "ambition",
+  "prompt": "Ambition",
+  "source": "word-only"
+ },
+ {
+  "slug": "amnesia",
+  "prompt": "Amnesia",
+  "source": "word-only"
+ },
+ {
+  "slug": "anxiety",
+  "prompt": "Anxiety",
+  "source": "word-only"
+ },
+ {
+  "slug": "apology",
+  "prompt": "Apology",
+  "source": "word-only"
+ },
+ {
+  "slug": "architecture",
+  "prompt": "Architecture",
+  "source": "word-only"
+ },
+ {
+  "slug": "aurora",
+  "prompt": "Aurora",
+  "source": "word-only"
+ },
+ {
+  "slug": "avalanche",
+  "prompt": "Avalanche",
+  "source": "word-only"
+ },
+ {
+  "slug": "bankruptcy",
+  "prompt": "Bankruptcy",
+  "source": "word-only"
+ },
+ {
+  "slug": "betrayal",
+  "prompt": "Betrayal",
+  "source": "word-only"
+ },
+ {
+  "slug": "bittersweet",
+  "prompt": "Bittersweet",
+  "source": "word-only"
+ },
+ {
+  "slug": "black-hole",
+  "prompt": "Black hole",
+  "source": "word-only"
+ },
+ {
+  "slug": "boiling-point",
+  "prompt": "Boiling point",
+  "source": "word-only"
+ },
+ {
+  "slug": "boredom",
+  "prompt": "Boredom",
+  "source": "word-only"
+ },
+ {
+  "slug": "brainstorm",
+  "prompt": "Brainstorm",
+  "source": "word-only"
+ },
+ {
+  "slug": "bravery",
+  "prompt": "Bravery",
+  "source": "word-only"
+ },
+ {
+  "slug": "breaking-the-ice",
+  "prompt": "Breaking the ice",
+  "source": "word-only"
+ },
+ {
+  "slug": "buoyancy",
+  "prompt": "Buoyancy",
+  "source": "word-only"
+ },
+ {
+  "slug": "butterflies-in-your-stomach",
+  "prompt": "Butterflies in your stomach",
+  "source": "word-only"
+ },
+ {
+  "slug": "camouflage",
+  "prompt": "Camouflage",
+  "source": "word-only"
+ },
+ {
+  "slug": "centrifugal-force",
+  "prompt": "Centrifugal force",
+  "source": "word-only"
+ },
+ {
+  "slug": "chaos",
+  "prompt": "Chaos",
+  "source": "word-only"
+ },
+ {
+  "slug": "claustrophobia",
+  "prompt": "Claustrophobia",
+  "source": "word-only"
+ },
+ {
+  "slug": "cliffhanger",
+  "prompt": "Cliffhanger",
+  "source": "word-only"
+ },
+ {
+  "slug": "cold-feet",
+  "prompt": "Cold feet",
+  "source": "word-only"
+ },
+ {
+  "slug": "combustion",
+  "prompt": "Combustion",
+  "source": "word-only"
+ },
+ {
+  "slug": "compassion",
+  "prompt": "Compassion",
+  "source": "word-only"
+ },
+ {
+  "slug": "condensation",
+  "prompt": "Condensation",
+  "source": "word-only"
+ },
+ {
+  "slug": "confidence",
+  "prompt": "Confidence",
+  "source": "word-only"
+ },
+ {
+  "slug": "conscience",
+  "prompt": "Conscience",
+  "source": "word-only"
+ },
+ {
+  "slug": "courage",
+  "prompt": "Courage",
+  "source": "word-only"
+ },
+ {
+  "slug": "curiosity",
+  "prompt": "Curiosity",
+  "source": "word-only"
+ },
+ {
+  "slug": "dawn",
+  "prompt": "Dawn",
+  "source": "word-only"
+ },
+ {
+  "slug": "daydream",
+  "prompt": "Daydream",
+  "source": "word-only"
+ },
+ {
+  "slug": "deja-vu",
+  "prompt": "Déjà vu",
+  "source": "word-only"
+ },
+ {
+  "slug": "democracy",
+  "prompt": "Democracy",
+  "source": "word-only"
+ },
+ {
+  "slug": "determination",
+  "prompt": "Determination",
+  "source": "word-only"
+ },
+ {
+  "slug": "diplomacy",
+  "prompt": "Diplomacy",
+  "source": "word-only"
+ },
+ {
+  "slug": "disappointment",
+  "prompt": "Disappointment",
+  "source": "word-only"
+ },
+ {
+  "slug": "dizziness",
+  "prompt": "Dizziness",
+  "source": "word-only"
+ },
+ {
+  "slug": "doubt",
+  "prompt": "Doubt",
+  "source": "word-only"
+ },
+ {
+  "slug": "drought",
+  "prompt": "Drought",
+  "source": "word-only"
+ },
+ {
+  "slug": "dusk",
+  "prompt": "Dusk",
+  "source": "word-only"
+ },
+ {
+  "slug": "earthquake",
+  "prompt": "Earthquake",
+  "source": "word-only"
+ },
+ {
+  "slug": "echo",
+  "prompt": "Echo",
+  "source": "word-only"
+ },
+ {
+  "slug": "eclipse",
+  "prompt": "Eclipse",
+  "source": "word-only"
+ },
+ {
+  "slug": "embarrassment",
+  "prompt": "Embarrassment",
+  "source": "word-only"
+ },
+ {
+  "slug": "empathy",
+  "prompt": "Empathy",
+  "source": "word-only"
+ },
+ {
+  "slug": "envy",
+  "prompt": "Envy",
+  "source": "word-only"
+ },
+ {
+  "slug": "equilibrium",
+  "prompt": "Equilibrium",
+  "source": "word-only"
+ },
+ {
+  "slug": "erosion",
+  "prompt": "Erosion",
+  "source": "word-only"
+ },
+ {
+  "slug": "eternity",
+  "prompt": "Eternity",
+  "source": "word-only"
+ },
+ {
+  "slug": "euphoria",
+  "prompt": "Euphoria",
+  "source": "word-only"
+ },
+ {
+  "slug": "evaporation",
+  "prompt": "Evaporation",
+  "source": "word-only"
+ },
+ {
+  "slug": "evolution",
+  "prompt": "Evolution",
+  "source": "word-only"
+ },
+ {
+  "slug": "exhaustion",
+  "prompt": "Exhaustion",
+  "source": "word-only"
+ },
+ {
+  "slug": "falling-in-love",
+  "prompt": "Falling in love",
+  "source": "word-only"
+ },
+ {
+  "slug": "fame",
+  "prompt": "Fame",
+  "source": "word-only"
+ },
+ {
+  "slug": "fear",
+  "prompt": "Fear",
+  "source": "word-only"
+ },
+ {
+  "slug": "fermentation",
+  "prompt": "Fermentation",
+  "source": "word-only"
+ },
+ {
+  "slug": "forgiveness",
+  "prompt": "Forgiveness",
+  "source": "word-only"
+ },
+ {
+  "slug": "free-fall",
+  "prompt": "Free fall",
+  "source": "word-only"
+ },
+ {
+  "slug": "freedom",
+  "prompt": "Freedom",
+  "source": "word-only"
+ },
+ {
+  "slug": "friction",
+  "prompt": "Friction",
+  "source": "word-only"
+ },
+ {
+  "slug": "friendship",
+  "prompt": "Friendship",
+  "source": "word-only"
+ },
+ {
+  "slug": "frostbite",
+  "prompt": "Frostbite",
+  "source": "word-only"
+ },
+ {
+  "slug": "frustration",
+  "prompt": "Frustration",
+  "source": "word-only"
+ },
+ {
+  "slug": "generosity",
+  "prompt": "Generosity",
+  "source": "word-only"
+ },
+ {
+  "slug": "globalization",
+  "prompt": "Globalization",
+  "source": "word-only"
+ },
+ {
+  "slug": "gloom",
+  "prompt": "Gloom",
+  "source": "word-only"
+ },
+ {
+  "slug": "goosebumps",
+  "prompt": "Goosebumps",
+  "source": "word-only"
+ },
+ {
+  "slug": "gratitude",
+  "prompt": "Gratitude",
+  "source": "word-only"
+ },
+ {
+  "slug": "gravity",
+  "prompt": "Gravity",
+  "source": "word-only"
+ },
+ {
+  "slug": "greenhouse-effect",
+  "prompt": "Greenhouse effect",
+  "source": "word-only"
+ },
+ {
+  "slug": "gridlock",
+  "prompt": "Gridlock",
+  "source": "word-only"
+ },
+ {
+  "slug": "grief",
+  "prompt": "Grief",
+  "source": "word-only"
+ },
+ {
+  "slug": "guilt",
+  "prompt": "Guilt",
+  "source": "word-only"
+ },
+ {
+  "slug": "harmony",
+  "prompt": "Harmony",
+  "source": "word-only"
+ },
+ {
+  "slug": "heartbreak",
+  "prompt": "Heartbreak",
+  "source": "word-only"
+ },
+ {
+  "slug": "hesitation",
+  "prompt": "Hesitation",
+  "source": "word-only"
+ },
+ {
+  "slug": "hibernation",
+  "prompt": "Hibernation",
+  "source": "word-only"
+ },
+ {
+  "slug": "homesickness",
+  "prompt": "Homesickness",
+  "source": "word-only"
+ },
+ {
+  "slug": "hope",
+  "prompt": "Hope",
+  "source": "word-only"
+ },
+ {
+  "slug": "hot-potato",
+  "prompt": "Hot potato",
+  "source": "word-only"
+ },
+ {
+  "slug": "humidity",
+  "prompt": "Humidity",
+  "source": "word-only"
+ },
+ {
+  "slug": "hunger",
+  "prompt": "Hunger",
+  "source": "word-only"
+ },
+ {
+  "slug": "hurricane",
+  "prompt": "Hurricane",
+  "source": "word-only"
+ },
+ {
+  "slug": "hypnosis",
+  "prompt": "Hypnosis",
+  "source": "word-only"
+ },
+ {
+  "slug": "illusion",
+  "prompt": "Illusion",
+  "source": "word-only"
+ },
+ {
+  "slug": "imagination",
+  "prompt": "Imagination",
+  "source": "word-only"
+ },
+ {
+  "slug": "impatience",
+  "prompt": "Impatience",
+  "source": "word-only"
+ },
+ {
+  "slug": "independence",
+  "prompt": "Independence",
+  "source": "word-only"
+ },
+ {
+  "slug": "inertia",
+  "prompt": "Inertia",
+  "source": "word-only"
+ },
+ {
+  "slug": "inflation",
+  "prompt": "Inflation",
+  "source": "wikimedia-commons",
+  "author": "JJLiu112",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:World_inflation_rate.png"
+ },
+ {
+  "slug": "innocence",
+  "prompt": "Innocence",
+  "source": "word-only"
+ },
+ {
+  "slug": "insomnia",
+  "prompt": "Insomnia",
+  "source": "word-only"
+ },
+ {
+  "slug": "intuition",
+  "prompt": "Intuition",
+  "source": "word-only"
+ },
+ {
+  "slug": "itch",
+  "prompt": "Itch",
+  "source": "word-only"
+ },
+ {
+  "slug": "jealousy",
+  "prompt": "Jealousy",
+  "source": "word-only"
+ },
+ {
+  "slug": "jet-lag",
+  "prompt": "Jet lag",
+  "source": "word-only"
+ },
+ {
+  "slug": "jitters",
+  "prompt": "Jitters",
+  "source": "word-only"
+ },
+ {
+  "slug": "joy",
+  "prompt": "Joy",
+  "source": "word-only"
+ },
+ {
+  "slug": "justice",
+  "prompt": "Justice",
+  "source": "word-only"
+ },
+ {
+  "slug": "karma",
+  "prompt": "Karma",
+  "source": "word-only"
+ },
+ {
+  "slug": "kindness",
+  "prompt": "Kindness",
+  "source": "word-only"
+ },
+ {
+  "slug": "kinetic-energy",
+  "prompt": "Kinetic energy",
+  "source": "word-only"
+ },
+ {
+  "slug": "kinship",
+  "prompt": "Kinship",
+  "source": "word-only"
+ },
+ {
+  "slug": "knowledge",
+  "prompt": "Knowledge",
+  "source": "word-only"
+ },
+ {
+  "slug": "lava",
+  "prompt": "Lava",
+  "source": "word-only"
+ },
+ {
+  "slug": "laziness",
+  "prompt": "Laziness",
+  "source": "word-only"
+ },
+ {
+  "slug": "levitation",
+  "prompt": "Levitation",
+  "source": "word-only"
+ },
+ {
+  "slug": "liberty",
+  "prompt": "Liberty",
+  "source": "word-only"
+ },
+ {
+  "slug": "loneliness",
+  "prompt": "Loneliness",
+  "source": "word-only"
+ },
+ {
+  "slug": "longing",
+  "prompt": "Longing",
+  "source": "word-only"
+ },
+ {
+  "slug": "loyalty",
+  "prompt": "Loyalty",
+  "source": "word-only"
+ },
+ {
+  "slug": "luck",
+  "prompt": "Luck",
+  "source": "word-only"
+ },
+ {
+  "slug": "lullaby",
+  "prompt": "Lullaby",
+  "source": "word-only"
+ },
+ {
+  "slug": "magnetic-field",
+  "prompt": "Magnetic field",
+  "source": "word-only"
+ },
+ {
+  "slug": "magnetism",
+  "prompt": "Magnetism",
+  "source": "word-only"
+ },
+ {
+  "slug": "maze",
+  "prompt": "Maze",
+  "source": "word-only"
+ },
+ {
+  "slug": "meditation",
+  "prompt": "Meditation",
+  "source": "word-only"
+ },
+ {
+  "slug": "melancholy",
+  "prompt": "Melancholy",
+  "source": "word-only"
+ },
+ {
+  "slug": "metamorphosis",
+  "prompt": "Metamorphosis",
+  "source": "word-only"
+ },
+ {
+  "slug": "migration",
+  "prompt": "Migration",
+  "source": "word-only"
+ },
+ {
+  "slug": "mirage",
+  "prompt": "Mirage",
+  "source": "word-only"
+ },
+ {
+  "slug": "momentum",
+  "prompt": "Momentum",
+  "source": "word-only"
+ },
+ {
+  "slug": "mood-swing",
+  "prompt": "Mood swing",
+  "source": "word-only"
+ },
+ {
+  "slug": "mystery",
+  "prompt": "Mystery",
+  "source": "word-only"
+ },
+ {
+  "slug": "nervousness",
+  "prompt": "Nervousness",
+  "source": "word-only"
+ },
+ {
+  "slug": "nirvana",
+  "prompt": "Nirvana",
+  "source": "word-only"
+ },
+ {
+  "slug": "nostalgia",
+  "prompt": "Nostalgia",
+  "source": "word-only"
+ },
+ {
+  "slug": "numb-fingers",
+  "prompt": "Numb fingers",
+  "source": "word-only"
+ },
+ {
+  "slug": "numbness",
+  "prompt": "Numbness",
+  "source": "word-only"
+ },
+ {
+  "slug": "obsession",
+  "prompt": "Obsession",
+  "source": "word-only"
+ },
+ {
+  "slug": "optimism",
+  "prompt": "Optimism",
+  "source": "word-only"
+ },
+ {
+  "slug": "orbit",
+  "prompt": "Orbit",
+  "source": "word-only"
+ },
+ {
+  "slug": "osmosis",
+  "prompt": "Osmosis",
+  "source": "word-only"
+ },
+ {
+  "slug": "outrage",
+  "prompt": "Outrage",
+  "source": "word-only"
+ },
+ {
+  "slug": "overwhelmed",
+  "prompt": "Overwhelmed",
+  "source": "word-only"
+ },
+ {
+  "slug": "panic",
+  "prompt": "Panic",
+  "source": "word-only"
+ },
+ {
+  "slug": "paranoia",
+  "prompt": "Paranoia",
+  "source": "word-only"
+ },
+ {
+  "slug": "patience",
+  "prompt": "Patience",
+  "source": "word-only"
+ },
+ {
+  "slug": "peer-pressure",
+  "prompt": "Peer pressure",
+  "source": "word-only"
+ },
+ {
+  "slug": "perseverance",
+  "prompt": "Perseverance",
+  "source": "word-only"
+ },
+ {
+  "slug": "phantom",
+  "prompt": "Phantom",
+  "source": "word-only"
+ },
+ {
+  "slug": "photogenic",
+  "prompt": "Photogenic",
+  "source": "word-only"
+ },
+ {
+  "slug": "photosynthesis",
+  "prompt": "Photosynthesis",
+  "source": "word-only"
+ },
+ {
+  "slug": "pollution",
+  "prompt": "Pollution",
+  "source": "word-only"
+ },
+ {
+  "slug": "pressure",
+  "prompt": "Pressure",
+  "source": "word-only"
+ },
+ {
+  "slug": "pride",
+  "prompt": "Pride",
+  "source": "word-only"
+ },
+ {
+  "slug": "privacy",
+  "prompt": "Privacy",
+  "source": "word-only"
+ },
+ {
+  "slug": "procrastination",
+  "prompt": "Procrastination",
+  "source": "word-only"
+ },
+ {
+  "slug": "quagmire",
+  "prompt": "Quagmire",
+  "source": "word-only"
+ },
+ {
+  "slug": "quicksand",
+  "prompt": "Quicksand",
+  "source": "word-only"
+ },
+ {
+  "slug": "quiet",
+  "prompt": "Quiet",
+  "source": "word-only"
+ },
+ {
+  "slug": "rainstorm",
+  "prompt": "Rainstorm",
+  "source": "word-only"
+ },
+ {
+  "slug": "rebellion",
+  "prompt": "Rebellion",
+  "source": "word-only"
+ },
+ {
+  "slug": "recycling",
+  "prompt": "Recycling",
+  "source": "word-only"
+ },
+ {
+  "slug": "reflection",
+  "prompt": "Reflection",
+  "source": "word-only"
+ },
+ {
+  "slug": "regret",
+  "prompt": "Regret",
+  "source": "word-only"
+ },
+ {
+  "slug": "relief",
+  "prompt": "Relief",
+  "source": "word-only"
+ },
+ {
+  "slug": "resilience",
+  "prompt": "Resilience",
+  "source": "word-only"
+ },
+ {
+  "slug": "restlessness",
+  "prompt": "Restlessness",
+  "source": "word-only"
+ },
+ {
+  "slug": "revolution",
+  "prompt": "Revolution",
+  "source": "word-only"
+ },
+ {
+  "slug": "ripple-effect",
+  "prompt": "Ripple effect",
+  "source": "word-only"
+ },
+ {
+  "slug": "romance",
+  "prompt": "Romance",
+  "source": "word-only"
+ },
+ {
+  "slug": "sarcasm",
+  "prompt": "Sarcasm",
+  "source": "word-only"
+ },
+ {
+  "slug": "serenity",
+  "prompt": "Serenity",
+  "source": "word-only"
+ },
+ {
+  "slug": "shock",
+  "prompt": "Shock",
+  "source": "word-only"
+ },
+ {
+  "slug": "shyness",
+  "prompt": "Shyness",
+  "source": "word-only"
+ },
+ {
+  "slug": "spilled-milk",
+  "prompt": "Spilled milk",
+  "source": "word-only"
+ },
+ {
+  "slug": "stage-fright",
+  "prompt": "Stage fright",
+  "source": "word-only"
+ },
+ {
+  "slug": "stalemate",
+  "prompt": "Stalemate",
+  "source": "word-only"
+ },
+ {
+  "slug": "static-electricity",
+  "prompt": "Static electricity",
+  "source": "word-only"
+ },
+ {
+  "slug": "stress",
+  "prompt": "Stress",
+  "source": "word-only"
+ },
+ {
+  "slug": "sunrise",
+  "prompt": "Sunrise",
+  "source": "word-only"
+ },
+ {
+  "slug": "superstition",
+  "prompt": "Superstition",
+  "source": "word-only"
+ },
+ {
+  "slug": "surface-tension",
+  "prompt": "Surface tension",
+  "source": "word-only"
+ },
+ {
+  "slug": "surrender",
+  "prompt": "Surrender",
+  "source": "word-only"
+ },
+ {
+  "slug": "suspense",
+  "prompt": "Suspense",
+  "source": "word-only"
+ },
+ {
+  "slug": "sympathy",
+  "prompt": "Sympathy",
+  "source": "word-only"
+ },
+ {
+  "slug": "teamwork",
+  "prompt": "Teamwork",
+  "source": "word-only"
+ },
+ {
+  "slug": "temptation",
+  "prompt": "Temptation",
+  "source": "word-only"
+ },
+ {
+  "slug": "thirst",
+  "prompt": "Thirst",
+  "source": "word-only"
+ },
+ {
+  "slug": "thunder",
+  "prompt": "Thunder",
+  "source": "word-only"
+ },
+ {
+  "slug": "tidal-wave",
+  "prompt": "Tidal wave",
+  "source": "word-only"
+ },
+ {
+  "slug": "time-travel",
+  "prompt": "Time travel",
+  "source": "word-only"
+ },
+ {
+  "slug": "tornado",
+  "prompt": "Tornado",
+  "source": "word-only"
+ },
+ {
+  "slug": "tradition",
+  "prompt": "Tradition",
+  "source": "word-only"
+ },
+ {
+  "slug": "tranquility",
+  "prompt": "Tranquility",
+  "source": "word-only"
+ },
+ {
+  "slug": "triumph",
+  "prompt": "Triumph",
+  "source": "word-only"
+ },
+ {
+  "slug": "trust",
+  "prompt": "Trust",
+  "source": "word-only"
+ },
+ {
+  "slug": "tug-of-war",
+  "prompt": "Tug of war",
+  "source": "word-only"
+ },
+ {
+  "slug": "turbulence",
+  "prompt": "Turbulence",
+  "source": "word-only"
+ },
+ {
+  "slug": "uncertainty",
+  "prompt": "Uncertainty",
+  "source": "word-only"
+ },
+ {
+  "slug": "underdog",
+  "prompt": "Underdog",
+  "source": "word-only"
+ },
+ {
+  "slug": "unity",
+  "prompt": "Unity",
+  "source": "word-only"
+ },
+ {
+  "slug": "vacuum",
+  "prompt": "Vacuum",
+  "source": "word-only"
+ },
+ {
+  "slug": "vanity",
+  "prompt": "Vanity",
+  "source": "word-only"
+ },
+ {
+  "slug": "velocity",
+  "prompt": "Velocity",
+  "source": "word-only"
+ },
+ {
+  "slug": "vertigo",
+  "prompt": "Vertigo",
+  "source": "word-only"
+ },
+ {
+  "slug": "vibration",
+  "prompt": "Vibration",
+  "source": "word-only"
+ },
+ {
+  "slug": "victory",
+  "prompt": "Victory",
+  "source": "word-only"
+ },
+ {
+  "slug": "volcano",
+  "prompt": "Volcano",
+  "source": "word-only"
+ },
+ {
+  "slug": "wanderlust",
+  "prompt": "Wanderlust",
+  "source": "word-only"
+ },
+ {
+  "slug": "warmth",
+  "prompt": "Warmth",
+  "source": "word-only"
+ },
+ {
+  "slug": "wavelength",
+  "prompt": "Wavelength",
+  "source": "word-only"
+ },
+ {
+  "slug": "weightlessness",
+  "prompt": "Weightlessness",
+  "source": "word-only"
+ },
+ {
+  "slug": "whiplash",
+  "prompt": "Whiplash",
+  "source": "word-only"
+ },
+ {
+  "slug": "whirlpool",
+  "prompt": "Whirlpool",
+  "source": "word-only"
+ },
+ {
+  "slug": "wildfire",
+  "prompt": "Wildfire",
+  "source": "word-only"
+ },
+ {
+  "slug": "willpower",
+  "prompt": "Willpower",
+  "source": "word-only"
+ },
+ {
+  "slug": "wisdom",
+  "prompt": "Wisdom",
+  "source": "word-only"
+ },
+ {
+  "slug": "wonder",
+  "prompt": "Wonder",
+  "source": "word-only"
+ },
+ {
+  "slug": "worry",
+  "prompt": "Worry",
+  "source": "word-only"
+ },
+ {
+  "slug": "yearning",
+  "prompt": "Yearning",
+  "source": "word-only"
+ },
+ {
+  "slug": "yesteryear",
+  "prompt": "Yesteryear",
+  "source": "word-only"
+ },
+ {
+  "slug": "zeal",
+  "prompt": "Zeal",
+  "source": "word-only"
+ },
+ {
+  "slug": "zero-gravity",
+  "prompt": "Zero gravity",
+  "source": "word-only"
+ }
+]

@@ -1,15 +1,18 @@
 /**
- * Friends + social presence/notifications over Supabase (RPCs from migration 0007
- * + Realtime). See PROGRESSION_SOCIAL.md §4.
+ * Friends + social presence/notifications over our API + Socket.IO gateway.
+ * See PROGRESSION_SOCIAL.md section 4 and apps/api/REALTIME.md.
  *
- *  - RPC wrappers: list / add / respond / remove / block / unblock / find.
- *  - Presence: a global `presence:online` channel → the live set of online user
- *    ids (so friends show an online dot).
- *  - Notifications: a per-user channel `user:<id>` receives friend_request /
- *    room_invite broadcasts → an in-app popup.
+ *  - REST: /friends (list), /friends/find, /friends/request, /friends/respond,
+ *    DELETE /friends/:id, /friends/block, /friends/unblock.
+ *  - Presence: the gateway puts every signed-in socket in `presence:online` and
+ *    pushes the live set of online user ids (`ready.online`, then `online.ids`).
+ *  - Notifications: the gateway delivers `notify` to `user:<id>`. friend_request /
+ *    friend_accepted are emitted SERVER-SIDE by the REST handlers; room_invite is
+ *    sent by the inviting client (`notifyUser`).
  */
-import type { RealtimeChannel } from '@supabase/supabase-js';
-import { supabase } from './supabase';
+import type { Socket } from 'socket.io-client';
+import { api, ensureFreshToken, getAccessToken, isApiConfigured } from './api';
+import { connectSocket } from './lobby';
 
 export interface FriendRow {
   other_id: string;
@@ -32,44 +35,49 @@ export type Notification =
   | { type: 'friend_accepted'; fromName: string }
   | { type: 'room_invite'; fromName: string; code: string };
 
+const signedIn = () => isApiConfigured() && !!getAccessToken();
+
 export async function listFriends(): Promise<FriendRow[]> {
-  if (!supabase) return [];
-  const { data } = await supabase.rpc('friends_list');
-  return (data as FriendRow[]) ?? [];
+  if (!signedIn()) return [];
+  return api<FriendRow[]>('/friends', { auth: 'user' }).catch(() => []);
 }
 export async function findUser(name: string): Promise<FoundUser | null> {
-  if (!supabase) return null;
-  const { data } = await supabase.rpc('find_user', { name: name.trim().toLowerCase() });
-  const row = Array.isArray(data) ? data[0] : data;
-  return (row as FoundUser) ?? null;
+  if (!signedIn()) return null;
+  const res = await api<{ user: FoundUser | null }>(`/friends/find?q=${encodeURIComponent(name.trim().toLowerCase())}`, { auth: 'user' }).catch(
+    () => ({ user: null }),
+  );
+  return res.user;
 }
+/** Resolves 'pending' or 'accepted' (a reciprocal request auto-accepts). */
 export async function sendFriendRequest(target: string): Promise<string | null> {
-  if (!supabase) return null;
-  const { data, error } = await supabase.rpc('send_friend_request', { target });
-  if (error) throw new Error(error.message);
-  return (data as string) ?? null;
+  if (!signedIn()) return null;
+  const res = await api<{ status: 'pending' | 'accepted' }>('/friends/request', { method: 'POST', body: { target }, auth: 'user' });
+  return res.status;
 }
 export async function respondFriendRequest(other: string, accept: boolean): Promise<void> {
-  if (!supabase) return;
-  const { error } = await supabase.rpc('respond_friend_request', { other, accept });
-  if (error) throw new Error(error.message);
+  if (!signedIn()) return;
+  await api('/friends/respond', { method: 'POST', body: { other, accept }, auth: 'user' });
 }
 export async function removeFriend(other: string): Promise<void> {
-  if (!supabase) return;
-  await supabase.rpc('remove_friend', { other });
+  if (!signedIn()) return;
+  await api(`/friends/${other}`, { method: 'DELETE', auth: 'user' }).catch(() => {});
 }
 export async function blockUser(other: string): Promise<void> {
-  if (!supabase) return;
-  await supabase.rpc('block_user', { other });
+  if (!signedIn()) return;
+  await api('/friends/block', { method: 'POST', body: { other }, auth: 'user' }).catch(() => {});
 }
 
-// ── Presence + notifications ────────────────────────────────────────────────
+// -- Presence + notifications -------------------------------------------------
 
-let presenceCh: RealtimeChannel | null = null;
-let notifyCh: RealtimeChannel | null = null;
+let social: Socket | null = null;
 let onlineIds = new Set<string>();
 const onlineSubs = new Set<(ids: Set<string>) => void>();
 let notifyCb: ((n: Notification) => void) | null = null;
+
+function setOnline(ids: string[]): void {
+  onlineIds = new Set(ids);
+  for (const cb of onlineSubs) cb(onlineIds);
+}
 
 /** Subscribe to the live online-id set. Returns an unsub. */
 export function subscribeOnline(cb: (ids: Set<string>) => void): () => void {
@@ -81,7 +89,7 @@ export function isOnline(id: string): boolean {
   return onlineIds.has(id);
 }
 
-// ── Pending incoming friend-request count ───────────────────────────────────
+// -- Pending incoming friend-request count --------------------------------------
 // Surfaced as a badge on the Home "Friends" button so requests that arrived
 // while you were away are visible on the MAIN screen, not just inside the modal.
 let pendingCount = 0;
@@ -96,7 +104,7 @@ export function subscribePendingRequests(cb: (n: number) => void): () => void {
 
 /** Re-fetch the pending-incoming count from the friends list and notify subs. */
 export async function refreshPendingRequests(): Promise<void> {
-  if (!supabase) {
+  if (!signedIn()) {
     pendingCount = 0;
   } else {
     const list = await listFriends();
@@ -105,43 +113,20 @@ export async function refreshPendingRequests(): Promise<void> {
   for (const cb of pendingSubs) cb(pendingCount);
 }
 
-/** Start presence + the per-user notification channel for the signed-in user. */
-export async function startSocial(userId: string, username: string, onNotify: (n: Notification) => void): Promise<void> {
-  if (!supabase) return;
+/** Start presence + the notification inbox for the signed-in user. */
+export async function startSocial(_userId: string, _username: string, onNotify: (n: Notification) => void): Promise<void> {
+  if (!signedIn()) return;
   notifyCb = onNotify;
-  // Global presence — everyone online tracks themselves here.
-  if (!presenceCh) {
-    presenceCh = supabase.channel('presence:online', { config: { presence: { key: userId } } });
-    presenceCh.on('presence', { event: 'sync' }, () => {
-      const state = presenceCh!.presenceState() as Record<string, unknown[]>;
-      onlineIds = new Set(Object.keys(state));
-      for (const cb of onlineSubs) cb(onlineIds);
-    });
-    await new Promise<void>((resolve) => {
-      presenceCh!.subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await presenceCh!.track({ id: userId, username });
-          resolve();
-        }
-      });
-    });
-  }
-  // Per-user notification inbox.
-  if (!notifyCh) {
-    notifyCh = supabase.channel(`user:${userId}`, { config: { broadcast: { self: false } } });
-    notifyCh.on('broadcast', { event: 'notify' }, (msg) => {
-      const n = msg.payload as Notification;
+  if (!social) {
+    social = connectSocket(async () => (await ensureFreshToken()) ?? '');
+    social.on('ready', (r: { online?: string[] }) => setOnline(r.online ?? []));
+    social.on('online', (r: { ids?: string[] }) => setOnline(r.ids ?? []));
+    social.on('notify', (n: Notification) => {
       notifyCb?.(n);
       // Keep the Home badge in sync as requests arrive / are accepted live.
-      if (n.type === 'friend_request' || n.type === 'friend_accepted') {
-        void refreshPendingRequests();
-      }
+      if (n.type === 'friend_request' || n.type === 'friend_accepted') void refreshPendingRequests();
     });
-    await new Promise<void>((resolve) => {
-      notifyCh!.subscribe((status) => {
-        if (status === 'SUBSCRIBED') resolve();
-      });
-    });
+    social.connect();
   }
   // Seed the pending-request badge with whatever arrived while we were away.
   void refreshPendingRequests();
@@ -149,30 +134,17 @@ export async function startSocial(userId: string, username: string, onNotify: (n
 
 /** Tear down presence + notifications (on sign-out). */
 export async function stopSocial(): Promise<void> {
-  if (!supabase) return;
-  if (presenceCh) {
-    await supabase.removeChannel(presenceCh);
-    presenceCh = null;
+  if (social) {
+    social.disconnect();
+    social = null;
   }
-  if (notifyCh) {
-    await supabase.removeChannel(notifyCh);
-    notifyCh = null;
-  }
-  onlineIds = new Set();
-  for (const cb of onlineSubs) cb(onlineIds);
+  setOnline([]);
   pendingCount = 0;
   for (const cb of pendingSubs) cb(0);
 }
 
-/** Send a notification to another user's inbox channel (fire-and-forget). */
+/** Send a notification to another user's inbox (fire-and-forget; room invites). */
 export async function notifyUser(toUserId: string, payload: Notification): Promise<void> {
-  if (!supabase) return;
-  const ch = supabase.channel(`user:${toUserId}`);
-  await new Promise<void>((resolve) => {
-    ch.subscribe((status) => {
-      if (status === 'SUBSCRIBED') resolve();
-    });
-  });
-  await ch.send({ type: 'broadcast', event: 'notify', payload });
-  await supabase.removeChannel(ch);
+  if (!social?.connected) return;
+  social.emit('notify', { toUserId, payload });
 }

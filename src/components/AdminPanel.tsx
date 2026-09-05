@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../lib/auth';
 import { hasDevSeam } from '../lib/devSeams';
 import { useModalDismiss } from '../lib/useModalDismiss';
-import { supabase, type AdminUserRow, type CustomPack, type UserRole } from '../lib/supabase';
+import { api, isApiConfigured, type AdminUserRow, type CustomPack, type UserRole } from '../lib/api';
 import { play } from '../services/audio';
 import { RankBadge } from './RankBadge';
 
@@ -11,8 +11,8 @@ import { RankBadge } from './RankBadge';
  * Admin dashboard — gated on `useAuth().isAdmin`. Two tabs:
  *
  *   👥 Users — list every signed-up account, promote/demote (player ↔ moderator
- *      ↔ admin), and ban/unban. All writes go through SECURITY DEFINER RPCs in
- *      0002_roles_admin.sql so the policies are enforced server-side regardless
+ *      ↔ admin), and ban/unban. All writes go through the API's /admin/* routes
+ *      (RolesGuard 'admin') so the policies are enforced server-side regardless
  *      of what this UI sends.
  *
  *   📦 Packs — review user-authored custom packs (drafts + published) and flip
@@ -29,8 +29,8 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
 
   // Dev/QA seam (see Home): allow rendering the dashboard chrome without an admin
   // session so its responsive layout can be inspected. Gated to local dev/test
-  // hosts (devSeams.ts). Data calls no-op/error regardless (admin RPCs enforce
-  // role server-side), so this is purely a layout-inspection affordance.
+  // hosts (devSeams.ts). Data calls no-op/error regardless (the API enforces the
+  // admin role server-side), so this is purely a layout-inspection affordance.
   const devScreens = hasDevSeam('__devscreens');
   if (!isAdmin && !devScreens) return null;
 
@@ -107,16 +107,29 @@ function UsersTab() {
   const [busy, setBusy] = useState<string | null>(null); // user id currently being mutated
 
   const load = useCallback(async () => {
-    if (!supabase) return;
+    if (!isApiConfigured()) return;
     setError(null);
-    const { data, error } = await supabase.rpc('admin_list_users');
-    if (error) {
-      setError(error.message);
+    try {
+      setRows(await api<AdminUserRow[]>('/admin/users', { auth: 'user' }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
       setRows([]);
-      return;
     }
-    setRows((data as AdminUserRow[]) ?? []);
   }, []);
+
+  /** Run one admin write; surfaces the API error and reports success. */
+  const mutate = async (id: string, fn: () => Promise<unknown>): Promise<boolean> => {
+    setBusy(id);
+    try {
+      await fn();
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      return false;
+    } finally {
+      setBusy(null);
+    }
+  };
 
   useEffect(() => {
     load();
@@ -135,36 +148,22 @@ function UsersTab() {
   }, [rows, search]);
 
   const setRole = async (row: AdminUserRow, role: UserRole) => {
-    if (!supabase) return;
     if (row.id === profile?.id && role !== 'admin') {
-      alert('You cannot demote yourself — ask another admin.');
+      alert('You cannot demote yourself, ask another admin.');
       return;
     }
-    setBusy(row.id);
-    const { error } = await supabase.rpc('set_user_role', { target_id: row.id, new_role: role });
-    setBusy(null);
-    if (error) {
-      setError(error.message);
-      return;
-    }
+    if (!(await mutate(row.id, () => api(`/admin/users/${row.id}/role`, { method: 'PATCH', body: { role }, auth: 'user' })))) return;
     setRows((rs) => rs?.map((r) => (r.id === row.id ? { ...r, role } : r)) ?? null);
   };
 
   const toggleBan = async (row: AdminUserRow) => {
-    if (!supabase) return;
     if (row.id === profile?.id) {
       alert('You cannot ban yourself.');
       return;
     }
     const willBan = !row.banned_at;
     if (willBan && !confirm(`Ban @${row.username}? They lose access to all online features.`)) return;
-    setBusy(row.id);
-    const { error } = await supabase.rpc('set_user_banned', { target_id: row.id, banned: willBan });
-    setBusy(null);
-    if (error) {
-      setError(error.message);
-      return;
-    }
+    if (!(await mutate(row.id, () => api(`/admin/users/${row.id}/banned`, { method: 'PATCH', body: { banned: willBan }, auth: 'user' })))) return;
     setRows((rs) =>
       rs?.map((r) =>
         r.id === row.id ? { ...r, banned_at: willBan ? new Date().toISOString() : null } : r,
@@ -173,44 +172,23 @@ function UsersTab() {
   };
 
   const toggleFullAccess = async (row: AdminUserRow) => {
-    if (!supabase) return;
     const value = !row.full_access;
-    setBusy(row.id);
-    const { error } = await supabase.rpc('admin_set_full_access', { target_id: row.id, value });
-    setBusy(null);
-    if (error) {
-      setError(error.message);
-      return;
-    }
+    if (!(await mutate(row.id, () => api(`/admin/users/${row.id}/full-access`, { method: 'PATCH', body: { value }, auth: 'user' })))) return;
     setRows((rs) => rs?.map((r) => (r.id === row.id ? { ...r, full_access: value } : r)) ?? null);
   };
 
   const grantXp = async (row: AdminUserRow) => {
-    if (!supabase) return;
     const raw = prompt(`Grant XP to @${row.username} (negative to remove):`, '100');
     if (raw === null) return;
     const amount = parseInt(raw, 10);
     if (!Number.isFinite(amount)) return;
-    setBusy(row.id);
-    const { error } = await supabase.rpc('admin_grant_xp', { target_id: row.id, amount });
-    setBusy(null);
-    if (error) {
-      setError(error.message);
-      return;
-    }
+    if (!(await mutate(row.id, () => api(`/admin/users/${row.id}/grant-xp`, { method: 'POST', body: { amount }, auth: 'user' })))) return;
     await load();
   };
 
   const resetProgression = async (row: AdminUserRow) => {
-    if (!supabase) return;
     if (!confirm(`Reset @${row.username} to Level 1, Prestige 0, 0 XP?`)) return;
-    setBusy(row.id);
-    const { error } = await supabase.rpc('admin_reset_progression', { target_id: row.id });
-    setBusy(null);
-    if (error) {
-      setError(error.message);
-      return;
-    }
+    if (!(await mutate(row.id, () => api(`/admin/users/${row.id}/reset-progression`, { method: 'POST', auth: 'user' })))) return;
     await load();
   };
 
@@ -318,18 +296,14 @@ function PacksTab() {
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!supabase) return;
+    if (!isApiConfigured()) return;
     setError(null);
-    const { data, error } = await supabase
-      .from('custom_packs')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) {
-      setError(error.message);
+    try {
+      setRows(await api<CustomPack[]>('/packs/custom?scope=all', { auth: 'user' }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
       setRows([]);
-      return;
     }
-    setRows((data as CustomPack[]) ?? []);
   }, []);
 
   useEffect(() => {
@@ -337,38 +311,29 @@ function PacksTab() {
   }, [load]);
 
   const togglePublish = async (pack: CustomPack) => {
-    if (!supabase) return;
     setBusy(pack.id);
     const next = !pack.published;
-    const { error } = await supabase
-      .from('custom_packs')
-      .update({ published: next, published_at: next ? new Date().toISOString() : null })
-      .eq('id', pack.id);
-    setBusy(null);
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      const updated = await api<CustomPack>(`/packs/custom/${pack.id}`, { method: 'PATCH', body: { published: next }, auth: 'user' });
+      setRows((rs) => rs?.map((r) => (r.id === pack.id ? updated : r)) ?? null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
     }
-    setRows((rs) =>
-      rs?.map((r) =>
-        r.id === pack.id
-          ? { ...r, published: next, published_at: next ? new Date().toISOString() : null }
-          : r,
-      ) ?? null,
-    );
   };
 
   const remove = async (pack: CustomPack) => {
-    if (!supabase) return;
     if (!confirm(`Delete pack "${pack.name}"? This cannot be undone.`)) return;
     setBusy(pack.id);
-    const { error } = await supabase.from('custom_packs').delete().eq('id', pack.id);
-    setBusy(null);
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      await api(`/packs/custom/${pack.id}`, { method: 'DELETE', auth: 'user' });
+      setRows((rs) => rs?.filter((r) => r.id !== pack.id) ?? null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
     }
-    setRows((rs) => rs?.filter((r) => r.id !== pack.id) ?? null);
   };
 
   return (

@@ -6,7 +6,7 @@ import { teamXpForResult } from '../core/progression';
 import { linkRoomMember, unlinkRoomMember } from '../lib/couchXp';
 import { useAuth } from '../lib/auth';
 import { awardXp } from '../lib/progressionClient';
-import { isSupabaseConfigured } from '../lib/supabase';
+import { isApiConfigured } from '../lib/api';
 import {
   generatePlayerId,
   openRoom,
@@ -19,7 +19,7 @@ import {
 /**
  * The phone-as-controller page. Mounted when the URL carries `?view=controller`.
  * Lives entirely outside the Couch-Mode store — its own minimal state + a
- * direct Realtime channel to the host.
+ * direct socket to the room (host + phones).
  *
  * Flow:
  *   1. Connect to lobby:<CODE>, track presence as a player.
@@ -215,9 +215,9 @@ export function PlayerController() {
       setError('Missing or invalid room code in URL.');
       return;
     }
-    if (!isSupabaseConfigured()) {
+    if (!isApiConfigured()) {
       setStatus('error');
-      setError('Party mode needs Supabase configuration.');
+      setError('Party mode needs the game server (VITE_API_URL is not set in this build).');
       return;
     }
 
@@ -311,7 +311,8 @@ export function PlayerController() {
       if (document.visibilityState !== 'visible') return;
       const h = handleRef.current;
       if (!h) return;
-      h.channel.track({ ...h.self, team: teamRef.current }).catch(() => {});
+      if (!h.socket.connected && !h.socket.active) h.socket.connect();
+      h.updatePresence({ team: teamRef.current }).catch(() => {});
       h.broadcast({ type: 'request_state', playerId: h.self.id }).catch(() => {});
     };
     document.addEventListener('visibilitychange', onVisible);
@@ -336,9 +337,9 @@ export function PlayerController() {
           // Persist the team so a refresh / reconnect restores it — otherwise the
           // player would come back unassigned and be unable to answer.
           persistSave({ playerId: myId, name: nameRef.current, room, team: event.team, answeredCell: answeredCellRef.current });
-          // Re-track our own presence with the new team (or null = back to pool).
+          // Update our own roster entry with the new team (or null = back to pool).
           const h = handleRef.current;
-          if (h) h.channel.track({ ...h.self, team: event.team }).catch(() => {});
+          if (h) h.updatePresence({ team: event.team }).catch(() => {});
         }
         // Team colours/names ride along with the assignment so colour + team
         // update atomically (no ordering race with a separate team_labels event).
@@ -534,7 +535,7 @@ export function PlayerController() {
       teamRef.current = t;
       const h = handleRef.current;
       if (h) {
-        h.channel.track({ ...h.self, team: t }).catch(() => {});
+        h.updatePresence({ team: t }).catch(() => {});
         persistSave({ playerId: h.self.id, name, room, team: t, answeredCell: answeredCellRef.current });
       }
     },
@@ -589,6 +590,11 @@ export function PlayerController() {
       data-team={team ?? ''}
       data-phase={phase}
     >
+      {/* Portrait lock in the browser (mobile.css shows this only in phone landscape). */}
+      <div className="rotate-hint" data-testid="rotate-hint" role="status">
+        <span className="rotate-hint-icon" aria-hidden="true">📱</span>
+        Turn your phone upright to play
+      </div>
       <header className="controller-head">
         <div className="controller-room">
           Room <strong>{room}</strong>

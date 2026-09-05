@@ -1,0 +1,514 @@
+/* ============================================================
+   Letterlock: mobile rehaul (LAUNCH_PLAN Phase 1b)
+   Loaded after app.css / lobby.css / admin.css so equal-specificity rules here
+   win. Four concerns, in order: touch targets, type scale, the landscape host
+   layout, and the phone-controller portrait lock; then the install / fullscreen
+   affordances and the low-end motion budget.
+   ============================================================ */
+
+/* ---------- 1. Touch targets: every tappable is at least 44 x 44 CSS px ----------
+   Unconditional (not behind pointer: coarse) so the device-matrix checkers, which
+   drive plain viewports, verify the same layout a finger gets. */
+.btn,
+.award,
+.choice,
+.cat-chip,
+.cat-lang-btn,
+.cat-tier,
+.segment button,
+.chip:is(button),
+.controller-leave,
+.qcard-flag-fs-btn,
+.qcard-map-expand,
+.lb-pack-btn,
+.mode-card,
+.set-row .btn {
+  min-height: 44px;
+}
+.icon-btn,
+.exit-btn,
+.game-head > .exit-btn,
+.pie-pop-close,
+.store-sheet-close,
+.install-sheet-close,
+.qcard-map-fs-close,
+.modal-close,
+.cat-close,
+.controller-couch-close {
+  min-width: 44px;
+  min-height: 44px;
+}
+/* The scoreboard's "switch turn" sits in a dense strip: a 44px hit area that
+   overlaps the strip's own padding instead of growing the header. */
+.vs-switch {
+  min-height: 44px;
+  padding-block: 10px;
+  margin-block: -10px;
+}
+/* Toggle switch: the button is the 64 x 44 hit area, the 56 x 32 track is drawn
+   by ::before so the control looks exactly as before. */
+.switch {
+  width: 64px;
+  height: 44px;
+  background: transparent;
+  border: 0;
+}
+.switch::before {
+  content: '';
+  position: absolute;
+  inset: 6px 4px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  transition: background var(--dur-fast);
+}
+.switch.on::before {
+  background: var(--blue);
+}
+.switch.on {
+  background: transparent;
+}
+.switch .knob {
+  top: 10px;
+  left: 8px;
+}
+/* Colour swatches: a 44px button whose paint is clipped to the 28px dot, so the
+   rows keep their rhythm and the target is a fingertip. */
+.swatch {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+  border: 0;
+  background-clip: content-box;
+}
+.swatch.active {
+  border: 0;
+  box-shadow: none;
+}
+.swatch.active::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.28);
+}
+.swatches {
+  gap: 2px;
+}
+/* Exit is a 44px circle on phones (was 38). */
+@media (max-width: 720px) {
+  .game-head > .exit-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+/* Small game-card buttons (Show answer, Skip) and the compact award pad never
+   drop under the floor on short screens. */
+.qcard-answer .btn,
+.answer-reveal {
+  min-height: 44px;
+}
+.hostpad .award {
+  min-height: 44px;
+}
+/* Pie-rule close: a 44px target, visually light. */
+.pie-pop-close {
+  top: 0;
+  right: 0;
+  background: transparent;
+  font-size: 1rem;
+}
+.pie-pop-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.store-sheet-close,
+.install-sheet-close {
+  top: 0;
+  right: 0;
+  background: transparent;
+  font-size: 1rem;
+}
+
+/* ---------- 2. Type scale per breakpoint (arm's-length reading) ----------
+   Phones: body 17px, small 15px, captions 13px; the question is never under 18px
+   and grows with the height that is actually available (svh, not vh). */
+@media (max-width: 720px) {
+  :root {
+    --t-body: 1.0625rem;
+    --t-sm: 0.94rem;
+    --t-xs: 0.8125rem;
+  }
+  .turn-banner {
+    font-size: 1rem;
+  }
+  .team-chip {
+    font-size: 0.95rem;
+  }
+}
+@media (max-width: 720px), (max-height: 600px) {
+  .qcard-q {
+    font-size: clamp(18px, 2.6svh, 22px);
+    line-height: 1.32;
+  }
+  .answer-value {
+    font-size: clamp(18px, 2.6svh, 24px);
+  }
+  .qcard-picker,
+  .qcard-rule {
+    font-size: 0.8125rem;
+  }
+}
+
+/* ---------- 3a. Thumb zone: the host pad's primary awards sit on the bottom row,
+   Undo top-left (farthest from a right thumb). Party Mode: Undo above the big
+   Reveal button for the same reason. Phones only; desktop keeps reading order. */
+@media (max-width: 720px), (orientation: landscape) and (max-height: 460px) {
+  .hostpad {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'undo none'
+      'pick other';
+  }
+  .hostpad .award.primary {
+    grid-area: pick;
+  }
+  .hostpad .award.none {
+    grid-area: none;
+  }
+  .hostpad .award.undo {
+    grid-area: undo;
+  }
+  .hostpad .award:not(.primary):not(.none):not(.undo) {
+    grid-area: other;
+  }
+  .party-decide-undo {
+    order: -1;
+    align-self: flex-start;
+  }
+}
+
+/* ---------- 3b. Landscape-first host layout on phones ----------
+   Board left at full height; timer (thin bar) + question + host pad stacked right
+   as one column; header collapses to a slim strip. Overrides the generic
+   landscape block in app.css (max-height: 520px), which only did the 2 columns. */
+@media (orientation: landscape) and (max-height: 460px) {
+  .ll-screen {
+    padding-top: max(4px, env(safe-area-inset-top));
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+  }
+  .game {
+    gap: 4px;
+  }
+  .game-head {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 6px;
+  }
+  .game-head-spacer {
+    display: none;
+  }
+  .game-head > .exit-btn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    display: grid;
+    place-content: center;
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+  .exit-label {
+    display: none;
+  }
+  /* Slim scoreboard strip: name + score on one line per team, centre badge only. */
+  .scoreboard {
+    padding: 0 10px;
+    gap: 8px;
+    min-height: 44px;
+    border-radius: 14px;
+  }
+  .team-panel {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 8px;
+  }
+  .team-panel.team-B {
+    flex-direction: row-reverse;
+  }
+  .team-score {
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+  .team-stats,
+  .series-pips,
+  .team-dir,
+  .mode-tag,
+  .pack-tag {
+    display: none;
+  }
+  .score-mid {
+    gap: 0;
+  }
+  .game-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(280px, 1fr);
+    gap: 10px;
+    align-items: stretch;
+  }
+  .board-wrap {
+    flex: none;
+    height: auto;
+    min-height: 0;
+    gap: 4px;
+  }
+  .turn-banner {
+    padding: 6px 12px;
+    gap: 6px;
+    font-size: 0.85rem;
+    max-width: 100%;
+  }
+  .turn-dir {
+    display: none;
+  }
+  .game-side {
+    flex: none;
+    min-height: 0;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+  .question-zone {
+    height: 100%;
+    gap: 6px;
+  }
+  /* Timer becomes a thin bar across the top of the column, label + seconds under it. */
+  .timer {
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 8px;
+  }
+  .timer-bar {
+    order: -1;
+    flex: 1 0 100%;
+    height: 5px;
+  }
+  .timer-label,
+  .timer-num {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+  .timer-num {
+    min-width: 0;
+    margin-left: auto;
+  }
+  .qcard {
+    padding: 8px 12px;
+  }
+  .qcard-top {
+    margin-bottom: 4px;
+    gap: 8px;
+  }
+  .letter-badge {
+    width: 36px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  .qcard-q {
+    margin-bottom: 6px;
+  }
+  .qcard-answer {
+    gap: 6px;
+  }
+  .hostpad {
+    gap: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--line);
+  }
+  .award {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 4px 8px;
+    font-size: 0.92rem;
+    min-height: 44px;
+  }
+  .award-sub {
+    display: none;
+  }
+  .pick-help {
+    padding: 12px 14px;
+  }
+  .pick-help-icon {
+    font-size: 1.6rem;
+  }
+  .pick-help h3 {
+    margin: 4px 0;
+    font-size: 1.05rem;
+  }
+  .pick-help p {
+    font-size: 0.85rem;
+    margin: 0 0 6px;
+  }
+}
+
+/* ---------- 4. Phone controller: portrait only in the browser ----------
+   (the apps lock the sensor in native.ts). Shown only on a real touch device in
+   phone landscape; desktop and the viewport-only checkers never match. */
+.rotate-hint {
+  display: none;
+}
+@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) and (hover: none) {
+  .rotate-hint {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+    background: var(--bg-0);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.2rem;
+  }
+  .rotate-hint-icon {
+    font-size: 2.4rem;
+    display: inline-block;
+    transform: rotate(90deg);
+  }
+}
+/* The answer bar is the thumb zone: pinned to the bottom of the question view. */
+.controller-question {
+  display: flex;
+  flex-direction: column;
+}
+.controller-answer-bar {
+  margin-top: auto;
+  padding-bottom: max(6px, env(safe-area-inset-bottom));
+}
+
+/* ---------- 5. Fullscreen toggle (board corner) + Add-to-Home-Screen sheet ---------- */
+.fs-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 5;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  color: var(--text-dim);
+  padding: 0;
+  transition: background var(--dur-fast), color var(--dur-fast), transform var(--dur-fast) var(--ease-out);
+}
+.fs-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.fs-btn:active {
+  transform: scale(0.94);
+}
+.fs-btn[aria-pressed='true'] {
+  color: var(--blue-glow);
+  border-color: color-mix(in srgb, var(--blue-glow) 50%, transparent);
+}
+/* Keep the pie-rule popup clear of the corner button. */
+.pie-pop {
+  width: min(84%, 420px);
+}
+
+.install-sheet {
+  position: fixed;
+  left: 50%;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 20px));
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 12px 48px 12px 16px;
+  border-radius: var(--r-lg);
+  background: color-mix(in oklab, var(--surface-2) 92%, black);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+.install-sheet-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.install-sheet-text strong {
+  font-size: var(--t-sm);
+}
+.install-sheet-text > span {
+  font-size: var(--t-xs);
+  color: var(--text-dim);
+}
+.install-steps {
+  margin: 0;
+  padding-left: 18px;
+  font-size: var(--t-xs);
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.install-steps b {
+  color: var(--text);
+}
+.install-key {
+  display: inline-grid;
+  place-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  border-radius: 5px;
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--blue-glow);
+  font-weight: 700;
+  line-height: 1;
+}
+.install-sheet-btn {
+  flex: 0 0 auto;
+  padding: 10px 18px;
+}
+.install-sheet-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+/* ---------- 6. Motion budget: html[data-lowpower] (Data Saver, <=4 GB, reduced motion)
+   keeps the claim pop and the winning trace, drops the ambient cost. ---------- */
+html[data-lowpower] .ll-board {
+  filter: none;
+}
+html[data-lowpower] body::before {
+  display: none;
+}
+html[data-lowpower] .pie-pop {
+  backdrop-filter: none;
+}
+html[data-lowpower] .ll-hex.selected .hex-base,
+html[data-lowpower] .ll-hex.win .hex-base,
+html[data-lowpower] .win-trace {
+  animation-iteration-count: 1;
+}
+html[data-lowpower] .turn-flare {
+  display: none;
+}

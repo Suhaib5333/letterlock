@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Injectable,
   Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -79,6 +80,18 @@ export class AuthService {
     });
     await this.mail.sendOtp(email, code);
     return { ok: true };
+  }
+
+  /**
+   * Dev/e2e hook: the last OTP captured for `email` (MailService dev mode). Hard
+   * 404 in production or whenever a real mailer (RESEND_API_KEY) is configured, so
+   * it can never leak a code that was actually emailed.
+   */
+  devOtpCode(email: string): { code: string | null } {
+    if (process.env.NODE_ENV === 'production' || !this.mail.devMode) {
+      throw new NotFoundException({ message: 'Not available', code: 'not_found' });
+    }
+    return { code: this.mail.lastDevCode(email.trim().toLowerCase()) ?? null };
   }
 
   async verifyOtp(email: string, code: string, userAgent?: string): Promise<AuthResult> {

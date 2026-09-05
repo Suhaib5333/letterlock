@@ -53,3 +53,6 @@ infra/db-creds
 infra/.kvm-known-hosts
 infra/*.backup
 dist-e2e-*/
+
+__pycache__/
+*.pyc

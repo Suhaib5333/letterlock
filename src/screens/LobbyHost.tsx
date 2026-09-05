@@ -1,7 +1,8 @@
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { QrCode } from '../components/QrCode';
-import { isSupabaseConfigured } from '../lib/supabase';
+import { useBannerAd } from '../lib/ads';
+import { isApiConfigured } from '../lib/api';
 import {
   generatePlayerId,
   generateRoomCode,
@@ -20,7 +21,7 @@ import { useStore } from '../state/store';
  * assign teams, and start the match. Once the match starts we navigate to
  * Setup (same engine as Couch Mode) — the host's device is authoritative.
  *
- * The Realtime channel stays open across screens via window.__lobby so
+ * The room socket stays open across screens via window.__lobby so
  * Game.tsx can reach in and broadcast question_served / adjudicated events
  * to the player phones during the live match.
  */
@@ -48,6 +49,7 @@ function useSessionRoomCode(): string {
 
 export function LobbyHost() {
   const { state, dispatch } = useStore();
+  useBannerAd('lobby-host');
   const code = useSessionRoomCode();
   const [roster, setRoster] = useState<PresencePlayer[]>([]);
   const [status, setStatus] = useState<'connecting' | 'open' | 'error'>('connecting');
@@ -65,9 +67,9 @@ export function LobbyHost() {
 
   // Open the channel as host on mount; clean up on unmount.
   useEffect(() => {
-    if (!isSupabaseConfigured()) {
+    if (!isApiConfigured()) {
       setStatus('error');
-      setError('Party mode needs Supabase — VITE_SUPABASE_URL/ANON_KEY missing.');
+      setError('Party mode needs the game server (VITE_API_URL is not set in this build).');
       return;
     }
     let cancelled = false;

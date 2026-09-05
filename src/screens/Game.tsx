@@ -2,6 +2,8 @@ import confetti from 'canvas-confetti';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { Board } from '../components/Board';
+import { ExtraSkipButton } from '../components/ExtraSkipButton';
+import { FullscreenButton } from '../components/FullscreenButton';
 import { HostPad } from '../components/HostPad';
 import { LevelUpOverlay } from '../components/LevelUpOverlay';
 import { QuestionCard } from '../components/QuestionCard';
@@ -10,12 +12,16 @@ import { Timer } from '../components/Timer';
 import { submitScore } from '../components/Leaderboard';
 import type { TeamId } from '../core/models';
 import { isAnswerCorrect } from '../core/fuzzyMatch';
+import { adBreakBetweenGames } from '../lib/ads';
 import { useAuth } from '../lib/auth';
 import { devSeamsEnabled, hasDevSeam } from '../lib/devSeams';
 import { awardXp } from '../lib/progressionClient';
 import { hostXpForResult } from '../core/progression';
 import { awardRoomXp } from '../lib/couchXp';
+import { applyMotionBudget, confettiScale } from '../lib/motionBudget';
+import { isNative } from '../lib/platform';
 import { useOnlineHost } from '../lib/useOnlineHost';
+import { releaseWakeLock, requestWakeLock } from '../lib/wakeLock';
 import { haptic, play } from '../services/audio';
 import { colorById } from '../state/palette';
 import { clearSavedGame, useStore } from '../state/store';
@@ -30,7 +36,11 @@ function fireConfetti(team: TeamId, colorId: string) {
   const c = colorById(colorId);
   const colors = [c.light, c.glow, '#ffffff'];
   void team;
-  confetti({ particleCount: 140, spread: 78, origin: { y: 0.4 }, colors, scalar: 1.1 });
+  // Motion budget: a constrained phone (Data Saver, <=4 GB, reduced motion) gets
+  // half the particles and only the centre burst; the hero moment stays.
+  const k = confettiScale();
+  confetti({ particleCount: Math.round(140 * k), spread: 78, origin: { y: 0.4 }, colors, scalar: 1.1 });
+  if (k < 1) return;
   setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 60, origin: { x: 0 }, colors }), 180);
   setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 60, origin: { x: 1 }, colors }), 320);
 }
@@ -101,6 +111,15 @@ export function Game() {
     if (!canPieSwap) setPieDismissed(false);
   }, [canPieSwap]);
 
+  // While the board is on screen: keep the phone awake (browser Wake Lock; the
+  // apps use native keep-awake from native.ts) and apply the low-end motion budget.
+  useEffect(() => {
+    applyMotionBudget();
+    if (isNative) return;
+    requestWakeLock();
+    return releaseWakeLock;
+  }, []);
+
   // Re-arm the per-game XP awards when a new game begins.
   useEffect(() => {
     if (!ui.gameOver) {
@@ -132,7 +151,7 @@ export function Game() {
       if (!reducedMotion) fireConfetti(game.winner, teams[game.winner].colorId);
       clearSavedGame();
       // Push the match result to the global leaderboard. No-ops cleanly when
-      // Supabase is unconfigured OR no user is signed in. Guard so a re-render
+      // the API is unconfigured OR no user is signed in. Guard so a re-render
       // (StrictMode double-fire, pulse bump) doesn't double-submit.
       if (!submittedScore.current && opts) {
         submittedScore.current = true;
@@ -413,7 +432,7 @@ export function Game() {
             )}
           </AnimatePresence>
 
-
+          <FullscreenButton />
           <div className="board-stage">
             <Board
               game={game}
@@ -503,6 +522,7 @@ export function Game() {
                       setStealResume((n) => n + 1);
                     }}
                   />
+                  <ExtraSkipButton show={ui.skipsUsed >= (hasClip ? 12 : 1)} />
                 </div>
                 {showOnlineAnswers && (
                   <div className="online-answers" data-testid="online-answers">
@@ -816,6 +836,7 @@ export function Game() {
                 data-testid="continue-after-game"
                 onClick={() => {
                   play('pick');
+                  void adBreakBetweenGames(); // LAUNCH_PLAN D4: interstitial only here, capped, never mid-question
                   dispatch({ type: 'CONTINUE_AFTER_GAME' });
                 }}
               >

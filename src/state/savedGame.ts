@@ -2,10 +2,10 @@
  * Saved game (Resume), account-aware.
  *
  * Storage depends on who's playing:
- *   • Signed-in users → persisted in Supabase (`saved_games`, ONE row per user)
- *     so "leave and come back → resume your last game" follows the account across
+ *   - Signed-in users: persisted through our API (`/saves`, ONE row per user) so
+ *     "leave and come back, resume your last game" follows the account across
  *     devices/sessions. The local copy is just a fast cache kept in sync.
- *   • Guests → localStorage only (this browser).
+ *   - Guests: localStorage only (this browser).
  *
  * The account is the source of truth for signed-in users: on sign-in we PULL the
  * remote save and never inherit a previous user's / guest's local save (so two
@@ -14,7 +14,7 @@
  * `configureSavedGame(userId|null)` is called by the auth layer when the session
  * resolves or changes (mirrors configureProgress).
  */
-import { supabase } from '../lib/supabase';
+import { api, getAccessToken, isApiConfigured } from '../lib/api';
 
 const PERSIST_KEY = 'letterlock.save.v1';
 
@@ -74,13 +74,15 @@ function writeLocal(p: SavePayload | null): void {
   }
 }
 
+const remote = () => !!uid && isApiConfigured() && !!getAccessToken();
+
 /**
  * Point the saved-game store at the current identity. `userId` = signed in
  * (the account's saved game is authoritative); `null` = guest (local only).
  */
 export async function configureSavedGame(userId: string | null): Promise<void> {
   uid = userId;
-  if (!userId || !supabase) {
+  if (!remote()) {
     // Guest: resume only this browser's local save.
     cache = readLocal();
     notify();
@@ -89,17 +91,12 @@ export async function configureSavedGame(userId: string | null): Promise<void> {
   // Signed-in: the account's saved game is the source of truth. Pull it; if there
   // is none, the user has no resumable game (don't inherit a local/guest save).
   try {
-    const { data, error } = await supabase
-      .from('saved_games')
-      .select('state')
-      .eq('user_id', userId)
-      .maybeSingle();
-    if (error) throw error;
-    cache = (data?.state as SavePayload) ?? null;
+    const res = await api<{ state: SavePayload | null }>('/saves', { auth: 'user' });
+    cache = res.state ?? null;
     writeLocal(cache); // keep this user's local cache consistent with the account
   } catch {
-    // Network/RPC failure — fall back to this user's own last local mirror
-    // (offline resume) rather than wiping it or leaking another identity's save.
+    // Network failure: fall back to this user's own last local mirror (offline
+    // resume) rather than wiping it or leaking another identity's save.
     cache = readLocal();
   }
   notify();
@@ -111,19 +108,12 @@ export function saveGame(payload: SavePayload): void {
   cache = payload;
   writeLocal(payload);
   notify();
-  if (!uid || !supabase) return;
-  const userId = uid;
+  if (!remote()) return;
   if (timer) clearTimeout(timer);
   timer = setTimeout(() => {
     timer = null;
-    if (!supabase) return;
-    supabase
-      .from('saved_games')
-      .upsert(
-        { user_id: userId, state: payload, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id' },
-      )
-      .then(() => {});
+    if (!remote()) return;
+    api('/saves', { method: 'PUT', body: { state: payload }, auth: 'user' }).catch(() => {});
   }, 600);
 }
 
@@ -136,7 +126,6 @@ export function clearSave(): void {
     clearTimeout(timer);
     timer = null;
   }
-  if (!uid || !supabase) return;
-  const userId = uid;
-  supabase.from('saved_games').delete().eq('user_id', userId).then(() => {});
+  if (!remote()) return;
+  api('/saves', { method: 'DELETE', auth: 'user' }).catch(() => {});
 }

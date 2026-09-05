@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { useRef } from 'react';
 import { useModalDismiss } from '../lib/useModalDismiss';
 import { LegalLinks } from './LegalLinks';
+import { MonetizationSettings } from './MonetizationSettings';
 import { play, setSuspenseVariant, startSuspense, stopSuspense, type SuspenseVariant } from '../services/audio';
 import { useStore } from '../state/store';
 import type { Settings } from '../state/types';
@@ -186,6 +187,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
             ]}
           />
         </div>
+        <MonetizationSettings />
         </div>
 
         <button className="btn btn-primary block" onClick={onClose}>

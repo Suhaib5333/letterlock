@@ -742,7 +742,7 @@ test('an unreachable media clip AUTO-ADVANCES to another question on its own', a
   await expect(page.getByTestId('question-card')).toBeVisible();
 });
 
-test('auth modal opens with Google sign-in CTA (Supabase configured)', async ({ page }) => {
+test('auth modal opens with Google sign-in CTA (API configured)', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('open-auth').click();
   await expect(page.getByTestId('auth-modal')).toBeVisible();

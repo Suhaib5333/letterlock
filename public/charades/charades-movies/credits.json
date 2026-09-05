@@ -1,0 +1,1052 @@
+[
+ {
+  "slug": "a-bug-s-life",
+  "prompt": "A Bug’s Life",
+  "source": "word-only"
+ },
+ {
+  "slug": "a-quiet-place",
+  "prompt": "A Quiet Place",
+  "source": "word-only"
+ },
+ {
+  "slug": "air-bud",
+  "prompt": "Air Bud",
+  "source": "word-only"
+ },
+ {
+  "slug": "aladdin",
+  "prompt": "Aladdin",
+  "source": "word-only"
+ },
+ {
+  "slug": "aladdin-and-the-king-of-thieves",
+  "prompt": "Aladdin and the King of Thieves",
+  "source": "word-only"
+ },
+ {
+  "slug": "ant-man",
+  "prompt": "Ant-Man",
+  "source": "word-only"
+ },
+ {
+  "slug": "antz",
+  "prompt": "Antz",
+  "source": "word-only"
+ },
+ {
+  "slug": "aquaman",
+  "prompt": "Aquaman",
+  "source": "word-only"
+ },
+ {
+  "slug": "arrested-development",
+  "prompt": "Arrested Development",
+  "source": "word-only"
+ },
+ {
+  "slug": "avatar",
+  "prompt": "Avatar",
+  "source": "word-only"
+ },
+ {
+  "slug": "avengers",
+  "prompt": "Avengers",
+  "source": "word-only"
+ },
+ {
+  "slug": "back-to-the-future",
+  "prompt": "Back to the Future",
+  "source": "word-only"
+ },
+ {
+  "slug": "bambi",
+  "prompt": "Bambi",
+  "source": "word-only"
+ },
+ {
+  "slug": "batman",
+  "prompt": "Batman",
+  "source": "word-only"
+ },
+ {
+  "slug": "beauty-and-the-beast",
+  "prompt": "Beauty and the Beast",
+  "source": "word-only"
+ },
+ {
+  "slug": "beetlejuice",
+  "prompt": "Beetlejuice",
+  "source": "word-only"
+ },
+ {
+  "slug": "big-hero-6",
+  "prompt": "Big Hero 6",
+  "source": "word-only"
+ },
+ {
+  "slug": "black-panther",
+  "prompt": "Black Panther",
+  "source": "word-only"
+ },
+ {
+  "slug": "blade-runner",
+  "prompt": "Blade Runner",
+  "source": "word-only"
+ },
+ {
+  "slug": "brave",
+  "prompt": "Brave",
+  "source": "word-only"
+ },
+ {
+  "slug": "breaking-bad",
+  "prompt": "Breaking Bad",
+  "source": "word-only"
+ },
+ {
+  "slug": "bridgerton",
+  "prompt": "Bridgerton",
+  "source": "word-only"
+ },
+ {
+  "slug": "captain-america",
+  "prompt": "Captain America",
+  "source": "word-only"
+ },
+ {
+  "slug": "cars",
+  "prompt": "Cars",
+  "source": "word-only"
+ },
+ {
+  "slug": "casablanca",
+  "prompt": "Casablanca",
+  "source": "word-only"
+ },
+ {
+  "slug": "charlie-and-the-chocolate-factory",
+  "prompt": "Charlie and the Chocolate Factory",
+  "source": "word-only"
+ },
+ {
+  "slug": "charlie-s-angels",
+  "prompt": "Charlie’s Angels",
+  "source": "word-only"
+ },
+ {
+  "slug": "cheers",
+  "prompt": "Cheers",
+  "source": "word-only"
+ },
+ {
+  "slug": "chicken-run",
+  "prompt": "Chicken Run",
+  "source": "word-only"
+ },
+ {
+  "slug": "cinderella",
+  "prompt": "Cinderella",
+  "source": "word-only"
+ },
+ {
+  "slug": "cobra-kai",
+  "prompt": "Cobra Kai",
+  "source": "word-only"
+ },
+ {
+  "slug": "coco",
+  "prompt": "Coco",
+  "source": "word-only"
+ },
+ {
+  "slug": "cruella",
+  "prompt": "Cruella",
+  "source": "word-only"
+ },
+ {
+  "slug": "deadpool",
+  "prompt": "Deadpool",
+  "source": "word-only"
+ },
+ {
+  "slug": "despicable-me",
+  "prompt": "Despicable Me",
+  "source": "word-only"
+ },
+ {
+  "slug": "despicable-me-2",
+  "prompt": "Despicable Me 2",
+  "source": "word-only"
+ },
+ {
+  "slug": "doctor-who",
+  "prompt": "Doctor Who",
+  "source": "word-only"
+ },
+ {
+  "slug": "dora-the-explorer",
+  "prompt": "Dora the Explorer",
+  "source": "word-only"
+ },
+ {
+  "slug": "downton-abbey",
+  "prompt": "Downton Abbey",
+  "source": "word-only"
+ },
+ {
+  "slug": "dumbo",
+  "prompt": "Dumbo",
+  "source": "word-only"
+ },
+ {
+  "slug": "dune",
+  "prompt": "Dune",
+  "source": "word-only"
+ },
+ {
+  "slug": "e-t-the-extra-terrestrial",
+  "prompt": "E.T. the Extra-Terrestrial",
+  "source": "word-only"
+ },
+ {
+  "slug": "elf",
+  "prompt": "Elf",
+  "source": "word-only"
+ },
+ {
+  "slug": "emily-in-paris",
+  "prompt": "Emily in Paris",
+  "source": "word-only"
+ },
+ {
+  "slug": "encanto",
+  "prompt": "Encanto",
+  "source": "word-only"
+ },
+ {
+  "slug": "family-guy",
+  "prompt": "Family Guy",
+  "source": "word-only"
+ },
+ {
+  "slug": "fantasia",
+  "prompt": "Fantasia",
+  "source": "word-only"
+ },
+ {
+  "slug": "ferris-bueller-s-day-off",
+  "prompt": "Ferris Bueller’s Day Off",
+  "source": "word-only"
+ },
+ {
+  "slug": "finding-dory",
+  "prompt": "Finding Dory",
+  "source": "word-only"
+ },
+ {
+  "slug": "finding-nemo",
+  "prompt": "Finding Nemo",
+  "source": "word-only"
+ },
+ {
+  "slug": "footloose",
+  "prompt": "Footloose",
+  "source": "word-only"
+ },
+ {
+  "slug": "forrest-gump",
+  "prompt": "Forrest Gump",
+  "source": "word-only"
+ },
+ {
+  "slug": "frasier",
+  "prompt": "Frasier",
+  "source": "word-only"
+ },
+ {
+  "slug": "friends",
+  "prompt": "Friends",
+  "source": "word-only"
+ },
+ {
+  "slug": "frozen",
+  "prompt": "Frozen",
+  "source": "word-only"
+ },
+ {
+  "slug": "game-of-thrones",
+  "prompt": "Game of Thrones",
+  "source": "word-only"
+ },
+ {
+  "slug": "ghostbusters",
+  "prompt": "Ghostbusters",
+  "source": "word-only"
+ },
+ {
+  "slug": "ghostbusters-afterlife",
+  "prompt": "Ghostbusters: Afterlife",
+  "source": "word-only"
+ },
+ {
+  "slug": "gladiator",
+  "prompt": "Gladiator",
+  "source": "word-only"
+ },
+ {
+  "slug": "glee",
+  "prompt": "Glee",
+  "source": "word-only"
+ },
+ {
+  "slug": "godzilla",
+  "prompt": "Godzilla",
+  "source": "word-only"
+ },
+ {
+  "slug": "grease",
+  "prompt": "Grease",
+  "source": "word-only"
+ },
+ {
+  "slug": "grey-s-anatomy",
+  "prompt": "Grey’s Anatomy",
+  "source": "word-only"
+ },
+ {
+  "slug": "guardians-of-the-galaxy",
+  "prompt": "Guardians of the Galaxy",
+  "source": "word-only"
+ },
+ {
+  "slug": "happy-days",
+  "prompt": "Happy Days",
+  "source": "word-only"
+ },
+ {
+  "slug": "harry-potter",
+  "prompt": "Harry Potter",
+  "source": "word-only"
+ },
+ {
+  "slug": "hercules",
+  "prompt": "Hercules",
+  "source": "word-only"
+ },
+ {
+  "slug": "home-alone",
+  "prompt": "Home Alone",
+  "source": "word-only"
+ },
+ {
+  "slug": "hotel-transylvania",
+  "prompt": "Hotel Transylvania",
+  "source": "word-only"
+ },
+ {
+  "slug": "house-of-the-dragon",
+  "prompt": "House of the Dragon",
+  "source": "word-only"
+ },
+ {
+  "slug": "how-to-train-your-dragon",
+  "prompt": "How to Train Your Dragon",
+  "source": "word-only"
+ },
+ {
+  "slug": "ice-age",
+  "prompt": "Ice Age",
+  "source": "word-only"
+ },
+ {
+  "slug": "inception",
+  "prompt": "Inception",
+  "source": "word-only"
+ },
+ {
+  "slug": "indiana-jones",
+  "prompt": "Indiana Jones",
+  "source": "word-only"
+ },
+ {
+  "slug": "inside-out",
+  "prompt": "Inside Out",
+  "source": "word-only"
+ },
+ {
+  "slug": "interstellar",
+  "prompt": "Interstellar",
+  "source": "word-only"
+ },
+ {
+  "slug": "iron-man",
+  "prompt": "Iron Man",
+  "source": "word-only"
+ },
+ {
+  "slug": "james-bond",
+  "prompt": "James Bond",
+  "source": "word-only"
+ },
+ {
+  "slug": "jaws",
+  "prompt": "Jaws",
+  "source": "word-only"
+ },
+ {
+  "slug": "john-wick",
+  "prompt": "John Wick",
+  "source": "word-only"
+ },
+ {
+  "slug": "joker",
+  "prompt": "Joker",
+  "source": "word-only"
+ },
+ {
+  "slug": "jumanji",
+  "prompt": "Jumanji",
+  "source": "word-only"
+ },
+ {
+  "slug": "jumanji-the-next-level",
+  "prompt": "Jumanji: The Next Level",
+  "source": "word-only"
+ },
+ {
+  "slug": "jurassic-park",
+  "prompt": "Jurassic Park",
+  "source": "word-only"
+ },
+ {
+  "slug": "kill-bill",
+  "prompt": "Kill Bill",
+  "source": "word-only"
+ },
+ {
+  "slug": "king-kong",
+  "prompt": "King Kong",
+  "source": "word-only"
+ },
+ {
+  "slug": "knives-out",
+  "prompt": "Knives Out",
+  "source": "word-only"
+ },
+ {
+  "slug": "kong-skull-island",
+  "prompt": "Kong: Skull Island",
+  "source": "word-only"
+ },
+ {
+  "slug": "kung-fu-panda",
+  "prompt": "Kung Fu Panda",
+  "source": "word-only"
+ },
+ {
+  "slug": "kung-fu-panda-2",
+  "prompt": "Kung Fu Panda 2",
+  "source": "word-only"
+ },
+ {
+  "slug": "la-la-land",
+  "prompt": "La La Land",
+  "source": "word-only"
+ },
+ {
+  "slug": "lassie",
+  "prompt": "Lassie",
+  "source": "word-only"
+ },
+ {
+  "slug": "law-and-order",
+  "prompt": "Law and Order",
+  "source": "word-only"
+ },
+ {
+  "slug": "lego-movie",
+  "prompt": "Lego Movie",
+  "source": "word-only"
+ },
+ {
+  "slug": "life-of-pi",
+  "prompt": "Life of Pi",
+  "source": "word-only"
+ },
+ {
+  "slug": "lilo-and-stitch",
+  "prompt": "Lilo and Stitch",
+  "source": "word-only"
+ },
+ {
+  "slug": "lost",
+  "prompt": "Lost",
+  "source": "word-only"
+ },
+ {
+  "slug": "luca",
+  "prompt": "Luca",
+  "source": "word-only"
+ },
+ {
+  "slug": "mad-max",
+  "prompt": "Mad Max",
+  "source": "word-only"
+ },
+ {
+  "slug": "madagascar",
+  "prompt": "Madagascar",
+  "source": "word-only"
+ },
+ {
+  "slug": "mary-poppins",
+  "prompt": "Mary Poppins",
+  "source": "word-only"
+ },
+ {
+  "slug": "megamind",
+  "prompt": "Megamind",
+  "source": "word-only"
+ },
+ {
+  "slug": "men-in-black",
+  "prompt": "Men in Black",
+  "source": "word-only"
+ },
+ {
+  "slug": "minions",
+  "prompt": "Minions",
+  "source": "word-only"
+ },
+ {
+  "slug": "mission-impossible",
+  "prompt": "Mission: Impossible",
+  "source": "word-only"
+ },
+ {
+  "slug": "moana",
+  "prompt": "Moana",
+  "source": "word-only"
+ },
+ {
+  "slug": "modern-family",
+  "prompt": "Modern Family",
+  "source": "word-only"
+ },
+ {
+  "slug": "monsters-inc",
+  "prompt": "Monsters, Inc.",
+  "source": "word-only"
+ },
+ {
+  "slug": "mrs-doubtfire",
+  "prompt": "Mrs. Doubtfire",
+  "source": "word-only"
+ },
+ {
+  "slug": "mulan",
+  "prompt": "Mulan",
+  "source": "word-only"
+ },
+ {
+  "slug": "narnia",
+  "prompt": "Narnia",
+  "source": "word-only"
+ },
+ {
+  "slug": "naruto",
+  "prompt": "Naruto",
+  "source": "word-only"
+ },
+ {
+  "slug": "night-at-the-museum",
+  "prompt": "Night at the Museum",
+  "source": "word-only"
+ },
+ {
+  "slug": "ocean-s-eleven",
+  "prompt": "Ocean’s Eleven",
+  "source": "word-only"
+ },
+ {
+  "slug": "old-school",
+  "prompt": "Old School",
+  "source": "word-only"
+ },
+ {
+  "slug": "onward",
+  "prompt": "Onward",
+  "source": "word-only"
+ },
+ {
+  "slug": "oppenheimer",
+  "prompt": "Oppenheimer",
+  "source": "word-only"
+ },
+ {
+  "slug": "paddington",
+  "prompt": "Paddington",
+  "source": "word-only"
+ },
+ {
+  "slug": "parks-and-recreation",
+  "prompt": "Parks and Recreation",
+  "source": "word-only"
+ },
+ {
+  "slug": "peaky-blinders",
+  "prompt": "Peaky Blinders",
+  "source": "word-only"
+ },
+ {
+  "slug": "peter-pan",
+  "prompt": "Peter Pan",
+  "source": "word-only"
+ },
+ {
+  "slug": "pinocchio",
+  "prompt": "Pinocchio",
+  "source": "word-only"
+ },
+ {
+  "slug": "pirates-of-the-caribbean",
+  "prompt": "Pirates of the Caribbean",
+  "source": "word-only"
+ },
+ {
+  "slug": "pocahontas",
+  "prompt": "Pocahontas",
+  "source": "word-only"
+ },
+ {
+  "slug": "pulp-fiction",
+  "prompt": "Pulp Fiction",
+  "source": "word-only"
+ },
+ {
+  "slug": "puss-in-boots",
+  "prompt": "Puss in Boots",
+  "source": "word-only"
+ },
+ {
+  "slug": "queen-s-gambit",
+  "prompt": "Queen’s Gambit",
+  "source": "word-only"
+ },
+ {
+  "slug": "raiders-of-the-lost-ark",
+  "prompt": "Raiders of the Lost Ark",
+  "source": "word-only"
+ },
+ {
+  "slug": "rango",
+  "prompt": "Rango",
+  "source": "word-only"
+ },
+ {
+  "slug": "ratatouille",
+  "prompt": "Ratatouille",
+  "source": "word-only"
+ },
+ {
+  "slug": "raya-and-the-last-dragon",
+  "prompt": "Raya and the Last Dragon",
+  "source": "word-only"
+ },
+ {
+  "slug": "rick-and-morty",
+  "prompt": "Rick and Morty",
+  "source": "word-only"
+ },
+ {
+  "slug": "rio",
+  "prompt": "Rio",
+  "source": "word-only"
+ },
+ {
+  "slug": "robin-hood",
+  "prompt": "Robin Hood",
+  "source": "word-only"
+ },
+ {
+  "slug": "rocky",
+  "prompt": "Rocky",
+  "source": "word-only"
+ },
+ {
+  "slug": "rush-hour",
+  "prompt": "Rush Hour",
+  "source": "word-only"
+ },
+ {
+  "slug": "saving-private-ryan",
+  "prompt": "Saving Private Ryan",
+  "source": "word-only"
+ },
+ {
+  "slug": "schitt-s-creek",
+  "prompt": "Schitt’s Creek",
+  "source": "word-only"
+ },
+ {
+  "slug": "sesame-street",
+  "prompt": "Sesame Street",
+  "source": "word-only"
+ },
+ {
+  "slug": "severance",
+  "prompt": "Severance",
+  "source": "word-only"
+ },
+ {
+  "slug": "sherlock",
+  "prompt": "Sherlock",
+  "source": "word-only"
+ },
+ {
+  "slug": "shrek",
+  "prompt": "Shrek",
+  "source": "word-only"
+ },
+ {
+  "slug": "sing",
+  "prompt": "Sing",
+  "source": "word-only"
+ },
+ {
+  "slug": "snow-white",
+  "prompt": "Snow White",
+  "source": "word-only"
+ },
+ {
+  "slug": "soul",
+  "prompt": "Soul",
+  "source": "word-only"
+ },
+ {
+  "slug": "spider-man",
+  "prompt": "Spider-Man",
+  "source": "word-only"
+ },
+ {
+  "slug": "spongebob-squarepants",
+  "prompt": "SpongeBob SquarePants",
+  "source": "word-only"
+ },
+ {
+  "slug": "squid-game",
+  "prompt": "Squid Game",
+  "source": "word-only"
+ },
+ {
+  "slug": "star-wars",
+  "prompt": "Star Wars",
+  "source": "word-only"
+ },
+ {
+  "slug": "stranger-things",
+  "prompt": "Stranger Things",
+  "source": "word-only"
+ },
+ {
+  "slug": "superman",
+  "prompt": "Superman",
+  "source": "word-only"
+ },
+ {
+  "slug": "tangled",
+  "prompt": "Tangled",
+  "source": "word-only"
+ },
+ {
+  "slug": "tarzan",
+  "prompt": "Tarzan",
+  "source": "word-only"
+ },
+ {
+  "slug": "ted-lasso",
+  "prompt": "Ted Lasso",
+  "source": "word-only"
+ },
+ {
+  "slug": "teenage-mutant-ninja-turtles",
+  "prompt": "Teenage Mutant Ninja Turtles",
+  "source": "word-only"
+ },
+ {
+  "slug": "terminator",
+  "prompt": "Terminator",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-addams-family",
+  "prompt": "The Addams Family",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-avengers-endgame",
+  "prompt": "The Avengers: Endgame",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-breakfast-club",
+  "prompt": "The Breakfast Club",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-croods",
+  "prompt": "The Croods",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-crown",
+  "prompt": "The Crown",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-dark-knight",
+  "prompt": "The Dark Knight",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-emperor-s-new-groove",
+  "prompt": "The Emperor’s New Groove",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-fast-and-the-furious",
+  "prompt": "The Fast and the Furious",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-flintstones",
+  "prompt": "The Flintstones",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-goonies",
+  "prompt": "The Goonies",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-greatest-showman",
+  "prompt": "The Greatest Showman",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-hobbit",
+  "prompt": "The Hobbit",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-hunger-games",
+  "prompt": "The Hunger Games",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-incredibles",
+  "prompt": "The Incredibles",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-jungle-book",
+  "prompt": "The Jungle Book",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-karate-kid",
+  "prompt": "The Karate Kid",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-lion-king",
+  "prompt": "The Lion King",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-little-mermaid",
+  "prompt": "The Little Mermaid",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-lord-of-the-rings",
+  "prompt": "The Lord of the Rings",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-mandalorian",
+  "prompt": "The Mandalorian",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-matrix",
+  "prompt": "The Matrix",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-nightmare-before-christmas",
+  "prompt": "The Nightmare Before Christmas",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-notebook",
+  "prompt": "The Notebook",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-office",
+  "prompt": "The Office",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-polar-express",
+  "prompt": "The Polar Express",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-princess-bride",
+  "prompt": "The Princess Bride",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-revenant",
+  "prompt": "The Revenant",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-simpsons",
+  "prompt": "The Simpsons",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-sound-of-music",
+  "prompt": "The Sound of Music",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-truman-show",
+  "prompt": "The Truman Show",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-vampire-diaries",
+  "prompt": "The Vampire Diaries",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-walking-dead",
+  "prompt": "The Walking Dead",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-witcher",
+  "prompt": "The Witcher",
+  "source": "word-only"
+ },
+ {
+  "slug": "the-wizard-of-oz",
+  "prompt": "The Wizard of Oz",
+  "source": "word-only"
+ },
+ {
+  "slug": "titanic",
+  "prompt": "Titanic",
+  "source": "word-only"
+ },
+ {
+  "slug": "top-gun",
+  "prompt": "Top Gun",
+  "source": "word-only"
+ },
+ {
+  "slug": "toy-story",
+  "prompt": "Toy Story",
+  "source": "word-only"
+ },
+ {
+  "slug": "trolls",
+  "prompt": "Trolls",
+  "source": "word-only"
+ },
+ {
+  "slug": "twilight",
+  "prompt": "Twilight",
+  "source": "word-only"
+ },
+ {
+  "slug": "uncharted",
+  "prompt": "Uncharted",
+  "source": "word-only"
+ },
+ {
+  "slug": "up",
+  "prompt": "Up",
+  "source": "word-only"
+ },
+ {
+  "slug": "up-in-the-air",
+  "prompt": "Up in the Air",
+  "source": "word-only"
+ },
+ {
+  "slug": "venom",
+  "prompt": "Venom",
+  "source": "word-only"
+ },
+ {
+  "slug": "wall-e",
+  "prompt": "WALL-E",
+  "source": "word-only"
+ },
+ {
+  "slug": "wandavision",
+  "prompt": "WandaVision",
+  "source": "word-only"
+ },
+ {
+  "slug": "wednesday",
+  "prompt": "Wednesday",
+  "source": "word-only"
+ },
+ {
+  "slug": "westworld",
+  "prompt": "Westworld",
+  "source": "word-only"
+ },
+ {
+  "slug": "willy-wonka",
+  "prompt": "Willy Wonka",
+  "source": "word-only"
+ },
+ {
+  "slug": "wonder-woman",
+  "prompt": "Wonder Woman",
+  "source": "word-only"
+ },
+ {
+  "slug": "wreck-it-ralph",
+  "prompt": "Wreck-It Ralph",
+  "source": "word-only"
+ },
+ {
+  "slug": "x-men",
+  "prompt": "X-Men",
+  "source": "word-only"
+ },
+ {
+  "slug": "yellowstone",
+  "prompt": "Yellowstone",
+  "source": "word-only"
+ },
+ {
+  "slug": "zoolander",
+  "prompt": "Zoolander",
+  "source": "word-only"
+ },
+ {
+  "slug": "zootopia",
+  "prompt": "Zootopia",
+  "source": "word-only"
+ }
+]

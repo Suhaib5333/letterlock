@@ -4,6 +4,8 @@ import { useStore } from '../state/store';
 import { useAppConfig } from '../lib/appConfig';
 import { useAuth } from '../lib/auth';
 import { useOnlineRooms } from '../lib/online';
+import { isTV } from '../lib/platform';
+import { RoomCodePad } from '../components/RoomCodePad';
 
 /**
  * Join an existing room by code. We use a URL param (`?room=CODE`) to hand off
@@ -92,6 +94,17 @@ export function LobbyJoin() {
             }}
           />
         </label>
+        {isTV() && (
+          <RoomCodePad
+            value={normalized}
+            onChange={(v) => {
+              setCode(v);
+              setError(null);
+            }}
+            onJoin={submit}
+            canJoin={valid}
+          />
+        )}
         {error && <p className="join-error">{error}</p>}
         <button
           className="btn btn-primary btn-lg block"

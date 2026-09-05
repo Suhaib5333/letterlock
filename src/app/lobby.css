@@ -532,7 +532,7 @@
 }
 .controller-media {
   width: 100%;
-  max-height: 30vh;
+  max-height: 30svh;
   border-radius: 12px;
   object-fit: contain;
   background: black;
@@ -635,7 +635,7 @@
      with the question card (which also scrolls). */
   flex: 0 1 auto;
   min-height: 0;
-  max-height: 30vh;
+  max-height: 30svh;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--surface-border);
@@ -994,7 +994,7 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
 .mini-board {
   width: 100%;
   max-width: 320px;
-  max-height: 34vh;
+  max-height: 34svh;
   margin: 0 auto 4px;
   display: block;
 }
@@ -1051,12 +1051,12 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
 @media (max-height: 560px) {
   .controller-head { padding: 8px var(--s-3); }
   .controller-question { gap: 8px; padding: 10px var(--s-3); }
-  .mini-board { max-height: 20vh; margin-bottom: 2px; }
+  .mini-board { max-height: 20svh; margin-bottom: 2px; }
   .controller-letter { font-size: clamp(26px, 7vw, 40px); }
   .controller-turn { font-size: 0.95rem; padding: 5px 10px; }
   .controller-timer { height: 20px; }
   .controller-prompt { font-size: clamp(15px, 3.4vw, 18px); line-height: 1.3; }
-  .controller-media { max-height: 34vh; }
+  .controller-media { max-height: 34svh; }
   .controller-answer span { font-size: 11px; }
   .controller-answer input { padding: 11px 12px; font-size: 16px; }
   .controller-answer-bar { gap: 7px; padding-top: 7px; }
@@ -1064,9 +1064,9 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
 /* Very short (landscape on small phones): drop the decorative first-letter hint
    and tighten further so text questions sit comfortably above the answer bar. */
 @media (max-height: 430px) {
-  .mini-board { max-height: 16vh; }
+  .mini-board { max-height: 16svh; }
   .controller-letter { display: none; }
-  .controller-media { max-height: 30vh; }
+  .controller-media { max-height: 30svh; }
 }
 
 /* Login incentive nudge on Mode Select */
@@ -1120,7 +1120,7 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
 /* ── Friends modal + notification toast (social) ── */
 .friends-modal {
   width: min(520px, 96vw);
-  max-height: 86vh;
+  max-height: 86svh;
   display: flex;
   flex-direction: column;
   gap: var(--s-2);

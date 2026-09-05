@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { useAppConfig } from '../lib/appConfig';
 import { useAuth } from '../lib/auth';
 import { useOnlineRooms } from '../lib/online';
-import { isSupabaseConfigured } from '../lib/supabase';
+import { isApiConfigured } from '../lib/api';
 import { play } from '../services/audio';
 import { useStore } from '../state/store';
 
@@ -12,7 +12,7 @@ import { useStore } from '../state/store';
  *   🛋 Couch Mode — one device, host adjudicates (the existing flow).
  *   🛜 Online Mode — Kahoot-style: room code, phones-as-controllers.
  *
- * Online is gated on Supabase being configured — when it isn't, the card is
+ * Online is gated on the API being configured — when it isn't, the card is
  * still visible but disabled with a friendly hint, so the UI is the same on
  * every machine and we don't surprise users with hidden buttons.
  */
@@ -20,7 +20,7 @@ export function ModeSelect() {
   const { dispatch } = useStore();
   const { user } = useAuth();
   const rooms = useOnlineRooms(useAppConfig());
-  const online = isSupabaseConfigured() && rooms.ok;
+  const online = isApiConfigured() && rooms.ok;
   const signedOut = online && !user;
   const offlineTag =
     rooms.reason === 'offline' ? 'Offline: reconnect to play online' : rooms.reason === 'maintenance' ? 'Paused for maintenance' : null;
@@ -93,7 +93,7 @@ export function ModeSelect() {
           <span className="mode-card-emoji" aria-hidden="true">🛜</span>
           <span className="mode-card-name">Party Mode</span>
           <span className="mode-card-tag">
-            {online ? 'Phones as controllers · room code' : offlineTag ?? 'Needs Supabase — set VITE_SUPABASE_URL'}
+            {online ? 'Phones as controllers · room code' : offlineTag ?? 'Online play is not available in this build'}
           </span>
           <span className="mode-card-desc">
             Players join from their phones with a code or QR.
@@ -118,7 +118,7 @@ export function ModeSelect() {
           <span className="mode-card-emoji" aria-hidden="true">📱</span>
           <span className="mode-card-name">Join a room</span>
           <span className="mode-card-tag">
-            {online ? 'I have a 6-letter code' : offlineTag ?? 'Needs Supabase'}
+            {online ? 'I have a 6-letter code' : offlineTag ?? 'Online play is not available in this build'}
           </span>
           <span className="mode-card-desc">
             Got a 6-letter code from the host? Enter it to join the lobby on this device.

@@ -17,9 +17,21 @@ function hasItunesMedia(pack: (typeof PACKS)[number]): boolean {
 describe('platform gating of iTunes-preview packs (D3)', () => {
   const itunesPacks = PACKS.filter(hasItunesMedia);
 
-  it('finds the iTunes-based packs (songs, tv clips, sitcom + decade clips, melodies extra)', () => {
+  it('finds the iTunes-based packs (songs, tv clips, sitcom + decade clips, melodies-itunes)', () => {
     const ids = itunesPacks.map((p) => p.id);
-    expect(ids).toEqual(expect.arrayContaining(['songs', 'songs-rock', 'tv-clips', 'melodies']));
+    expect(ids).toEqual(expect.arrayContaining(['songs', 'songs-rock', 'tv-clips', 'melodies-itunes']));
+  });
+
+  it('Guess the Melody is split: the public-domain pack ships everywhere, the iTunes one is web only', () => {
+    const pd = PACKS.find((p) => p.id === 'melodies')!;
+    const itunes = PACKS.find((p) => p.id === 'melodies-itunes')!;
+    expect(pd.platforms).toBeUndefined();
+    expect(packAllowedOn(pd, 'native')).toBe(true);
+    expect(hasItunesMedia(pd)).toBe(false);
+    expect(packNeedsRemoteMedia(pd, 'https://letterlock.raltech.dev')).toBe(false);
+    expect(itunes.platforms).toEqual(['web']);
+    expect(itunes.group).toBe(pd.group);
+    expect(itunes.difficulty).toBe(pd.difficulty);
   });
 
   for (const pack of itunesPacks) {

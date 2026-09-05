@@ -1,0 +1,121 @@
+/* ==========================================================================
+   TV / 10-foot mode (LAUNCH_PLAN.md Phase 3b, plan §7.6)
+   Everything here is scoped to `html.tv-mode`, which main.tsx sets from
+   isTV() (TV user agent, `?tv=1`, or the Android app without touch). The
+   spatial focus manager (src/lib/spatialNav.ts) works everywhere; only these
+   visuals are TV-specific. Nothing here touches the phone/desktop layout.
+   ========================================================================== */
+
+html.tv-mode {
+  /* 5% overscan safe area. `.ll-screen` already reads --tv-safe for its top
+     padding; the sides get the horizontal 5% below. */
+  --tv-safe: 5vh;
+  --tv-safe-x: 5vw;
+  --tv-ring: #ffffff;
+  --tv-ring-glow: var(--blue-glow);
+}
+html.tv-mode .ll-screen {
+  padding: var(--tv-safe) var(--tv-safe-x);
+}
+
+/* ---- One big focus ring, readable on both team colours -------------------
+   White core, dark gap, coloured glow: visible over blue, amber, and the dark
+   ground. `:focus` (not only :focus-visible) because a remote never has a
+   pointer, so a programmatically focused control must show the ring too. */
+html.tv-mode :focus,
+html.tv-mode :focus-visible {
+  outline: 3px solid var(--tv-ring);
+  outline-offset: 4px;
+  box-shadow:
+    0 0 0 2px var(--bg-0),
+    0 0 0 7px var(--tv-ring-glow),
+    0 0 28px var(--tv-ring-glow);
+  border-radius: 10px;
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+/* The hex is an SVG <g>; a rectangle around a hexagon would cross its
+   neighbours, so its ring is the hex outline itself (same white + glow). */
+html.tv-mode .ll-hex:focus,
+html.tv-mode .ll-hex:focus-visible {
+  outline: none;
+  box-shadow: none;
+  filter: drop-shadow(0 0 10px var(--tv-ring-glow));
+}
+html.tv-mode .ll-hex:focus .hex-stroke {
+  stroke: var(--tv-ring);
+  stroke-width: 5;
+}
+html.tv-mode .ll-hex.claimable:focus .hex-base {
+  fill: url(#fillNeutralHover);
+}
+
+/* ---- Hover affordances also on focus (a remote never hovers) ---------- */
+html.tv-mode .btn:focus,
+html.tv-mode .award:focus,
+html.tv-mode .choice:focus,
+html.tv-mode .swatch:focus,
+html.tv-mode .cat-card-main:focus,
+html.tv-mode .cat-tier:focus,
+html.tv-mode .mode-card:focus,
+html.tv-mode .pad-key:focus {
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.12);
+}
+
+/* ---- 10-foot type: body >= 24px, headings >= 48px on a 1080p TV ------- */
+@media (min-width: 1920px) {
+  html.tv-mode {
+    --t-body: 24px;
+    --t-sm: 20px;
+    --t-xs: 18px;
+    --t-h3: 28px;
+    --t-h2: 48px;
+    --t-h1: 52px;
+    --t-hero: 64px;
+  }
+  html.tv-mode .qcard-q {
+    font-size: 32px;
+  }
+  html.tv-mode .award,
+  html.tv-mode .btn,
+  html.tv-mode .choice,
+  html.tv-mode .mode-card-name,
+  html.tv-mode .cat-card-name {
+    font-size: 24px;
+  }
+  html.tv-mode .mode-card-desc,
+  html.tv-mode .cat-card-desc,
+  html.tv-mode .setup-hint,
+  html.tv-mode .chip {
+    font-size: 20px;
+  }
+}
+
+/* ---- Room code pad (LobbyJoin, TV only) --------------------------------- */
+.room-pad {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: var(--s-3);
+}
+.pad-key {
+  font: 700 clamp(18px, 2.2vh, 26px) var(--font-display);
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  padding: clamp(8px, 1.4vh, 14px) 0;
+  min-width: 0;
+}
+.pad-key:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.pad-key.pad-wide {
+  grid-column: span 2;
+}
+.pad-key.pad-join {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}

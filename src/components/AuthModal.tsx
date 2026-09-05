@@ -1,28 +1,40 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useAuth } from '../lib/auth';
+import { appleWebEnabled, useAuth } from '../lib/auth';
+import { api, ApiError } from '../lib/api';
 import { useModalDismiss } from '../lib/useModalDismiss';
-import { supabase } from '../lib/supabase';
 import { play } from '../services/audio';
 import { RankBar } from './RankBadge';
 import { canPrestige } from '../core/progression';
 import { prestigeUp } from '../lib/progressionClient';
 
-// Names nobody may take — mirrors is_reserved_username() in migration 0009. The
-// server is the source of truth; this is just for instant client feedback.
+// Names nobody may take. Mirrors RESERVED_USERNAMES in the API (me.service.ts);
+// the server is the source of truth, this is just for instant client feedback.
 const RESERVED = new Set([
   'admin', 'administrator', 'root', 'system', 'support', 'help', 'moderator', 'mod',
   'staff', 'official', 'letterlock', 'null', 'undefined', 'everyone', 'anonymous',
 ]);
 const isReserved = (name: string) => RESERVED.has(name.toLowerCase());
 
+/** GET /users/username-available?name= (public). Errors count as "taken" (safe default). */
+async function usernameAvailable(name: string): Promise<boolean> {
+  try {
+    const r = await api<{ available: boolean }>(`/users/username-available?name=${encodeURIComponent(name)}`, { auth: 'none' });
+    return r.available === true;
+  } catch {
+    return false;
+  }
+}
+
+type Result = { ok: boolean; error?: string };
+
 /**
  * One-stop auth dialog:
- *  - Signed-out: shows the "Sign in with Google" CTA.
+ *  - Signed-out: Google (+ Apple when configured) and the email-code flow.
  *  - Signed in but no username yet: forces a username claim before the user
  *    can close the dialog (the global leaderboard keys scores by username,
  *    so we don't have a useful identity without one).
- *  - Signed in + has username: shows the profile + sign-out button.
+ *  - Signed in + has username: profile, sign-out, and account deletion.
  */
 export function AuthModal({ onClose }: { onClose: () => void }) {
   const {
@@ -32,9 +44,11 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
     profileLoading,
     profileChecked,
     signInWithGoogle,
+    signInWithApple,
     signInWithEmail,
     verifyEmailOtp,
     signOut,
+    deleteAccount,
     refreshProfile,
     authRedirectError,
     clearAuthRedirectError,
@@ -46,11 +60,11 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
     if (authRedirectError) clearAuthRedirectError();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- consume once on mount
   }, []);
-  // Only gate on the username AFTER the profile fetch RESOLVES — otherwise an
-  // existing user briefly sees the "choose a username" view on every sign-in.
+  // Only gate on the username AFTER the profile is known, otherwise an existing
+  // user briefly sees the "choose a username" view on every sign-in.
   const needsUsername = !!user && profileChecked && !profile;
   const dialogRef = useRef<HTMLDivElement>(null);
-  // The username-claim gate is mandatory — don't let Escape dismiss it.
+  // The username-claim gate is mandatory: don't let Escape dismiss it.
   useModalDismiss(dialogRef, onClose, { closeOnEscape: !needsUsername });
 
   return (
@@ -79,31 +93,32 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
           ) : !user ? (
             <SignInView
               onSignInGoogle={signInWithGoogle}
+              onSignInApple={signInWithApple}
               onSignInEmail={signInWithEmail}
               onVerifyOtp={verifyEmailOtp}
               onClose={onClose}
               initialError={redirectError}
             />
           ) : !profile && (profileLoading || !profileChecked) ? (
-            // Covers BOTH the in-flight fetch and the one render right after
-            // sign-in where the fetch hasn't started yet — without the second
-            // clause that render fell through to ProfileView with a null profile.
+            // Covers BOTH an in-flight fetch and a not-yet-checked render, so this
+            // never falls through to ProfileView with a null profile.
             <p className="go-sub">Loading your profile…</p>
           ) : needsUsername ? (
-            <UsernameView userId={user.id} onClaimed={refreshProfile} />
+            <UsernameView onClaimed={refreshProfile} />
           ) : (
             <ProfileView
               username={profile!.username}
               usernameChangedAt={profile!.username_changed_at ?? null}
-              email={user.email}
+              email={user.email ?? undefined}
               level={profile!.level ?? 1}
               prestige={profile!.prestige ?? 0}
               xp={profile!.xp ?? 0}
               onUpdated={refreshProfile}
               onSignOut={() => {
-                signOut();
+                void signOut();
                 onClose();
               }}
+              onDelete={deleteAccount}
               onClose={onClose}
             />
           )}
@@ -115,28 +130,30 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
 
 function SignInView({
   onSignInGoogle,
+  onSignInApple,
   onSignInEmail,
   onVerifyOtp,
   onClose,
   initialError,
 }: {
-  onSignInGoogle: () => Promise<{ ok: boolean; error?: string }>;
-  onSignInEmail: (email: string) => Promise<{ ok: boolean; error?: string }>;
-  onVerifyOtp: (email: string, code: string) => Promise<{ ok: boolean; error?: string }>;
+  onSignInGoogle: () => Promise<Result>;
+  onSignInApple: () => Promise<Result>;
+  onSignInEmail: (email: string) => Promise<Result>;
+  onVerifyOtp: (email: string, code: string) => Promise<Result>;
   onClose: () => void;
   initialError?: string | null;
 }) {
-  // Two-step: email → 6-digit code (mirrors palmandplate admin flow).
+  // Two-step: email, then the 6-digit code.
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [busy, setBusy] = useState<'google' | 'email' | 'verify' | 'resend' | null>(null);
+  const [busy, setBusy] = useState<'google' | 'apple' | 'email' | 'verify' | 'resend' | null>(null);
   const [error, setError] = useState<string | null>(
     initialError ? `Google sign-in failed: ${initialError}` : null,
   );
   const [cooldown, setCooldown] = useState(0);
 
-  // Resend cooldown — 60s after every send (Supabase rate-limits anyway).
+  // Resend cooldown: 60 s after every send (the API enforces the same lock).
   useEffect(() => {
     if (cooldown <= 0) return;
     const t = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
@@ -148,8 +165,20 @@ function SignInView({
     setError(null);
     setBusy('google');
     const res = await onSignInGoogle();
+    if (!res.ok) {
+      setBusy(null);
+      setError(res.error ?? 'Google sign-in failed.');
+    }
+    // On success the page navigates to the API's Google redirect.
+  };
+
+  const handleApple = async () => {
+    play('pick');
+    setError(null);
+    setBusy('apple');
+    const res = await onSignInApple();
     setBusy(null);
-    if (!res.ok) setError(res.error ?? 'Google sign-in failed.');
+    if (!res.ok) setError(res.error ?? 'Apple sign-in failed.');
   };
 
   const sendEmail = async (kind: 'email' | 'resend') => {
@@ -166,9 +195,7 @@ function SignInView({
     }
   };
 
-  // Supabase OTPs are project-configurable 6–10 digits. We treat anything
-  // 6+ as valid client-side and let supabase.auth.verifyOtp decide for sure.
-  const codeReady = /^\d{6,10}$/.test(code);
+  const codeReady = /^\d{6}$/.test(code);
 
   const handleVerify = async () => {
     if (!codeReady) return;
@@ -178,8 +205,8 @@ function SignInView({
     const res = await onVerifyOtp(email, code);
     setBusy(null);
     if (!res.ok) setError(res.error ?? 'That code is wrong or expired.');
-    // On success, the AuthProvider session listener kicks in and the modal
-    // re-renders to the username-claim view automatically.
+    // On success the AuthProvider state updates and the modal re-renders to the
+    // username-claim view (or the profile) automatically.
   };
 
   return (
@@ -193,7 +220,7 @@ function SignInView({
           </>
         ) : (
           <>
-            We sent a 6-digit code to <strong>{email}</strong>. It's good for 60 minutes.
+            We sent a 6-digit code to <strong>{email}</strong>. It's good for 10 minutes.
           </>
         )}
       </p>
@@ -210,6 +237,17 @@ function SignInView({
               <span className="g-mark" aria-hidden="true">G</span>{' '}
               {busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
             </button>
+
+            {appleWebEnabled() && (
+              <button
+                className="btn btn-secondary btn-lg block apple-signin"
+                data-testid="signin-apple"
+                disabled={busy !== null}
+                onClick={handleApple}
+              >
+                <span aria-hidden="true"></span> {busy === 'apple' ? 'Opening Apple…' : 'Sign in with Apple'}
+              </button>
+            )}
 
             <div className="auth-divider"><span>or sign in with email</span></div>
 
@@ -252,14 +290,11 @@ function SignInView({
                 autoComplete="one-time-code"
                 className="auth-input auth-otp"
                 data-testid="signin-otp-input"
-                placeholder="Paste your code"
-                // 10 is Supabase's maximum OTP length. The frontend handles
-                // 6–10 because mailer_otp_length is project-configurable.
-                maxLength={10}
+                placeholder="6-digit code"
+                maxLength={6}
                 value={code}
                 onChange={(e) => {
-                  const v = e.target.value.replace(/\D/g, '').slice(0, 10);
-                  setCode(v);
+                  setCode(e.target.value.replace(/\D/g, '').slice(0, 6));
                   setError(null);
                 }}
                 onKeyDown={(e) => {
@@ -313,7 +348,7 @@ function SignInView({
 
         {step === 'email' && (
           <button className="btn btn-ghost" data-testid="auth-cancel" onClick={onClose}>
-            Skip — play locally
+            Skip, play locally
           </button>
         )}
       </div>
@@ -321,7 +356,7 @@ function SignInView({
   );
 }
 
-function UsernameView({ userId, onClaimed }: { userId: string; onClaimed: () => void }) {
+function UsernameView({ onClaimed }: { onClaimed: () => void }) {
   const [name, setName] = useState('');
   const [status, setStatus] = useState<'idle' | 'checking' | 'taken' | 'ok' | 'invalid'>('idle');
   const [busy, setBusy] = useState(false);
@@ -334,33 +369,36 @@ function UsernameView({ userId, onClaimed }: { userId: string; onClaimed: () => 
     if (!valid) return setStatus('invalid');
     if (isReserved(name)) return setStatus('taken');
     setStatus('checking');
+    let cancelled = false;
     const t = setTimeout(async () => {
-      if (!supabase) return;
-      const { data } = await supabase.rpc('username_available', { name });
-      setStatus(data === true ? 'ok' : 'taken');
+      const ok = await usernameAvailable(name);
+      if (!cancelled) setStatus(ok ? 'ok' : 'taken');
     }, 350);
-    return () => clearTimeout(t);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
   }, [name, valid]);
 
   const submit = async () => {
-    if (!supabase || status !== 'ok' || busy) return;
+    if (status !== 'ok' || busy) return;
     setBusy(true);
     setClaimError(null);
-    const { error } = await supabase
-      .from('profiles')
-      .insert({ id: userId, username: name });
-    setBusy(false);
-    if (!error) {
+    try {
+      await api('/me/username', { method: 'POST', body: { username: name }, auth: 'user' });
+      setBusy(false);
       onClaimed();
-      return;
-    }
-    // 23505 = unique_violation → someone claimed it between the availability
-    // check and now (TOCTOU). Re-flag it as taken; otherwise show the raw error.
-    if (error.code === '23505' || /duplicate|unique/i.test(error.message)) {
-      setStatus('taken');
-      setClaimError('That username was just taken — pick another.');
-    } else {
-      setClaimError(error.message || 'Could not claim that username. Try again.');
+    } catch (e) {
+      setBusy(false);
+      // 409 taken = someone claimed it between the availability check and now.
+      if (e instanceof ApiError && e.code === 'taken') {
+        setStatus('taken');
+        setClaimError('That username was just taken, pick another.');
+      } else if (e instanceof ApiError && e.code === 'already_claimed') {
+        onClaimed(); // a stale view: the profile already exists
+      } else {
+        setClaimError(e instanceof Error ? e.message : 'Could not claim that username. Try again.');
+      }
     }
   };
 
@@ -413,9 +451,8 @@ function UsernameView({ userId, onClaimed }: { userId: string; onClaimed: () => 
   );
 }
 
-// Usernames may be changed at most once every 30 days (mirrors the server-side
-// limit in migration 0009). Kept here only to drive proactive UI; the DB is the
-// source of truth that actually enforces it.
+// Usernames may be changed at most once every 30 days (the API enforces it; this
+// only drives the proactive UI).
 const USERNAME_CHANGE_DAYS = 30;
 function formatDate(d: Date): string {
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
@@ -430,6 +467,7 @@ function ProfileView({
   xp,
   onUpdated,
   onSignOut,
+  onDelete,
   onClose,
 }: {
   username: string;
@@ -440,6 +478,7 @@ function ProfileView({
   xp: number;
   onUpdated: () => void;
   onSignOut: () => void;
+  onDelete: () => Promise<Result>;
   onClose: () => void;
 }) {
   const [editing, setEditing] = useState(false);
@@ -448,6 +487,9 @@ function ProfileView({
   const [status, setStatus] = useState<'idle' | 'checking' | 'taken' | 'ok' | 'invalid'>('idle');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Account deletion: a two-step confirm inside the dialog (Apple 5.1.1(v), Play policy).
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const valid = /^[a-z0-9_]{3,20}$/.test(name);
   const unchanged = name === username;
 
@@ -465,43 +507,45 @@ function ProfileView({
     if (!valid) return setStatus('invalid');
     if (isReserved(name)) return setStatus('taken');
     setStatus('checking');
+    let cancelled = false;
     const t = setTimeout(async () => {
-      if (!supabase) return;
-      const { data } = await supabase.rpc('username_available', { name });
-      setStatus(data === true ? 'ok' : 'taken');
+      const ok = await usernameAvailable(name);
+      if (!cancelled) setStatus(ok ? 'ok' : 'taken');
     }, 350);
-    return () => clearTimeout(t);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
   }, [name, valid, editing, unchanged]);
 
   const save = async () => {
-    if (!supabase || status !== 'ok' || busy) return;
+    if (status !== 'ok' || busy) return;
     setBusy(true);
     setError(null);
-    // change_username (migration 0009) enforces the once-per-30-days limit +
-    // uniqueness + format server-side and returns a structured result. On success
-    // it cascades to this user's leaderboard rows via sync_leaderboard_username
-    // (migration 0005), keyed by user_id, so existing scores show the new name.
-    const { data, error: e } = await supabase.rpc('change_username', { p_name: name });
-    setBusy(false);
-    const row = Array.isArray(data) ? data[0] : data;
-    if (!e && row?.ok) {
+    // PUT /me/username enforces the once-per-30-days limit + uniqueness + format
+    // server-side and cascades the new name to this user's leaderboard rows.
+    try {
+      await api('/me/username', { method: 'PUT', body: { username: name }, auth: 'user' });
+      setBusy(false);
       setEditing(false);
       onUpdated();
-      return;
-    }
-    const code = row?.error as string | undefined;
-    if (code === 'taken') {
-      setStatus('taken');
-      setError('That username was just taken — pick another.');
-    } else if (code === 'too_soon') {
-      const when = row?.next_allowed_at ? formatDate(new Date(row.next_allowed_at)) : 'later';
-      setError(`You can only change your username once a month. Next change available on ${when}.`);
-    } else if (code === 'reserved') {
-      setError('That username is reserved — pick another.');
-    } else if (code === 'invalid') {
-      setError('Use 3–20 lowercase letters, digits, and underscores.');
-    } else {
-      setError(e?.message || 'Could not update username. Try again.');
+    } catch (e) {
+      setBusy(false);
+      const code = e instanceof ApiError ? e.code : '';
+      const next = e instanceof ApiError ? (e.body?.next_allowed_at as string | null | undefined) : null;
+      if (code === 'taken') {
+        setStatus('taken');
+        setError('That username was just taken, pick another.');
+      } else if (code === 'too_soon') {
+        const when = next ? formatDate(new Date(next)) : 'later';
+        setError(`You can only change your username once a month. Next change available on ${when}.`);
+      } else if (code === 'reserved') {
+        setError('That username is reserved, pick another.');
+      } else if (code === 'invalid') {
+        setError('Use 3–20 lowercase letters, digits, and underscores.');
+      } else {
+        setError(e instanceof Error ? e.message : 'Could not update username. Try again.');
+      }
     }
   };
 
@@ -564,6 +608,49 @@ function ProfileView({
     );
   }
 
+  if (confirmDelete) {
+    return (
+      <>
+        <h2>Delete your account?</h2>
+        <p className="go-sub">
+          This permanently removes <strong>@{username}</strong>: your XP, level, friends, saved game,
+          leaderboard scores and custom packs. It cannot be undone.
+        </p>
+        {error && (
+          <p className="auth-error" data-testid="account-delete-error" role="alert">{error}</p>
+        )}
+        <div className="auth-actions">
+          <button
+            className="btn btn-primary btn-lg block btn-danger"
+            data-testid="account-delete-confirm"
+            disabled={deleting}
+            onClick={async () => {
+              setDeleting(true);
+              setError(null);
+              const r = await onDelete();
+              setDeleting(false);
+              if (r.ok) onClose();
+              else setError(r.error ?? 'Could not delete the account. Try again.');
+            }}
+          >
+            {deleting ? 'Deleting…' : 'Yes, delete my account'}
+          </button>
+          <button
+            className="btn btn-ghost"
+            data-testid="account-delete-cancel"
+            disabled={deleting}
+            onClick={() => {
+              setConfirmDelete(false);
+              setError(null);
+            }}
+          >
+            Keep my account
+          </button>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <h2>Signed in</h2>
@@ -585,7 +672,7 @@ function ProfileView({
             if (r) onUpdated();
           }}
         >
-          {prestiging ? 'Prestiging…' : '⭐ Prestige — reset to Level 1, gain a star'}
+          {prestiging ? 'Prestiging…' : '⭐ Prestige: reset to Level 1, gain a star'}
         </button>
       )}
       {inCooldown && nextChangeAt && (
@@ -613,6 +700,17 @@ function ProfileView({
         </button>
         <button className="btn btn-primary" data-testid="auth-done" onClick={onClose}>
           Done
+        </button>
+        <button
+          type="button"
+          className="auth-link auth-danger-link"
+          data-testid="account-delete"
+          onClick={() => {
+            play('pick');
+            setConfirmDelete(true);
+          }}
+        >
+          Delete account
         </button>
       </div>
     </>

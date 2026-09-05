@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { PACKS } from '../content';
 import { useModalDismiss } from '../lib/useModalDismiss';
-import { enqueue, isNetworkError, registerRunner } from '../lib/offlineQueue';
+import { api, getAccessToken, isApiConfigured, isNetworkApiError } from '../lib/api';
+import { useAuth } from '../lib/auth';
+import { enqueue, registerRunner } from '../lib/offlineQueue';
 import { isOnline } from '../lib/online';
-import { supabase } from '../lib/supabase';
 import { RankBadge } from './RankBadge';
 
 type ScoreRow = {
@@ -15,7 +16,6 @@ type ScoreRow = {
   duration_ms: number;
   level: number;
   prestige: number;
-  total: number; // total deduped players in this scope (for pagination)
 };
 type RankRow = { id: string; username: string; level: number; prestige: number; total_xp: number; rank: number };
 type MyRank = { rank: number; total_xp: number; level: number; prestige: number };
@@ -23,11 +23,12 @@ const PAGE_SIZE = 25;
 
 export function Leaderboard({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<'scores' | 'ranks'>('scores');
-  const [meId, setMeId] = useState<string | null>(null);
+  const meId = useAuth().user?.id ?? null;
   // Scores tab — deduped (best per player) + paginated.
   const [packId, setPackId] = useState<string>('all');
   const [page, setPage] = useState(0);
   const [rows, setRows] = useState<ScoreRow[] | null>(null);
+  const [total, setTotal] = useState(0); // deduped players in this scope (for pagination)
   const [pickerOpen, setPickerOpen] = useState(false);
   // Ranks tab
   const [rankRows, setRankRows] = useState<RankRow[] | null>(null);
@@ -36,50 +37,57 @@ export function Leaderboard({ onClose }: { onClose: () => void }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   useModalDismiss(dialogRef, onClose);
 
-  useEffect(() => {
-    supabase?.auth.getSession().then(({ data }) => setMeId(data.session?.user?.id ?? null));
-  }, []);
-
   // Reset to page 1 whenever the pack changes.
   useEffect(() => setPage(0), [packId]);
 
-  // Scores tab data — deduped + paginated via pack_leaderboard RPC.
+  // Scores tab data: deduped (best per player) + paginated, GET /leaderboard/:pack.
   useEffect(() => {
-    if (tab !== 'scores' || !supabase) return;
+    if (tab !== 'scores' || !isApiConfigured()) return;
     let cancelled = false;
     setRows(null);
     setError(null);
-    supabase
-      .rpc('pack_leaderboard', { p_pack: packId, p_limit: PAGE_SIZE, p_offset: page * PAGE_SIZE })
-      .then(({ data, error }) => {
+    api<{ rows: ScoreRow[]; total: number }>(
+      `/leaderboard/${encodeURIComponent(packId)}?limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}`,
+      { auth: 'none' },
+    ).then(
+      (res) => {
         if (cancelled) return;
-        if (error) setError(error.message);
-        else setRows((data as ScoreRow[]) ?? []);
-      });
+        setRows(res.rows ?? []);
+        setTotal(res.total ?? 0);
+      },
+      (e: Error) => {
+        if (!cancelled) setError(e.message);
+      },
+    );
     return () => {
       cancelled = true;
     };
   }, [packId, tab, page]);
 
-  const total = rows?.[0]?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  // Ranks tab data (global by total XP)
+  // Ranks tab data (global by total XP): GET /ranks + GET /ranks/me (signed in).
   useEffect(() => {
-    if (tab !== 'ranks' || !supabase) return;
+    if (tab !== 'ranks' || !isApiConfigured()) return;
     let cancelled = false;
     setRankRows(null);
     setError(null);
-    supabase.rpc('global_ranks', { p_limit: 100 }).then(({ data, error }) => {
-      if (cancelled) return;
-      if (error) setError(error.message);
-      else setRankRows((data as RankRow[]) ?? []);
-    });
-    supabase.rpc('my_global_rank').then(({ data }) => {
-      if (cancelled) return;
-      const r = Array.isArray(data) ? data[0] : data;
-      if (r) setMyRank(r as MyRank);
-    });
+    api<RankRow[]>('/ranks?limit=100', { auth: 'none' }).then(
+      (rows) => {
+        if (!cancelled) setRankRows(rows ?? []);
+      },
+      (e: Error) => {
+        if (!cancelled) setError(e.message);
+      },
+    );
+    if (getAccessToken()) {
+      api<MyRank>('/ranks/me', { auth: 'user' }).then(
+        (r) => {
+          if (!cancelled && r) setMyRank(r);
+        },
+        () => {}, // 404 no_profile / signed out: no pinned row
+      );
+    }
     return () => {
       cancelled = true;
     };
@@ -244,8 +252,8 @@ export function Leaderboard({ onClose }: { onClose: () => void }) {
 }
 
 /**
- * Submit a finished match's score to the global board. No-ops cleanly when
- * Supabase isn't configured OR the user isn't signed in.
+ * Submit a finished match's score to the global board (POST /leaderboard). No-ops
+ * cleanly when the API isn't configured OR the user isn't signed in.
  */
 export async function submitScore(args: {
   packId: string;
@@ -253,7 +261,7 @@ export async function submitScore(args: {
   moves: number;
   durationMs: number;
 }): Promise<void> {
-  if (!supabase) return;
+  if (!isApiConfigured() || !getAccessToken()) return;
   // Offline: queue the score and replay it on reconnect (offlineQueue.ts).
   if (!isOnline()) {
     enqueue('submit_score', args);
@@ -262,14 +270,14 @@ export async function submitScore(args: {
   try {
     await submitScoreNow(args);
   } catch (err) {
-    if (isNetworkError(err)) enqueue('submit_score', args);
+    if (isNetworkApiError(err)) enqueue('submit_score', args);
   }
 }
 
 registerRunner('submit_score', async (payload) => {
   const args = payload as Parameters<typeof submitScoreNow>[0] | null;
   if (!args || typeof args.packId !== 'string') return;
-  await submitScoreNow(args);
+  await submitScoreNow(args); // a network error re-queues it; 404 no_profile is dropped
 });
 
 async function submitScoreNow(args: {
@@ -278,35 +286,8 @@ async function submitScoreNow(args: {
   moves: number;
   durationMs: number;
 }): Promise<void> {
-  if (!supabase) return;
-  const { data: session } = await supabase.auth.getSession();
-  const user = session.session?.user;
-  if (!user) return;
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('username')
-    .eq('id', user.id)
-    .maybeSingle();
-  if (!profile?.username) return;
-  // Preferred path: the SECURITY DEFINER RPC (migration 0004) — derives the
-  // username server-side, blocks banned users, and bounds the metrics so the
-  // board can't be forged. Falls back to the legacy direct insert only if the
-  // RPC isn't deployed yet (PGRST202 = function not found).
-  const { error } = await supabase.rpc('submit_score', {
-    p_pack_id: args.packId,
-    p_score: args.score,
-    p_moves: args.moves,
-    p_duration_ms: args.durationMs,
-  });
-  if (error && isNetworkError(error)) throw error;
-  if (error && (error.code === 'PGRST202' || /could not find the function/i.test(error.message))) {
-    await supabase.from('leaderboard').insert({
-      user_id: user.id,
-      username: profile.username,
-      pack_id: args.packId,
-      score: args.score,
-      moves: args.moves,
-      duration_ms: args.durationMs,
-    });
-  }
+  if (!isApiConfigured() || !getAccessToken()) return;
+  // The API derives the username server-side, blocks banned users, and bounds the
+  // metrics so the board can't be forged.
+  await api('/leaderboard', { method: 'POST', body: args, auth: 'user' });
 }

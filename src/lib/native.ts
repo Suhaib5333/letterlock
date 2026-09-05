@@ -24,7 +24,10 @@
  *   - `navigator.share` and `navigator.vibrate` are routed to the Share and
  *     Haptics plugins, so the existing call sites work unchanged.
  */
+import { initAds } from './ads';
+import { initOta } from './ota';
 import { isNative, platform } from './platform';
+import { initPurchases } from './purchases';
 
 type Plugins = {
   App: typeof import('@capacitor/app').App;
@@ -141,6 +144,10 @@ export async function initNative(): Promise<void> {
   installBackButton();
   installDeepLinks();
   if (matchActive) plugins.KeepAwake.keepAwake().catch(() => {});
+  // OTA (Phase 3c), ads (Phase 4), Remove Ads (Phase 5): all fire-and-forget, all no-ops when unconfigured.
+  void initOta();
+  void initAds();
+  void initPurchases();
 }
 
 /**

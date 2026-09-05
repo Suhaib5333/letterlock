@@ -1,0 +1,151 @@
+# OTA web-bundle release (LAUNCH_PLAN Phase 3c, D7). Cuts a bundle the installed
+# iOS/Android apps pull on their next launch/resume through @capgo/capacitor-updater
+# in manual mode (src/lib/ota.ts). Native code is NOT touched: anything native
+# still goes through the stores, and `minNative` blocks shells that are too old.
+#
+#   git tag ota-v1.0.1 && git push --tags        # version = the tag without "ota-v"
+#   gh workflow run ota-release.yml -f version=1.0.1 -f min_native=1.0.0
+#
+# Secrets (repo Settings > Secrets > Actions): VPS_HOST, VPS_USER, VPS_PASS
+# (same three as the API deploy), API_ADMIN_TOKEN (= the API's QA_ADMIN_TOKEN;
+# PATCH /app-config accepts it as `x-qa-token`). Variable (optional):
+# OTA_MIN_NATIVE, the default native shell version a bundle requires.
+#
+# Rollback: the plugin rolls back on its own when a bundle fails to boot
+# (notifyAppReady not called within 10 s). To pull a bad-but-booting bundle,
+# re-run this workflow with the previous good version, or PATCH
+# `{ "latestBundle": null }` to stop serving OTA at all.
+name: OTA release
+
+on:
+  push:
+    tags: ['ota-v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Bundle version (semver, e.g. 1.0.1). Must be newer than what the apps run.'
+        required: true
+      min_native:
+        description: 'Minimum native shell version (semver). Empty = OTA_MIN_NATIVE variable or 1.0.0.'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ota-release
+  cancel-in-progress: false
+
+env:
+  API_URL: https://api.letterlock.raltech.dev
+  BUNDLES_DIR: /opt/letterlock/bundles
+
+jobs:
+  release:
+    name: Build, upload, publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version + preflight
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_MIN_NATIVE: ${{ inputs.min_native }}
+          VAR_MIN_NATIVE: ${{ vars.OTA_MIN_NATIVE }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PASS: ${{ secrets.VPS_PASS }}
+          API_ADMIN_TOKEN: ${{ secrets.API_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then VERSION="${GITHUB_REF_NAME#ota-v}"; else VERSION="$INPUT_VERSION"; fi
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error ::version '$VERSION' is not semver"; exit 1; }
+          MIN_NATIVE="${INPUT_MIN_NATIVE:-${VAR_MIN_NATIVE:-1.0.0}}"
+          [[ "$MIN_NATIVE" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error ::min_native '$MIN_NATIVE' is not semver"; exit 1; }
+          missing=()
+          [ -z "$VPS_HOST" ] && missing+=(VPS_HOST); [ -z "$VPS_USER" ] && missing+=(VPS_USER)
+          [ -z "$VPS_PASS" ] && missing+=(VPS_PASS); [ -z "$API_ADMIN_TOKEN" ] && missing+=(API_ADMIN_TOKEN)
+          if [ ${#missing[@]} -gt 0 ]; then echo "::error ::missing secrets: ${missing[*]}"; exit 1; fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "MIN_NATIVE=$MIN_NATIVE" >> "$GITHUB_ENV"
+          echo "OTA bundle $VERSION (minNative $MIN_NATIVE)"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Build web bundle
+        env:
+          VITE_API_URL: ${{ env.API_URL }}
+        run: |
+          set -euo pipefail
+          npm run build
+          test -f dist/index.html
+
+      - name: Zip + sha256
+        run: |
+          set -euo pipefail
+          (cd dist && zip -qr "../letterlock-$VERSION.zip" .)
+          SHA256=$(sha256sum "letterlock-$VERSION.zip" | cut -d' ' -f1)
+          echo "SHA256=$SHA256" >> "$GITHUB_ENV"
+          ls -la "letterlock-$VERSION.zip"; echo "sha256 $SHA256"
+
+      - name: Upload to the VPS (retry over ports 22 and 2222)
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PASS: ${{ secrets.VPS_PASS }}
+        run: |
+          set -uo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq sshpass > /dev/null
+          SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=20 -o LogLevel=ERROR"
+          ok=0
+          # Hostinger intermittently drops fresh connections from GitHub runners and
+          # SSH listens on both 22 and 2222 (LAUNCH_PLAN §2c): 5 rounds over both ports.
+          for attempt in 1 2 3 4 5; do
+            for port in 22 2222; do
+              echo "attempt $attempt port $port"
+              if sshpass -p "$VPS_PASS" ssh $SSH_OPTS -p "$port" "$VPS_USER@$VPS_HOST" "mkdir -p '$BUNDLES_DIR'" \
+                 && sshpass -p "$VPS_PASS" scp $SSH_OPTS -P "$port" "letterlock-$VERSION.zip" "$VPS_USER@$VPS_HOST:$BUNDLES_DIR/$VERSION.zip.part" \
+                 && sshpass -p "$VPS_PASS" ssh $SSH_OPTS -p "$port" "$VPS_USER@$VPS_HOST" "mv -f '$BUNDLES_DIR/$VERSION.zip.part' '$BUNDLES_DIR/$VERSION.zip' && chmod 644 '$BUNDLES_DIR/$VERSION.zip'"; then
+                ok=1; break 2
+              fi
+              sleep 10
+            done
+          done
+          [ "$ok" = 1 ] || { echo "::error ::upload failed after 5 rounds"; exit 1; }
+          echo "uploaded $BUNDLES_DIR/$VERSION.zip"
+
+      - name: Verify the API serves the bundle byte-for-byte
+        run: |
+          set -euo pipefail
+          URL="$API_URL/bundles/$VERSION.zip"
+          for i in 1 2 3 4 5 6; do
+            GOT=$(curl -fsSL --retry 2 "$URL" | sha256sum | cut -d' ' -f1) && break || sleep 10
+          done
+          [ "${GOT:-}" = "$SHA256" ] || { echo "::error ::served sha256 '${GOT:-}' != built '$SHA256' ($URL). Is BUNDLES_DIR=$BUNDLES_DIR set on the API?"; exit 1; }
+          echo "OK $URL"
+
+      - name: Publish latestBundle to app-config
+        env:
+          API_ADMIN_TOKEN: ${{ secrets.API_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          BODY=$(jq -cn --arg v "$VERSION" --arg u "$API_URL/bundles/$VERSION.zip" --arg s "$SHA256" --arg m "$MIN_NATIVE" \
+            '{latestBundle:{version:$v,url:$u,sha256:$s,minNative:$m}}')
+          RESP=$(curl -sS -w '\n%{http_code}' -X PATCH "$API_URL/app-config" \
+            -H "x-qa-token: $API_ADMIN_TOKEN" -H 'Content-Type: application/json' --data "$BODY")
+          CODE=$(printf '%s' "$RESP" | tail -n1); OUT=$(printf '%s' "$RESP" | sed '$d')
+          [ "$CODE" = "200" ] || { echo "::error ::PATCH /app-config -> HTTP $CODE: $OUT"; exit 1; }
+          echo "$OUT" | jq '.latestBundle'
+          echo "Apps pick up $VERSION on their next launch/resume (cache 60 s)."
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: letterlock-ota-${{ env.VERSION }}
+          path: letterlock-${{ env.VERSION }}.zip
+          retention-days: 30

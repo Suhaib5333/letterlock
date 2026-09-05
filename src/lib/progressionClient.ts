@@ -1,11 +1,11 @@
 import type { Access } from '../core/progression';
 import { GUEST_ACCESS } from '../core/progression';
+import { api, getAccessToken, isApiConfigured, isNetworkApiError, type Profile } from './api';
 import { devSeamsEnabled, hasDevSeam } from './devSeams';
-import { enqueue, isNetworkError, registerRunner } from './offlineQueue';
+import { enqueue, registerRunner } from './offlineQueue';
 import { isOnline } from './online';
-import { supabase, type Profile } from './supabase';
 
-/** Result of an XP award (mirrors the award_xp RPC return row). */
+/** Result of an XP award (POST /xp/award). */
 export interface AwardResult {
   xp: number;
   level: number;
@@ -14,45 +14,39 @@ export interface AwardResult {
   leveled_up: boolean;
 }
 
+const signedIn = () => isApiConfigured() && !!getAccessToken();
+
 /**
- * Award XP to the signed-in user via the server RPC (clamped + capped server
- * side). No-ops cleanly when signed out / Supabase unconfigured. Returns the new
- * progression row, or null if nothing happened.
+ * Award XP to the signed-in user (clamped + capped server side). No-ops cleanly
+ * when signed out / the API is unconfigured. Returns the new progression row, or
+ * null if nothing happened.
  */
 export async function awardXp(amount: number): Promise<AwardResult | null> {
-  if (!supabase) return null;
-  const { data: session } = await supabase.auth.getSession();
-  if (!session.session?.user) return null;
+  if (!signedIn()) return null;
   // Offline: park the award in the local queue; it is replayed on reconnect
   // (offlineQueue.ts). The level-up celebration for that award is skipped.
   if (!isOnline()) {
     enqueue('award_xp', { amount });
     return null;
   }
-  const { data, error } = await supabase.rpc('award_xp', { amount });
-  if (error && isNetworkError(error)) {
-    enqueue('award_xp', { amount });
+  try {
+    return await api<AwardResult>('/xp/award', { method: 'POST', body: { amount }, auth: 'user' });
+  } catch (e) {
+    if (isNetworkApiError(e)) enqueue('award_xp', { amount });
     return null;
   }
-  if (error || !data) return null;
-  const row = Array.isArray(data) ? data[0] : data;
-  return (row as AwardResult) ?? null;
 }
 
 registerRunner('award_xp', async (payload) => {
   const amount = (payload as { amount?: number } | null)?.amount;
-  if (!supabase || typeof amount !== 'number') return;
-  const { error } = await supabase.rpc('award_xp', { amount });
-  if (error && isNetworkError(error)) throw error; // keep queued
+  if (!signedIn() || typeof amount !== 'number') return;
+  await api('/xp/award', { method: 'POST', body: { amount }, auth: 'user' }); // a network error re-queues it
 });
 
 /** Manually prestige (eligible at level 10). Returns the new {level, prestige}. */
 export async function prestigeUp(): Promise<{ level: number; prestige: number } | null> {
-  if (!supabase) return null;
-  const { data, error } = await supabase.rpc('prestige_up');
-  if (error || !data) return null;
-  const row = Array.isArray(data) ? data[0] : data;
-  return (row as { level: number; prestige: number }) ?? null;
+  if (!signedIn()) return null;
+  return api<{ level: number; prestige: number }>('/xp/prestige', { method: 'POST', auth: 'user' }).catch(() => null);
 }
 
 /** Test/QA seam: `?__unlockall=1` (or localStorage flag) grants full access so the

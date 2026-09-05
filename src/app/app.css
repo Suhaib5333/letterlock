@@ -17,9 +17,9 @@
   flex-direction: column;
   overflow: hidden;
   /* respect notches / rounded corners via safe-area insets (viewport-fit=cover) */
-  padding: max(clamp(10px, 2.2vh, var(--s-4)), var(--tv-safe), env(safe-area-inset-top))
+  padding: max(clamp(10px, 2.2svh, var(--s-4)), var(--tv-safe), env(safe-area-inset-top))
     max(clamp(var(--s-3), 3vw, var(--s-5)), env(safe-area-inset-right))
-    max(clamp(10px, 2vh, var(--s-4)), env(safe-area-inset-bottom))
+    max(clamp(10px, 2svh, var(--s-4)), env(safe-area-inset-bottom))
     max(clamp(var(--s-3), 3vw, var(--s-5)), env(safe-area-inset-left));
 }
 /* The screen's content root fills remaining height and manages its own internal layout. */
@@ -149,7 +149,7 @@
 .home {
   max-width: 1100px;
   margin: 0 auto;
-  gap: clamp(10px, 2vh, 28px);
+  gap: clamp(10px, 2svh, 28px);
 }
 .home-top {
   flex: 0 0 auto;
@@ -241,7 +241,7 @@
   flex-direction: column;
   justify-content: center;
   text-align: center;
-  gap: clamp(10px, 1.8vh, 24px);
+  gap: clamp(10px, 1.8svh, 24px);
 }
 .hero-title {
   font-size: var(--t-hero);
@@ -252,7 +252,7 @@
   max-width: 56ch;
   margin: 0 auto;
   color: var(--text-dim);
-  font-size: clamp(0.95rem, 1.6vh, 1.2rem);
+  font-size: clamp(0.95rem, 1.6svh, 1.2rem);
 }
 .hero-cta {
   display: flex;
@@ -275,7 +275,7 @@
     display: none;
   }
   .hero-title {
-    font-size: clamp(1.2rem, 7vh, 1.8rem);
+    font-size: clamp(1.2rem, 7svh, 1.8rem);
     max-width: none;
   }
   .hero-cta .btn {
@@ -306,7 +306,7 @@
    Home (header + hero) stays fixed on every screen */
 .pack-grid {
   display: flex;
-  gap: clamp(8px, 1.4vh, 16px);
+  gap: clamp(8px, 1.4svh, 16px);
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x proximity;
@@ -509,7 +509,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(8px, 3vh, 40px) clamp(8px, 3vw, 40px);
+  padding: clamp(8px, 3svh, 40px) clamp(8px, 3vw, 40px);
 }
 .cat-panel {
   width: min(1040px, 100%);
@@ -525,7 +525,7 @@
 }
 .cat-head {
   flex: 0 0 auto;
-  padding: clamp(12px, 2vh, 20px) clamp(14px, 2.4vw, 26px) 10px;
+  padding: clamp(12px, 2svh, 20px) clamp(14px, 2.4vw, 26px) 10px;
   border-bottom: 1px solid var(--line);
   display: flex;
   flex-direction: column;
@@ -636,10 +636,10 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: clamp(12px, 2vh, 20px) clamp(14px, 2.4vw, 26px) clamp(20px, 4vh, 36px);
+  padding: clamp(12px, 2svh, 20px) clamp(14px, 2.4vw, 26px) clamp(20px, 4svh, 36px);
   display: flex;
   flex-direction: column;
-  gap: clamp(16px, 2.6vh, 28px);
+  gap: clamp(16px, 2.6svh, 28px);
 }
 .cat-empty {
   text-align: center;
@@ -874,7 +874,7 @@
 .setup {
   max-width: 760px;
   margin: 0 auto;
-  gap: clamp(8px, 1.5vh, 16px);
+  gap: clamp(8px, 1.5svh, 16px);
 }
 .setup-body {
   flex: 1 1 auto;
@@ -886,7 +886,7 @@
      be reached (the cut-off bug). Flex-start keeps the first option at the top
      and lets the rest scroll into view — nothing is ever clipped. */
   justify-content: flex-start;
-  gap: clamp(8px, 1.5vh, 18px);
+  gap: clamp(8px, 1.5svh, 18px);
   /* safety net: if the options are taller than the area (small/landscape screens,
      enlarged text, the extra Couch host-team row) this region scrolls internally
      instead of clipping — the page itself never scrolls. */
@@ -1059,7 +1059,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: clamp(8px, 1.4vh, 16px);
+  gap: clamp(8px, 1.4svh, 16px);
 }
 .game-head {
   flex: 0 0 auto;
@@ -1087,7 +1087,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(6px, 1.2vh, 12px);
+  gap: clamp(6px, 1.2svh, 12px);
 }
 /* the board flexes into all available space; the SVG's preserveAspectRatio fits it */
 .board-stage {
@@ -1496,7 +1496,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(8px, 1.4vh, 16px);
+  gap: clamp(8px, 1.4svh, 16px);
 }
 .qcard-scroll {
   flex: 1 1 auto;
@@ -1581,14 +1581,14 @@
 .qcard-flag {
   width: auto;
   max-width: 100%;
-  max-height: clamp(80px, 18vh, 168px);
+  max-height: clamp(80px, 18svh, 168px);
   border-radius: 12px;
   border: 1px solid var(--line-strong);
   box-shadow: var(--shadow-2);
   object-fit: contain;
   /* light panel so ANY logo colour (incl. black glyphs) is clearly visible */
   background: #fff;
-  padding: clamp(8px, 1.8vh, 16px);
+  padding: clamp(8px, 1.8svh, 16px);
 }
 
 /* World map question — inline SVG is responsive; the highlighted country
@@ -1603,7 +1603,7 @@
      let aspect-ratio derive the width. overflow:hidden kills any residual
      horizontal scrollbar from the raw SVG. */
   aspect-ratio: 2754 / 1398;
-  max-height: clamp(110px, 26vh, 240px);
+  max-height: clamp(110px, 26svh, 240px);
   padding: 0;
   background: #0e1726; /* dark navy so the grey landmasses pop */
   overflow: hidden;
@@ -1641,7 +1641,7 @@
 .qcard-map-loading {
   background: #0e1726;
   aspect-ratio: 2754 / 1398;
-  max-height: clamp(110px, 26vh, 240px);
+  max-height: clamp(110px, 26svh, 240px);
 }
 /* The whole card is one tap target — clicking anywhere on the map opens the
    fullscreen overlay. The button has no chrome so it visually IS the card. */
@@ -1693,7 +1693,7 @@
 .qcard-map-fs-card {
   position: relative;
   width: min(96vw, 1600px);
-  height: min(92vh, 900px);
+  height: min(92svh, 900px);
   background: #0e1726;
   border-radius: 18px;
   overflow: hidden;
@@ -1809,7 +1809,7 @@
 .answer-charade-img {
   margin-top: 8px;
   max-width: 100%;
-  max-height: clamp(90px, 20vh, 180px);
+  max-height: clamp(90px, 20svh, 180px);
   border-radius: 12px;
   border: 1px solid var(--line-strong);
   object-fit: cover;
@@ -1845,7 +1845,7 @@
 }
 .imgview-img {
   width: 100%;
-  max-height: 46vh;
+  max-height: 46svh;
   object-fit: cover;
   border-radius: 14px;
   border: 1px solid var(--line-strong, #2a3350);
@@ -1906,7 +1906,7 @@
 .qcard-video {
   width: auto;
   max-width: 100%;
-  max-height: clamp(120px, 28vh, 260px);
+  max-height: clamp(120px, 28svh, 260px);
   border-radius: 10px;
   background: #000;
   border: 1px solid var(--line-strong);
@@ -2332,7 +2332,7 @@
   border-radius: var(--r-xl);
   padding: var(--s-4);
   width: min(440px, 92vw);
-  max-height: 92vh;
+  max-height: 92svh;
   overflow-y: auto;
   box-shadow: var(--shadow-3);
   display: flex;
@@ -2478,10 +2478,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(8px, 1.6vh, 20px);
+  gap: clamp(8px, 1.6svh, 20px);
 }
 .victory-crown {
-  font-size: clamp(2.6rem, 7vh, 4rem);
+  font-size: clamp(2.6rem, 7svh, 4rem);
   flex: 0 0 auto;
 }
 .victory-title {
@@ -2491,7 +2491,7 @@
 .victory-score {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(2.4rem, 7vh, 3.4rem);
+  font-size: clamp(2.4rem, 7svh, 3.4rem);
   display: flex;
   gap: 16px;
   align-items: center;
@@ -2602,7 +2602,7 @@
 /* ---------- Leaderboard ---------- */
 .leaderboard {
   width: min(560px, 96vw);
-  max-height: 86vh;
+  max-height: 86svh;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -2644,7 +2644,7 @@
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  max-height: 46vh;
+  max-height: 46svh;
   overflow-y: auto;
   list-style: none;
   margin: 0;
@@ -3065,7 +3065,7 @@
   }
   .tut-body {
     grid-template-columns: 1fr;
-    gap: clamp(12px, 3vh, 32px);
+    gap: clamp(12px, 3svh, 32px);
   }
 }
 
@@ -3081,8 +3081,8 @@
     min-height: 0;
   }
   .tut-board .ll-board {
-    max-height: 74vh;
-    max-width: min(360px, 42vh);
+    max-height: 74svh;
+    max-width: min(360px, 42svh);
   }
   .tut-text h2 {
     font-size: 1.2rem;
@@ -3121,7 +3121,7 @@
   .game-main {
     display: flex;
     flex-direction: column;
-    gap: clamp(6px, 1.4vh, 14px);
+    gap: clamp(6px, 1.4svh, 14px);
   }
   /* Everything fits on-screen with NO scroll: the question panel takes the height
      its content needs, and the board flexes into whatever's left (never below a
@@ -3129,13 +3129,13 @@
      board is large. (The pie-swap prompt is an absolute overlay, so it never
      resizes the board.) */
   /* The hex board is the BIGGEST content piece: it keeps a large share of the
-     height (≈36vh) and grows larger in the pick phase. The question panel takes
+     height (≈36svh) and grows larger in the pick phase. The question panel takes
      the rest; a normal question fits with no scroll, and only a tall card (charade
      QR) scrolls inside .qcard-scroll. The host pad is a fixed footer — always
      visible, never clipped. */
   .board-wrap {
     flex: 1 1 auto;
-    min-height: clamp(140px, 32vh, 300px);
+    min-height: clamp(140px, 32svh, 300px);
   }
   .game-side {
     flex: 0 1 auto;
@@ -3196,11 +3196,11 @@
     font-size: 1.45rem;
   }
   .qcard-q {
-    font-size: clamp(1rem, 2.2vh, 1.25rem);
+    font-size: clamp(1rem, 2.2svh, 1.25rem);
     margin-bottom: 10px;
   }
   .qcard-flag {
-    max-height: clamp(52px, 12vh, 104px);
+    max-height: clamp(52px, 12svh, 104px);
   }
   .qcard-flag-wrap {
     margin-bottom: 8px;
@@ -3300,7 +3300,7 @@
   }
   /* compact Setup so all options + Start fit a phone with no scroll */
   .setup-body {
-    gap: clamp(6px, 1.4vh, 14px);
+    gap: clamp(6px, 1.4svh, 14px);
   }
   .setup-hint {
     display: none;
@@ -3475,7 +3475,7 @@
     gap: 4px;
   }
   .hero-title {
-    font-size: clamp(1.4rem, 5vh, 2.4rem);
+    font-size: clamp(1.4rem, 5svh, 2.4rem);
   }
   .hero-cta .btn-lg {
     padding: 10px 22px;
@@ -3547,7 +3547,7 @@
 /* ---------- TV / 10-foot (very large viewports) ---------- */
 @media (min-width: 1600px) {
   :root {
-    --tv-safe: 2.5vh;
+    --tv-safe: 2.5svh;
   }
   .ll-board {
     max-width: 920px;
@@ -3615,7 +3615,7 @@
 }
 .qcard-img-fs-img {
   max-width: 92vw;
-  max-height: 84vh;
+  max-height: 84svh;
   object-fit: contain;
   border-radius: 8px;
   box-shadow: var(--shadow-3);

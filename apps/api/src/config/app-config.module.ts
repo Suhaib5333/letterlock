@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Header, Injectable, Module, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Header, Injectable, Module, Patch, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsObject, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PrismaService } from '../prisma/prisma.service';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
+import { AdminOrQaGuard } from '../admin/admin.module';
 import { Prisma } from '../generated/prisma/client';
 
 const SEMVER = /^\d+\.\d+\.\d+$/;
@@ -108,12 +109,15 @@ export class AppConfigController {
 
   @Patch()
   @ApiBearerAuth()
-  @Roles('admin')
-  @ApiOperation({ summary: 'Admin: update any subset of the config' })
+  // Admin JWT or the CI machine header `x-qa-token` (ota-release.yml publishes latestBundle with it).
+  @Public()
+  @Roles()
+  @UseGuards(AdminOrQaGuard)
+  @ApiOperation({ summary: 'Admin or CI token: update any subset of the config' })
   patch(@Body() dto: PatchAppConfigDto) {
     return this.cfg.patch(dto);
   }
 }
 
-@Module({ controllers: [AppConfigController], providers: [AppConfigService] })
+@Module({ controllers: [AppConfigController], providers: [AppConfigService, AdminOrQaGuard] })
 export class AppConfigModule {}

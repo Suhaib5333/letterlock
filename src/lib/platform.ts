@@ -29,6 +29,22 @@ export function mobileOS(): 'ios' | 'android' | null {
   return null;
 }
 
+/**
+ * Android TV / Google TV and other 10-foot devices (LAUNCH_PLAN.md Phase 3b):
+ * driven by a remote, no touch, viewed from the couch. True for a TV user agent,
+ * for `?tv=1` (the permanent Playwright TV run and manual testing), or inside the
+ * Android app on a device with no touch digitiser at all (the cheap proxy for
+ * `uiMode == television`, which would need a native plugin). main.tsx sets
+ * `<html class="tv-mode">` from this; the ads code turns banners off on TV.
+ */
+export function isTV(): boolean {
+  if (typeof window === 'undefined') return false;
+  if (new URLSearchParams(window.location.search).get('tv') === '1') return true;
+  const ua = navigator.userAgent || '';
+  if (/\bTV\b|AFT[A-Z]|BRAVIA|SHIELD|Chromecast|GoogleTV/i.test(ua)) return true;
+  return isNative && platform === 'android' && navigator.maxTouchPoints === 0;
+}
+
 /** True only for a phone/tablet web browser tab (not the apps, not an installed PWA). */
 export function isMobileBrowser(): boolean {
   if (isNative) return false;

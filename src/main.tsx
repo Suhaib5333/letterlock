@@ -1,16 +1,27 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App';
+import { initWebAdsIfConfigured } from './lib/ads';
 import { AuthProvider } from './lib/auth';
 import { initNative, nativeReady } from './lib/native';
-import { isNative } from './lib/platform';
+import { isNative, isTV } from './lib/platform';
+import { initSpatialNav } from './lib/spatialNav';
 import { ImgView } from './screens/ImgView';
 import { PlayerController } from './screens/PlayerController';
 import { StoreProvider } from './state/store';
+import './fonts.css';
 import './theme.css';
 import './app/app.css';
 import './app/lobby.css';
 import './app/admin.css';
+import './app/mobile.css';
+import './tv.css';
+
+// TV / remote control (LAUNCH_PLAN Phase 3b): arrows move focus, Back closes the
+// top-most dialog; the 10-foot styles in tv.css apply only under html.tv-mode.
+const tv = isTV();
+if (tv) document.documentElement.classList.add('tv-mode');
+initSpatialNav({ tv });
 
 const splash = document.getElementById('boot-splash');
 if (splash) {
@@ -63,6 +74,7 @@ function boot() {
   );
   // Capacitor apps: drop the native splash once React has painted (no-op on web).
   requestAnimationFrame(() => nativeReady());
+  initWebAdsIfConfigured(); // Phase 8 web ads: inert until VITE_ADSENSE_CLIENT is set
 }
 
 // Capacitor apps (iOS/Android) restore mirrored storage + wire the native shell

@@ -2,12 +2,12 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../lib/auth';
 import { useModalDismiss } from '../lib/useModalDismiss';
-import { supabase, type CustomPack } from '../lib/supabase';
+import { api, isApiConfigured, type CustomPack } from '../lib/api';
 import { play } from '../services/audio';
 
 /**
  * Pack Editor — lets a signed-in user author a custom question pack and save
- * it to Supabase (`custom_packs` table). Owner sees their own drafts; once a
+ * it through the API (`/packs/custom`). Owner sees their own drafts; once a
  * moderator/admin flips `published`, the pack becomes selectable by everyone.
  *
  * The editor is letter-bucketed: 26 collapsible sections (A..Z), each with a
@@ -103,14 +103,12 @@ export function PackEditor({ onClose }: { onClose: () => void }) {
 
   // Load my drafts on mount (and after saves) so the user sees their pack list.
   const loadMine = useCallback(async () => {
-    if (!supabase || !user) return;
-    const { data, error } = await supabase
-      .from('custom_packs')
-      .select('*')
-      .eq('owner_id', user.id)
-      .order('created_at', { ascending: false });
-    if (error) setError(error.message);
-    else setMine((data as CustomPack[]) ?? []);
+    if (!isApiConfigured() || !user) return;
+    try {
+      setMine(await api<CustomPack[]>('/packs/custom?scope=mine', { auth: 'user' }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
   }, [user]);
 
   useEffect(() => {
@@ -145,40 +143,24 @@ export function PackEditor({ onClose }: { onClose: () => void }) {
   };
 
   const save = async () => {
-    if (!supabase || !user || !valid) return;
+    if (!isApiConfigured() || !user || !valid) return;
     setSaving(true);
     setError(null);
     setSavedNote(null);
     try {
-      const body = draftToBody(draft);
+      const payload = {
+        name: draft.name.trim(),
+        description: draft.description.trim() || null,
+        emoji: draft.emoji,
+        difficulty: draft.difficulty,
+        body: draftToBody(draft),
+      };
       if (draft.id) {
-        const { error } = await supabase
-          .from('custom_packs')
-          .update({
-            name: draft.name.trim(),
-            description: draft.description.trim() || null,
-            emoji: draft.emoji,
-            difficulty: draft.difficulty,
-            body,
-          })
-          .eq('id', draft.id);
-        if (error) throw error;
+        await api(`/packs/custom/${draft.id}`, { method: 'PATCH', body: payload, auth: 'user' });
         setSavedNote('✓ Updated');
       } else {
-        const { data, error } = await supabase
-          .from('custom_packs')
-          .insert({
-            owner_id: user.id,
-            name: draft.name.trim(),
-            description: draft.description.trim() || null,
-            emoji: draft.emoji,
-            difficulty: draft.difficulty,
-            body,
-          })
-          .select('id')
-          .maybeSingle();
-        if (error) throw error;
-        if (data?.id) setDraft((d) => ({ ...d, id: data.id }));
+        const created = await api<CustomPack>('/packs/custom', { method: 'POST', body: payload, auth: 'user' });
+        setDraft((d) => ({ ...d, id: created.id }));
         setSavedNote('✓ Saved as draft');
       }
       await loadMine();

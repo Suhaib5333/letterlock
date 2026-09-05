@@ -74,8 +74,7 @@ export function FriendsModal({
     setNote(null);
     try {
       const res = await sendFriendRequest(id);
-      // tell them (best-effort) so an online friend gets a popup
-      void notifyUser(id, { type: 'friend_request', fromName: myName });
+      // The API notifies them (friend_request) so an online friend gets a popup.
       setNote(res === 'accepted' ? "You're now friends!" : 'Request sent.');
       setFound(null);
       setQuery('');
@@ -87,8 +86,7 @@ export function FriendsModal({
   };
   const respond = async (id: string, accept: boolean) => {
     setBusy(true);
-    await respondFriendRequest(id, accept).catch(() => {});
-    if (accept) void notifyUser(id, { type: 'friend_accepted', fromName: myName });
+    await respondFriendRequest(id, accept).catch(() => {}); // the API notifies them on accept
     await refresh();
     setBusy(false);
   };

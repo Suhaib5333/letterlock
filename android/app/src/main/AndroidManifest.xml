@@ -46,6 +46,12 @@
             </intent-filter>
         </activity>
 
+        <!-- AdMob APP id (LAUNCH_PLAN Phase 4). The value lives in res/values/strings.xml
+             as `admob_app_id`. TODO(Suhaib): replace Google's public TEST app id there
+             with the real one from the AdMob console (ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY)
+             before the first store build. Unit ids are build-time env (VITE_ADMOB_*). -->
+        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="@string/admob_app_id" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

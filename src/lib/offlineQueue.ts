@@ -3,7 +3,7 @@ import { isOnline } from './online';
 /**
  * Tiny localStorage queue for server writes that must not be lost when the
  * device is offline (LAUNCH_PLAN Phase 1): `award_xp` and `submit_score`. Each
- * kind registers its own runner (the module that owns the Supabase call), so this
+ * kind registers its own runner (the module that owns the API call), so this
  * file stays dependency-free. Jobs are flushed on the window `online` event and
  * once at startup; a job that fails again for network reasons is re-queued.
  */
@@ -52,6 +52,7 @@ export function registerRunner(kind: string, run: Runner): void {
 
 /** True for the fetch/transport failures that mean "try again later", not "rejected". */
 export function isNetworkError(err: unknown): boolean {
+  if ((err as { code?: string } | null)?.code === 'network') return true; // ApiError from lib/api.ts
   const msg = typeof err === 'string' ? err : ((err as { message?: string } | null)?.message ?? '');
   return /failed to fetch|networkerror|network request failed|load failed|fetch failed|timed? ?out|ECONN|ENOTFOUND/i.test(msg);
 }

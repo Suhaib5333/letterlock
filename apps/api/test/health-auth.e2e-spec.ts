@@ -36,6 +36,24 @@ describe('health + auth', () => {
     expect(me.body.profile).toBeNull();
   });
 
+  it('GET /auth/otp/dev-code returns the captured code in dev mode only', async () => {
+    const email = 'devcode@example.com';
+    await h.http().post('/auth/otp/request').send({ email }).expect(200);
+    const res = await h.http().get('/auth/otp/dev-code?email=DevCode@example.com').expect(200);
+    expect(res.body.code).toBe(h.mail.lastDevCode(email));
+    expect(res.body.code).toMatch(/^\d{6}$/);
+    expect((await h.http().get('/auth/otp/dev-code?email=nobody@example.com').expect(200)).body.code).toBeNull();
+    // a configured mailer (real emails) or production disables it outright
+    process.env.RESEND_API_KEY = 're_live_x';
+    await h.http().get(`/auth/otp/dev-code?email=${email}`).expect(404);
+    process.env.RESEND_API_KEY = '';
+    process.env.NODE_ENV = 'production';
+    await h.http().get(`/auth/otp/dev-code?email=${email}`).expect(404);
+    process.env.NODE_ENV = 'test';
+    // the code still verifies
+    await h.http().post('/auth/otp/verify').send({ email, code: res.body.code }).expect(200);
+  });
+
   it('OTP resend lock (60 s) and per-email window (3 / 5 min)', async () => {
     const email = 'otp2@example.com';
     await h.http().post('/auth/otp/request').send({ email }).expect(200);

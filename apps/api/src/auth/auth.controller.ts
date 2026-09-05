@@ -30,6 +30,13 @@ export class AuthController {
     return this.auth.requestOtp(dto.email);
   }
 
+  @Get('otp/dev-code')
+  @Public()
+  @ApiOperation({ summary: 'DEV ONLY: last captured OTP for an email (404 in production / when Resend is configured)' })
+  devCode(@Query('email') email = '') {
+    return this.auth.devOtpCode(email);
+  }
+
   @Post('otp/verify')
   @Public()
   @HttpCode(200)

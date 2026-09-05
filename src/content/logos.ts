@@ -1,6 +1,6 @@
 import type { RawPack } from '../core/packs';
 
-const logo = (slug: string): string => `https://cdn.simpleicons.org/${slug}`;
+const logo = (slug: string): string => `/logos/${slug}.svg`;
 const PROMPT = 'Which brand does this logo belong to?';
 function q(brand: string, slug: string, alt?: string[]) {
   return {
@@ -27,7 +27,6 @@ export const logosEasyPack: RawPack = {
   hideBoardLetters: true,
   letters: {
     A: [
-      q('Apple', 'apple'),
       q('Adidas', 'adidas'),
       q('Airbnb', 'airbnb'),
     ],

@@ -6,8 +6,10 @@ import { AdminPanel } from '../components/AdminPanel';
 import { AuthModal } from '../components/AuthModal';
 import { CategoryMenu } from '../components/CategoryMenu';
 import { FriendsModal } from '../components/FriendsModal';
+import { InstallPrompt } from '../components/InstallPrompt';
 import { Leaderboard } from '../components/Leaderboard';
 import { LegalLinks } from '../components/LegalLinks';
+import { useBannerAd } from '../lib/ads';
 import { Logo, Wordmark } from '../components/Logo';
 import { PackEditor } from '../components/PackEditor';
 import { RankBar } from '../components/RankBadge';
@@ -18,7 +20,7 @@ import { isNative } from '../lib/platform';
 import { useAuth } from '../lib/auth';
 import { hasDevSeam } from '../lib/devSeams';
 import { subscribePendingRequests } from '../lib/friends';
-import { isSupabaseConfigured } from '../lib/supabase';
+import { isApiConfigured } from '../lib/api';
 import { play } from '../services/audio';
 import { remaining, subscribeProgress } from '../state/progress';
 import { resumeSavedGame, useStore } from '../state/store';
@@ -31,6 +33,7 @@ const TOTAL_QUESTIONS = PACKS.reduce((sum, p) => sum + totalQuestions(p), 0);
 
 export function Home() {
   const { state, dispatch, hasSavedGame } = useStore();
+  useBannerAd('home');
   const [showSettings, setShowSettings] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -100,7 +103,7 @@ export function Home() {
           <Wordmark />
         </div>
         <div className="home-top-actions">
-          {isSupabaseConfigured() && (
+          {isApiConfigured() && (
             <>
               <button
                 className="btn btn-ghost"
@@ -242,7 +245,7 @@ export function Home() {
             onClick={() => {
               play('pick');
               // Go through the mode picker so Couch vs Online is an explicit
-              // choice — even when Supabase isn't configured the card is shown
+              // choice — even when the API isn't configured the card is shown
               // (disabled) so people know the feature exists.
               dispatch({ type: 'SET_SCREEN', screen: 'mode-select' });
             }}
@@ -265,7 +268,7 @@ export function Home() {
               (especially on mobile where the row wraps onto two lines).
               Repeated here below Play so anyone landing on Home sees it
               immediately. Hidden once the user is signed in. */}
-          {isSupabaseConfigured() && !profile && (
+          {isApiConfigured() && !profile && (
             <button
               className="btn btn-secondary"
               data-testid="hero-signin"
@@ -277,7 +280,7 @@ export function Home() {
               🔐 Sign in with Google
             </button>
           )}
-          {isSupabaseConfigured() && profile && (
+          {isApiConfigured() && profile && (
             <span className="hero-signed" data-testid="hero-signed">
               ✓ Signed in as <strong>@{profile.username}</strong>
             </span>
@@ -291,21 +294,7 @@ export function Home() {
       </footer>
 
       <StoreSheet config={appConfig} />
-
-      {/* Loud, dismiss-not-allowed warning on Home when the Supabase env vars
-          are missing in the live build. Without this the auth/leaderboard
-          features silently disappear — that's how a Cloudflare deploy that
-          didn't carry over the env vars looked totally fine on localhost and
-          totally broken on prod. Now there's a visible breadcrumb. */}
-      {!isSupabaseConfigured() && (
-        <div className="env-warning" data-testid="env-warning" role="alert">
-          <strong>⚠ Online features disabled</strong>
-          <span>
-            VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are not set in this build.
-            On Cloudflare Pages → Settings → Environment variables.
-          </span>
-        </div>
-      )}
+      <InstallPrompt />
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
       {showLeaderboard && <Leaderboard onClose={() => setShowLeaderboard(false)} />}

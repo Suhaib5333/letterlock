@@ -243,7 +243,7 @@ export const sportsMediumPack: RawPack = {
       {
         q: 'This country\'s women\'s football team has won the most FIFA Women\'s World Cup titles.',
         a: 'USA',
-        image: 'https://flagcdn.com/us.svg',
+        image: '/flags/us.svg',
         category: 'sports',
       },
       { q: 'The F1 constructor that won four consecutive Constructors\' Championships from 2010 to 2013 with Sebastian Vettel.', a: 'Red Bull', category: 'sports' },
@@ -266,7 +266,7 @@ export const sportsMediumPack: RawPack = {
       {
         q: 'This country won the men\'s Cricket World Cup in 2011 on home soil.',
         a: 'India',
-        image: 'https://flagcdn.com/in.svg',
+        image: '/flags/in.svg',
         category: 'sports',
       },
       { q: 'The only country to have competed in every single FIFA World Cup finals tournament.', a: 'Brazil', category: 'sports' },
@@ -278,7 +278,7 @@ export const sportsMediumPack: RawPack = {
       {
         q: 'This country won the 2018 FIFA World Cup held in Russia.',
         a: 'France',
-        image: 'https://flagcdn.com/fr.svg',
+        image: '/flags/fr.svg',
         category: 'sports',
       },
       { q: 'The cyclist who won the Tour de France five consecutive times from 1991 to 1995.', a: 'Miguel Indurain', category: 'sports' },
@@ -300,7 +300,7 @@ export const sportsMediumPack: RawPack = {
       {
         q: 'This country hosted the 2014 FIFA World Cup and lost the final 1-0 to Germany.',
         a: 'Brazil',
-        image: 'https://flagcdn.com/br.svg',
+        image: '/flags/br.svg',
         category: 'sports',
       },
       { q: 'In F1, the coveted front-of-grid slot awarded to the driver who sets the quickest qualifying lap.', a: 'Pole position', category: 'sports' },
@@ -322,7 +322,7 @@ export const sportsMediumPack: RawPack = {
       {
         q: 'This nation, the Springboks, beat England in the 2019 Rugby World Cup final held in Japan.',
         a: 'South Africa',
-        image: 'https://flagcdn.com/za.svg',
+        image: '/flags/za.svg',
         category: 'sports',
       },
       { q: 'The Swiss-based international federation that governs track and field, organising the global championships held every two years.', a: 'World Athletics', category: 'sports' },
@@ -355,7 +355,7 @@ export const sportsMediumPack: RawPack = {
       {
         q: 'This country hosted the 2010 FIFA World Cup — the first on African soil.',
         a: 'South Africa',
-        image: 'https://flagcdn.com/za.svg',
+        image: '/flags/za.svg',
         category: 'sports',
       },
       { q: 'The Dutch F1 driver who won his first world championship on the final lap of the 2021 season.', a: 'Max Verstappen', category: 'sports' },
@@ -378,7 +378,7 @@ export const sportsMediumPack: RawPack = {
       {
         q: 'This South American country hosted the very first FIFA World Cup in 1930.',
         a: 'Uruguay',
-        image: 'https://flagcdn.com/uy.svg',
+        image: '/flags/uy.svg',
         category: 'sports',
       },
       { q: 'In rugby, a kick to touch awarded after the referee stops play for an infringement.', a: 'Penalty kick', category: 'sports' },
@@ -399,7 +399,7 @@ export const sportsMediumPack: RawPack = {
       {
         q: 'This country has historically dominated Olympic Greco-Roman wrestling.',
         a: 'Russia',
-        image: 'https://flagcdn.com/ru.svg',
+        image: '/flags/ru.svg',
         category: 'sports',
       },
     ],
@@ -435,7 +435,7 @@ export const sportsMediumPack: RawPack = {
       {
         q: 'This country won the inaugural Rugby World Cup in 1987.',
         a: 'New Zealand',
-        image: 'https://flagcdn.com/nz.svg',
+        image: '/flags/nz.svg',
         category: 'sports',
       },
       { q: 'In basketball, taking steps while holding the ball without dribbling.', a: 'Walking violation', category: 'sports' },

@@ -98,6 +98,16 @@ describe('admin, app-config, revenuecat webhook', () => {
     expect(after.body.maintenance).toBe(true);
     const cleared = await h.http().patch('/app-config').set(h.auth(admin)).send({ latestBundle: null, maintenance: false }).expect(200);
     expect(cleared.body.latestBundle).toBeNull();
+
+    // OTA release workflow: the CI machine token (x-qa-token) may patch too; nothing else may.
+    await h.http().patch('/app-config').send({ maintenance: false }).expect(403);
+    await h.http().patch('/app-config').set('x-qa-token', 'wrong').send({ maintenance: false }).expect(403);
+    const bundle = { version: '1.5.0', url: 'https://api.letterlock.raltech.dev/bundles/1.5.0.zip', sha256: 'f'.repeat(64), minNative: '1.0.0' };
+    const ota = await h.http().patch('/app-config').set('x-qa-token', 'qa-e2e-token').send({ latestBundle: bundle }).expect(200);
+    expect(ota.body.latestBundle).toEqual(bundle);
+    expect((await h.http().get('/app-config').expect(200)).body.latestBundle.version).toBe('1.5.0');
+    // the token grants nothing beyond this guard: a validation error is still a 400
+    await h.http().patch('/app-config').set('x-qa-token', 'qa-e2e-token').send({ minBundle: 'nope' }).expect(400);
   });
 
   it('bundles are served statically from BUNDLES_DIR', async () => {

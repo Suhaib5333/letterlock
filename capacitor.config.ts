@@ -1,6 +1,7 @@
 /// <reference types="@capacitor/splash-screen" />
 /// <reference types="@capacitor/keyboard" />
 /// <reference types="@capacitor/status-bar" />
+/// <reference types="@capgo/capacitor-updater" />
 
 import type { CapacitorConfig } from '@capacitor/cli';
 
@@ -68,6 +69,19 @@ const config: CapacitorConfig = {
       style: 'DARK',
       backgroundColor: '#0a0e1f',
       overlaysWebView: false,
+    },
+    CapacitorUpdater: {
+      // OTA (LAUNCH_PLAN Phase 3c, D7) in MANUAL mode: src/lib/ota.ts asks OUR
+      // API for `latestBundle`, downloads with a sha256 checksum and set()s it.
+      // No Capgo account. If the new bundle never calls notifyAppReady() within
+      // appReadyTimeout the native side rolls back to the last good bundle.
+      autoUpdate: false,
+      appReadyTimeout: 10000,
+      autoDeleteFailed: true,
+      autoDeletePrevious: true,
+      // A store update (new builtin) discards downloaded bundles that may be older.
+      resetWhenUpdate: true,
+      keepUrlPathAfterReload: true,
     },
   },
 };

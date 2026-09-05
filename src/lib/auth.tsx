@@ -1,270 +1,303 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
 import { configureProgress } from '../state/progress';
 import { configureSavedGame } from '../state/savedGame';
-import { supabase, type Profile } from './supabase';
+import { apiBase } from './appConfig';
+import {
+  api,
+  ApiError,
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  isApiConfigured,
+  onAuthLost,
+  setTokens,
+  type AuthResult,
+  type AuthUser,
+  type Profile,
+} from './api';
+
+export type { AuthUser, Profile } from './api';
+
+type Result = { ok: boolean; error?: string };
 
 interface AuthState {
-  user: User | null;
-  session: Session | null;
+  user: AuthUser | null;
   profile: Profile | null;
   loading: boolean;
-  // Convenience role flags derived from `profile.role` — guarded against banned
+  // Convenience role flags derived from `profile.role`, guarded against banned
   // accounts so a banned admin loses their button immediately on next reload.
   isAdmin: boolean;
   isModerator: boolean;
   isBanned: boolean;
-  // True while the profile row for the current user is still being fetched — lets
-  // the UI avoid flashing the "choose a username" gate at an existing user.
+  // True while a profile re-fetch is in flight (refreshProfile).
   profileLoading: boolean;
-  // True once the current user's profile fetch has resolved (so a null profile
-  // genuinely means "no username yet", not "still loading").
+  // True once the current user's profile is known (so a null profile genuinely
+  // means "no username yet", not "still loading"). Keyed to the user id, never a
+  // stale carry-over between identities (Round-23, CLAUDE.md II.3u).
   profileChecked: boolean;
-  signInWithGoogle: () => Promise<{ ok: boolean; error?: string }>;
-  // Email OTP — works out of the box on Supabase (default email provider,
-  // no SMTP / dashboard config needed) so users can sign in even when Google
-  // OAuth isn't enabled in the dashboard yet. The email contains both a
-  // magic-link AND a 6-digit code; we expose both flows.
-  signInWithEmail: (email: string) => Promise<{ ok: boolean; error?: string }>;
-  verifyEmailOtp: (
-    email: string,
-    code: string,
-  ) => Promise<{ ok: boolean; error?: string }>;
+  signInWithGoogle: () => Promise<Result>;
+  signInWithApple: () => Promise<Result>;
+  signInWithEmail: (email: string) => Promise<Result>;
+  verifyEmailOtp: (email: string, code: string) => Promise<Result>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<Result>;
   refreshProfile: () => Promise<void>;
-  // Error carried back from an OAuth redirect (see consumeOAuthErrorFromUrl).
-  // The auth modal shows it once, then clears it.
+  // Error carried back from the Google redirect (see consumeAuthCallback). The
+  // auth modal shows it once, then clears it.
   authRedirectError: string | null;
   clearAuthRedirectError: () => void;
 }
 
-// A failed OAuth round-trip (Google → Supabase → back here) lands with the
-// failure in the URL hash: #error=...&error_code=...&error_description=...
-// supabase-js's detectSessionInUrl only consumes SUCCESS tokens — an error hash
-// was silently ignored, so to the player it looked like "the page refreshed and
-// nothing happened". Capture it synchronously at module load (before auth-js's
-// async init runs), then scrub it from the URL so a manual refresh is clean.
-function consumeOAuthErrorFromUrl(): string | null {
-  if (typeof window === 'undefined') return null;
-  if (!/[#&]error(_description|_code)?=/.test(window.location.hash)) return null;
-  const params = new URLSearchParams(window.location.hash.slice(1));
-  const msg = params.get('error_description') || params.get('error');
-  if (!msg) return null;
-  window.history.replaceState(null, '', window.location.pathname + window.location.search);
-  return msg;
+/** Web "Sign in with Apple" is offered only when the Services ID is configured. */
+export function appleWebEnabled(): boolean {
+  return !!(import.meta.env.VITE_APPLE_SERVICES_ID as string | undefined)?.trim();
 }
-const oauthRedirectError = consumeOAuthErrorFromUrl();
-if (oauthRedirectError) {
-  // Keep a diagnostic trail even if no UI is mounted to show it.
-  console.error('OAuth sign-in failed:', oauthRedirectError);
+
+const REDIRECT_ERRORS: Record<string, string> = {
+  google_failed: 'Google could not complete the sign-in',
+  invalid_state: 'the sign-in link expired',
+  missing_code: 'Google returned no code',
+  access_denied: 'the request was cancelled',
+  google_unconfigured: 'Google sign-in is not configured on the server',
+};
+
+/**
+ * The Google flow ends with the API redirecting to `/auth/callback?code=<one-time>
+ * &returnTo=<path>` (or `?error=`). Consume that synchronously at module load,
+ * BEFORE main.tsx reads `?view=controller`, and restore the URL the player started
+ * from (e.g. `/?room=ABC123&view=controller` for a QR sign-in) so every downstream
+ * reader sees the original route. The code is exchanged by the provider below.
+ */
+function consumeAuthCallback(): { code: string | null; error: string | null } {
+  if (typeof window === 'undefined') return { code: null, error: null };
+  const url = new URL(window.location.href);
+  if (!url.pathname.replace(/\/+$/, '').endsWith('/auth/callback')) return { code: null, error: null };
+  const code = url.searchParams.get('code');
+  const rawError = url.searchParams.get('error');
+  const returnTo = url.searchParams.get('returnTo') ?? '';
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const target = returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : `${base}/`;
+  window.history.replaceState(null, '', target);
+  const error = rawError ? `${REDIRECT_ERRORS[rawError] ?? rawError} (${rawError})` : null;
+  if (error) console.error('OAuth sign-in failed:', error);
+  return { code, error };
 }
+const pendingCallback = consumeAuthCallback();
+
+// Sign in with Apple JS (web). Loaded on demand, only when configured.
+declare global {
+  interface Window {
+    AppleID?: {
+      auth: {
+        init: (cfg: { clientId: string; scope: string; redirectURI: string; usePopup: boolean }) => void;
+        signIn: () => Promise<{ authorization: { id_token: string; code: string }; user?: { name?: { firstName?: string; lastName?: string } } }>;
+      };
+    };
+  }
+}
+let appleScript: Promise<void> | null = null;
+function loadAppleJs(): Promise<void> {
+  if (window.AppleID) return Promise.resolve();
+  appleScript ??= new Promise<void>((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
+    s.onload = () => resolve();
+    s.onerror = () => {
+      appleScript = null;
+      reject(new Error('Could not load Sign in with Apple.'));
+    };
+    document.head.appendChild(s);
+  });
+  return appleScript;
+}
+
+const errorMessage = (e: unknown, fallback: string): string =>
+  e instanceof ApiError ? e.message : e instanceof Error ? e.message : fallback;
 
 const AuthCtx = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
-  // The user id whose profile fetch has RESOLVED. profileChecked derives from it
-  // (checkedUserId === user.id), so a user switch can never leave a stale "checked"
-  // from the previous identity: the old boolean stayed true for one render right
-  // after sign-in, which flashed needsUsername=true → the Home modal auto-close
-  // race that swallowed the "Choose a username" gate.
+  // The user id whose profile is KNOWN. profileChecked derives from it
+  // (checkedUserId === user.id), so a user switch can never leave a stale
+  // "checked" from the previous identity (the Round-23 gate-swallowing race).
   const [checkedUserId, setCheckedUserId] = useState<string | null>(null);
-  const [authRedirectError, setAuthRedirectError] = useState<string | null>(oauthRedirectError);
+  const [authRedirectError, setAuthRedirectError] = useState<string | null>(pendingCallback.error);
 
-  // Bootstrap: rehydrate the session from localStorage (supabase-js does
-  // this internally when persistSession=true) then listen for changes.
+  // Every sign-in / me response carries user + profile together, so both land in
+  // the same render: never a user-without-checked-profile flash.
+  const apply = (res: { user: AuthUser; profile: Profile | null }) => {
+    setUser(res.user);
+    setProfile(res.profile);
+    setCheckedUserId(res.user.id);
+  };
+  const reset = () => {
+    setUser(null);
+    setProfile(null);
+    setCheckedUserId(null);
+  };
+
+  // Bootstrap: exchange a Google one-time code, else rehydrate from the stored
+  // tokens (GET /auth/me refreshes an expired access token transparently).
   useEffect(() => {
-    if (!supabase) {
+    if (!isApiConfigured()) {
       setLoading(false);
       return;
     }
     let cancelled = false;
-    supabase.auth.getSession().then(({ data }) => {
-      if (cancelled) return;
-      setSession(data.session ?? null);
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-    });
+    (async () => {
+      try {
+        if (pendingCallback.code) {
+          const code = pendingCallback.code;
+          pendingCallback.code = null; // one-time: never re-exchange on a StrictMode re-run
+          const res = await api<AuthResult>('/auth/exchange', { method: 'POST', body: { code }, auth: 'none' });
+          setTokens(res.accessToken, res.refreshToken);
+          if (!cancelled) apply(res);
+        } else if (getAccessToken() || getRefreshToken()) {
+          const res = await api<{ user: AuthUser; profile: Profile | null }>('/auth/me', { auth: 'user' });
+          if (!cancelled) apply(res);
+        }
+      } catch (e) {
+        if (cancelled) return;
+        if (e instanceof ApiError && e.status === 401) {
+          clearTokens();
+          reset();
+          if (pendingCallback.error === null && e.code.startsWith('login_code')) {
+            setAuthRedirectError(`${e.message} (${e.code})`);
+          }
+        }
+        // Offline / server down: keep the stored tokens, stay signed-out in the UI
+        // for this load; the next load retries.
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    const off = onAuthLost(reset);
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
+      off();
     };
   }, []);
 
-  // Point the question-progress tracker at the current identity: signed-in users
-  // load their saved no-repeat cycle from the DB; guests get a fresh cycle each
-  // session. Runs once loading settles and whenever the user switches.
+  // Point the question-progress tracker + the Resume store at the current
+  // identity: signed-in users load their account data; guests get local state.
   useEffect(() => {
     if (loading) return;
     void configureProgress(user?.id ?? null);
-    // Point the Resume store at this identity too: signed-in users pull their
-    // account's saved game (resumes across devices/sessions); guests use the
-    // local save. See state/savedGame.ts.
     void configureSavedGame(user?.id ?? null);
   }, [user?.id, loading]);
 
-  // Load the profile row whenever the user changes — drives the username
-  // gate (a fresh Google sign-in has no profile until they claim a name).
-  useEffect(() => {
-    if (!user || !supabase) {
-      setProfile(null);
-      setProfileLoading(false);
-      setCheckedUserId(null); // settled: signed out → no profile, no username gate
-      return;
-    }
-    let cancelled = false;
-    setProfileLoading(true);
-    supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (cancelled) return;
-        setProfile((data as Profile) ?? null);
-        setProfileLoading(false);
-        setCheckedUserId(user.id);
+  const signInWithGoogle = async (): Promise<Result> => {
+    const base = apiBase();
+    if (!base) return { ok: false, error: 'Online features are not configured in this build.' };
+    // Preserve the current route (e.g. ?room=ABC123&view=controller) so a player
+    // who signs in from the QR-scanned controller lands BACK on the controller
+    // after the round-trip, not on the home page (returnTo is echoed by the API).
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(`${base}/auth/google?returnTo=${encodeURIComponent(returnTo)}`);
+    return { ok: true };
+  };
+
+  const signInWithApple = async (): Promise<Result> => {
+    const clientId = (import.meta.env.VITE_APPLE_SERVICES_ID as string | undefined)?.trim();
+    if (!clientId || !isApiConfigured()) return { ok: false, error: 'Apple sign-in is not available in this build.' };
+    try {
+      await loadAppleJs();
+      window.AppleID!.auth.init({
+        clientId,
+        scope: 'name email',
+        // Must be registered as a Return URL on the Services ID; popup mode still requires it.
+        redirectURI: `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, '')}/auth/callback`,
+        usePopup: true,
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
-
-  const signInWithGoogle = async (): Promise<{ ok: boolean; error?: string }> => {
-    if (!supabase) return { ok: false, error: 'Supabase not configured.' };
-    // Preserve the current query string (e.g. ?room=ABC123&view=controller) so a
-    // player who signs in from the QR-scanned controller lands BACK on the
-    // controller/room after the OAuth round-trip — not on the home page.
-    const redirectTo =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}${window.location.pathname}${window.location.search}`
-        : undefined;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo },
-    });
-    if (error) {
-      // The most common failure mode is "Unsupported provider: provider is not
-      // enabled" — Supabase returns this until Google OAuth is toggled on in
-      // the dashboard. Surface a hint instead of crashing.
-      const msg = /provider is not enabled/i.test(error.message)
-        ? 'Google sign-in is not enabled in this project yet. Use the email option below — it works out of the box.'
-        : error.message;
-      return { ok: false, error: msg };
+      const r = await window.AppleID!.auth.signIn();
+      const n = r.user?.name;
+      const fullName = n ? [n.firstName, n.lastName].filter(Boolean).join(' ') : undefined;
+      const res = await api<AuthResult>('/auth/apple', {
+        method: 'POST',
+        auth: 'none',
+        body: { identityToken: r.authorization.id_token, authorizationCode: r.authorization.code, ...(fullName ? { fullName } : {}) },
+      });
+      setTokens(res.accessToken, res.refreshToken);
+      apply(res);
+      return { ok: true };
+    } catch (e) {
+      // The Apple popup rejects with { error: 'popup_closed_by_user' } on cancel.
+      const code = (e as { error?: string } | null)?.error;
+      if (code === 'popup_closed_by_user') return { ok: false, error: 'Apple sign-in was cancelled.' };
+      return { ok: false, error: errorMessage(e, 'Apple sign-in failed.') };
     }
-    return { ok: true };
   };
 
-  const signInWithEmail = async (email: string): Promise<{ ok: boolean; error?: string }> => {
-    if (!supabase) return { ok: false, error: 'Supabase not configured.' };
+  const signInWithEmail = async (email: string): Promise<Result> => {
+    if (!isApiConfigured()) return { ok: false, error: 'Online features are not configured in this build.' };
     const trimmed = email.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      return { ok: false, error: 'Enter a valid email address.' };
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return { ok: false, error: 'Enter a valid email address.' };
+    try {
+      await api('/auth/otp/request', { method: 'POST', body: { email: trimmed }, auth: 'none' });
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: errorMessage(e, 'Could not send the sign-in code.') };
     }
-
-    // Preferred path: our Supabase Edge Function at /functions/v1/send-otp.
-    // It calls Supabase Admin (service_role) to mint an OTP, then sends the
-    // email via Resend — bypassing Supabase's 2-emails-per-hour default
-    // mailer rate limit AND avoiding Cloudflare in the email path entirely.
-    // The function source is at `supabase/functions/send-otp/index.ts`.
-    //
-    // If the function isn't deployed yet (or returns 404), fall back to
-    // Supabase's default signInWithOtp so sign-in still works at all.
-    const supabaseUrl = (supabase as unknown as { supabaseUrl?: string }).supabaseUrl
-      ?? (import.meta.env.VITE_SUPABASE_URL as string | undefined);
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-    if (supabaseUrl && anonKey) {
-      try {
-        const res = await fetch(`${supabaseUrl}/functions/v1/send-otp`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            // Edge Functions accept the anon key in the apikey header. Even
-            // with --no-verify-jwt this is good practice; some Supabase
-            // gateways enforce it.
-            apikey: anonKey,
-            Authorization: `Bearer ${anonKey}`,
-          },
-          body: JSON.stringify({ email: trimmed }),
-        });
-        if (res.ok) return { ok: true };
-        // 404 (function not deployed) OR 5xx (function misconfigured — e.g. the
-        // Resend/service-role secrets live on a different backend) → fall through
-        // to Supabase's built-in mailer so sign-in still works. Only a 4xx that
-        // isn't 404 (a real client error like a bad email) is surfaced.
-        if (res.status !== 404 && res.status < 500) {
-          const data = (await res.json().catch(() => ({ error: 'Unknown error' }))) as {
-            error?: string;
-          };
-          return { ok: false, error: data.error ?? `Send failed (HTTP ${res.status}).` };
-        }
-      } catch {
-        // Network failure — fall through.
-      }
-    }
-
-    // Fallback: direct Supabase mailer (works, but rate-limited 2/hour).
-    // shouldCreateUser:true so a brand-new email actually gets an account +
-    // a verifiable code (otherwise first-time sign-in silently mints no OTP).
-    const emailRedirectTo =
-      typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : undefined;
-    const { error } = await supabase.auth.signInWithOtp({
-      email: trimmed,
-      options: { emailRedirectTo, shouldCreateUser: true },
-    });
-    if (error) {
-      const friendly =
-        /rate limit/i.test(error.message) || /429/.test(error.message)
-          ? 'Supabase’s built-in email is rate-limited to 2/hour. Set up Resend in the Cloudflare Pages env (RESEND_API + SUPABASE_SERVICE_ROLE_KEY) to lift this.'
-          : error.message;
-      return { ok: false, error: friendly };
-    }
-    return { ok: true };
   };
 
-  const verifyEmailOtp = async (
-    email: string,
-    code: string,
-  ): Promise<{ ok: boolean; error?: string }> => {
-    if (!supabase) return { ok: false, error: 'Supabase not configured.' };
+  const verifyEmailOtp = async (email: string, code: string): Promise<Result> => {
+    if (!isApiConfigured()) return { ok: false, error: 'Online features are not configured in this build.' };
     const trimmedCode = code.trim();
-    // Supabase OTP length is project-configurable (6–10 digits). The workflow
-    // patches it to 6, but accepting any length in that range keeps the UI
-    // working if the project setting drifts or someone reconfigures it.
-    if (!/^\d{6,10}$/.test(trimmedCode)) {
-      return { ok: false, error: 'Enter the digits from your email.' };
+    if (!/^\d{6}$/.test(trimmedCode)) return { ok: false, error: 'Enter the 6 digits from your email.' };
+    try {
+      const res = await api<AuthResult>('/auth/otp/verify', {
+        method: 'POST',
+        body: { email: email.trim(), code: trimmedCode },
+        auth: 'none',
+      });
+      setTokens(res.accessToken, res.refreshToken);
+      apply(res);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: errorMessage(e, 'That code is wrong or expired.') };
     }
-    const { error } = await supabase.auth.verifyOtp({
-      email: email.trim(),
-      token: trimmedCode,
-      type: 'email',
-    });
-    if (error) return { ok: false, error: error.message };
-    return { ok: true };
   };
 
   const signOut = async () => {
-    if (!supabase) return;
-    await supabase.auth.signOut();
-    setProfile(null);
+    const refreshToken = getRefreshToken();
+    clearTokens();
+    reset();
+    if (refreshToken && isApiConfigured()) {
+      await api('/auth/logout', { method: 'POST', body: { refreshToken }, auth: 'none' }).catch(() => {});
+    }
+  };
+
+  /** Store-required in-app account deletion (Apple 5.1.1(v), Play policy). */
+  const deleteAccount = async (): Promise<Result> => {
+    if (!user || !isApiConfigured()) return { ok: false, error: 'Not signed in.' };
+    try {
+      await api('/auth/me', { method: 'DELETE', auth: 'user' });
+    } catch (e) {
+      return { ok: false, error: errorMessage(e, 'Could not delete the account. Try again.') };
+    }
+    clearTokens();
+    reset();
+    return { ok: true };
   };
 
   const refreshProfile = async () => {
-    if (!user || !supabase) return;
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
-    setProfile((data as Profile) ?? null);
+    if (!user || !isApiConfigured()) return;
+    setProfileLoading(true);
+    try {
+      apply(await api<{ user: AuthUser; profile: Profile | null }>('/auth/me', { auth: 'user' }));
+    } catch {
+      /* a lost session is handled by onAuthLost; a network blip keeps the old profile */
+    } finally {
+      setProfileLoading(false);
+    }
   };
 
-  // Signed out counts as "checked" (there is nothing to fetch); signed in only
-  // once THIS user's fetch resolved — never a stale carry-over between renders.
+  // Signed out counts as "checked" (nothing to fetch); signed in only once THIS
+  // user's data arrived.
   const profileChecked = user ? checkedUserId === user.id : true;
 
   const isBanned = !!profile?.banned_at;
@@ -275,7 +308,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthCtx.Provider
       value={{
         user,
-        session,
         profile,
         loading,
         isAdmin,
@@ -284,9 +316,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profileLoading,
         profileChecked,
         signInWithGoogle,
+        signInWithApple,
         signInWithEmail,
         verifyEmailOtp,
         signOut,
+        deleteAccount,
         refreshProfile,
         authRedirectError,
         clearAuthRedirectError: () => setAuthRedirectError(null),
@@ -300,12 +334,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth(): AuthState {
   const v = useContext(AuthCtx);
   if (!v) {
-    // Allow components to render without crashing when AuthProvider isn't
-    // mounted (e.g. tests, /img secret-prompt page). They just see "not
-    // signed in" forever, which is the right fallback.
+    // Components may render without AuthProvider (tests, the /img secret-prompt
+    // page). They just see "not signed in" forever, which is the right fallback.
+    const off: Result = { ok: false, error: 'Auth not initialised.' };
     return {
       user: null,
-      session: null,
       profile: null,
       loading: false,
       isAdmin: false,
@@ -313,10 +346,12 @@ export function useAuth(): AuthState {
       isBanned: false,
       profileChecked: false,
       profileLoading: false,
-      signInWithGoogle: async () => ({ ok: false, error: 'Auth not initialised.' }),
-      signInWithEmail: async () => ({ ok: false, error: 'Auth not initialised.' }),
-      verifyEmailOtp: async () => ({ ok: false, error: 'Auth not initialised.' }),
+      signInWithGoogle: async () => off,
+      signInWithApple: async () => off,
+      signInWithEmail: async () => off,
+      verifyEmailOtp: async () => off,
       signOut: async () => {},
+      deleteAccount: async () => off,
       refreshProfile: async () => {},
       authRedirectError: null,
       clearAuthRedirectError: () => {},

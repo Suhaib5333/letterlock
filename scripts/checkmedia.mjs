@@ -1,96 +1,132 @@
-// Verify EVERY media URL actually loads: audio (songs), video (TV clips), youtube
-// (movie trailers), and local images/audio (flags, melodies). Reports dead items per
-// pack so they can be pruned. Run:  npx vite-node scripts/checkmedia.mjs
-import { existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-import { PACKS } from '../src/content/index.ts';
-import { allQuestions } from '../src/core/packs.ts';
+// Media gate (CI-safe, exits non-zero on any failure). Run:  node scripts/checkmedia.mjs
+//
+//  1. Every media URL in every pack loads: local paths (/flags, /logos, /clips,
+//     /charades) must exist on disk; remote URLs (iTunes previews, web-only by D3)
+//     must answer a ranged GET. `REMOTE=0` skips the slow remote pass.
+//  2. Charades (D9): every prompt either has its bundled image or is explicitly
+//     word-only in public/charades/<packId>/credits.json; every image <= 60 KB.
+//  3. No forbidden third-party URL is left anywhere in src/ or index.html:
+//     loremflickr, flagcdn, cdn.simpleicons.org, fonts.googleapis, fonts.gstatic.
+//     (iTunes URLs are allowed: those packs are gated to the web by content/index.ts.)
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import { createServer } from 'vite';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = join(import.meta.dirname, '..');
 const PUBLIC = join(ROOT, 'public');
+const server = await createServer({ logLevel: 'error', server: { middlewareMode: true } });
+const { PACKS } = await server.ssrLoadModule('/src/content/index.ts');
+const { allQuestions } = await server.ssrLoadModule('/src/core/packs.ts');
+const { charadeSlug } = await server.ssrLoadModule('/src/content/charadesImages.ts');
+await server.close();
 
+const failures = [];
+const fail = (msg) => failures.push(msg);
+
+// ---------- 1. every media path/URL ----------
 const TIMEOUT = 12000;
 async function reachable(url) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT);
   try {
-    // Range GET (1 byte) — works for media CDNs that reject HEAD.
     const res = await fetch(url, { headers: { Range: 'bytes=0-1' }, signal: ctrl.signal });
-    if (res.status === 200 || res.status === 206) {
-      const ct = res.headers.get('content-type') || '';
-      return { ok: true, ct };
-    }
-    return { ok: false, status: res.status };
+    return res.status === 200 || res.status === 206 ? null : `HTTP ${res.status}`;
   } catch (e) {
-    return { ok: false, status: e.name === 'AbortError' ? 'timeout' : 'error' };
+    return e.name === 'AbortError' ? 'timeout' : 'error';
   } finally {
     clearTimeout(t);
   }
 }
-async function ytOk(id) {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), TIMEOUT);
-  try {
-    const res = await fetch(`https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=${id}`, { signal: ctrl.signal });
-    return res.ok;
-  } catch {
-    return false;
-  } finally {
-    clearTimeout(t);
-  }
-}
-function localOk(url) {
-  // '/flags/bh.svg' -> public/flags/bh.svg
-  const p = join(PUBLIC, url.replace(/^\//, ''));
-  return existsSync(p);
-}
-
-const limit = 8;
-async function mapLimit(items, fn) {
-  const out = [];
+async function mapLimit(items, limit, fn) {
   let i = 0;
-  async function worker() {
+  const out = [];
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
     while (i < items.length) {
       const idx = i++;
       out[idx] = await fn(items[idx]);
     }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  }));
   return out;
 }
 
-let totalDead = 0;
-const deadByPack = {};
+const remote = [];
 for (const pack of PACKS) {
-  const qs = allQuestions(pack);
-  const targets = [];
-  for (const q of qs) {
-    if (q.youtube) targets.push({ q, kind: 'youtube', url: q.youtube });
-    else if (q.video) targets.push({ q, kind: 'video', url: q.video });
-    else if (q.audio) targets.push({ q, kind: 'audio', url: q.audio });
-    else if (q.image) targets.push({ q, kind: 'image', url: q.image });
+  let local = 0, dead = 0;
+  for (const q of allQuestions(pack)) {
+    for (const kind of ['image', 'audio', 'video']) {
+      const url = q[kind];
+      if (!url) continue;
+      if (q.youtube) fail(`${pack.id}: youtube embed on "${q.a}" (YouTube was removed in round 8c)`);
+      if (url.startsWith('/')) {
+        local++;
+        if (!existsSync(join(PUBLIC, url.replace(/^\//, '')))) { dead++; fail(`${pack.id}: missing local ${kind} ${url} ("${q.a}")`); }
+      } else {
+        remote.push({ pack: pack.id, kind, url, a: q.a });
+      }
+    }
   }
-  if (targets.length === 0) continue;
-  // Skip the huge remote sets unless explicitly requested (logos/charades use slow
-  // CDNs and aren't the focus). Focus: clip/audio/flag packs.
-  const SKIP = /logos|charades/.test(pack.id);
-  if (SKIP && !process.env.ALL) {
-    console.log(`⏭  ${pack.name} (${targets.length} remote — skipped; set ALL=1 to include)`);
-    continue;
-  }
-  const results = await mapLimit(targets, async (t) => {
-    if (t.kind === 'youtube') return { t, ok: await ytOk(t.url) };
-    if (t.url.startsWith('/')) return { t, ok: localOk(t.url) };
-    const r = await reachable(t.url);
-    return { t, ok: r.ok, info: r };
-  });
-  const dead = results.filter((r) => !r.ok);
-  totalDead += dead.length;
-  deadByPack[pack.id] = dead.map((d) => ({ a: d.t.q.a, kind: d.t.kind, url: d.t.url, info: d.info }));
-  const mark = dead.length === 0 ? '✅' : '❌';
-  console.log(`${mark} ${pack.name.padEnd(26)} ${targets.length - dead.length}/${targets.length} ok` + (dead.length ? `  — ${dead.length} DEAD` : ''));
-  for (const d of dead) console.log(`     ✗ ${d.t.kind} "${d.t.q.a}" ${JSON.stringify(d.info ?? '')}`);
+  if (local) console.log(`${dead ? '❌' : '✅'} ${pack.id.padEnd(22)} ${local - dead}/${local} local files`);
 }
-console.log(`\nTotal dead media: ${totalDead}`);
-process.exit(0);
+if (process.env.REMOTE !== '0' && remote.length) {
+  console.log(`\nChecking ${remote.length} remote URLs (web-only packs)...`);
+  const results = await mapLimit(remote, 8, async (t) => ({ t, err: await reachable(t.url) }));
+  const byPack = {};
+  for (const r of results) {
+    const s = (byPack[r.t.pack] ??= { ok: 0, dead: 0 });
+    if (r.err) { s.dead++; fail(`${r.t.pack}: dead ${r.t.kind} "${r.t.a}" (${r.err}) ${r.t.url}`); } else s.ok++;
+  }
+  for (const [id, s] of Object.entries(byPack)) console.log(`${s.dead ? '❌' : '✅'} ${id.padEnd(22)} ${s.ok}/${s.ok + s.dead} remote ok${s.dead ? `, ${s.dead} DEAD` : ''}`);
+}
+
+// ---------- 2. charades coverage + size ----------
+console.log('');
+for (const pack of PACKS.filter((p) => /^charades/.test(p.id))) {
+  const dir = join(PUBLIC, 'charades', pack.id);
+  const creditsPath = join(dir, 'credits.json');
+  if (!existsSync(creditsPath)) { fail(`${pack.id}: no credits.json (run node scripts/genimages.mjs)`); continue; }
+  const credits = new Map(JSON.parse(readFileSync(creditsPath, 'utf8')).map((e) => [e.slug, e]));
+  let images = 0, wordOnly = 0;
+  for (const q of allQuestions(pack)) {
+    const slug = charadeSlug(q.a);
+    const e = credits.get(slug);
+    const file = join(dir, `${slug}.webp`);
+    if (!e) { fail(`${pack.id}: prompt "${q.a}" has no credits entry (not fetched, not word-only)`); continue; }
+    if (e.source === 'word-only') {
+      wordOnly++;
+      if (q.image) fail(`${pack.id}: "${q.a}" is word-only but carries an image ${q.image}`);
+      continue;
+    }
+    if (!existsSync(file)) { fail(`${pack.id}: credits say ${e.source} but ${slug}.webp is missing`); continue; }
+    if (q.image !== `/charades/${pack.id}/${slug}.webp`) fail(`${pack.id}: "${q.a}" should point at /charades/${pack.id}/${slug}.webp, got ${q.image}`);
+    if (!e.license || !e.sourceUrl) fail(`${pack.id}: ${slug} has no license/source credit`);
+    const size = statSync(file).size;
+    if (size > 60 * 1024) fail(`${pack.id}: ${slug}.webp is ${Math.round(size / 1024)} KB (> 60 KB)`);
+    images++;
+  }
+  console.log(`🎭 ${pack.id.padEnd(22)} ${images} images, ${wordOnly} word-only`);
+}
+
+// ---------- 3. forbidden hosts in src/ and index.html ----------
+const FORBIDDEN = /loremflickr\.com|flagcdn\.com|cdn\.simpleicons\.org|fonts\.googleapis\.com|fonts\.gstatic\.com/;
+function walk(dir, out = []) {
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name);
+    if (statSync(p).isDirectory()) walk(p, out);
+    else if (/\.(ts|tsx|css|html|json)$/.test(name) && !/\.test\.tsx?$/.test(name)) out.push(p);
+  }
+  return out;
+}
+for (const file of [...walk(join(ROOT, 'src')), join(ROOT, 'index.html')]) {
+  const lines = readFileSync(file, 'utf8').split('\n');
+  lines.forEach((line, i) => {
+    if (FORBIDDEN.test(line)) fail(`forbidden host in ${relative(ROOT, file)}:${i + 1}: ${line.trim().slice(0, 100)}`);
+  });
+}
+
+console.log('');
+if (failures.length) {
+  for (const f of failures) console.log(`  ✗ ${f}`);
+  console.log(`\nMEDIA GATE FAILED: ${failures.length} problem(s)`);
+  process.exit(1);
+}
+console.log('MEDIA GATE CLEAN');
