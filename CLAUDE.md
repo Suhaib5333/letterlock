@@ -1577,3 +1577,45 @@ Prompted by Suhaib asking, twice, whether everything really was done. It was not
   work.** The Android Gradle setup, the API test database, the Playwright `pg` resolution, the
   store-screenshot script and the OTA workflow all read correct and were all broken. The only
   thing that found them was running them.
+
+## 🛠️ Working rules learned the hard way (2026-09-05 cutover night)
+
+Every one of these is from a mistake made that evening, several of them user-visible.
+
+1. **Never push file CONTENT through a shell command line.** `ssh "cat > f <<'EOF' $(cat local)"`
+   mangles anything the shell touches. The Traefik config contains backticks in its
+   ``Host(`...`)`` rules, and a hand transfer arrived **missing two routers**, which took
+   the live site to 404. Use `python infra/put.py <local> <remote>` (SFTP) and confirm with
+   `md5sum` on both ends. The deploy pipeline was never affected: it scps a bundle.
+2. **Validate with the real parser before installing or publishing.** `node --check` on a
+   page's extracted `<script>`; a duplicate-key-strict YAML loader for configs. An artifact
+   was published **completely blank** because `\n` escapes had become real newlines inside a
+   JS string, and PyYAML silently accepts duplicate keys, which is how a second
+   `middlewares:` block deleted the first one. Both are now CI gates.
+3. **Building escapes inside a heredoc is unreliable.** `'\n'` came through as a real
+   newline more than once. Build the two characters explicitly: `chr(92) + 'n'`.
+4. **Back up any live config before editing it**, `cp f f.bak` on the server. That backup
+   restored service twice in one evening.
+5. **Never run two Playwright suites at once.** They fight over ports 4173/3173 and the
+   e2e database and produce 34 phantom failures. Stop the first (`TaskStop`).
+6. **Never report CI green from a tick.** Open the run and confirm which jobs ran.
+7. **Running the suites that seem relevant is not running the suite.** A `<select>` change
+   was verified with vitest, noscroll and checksettings, and broke an e2e test.
+8. **Know what auto-deploys before pushing.** Cloudflare Pages still had its Git
+   integration connected, so a `main` push silently rebuilt the LIVE site onto a backend
+   that was not ready. Now disconnected.
+9. **Traefik specifics** (confirmed against the docs via Context7): the file provider only
+   re-reads when the watched file is **modified**, and ACME retries sit on a slow ticker, so
+   a domain that failed while its DNS was wrong will **not** pick itself up. Appending a
+   comment is not enough, because the routers are unchanged and nothing new needs
+   resolving. What works is making Traefik see a NEW router: rename the router keys
+   (`sed` limited to the routers line-range **only**, never the services), wait for the
+   certificate, then rename them back. Restarting the shared Traefik would hit every other
+   tenant on the box and is not acceptable.
+10. **A config that has never been executed is not known to work.** In one day: the Android
+    build (JDK 17 vs Capacitor 8's Java 21), the API test database (never migrated), the
+    Playwright `pg` resolution (stale local `node_modules`), the store-screenshot script
+    (captured the wrong screen), `ota-release.yml` (invalid YAML), `deploy.yml` (would have
+    failed every `main` push) and the reminder email path. All read correct. All were broken.
+11. **Use Context7 for library and tool behaviour** instead of inferring it from symptoms.
+    The Traefik answer in point 9 came from the docs in one lookup, after a lot of guessing.
