@@ -41,7 +41,9 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          # Capacitor 8's own android module compiles with source/target 21, so a JDK
+          # older than that fails the build with "invalid source release: 21".
+          java-version: '21'
 
       # ubuntu-latest ships the Android SDK at $ANDROID_HOME; this keeps the
       # platform / build-tools that compileSdk 36 needs current and accepts licences.
