@@ -82,9 +82,7 @@ http:
         realm: "Letterlock staging"
         removeHeader: true
         users:
-          - "revenueautomationlab@gmail.com:$apr1$cf2ScI30$v5GAutVosKk7wEvDBLmJQ/"
-          - "suhaibrajabo@gmail.com:$apr1$VA/iZKbj$8i7lnxo94dyAJo5WXtxav1"
-          - "saeedalsaeedbusiness@gmail.com:$apr1$E/lqx38n$UOVSoSEcXhFNN1/0wPxRd1"
+          - "raltech:$apr1$N/ZIm3/2$P9is9rIctxxEUcgWrRvfu1"
 
     letterlock-json:
       headers:
