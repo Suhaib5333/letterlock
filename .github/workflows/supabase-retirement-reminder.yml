@@ -15,7 +15,13 @@ name: Supabase retirement reminder
 on:
   schedule:
     - cron: '0 6 * * 5'   # Fridays 06:00 UTC (09:00 Bahrain)
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Send now, ignoring the not-before date (for testing the mail path).'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -37,7 +43,7 @@ jobs:
           # The first reminder is two weeks after cutover, not the next Friday.
           START=2026-09-19
           TODAY=$(date -u +%F)
-          if [[ "$TODAY" < "$START" ]]; then
+          if [[ "$TODAY" < "$START" && "${{ inputs.force }}" != "true" ]]; then
             echo "::notice ::Too early. First reminder is $START (today $TODAY)."
             echo "send=no" >> "$GITHUB_OUTPUT"; exit 0
           fi
