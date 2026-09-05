@@ -1336,6 +1336,19 @@ re-passes `scripts/checkpack.mjs`.
    sweeps; do not fan out subagents unless the task genuinely needs them; run long
    suites in the background rather than re-reading large files.
 
+### ⛔ ORDERING RULE: do NOT push `main` before B1 (DNS) is done
+
+`main` → prod: `deploy-vps.yml` releases the API and `deploy.yml` publishes the web build
+to the LIVE `letterlock.raltech.dev`. That build has `VITE_API_URL=https://api.letterlock.raltech.dev`
+baked in, and **that hostname does not resolve yet**. Pushing `main` today would leave the live
+site with local play working but sign-in, leaderboards, friends and online rooms all failing.
+
+Work lands on **`uat`** (→ `dev.letterlock.raltech.dev`) until the DNS records exist. After B1:
+verify `https://api.letterlock.raltech.dev/healthz` returns `{"db":true}`, then fast-forward
+`main`. Note `main` is also where `workflow_dispatch` workflows must live — `android-build.yml`
+cannot be dispatched while `main` is behind (use an `app-v*` tag instead, which triggers from
+any ref).
+
 ### 🚧 Blocked on Suhaib (living list — keep it current)
 
 | # | What | Exact steps | Blocks |
