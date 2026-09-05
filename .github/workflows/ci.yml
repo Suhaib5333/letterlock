@@ -48,6 +48,24 @@ jobs:
         working-directory: apps/api
         run: bun install --frozen-lockfile && bunx prisma generate
 
+      # A malformed workflow only surfaces when you try to RUN it: GitHub rejects the
+      # dispatch with a parse error and everything else stays green. That is how a
+      # duplicate `default:` key shipped in ota-release.yml unnoticed.
+      - name: Workflow YAML parses
+        run: |
+          python3 - <<'PY'
+          import glob, sys, yaml
+          bad = 0
+          for f in sorted(glob.glob('.github/workflows/*.yml')):
+              try:
+                  yaml.safe_load(open(f, encoding='utf-8'))
+                  print('ok', f)
+              except Exception as e:
+                  print(f'::error file={f}::{e}')
+                  bad += 1
+          sys.exit(1 if bad else 0)
+          PY
+
       - name: Typecheck
         run: npm run typecheck
 

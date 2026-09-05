@@ -28,12 +28,12 @@ on:
       min_native:
         description: 'Minimum native shell version (semver). Empty = OTA_MIN_NATIVE variable or 1.0.0.'
         required: false
+        default: ''
       dry_run:
         description: 'Build, zip and checksum only. Nothing is uploaded and no app ever sees it.'
         type: boolean
-        default: false
         required: false
-        default: ''
+        default: false
 
 permissions:
   contents: read
