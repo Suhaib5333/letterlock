@@ -59,3 +59,4 @@ __pycache__/
 infra/dev-gate-creds
 infra/dev-gate-hashes.txt
 infra/google-creds
+infra/browser-state.json
