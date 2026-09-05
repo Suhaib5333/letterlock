@@ -9,7 +9,11 @@ on:
     branches: [main, uat]
     paths-ignore: ['**.md', 'docs/**', 'android/**', 'ios/**']
   workflow_dispatch: {}
-concurrency: { group: "deploy-vps-${{ github.ref }}", cancel-in-progress: true }
+# QUEUE, never cancel. A push during a release used to cancel the run mid-flight:
+# one was killed seconds after `prisma migrate deploy` and the PM2 restart, right at
+# the health check, which is exactly the window where a half-released box would go
+# unnoticed. Waiting a few minutes is cheaper than an interrupted deploy.
+concurrency: { group: "deploy-vps-${{ github.ref }}", cancel-in-progress: false }
 
 jobs:
   # Nothing reaches the VPS unless the suites pass. Before this gate existed a green
