@@ -9,7 +9,7 @@ on:
     branches: [main, uat]
     paths-ignore: ['**.md', 'docs/**', 'android/**', 'ios/**']
   workflow_dispatch: {}
-concurrency: { group: deploy-vps-${{ github.ref }}, cancel-in-progress: true }
+concurrency: { group: "deploy-vps-${{ github.ref }}", cancel-in-progress: true }
 
 jobs:
   deploy:
