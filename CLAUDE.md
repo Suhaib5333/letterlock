@@ -1518,3 +1518,31 @@ Prompted by Suhaib asking, twice, whether everything really was done. It was not
   `before/`; the plan asked for both and only `before/` existed.
 - 🧠 **The rule this round bought:** never report CI green from a tick — open the run and confirm
   which jobs ran. It is now standing rule 3 at the top of this file.
+
+## II.3y Round-27: exercising the paths nobody had ever run (2026-09-05)
+
+- 🐛 **`ota-release.yml` was BROKEN and invisible.** Adding a `dry_run` input dropped it between
+  `min_native`'s `required` and its `default`, producing a duplicate `default:` key. GitHub only
+  reports that when you try to RUN the workflow — the dispatch is rejected with a parse error
+  while every other check stays green. So the release path would have failed the first time
+  anyone cut a bundle. **CI now parses every `.github/workflows/*.yml`.**
+- 🐛 **The CI gate cancelled itself.** `concurrency: ci-${{ github.ref }}` is shared by both
+  callers, so dispatching the OTA dry run killed the deploy's gate three seconds in, and the
+  next push killed the OTA run. The key now includes `github.workflow`, giving each caller its
+  own lane.
+- ✅ **OTA `dry_run`**: builds, zips and checksums the bundle and skips upload/verify/publish, so
+  the release logic is provable today instead of first running on the day it matters. A dry run
+  needs no secrets, so the preflight downgrades the missing-secret check to a notice.
+- ✅ **`playwright.config.ts` no longer reuses a hand-started preview for the WEB build.** The
+  bundle bakes `VITE_API_URL` in, so a preview left over from `npm run preview` serves a build
+  pointed at the PRODUCTION API; Playwright reused it and the whole realtime half of the suite
+  failed with "Connecting…", which reads exactly like a code bug. Cost real time today.
+- 🧠 **Two process lessons, both mine.** (1) After switching a control to a `<select>` I ran
+  "the tests that seemed relevant" and the gate caught the e2e test I had broken — running some
+  suites is not running the suite. (2) Leaving two Playwright runs alive at once produced 34
+  phantom failures as they fought over the same ports and the same e2e database; always stop the
+  previous run before starting another.
+- 🧠 **The through-line of rounds 24-27: a config that has never been executed is not known to
+  work.** The Android Gradle setup, the API test database, the Playwright `pg` resolution, the
+  store-screenshot script and the OTA workflow all read correct and were all broken. The only
+  thing that found them was running them.
