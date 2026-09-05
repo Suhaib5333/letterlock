@@ -13,12 +13,27 @@ how to check/fix CI. Read this first in a new session.
 
 ## 0. Golden rules
 
-- **Deploy = push to `main`.** GitHub Actions (`.github/workflows/deploy.yml`)
-  then (1) applies Supabase migrations, (2) deploys the `send-otp` Edge Function,
-  (3) builds + deploys to Cloudflare Pages.
-- **CI re-applies EVERY migration on EVERY push** (not a tracked migration
-  system — it runs the SQL via the Supabase Management API each time). ⇒ **every
-  migration must be idempotent AND re-runnable in sequence repeatedly.**
+> ⚠️ **This file predates the move off Supabase (LAUNCH_PLAN Phase 2) and the rest of
+> it has NOT been rewritten yet.** Where it mentions Supabase, Edge Functions,
+> Cloudflare Pages or the Supabase Management API, treat it as history. The current
+> truth lives in `CLAUDE.md` (working rules + the B1-B14 blocked list) and
+> `LAUNCH_PLAN.md`. The Golden rules below are correct and current.
+
+- **Nothing ships untested.** `.github/workflows/ci.yml` is the gate: typecheck, unit
+  + content tests, the answer-leak gate, `npm audit`, workflow-YAML parsing, the
+  build, the full Playwright suite, the 17-device noscroll matrix, and the API suite
+  against a real Postgres. `deploy-vps.yml` and `ota-release.yml` both `needs:` it.
+  **Always open the run and confirm which jobs ran** — for the whole of Phases 1-3 a
+  green tick meant only that the deploy script had finished.
+- **Work lands on `uat` → `dev.letterlock.raltech.dev`. `main` → prod.**
+  `main` must NOT be pushed until the DNS records exist (B1), or the live site keeps
+  local play but loses sign-in, leaderboards, friends and online rooms.
+- **Deploy = push.** `deploy-vps.yml` builds the web bundle and the NestJS API,
+  ships one bundle over retrying SSH, and releases it with PM2 behind Traefik.
+  Cloudflare Pages is gone: Traefik serves `letterlock.raltech.dev` from the VPS.
+- **Database = Prisma migrations** in `apps/api/prisma/migrations`, applied with
+  `prisma migrate deploy`. The old rule below — that CI re-ran every Supabase SQL
+  file on every push, so migrations had to be idempotent — no longer applies.
 - **Commit messages: NO AI attribution** (repo CLAUDE.md rule — Suhaib-authored).
 - **Secrets never in tracked files.** `*.secret.md` and `.env*` are gitignored.
   Google OAuth + test creds live in `CREDENTIALS.secret.md` (gitignored).
