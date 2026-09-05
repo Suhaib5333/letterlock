@@ -58,3 +58,4 @@ __pycache__/
 *.pyc
 infra/dev-gate-creds
 infra/dev-gate-hashes.txt
+infra/google-creds
