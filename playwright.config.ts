@@ -51,7 +51,15 @@ export default defineConfig({
           ? 'npm run build && npm run preview'
           : `npx vite build --outDir ${OUT} && npx vite preview --outDir ${OUT} --port ${PORT} --strictPort`,
       url: WEB_URL,
-      reuseExistingServer: !process.env.CI,
+      // NEVER reuse a preview server for the WEB build, even locally. The bundle is
+      // built with VITE_API_URL baked in, so a preview somebody started by hand (or
+      // left over from `npm run preview`) serves a build pointed at the PRODUCTION
+      // API. Playwright would happily reuse it and the whole realtime half of the
+      // suite fails with "Connecting…" — a wrong-build failure that reads like a
+      // code bug. The rebuild costs a few seconds; a strict-port clash here is a
+      // clear error instead of a silent lie. (The API server above is safe to reuse:
+      // it is the same process either way.)
+      reuseExistingServer: false,
       timeout: 180_000,
       env: { VITE_API_URL: API_URL, VITE_APPLE_SERVICES_ID: '' },
     },

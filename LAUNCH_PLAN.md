@@ -322,6 +322,7 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 
 | Item | What |
 |---|---|
+| **CI/CD gate** | `.github/workflows/ci.yml` is the gate every ship depends on: typecheck, unit + content tests, answer-leak gate, `npm audit`, build, the full Playwright suite, the 17-device noscroll matrix, and the API suite against a real Postgres service. `deploy-vps.yml` and `ota-release.yml` both `needs:` it. **Always open the run and confirm which jobs ran** — a green tick is not evidence a test executed (it was not, for the whole of Phase 1-3). |
 | Backups | Nightly `pg_dump -Fc` of `letterlock` + `letterlock_dev` + a copy of the env files → 14-day local rotation + `rclone` to B2/S3, 30-day retention, quarterly restore test. Neither palmandplate nor jawhara has the off-box copy yet; Letterlock ships it first. |
 | Uptime | Uptime Kuma (Docker, joins the Traefik network): website, `GET /healthz` (`db:true`), a Socket.IO connect probe, `/app-config`. Alerts to your phone. |
 | Crashes / errors | Sentry free tier (`@sentry/capacitor` + `@sentry/react`), plus Play Console vitals (Play hides apps above 1.09% crash / 0.47% ANR) and Xcode Organizer. |
@@ -575,3 +576,21 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 - 2026-09-03 (later): added Phase 1b (mobile experience rehaul, portrait + landscape, URL-bar problem, via `frontend-stack`) and Phase 3b (Android TV / Google TV with remote control), decisions D15-D16, §16 TV platforms; totals now ~33 dev days / 8-10 weeks. PDF now lives in the repo.
 - 2026-09-05: **all decisions D1-D16 locked by Suhaib** (§2). D14 flipped to Option B (our own backend, the palmandplate way, no Supabase software), D7 to OTA now, D9 to keep images from licensed sources, D12 to web ads last, D13 to no web purchase, D3 to web-only media packs. Added §2c (VPS facts from the palmandplate / jawhara / custompc repos), Phase 1c (charades images), Phase 3c (OTA), Phase 6b (web → app popup), Phase 8 (web ads), §6b (web ads explained). Phase 2 rewritten for the custom backend. Totals now ~52 dev days / 12-14 weeks. Next step: clear the chat and start building in phase order.
 - 2026-09-05 (Phase 3 build): Capacitor 8 shell added (`capacitor.config.ts`, `android/`, `ios/`, 11 plugins), icons/splash/PWA icons generated from the favicon (`scripts/genicons.mjs` + `@capacitor/assets`), `.well-known` deep-link files with TEAMID / SHA-256 placeholders, `src/lib/native.ts` (deep links, back button, splash, status bar, keyboard, keep-awake, orientation, haptics, share, Preferences mirror), `html.is-native` CSS polish, Android TV manifest bits (Phase 3b), `.github/workflows/android-build.yml` (debug APK + unsigned AAB) and `codemagic.yaml` (iOS TestFlight, Android Play internal). How-to and placeholder list: `docs/MOBILE_BUILD.md`.
+- 2026-09-05 (build + verification sweep): Phases 1b, 1c, 2, 3b, 3c, 4, 5, 6b and 8 committed
+  (~1,000 files). **A CI test gate was added because there was none**: `deploy-vps.yml` built
+  and shipped to the VPS and `ota-release.yml` published OTA bundles without running a single
+  test, so a green tick only ever meant "the deploy script finished". `.github/workflows/ci.yml`
+  now runs typecheck, unit + content tests, the answer-leak gate, `npm audit`, the build, the
+  full Playwright suite and the 17-device noscroll matrix, plus the API suite against a real
+  Postgres service; **both the deploy and the OTA workflow `needs:` it**. Bugs it caught
+  immediately: the API e2e suite never created its schema (only passed on a hand-migrated
+  database), and the Playwright suite's `pg` resolved from a stale local `node_modules`.
+  Other fixes: the Android app had never built (JDK 17 vs Capacitor 8's Java 21 — also fixed in
+  `codemagic.yaml`, which would have failed on the first store build); Phase 1c had produced
+  images for one pack of five (284 → **1090 of 1107**); the store screenshots were pictures of
+  mode-select; Remove Ads never followed the login (the account side was dead code); Settings
+  now fits one screen on all 15 viewports; Phase 7 gained Uptime Kuma, a fail2ban jail, `npm
+  audit` and **crash reporting** (`src/lib/crash.ts`, Sentry behind a dynamic import, inert
+  without `VITE_SENTRY_DSN`). **Ordering constraint: `main` must not be pushed before the DNS
+  records exist** (B1) or the live site loses sign-in, leaderboards and online rooms. Work lands
+  on `uat` → dev until then. The full blocked-on-Suhaib list is B1-B14 in `CLAUDE.md`.
