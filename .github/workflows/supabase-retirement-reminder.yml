@@ -1,0 +1,88 @@
+# Weekly nudge to delete the Supabase project, until someone confirms it is gone.
+#
+# Background: the cutover to our own VPS finished on 2026-09-05. The app no longer
+# touches Supabase, but the project is deliberately kept alive for about two weeks
+# as the rollback path (switch letterlock.raltech.dev back to CNAME
+# letterlock-174.pages.dev and the old stack returns in minutes). The risk is not
+# technical, it is that "keep it for two weeks" quietly becomes "keep it forever"
+# and nobody remembers why there is a Supabase bill.
+#
+# TO STOP THESE EMAILS: create the marker file and push.
+#     git commit --allow-empty -m "supabase retired" && touch SUPABASE_RETIRED && git add SUPABASE_RETIRED
+# The next run sees it and stops, permanently.
+name: Supabase retirement reminder
+
+on:
+  schedule:
+    - cron: '0 6 * * 5'   # Fridays 06:00 UTC (09:00 Bahrain)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Should we send?
+        id: gate
+        run: |
+          set -euo pipefail
+          if [ -f SUPABASE_RETIRED ]; then
+            echo "::notice ::SUPABASE_RETIRED marker found, Supabase is done. Nothing to send."
+            echo "send=no" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # The first reminder is two weeks after cutover, not the next Friday.
+          START=2026-09-19
+          TODAY=$(date -u +%F)
+          if [[ "$TODAY" < "$START" ]]; then
+            echo "::notice ::Too early. First reminder is $START (today $TODAY)."
+            echo "send=no" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          DAYS=$(( ( $(date -u -d "$TODAY" +%s) - $(date -u -d 2026-09-05 +%s) ) / 86400 ))
+          echo "days=$DAYS" >> "$GITHUB_OUTPUT"
+          echo "send=yes" >> "$GITHUB_OUTPUT"
+
+      - name: Send the reminder
+        if: steps.gate.outputs.send == 'yes'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          TO: suhaibrajabo@gmail.com
+          DAYS: ${{ steps.gate.outputs.days }}
+        run: |
+          set -euo pipefail
+          [ -n "$RESEND_API_KEY" ] || { echo "::error ::RESEND_API_KEY missing"; exit 1; }
+          HTML=$(cat <<HTMLEOF
+          <div style="font-family:system-ui,sans-serif;max-width:560px;line-height:1.6">
+            <h2 style="margin:0 0 12px">Is Supabase still switched on?</h2>
+            <p>Letterlock moved to your own VPS <strong>$DAYS days ago</strong> and has been
+            running on it since. The Supabase project was only kept as the rollback path.</p>
+            <p><strong>If everything has been fine, delete it now</strong> and stop paying for it:</p>
+            <ol>
+              <li>Sign in at <a href="https://supabase.com/dashboard">supabase.com/dashboard</a></li>
+              <li>Open the <code>lkudntyvngwwlzuciocd</code> project</li>
+              <li>Settings &rarr; General &rarr; <strong>Delete project</strong></li>
+            </ol>
+            <p style="background:#FFF4E5;padding:12px;border-radius:8px">
+              <strong>Before you delete:</strong> once it is gone, the rollback is gone with it.
+              Check <a href="https://letterlock.raltech.dev">letterlock.raltech.dev</a> loads,
+              you can sign in, and the leaderboard shows real players.
+            </p>
+            <p>Then stop these emails by adding a <code>SUPABASE_RETIRED</code> file to the
+            repo and pushing. That is the switch, and this reminder never fires again.</p>
+            <p style="color:#6b7280;font-size:13px">Sent weekly by
+            <code>.github/workflows/supabase-retirement-reminder.yml</code> until that file exists.</p>
+          </div>
+          HTMLEOF
+          )
+          BODY=$(jq -cn --arg to "$TO" --arg html "$HTML" --arg d "$DAYS" \
+            '{from:"Letterlock <reminders@mail.raltech.dev>", to:[$to],
+              subject:("Delete the Supabase project? (" + $d + " days on the VPS)"),
+              html:$html}')
+          CODE=$(curl -sS -o /tmp/resend.json -w '%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" -H 'Content-Type: application/json' --data "$BODY")
+          cat /tmp/resend.json; echo
+          [ "$CODE" = "200" ] || { echo "::error ::Resend returned HTTP $CODE"; exit 1; }
+          echo "::notice ::Reminder sent to $TO ($DAYS days since cutover)."
