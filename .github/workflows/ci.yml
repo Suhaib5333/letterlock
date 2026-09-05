@@ -17,7 +17,9 @@ jobs:
   web:
     name: Web — typecheck, unit, content gates, e2e
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # The suite takes ~3 min on a dev box and ~20 on a 2-core runner, so the ceiling
+    # is generous on purpose: a timeout here reads as a mystery failure.
+    timeout-minutes: 45
     # tests-e2e/api-server.mjs boots the REAL apps/api against a real database
     # (playwright.config.ts `webServer`), so this job needs Postgres and the API's
     # own dependencies, not just the web ones. Without them the suite dies with

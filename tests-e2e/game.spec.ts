@@ -130,12 +130,19 @@ test('settings: the countdown-suspense picker selects a variant', async ({ page 
   await page.getByTestId('open-settings').click();
   const row = page.locator('.set-row', { hasText: 'Countdown suspense' });
   await expect(row).toBeVisible();
-  // Tapping a style marks it active (and previews it — audio isn't asserted).
-  await row.getByRole('button', { name: 'Heartbeat' }).click();
-  await expect(row.getByRole('button', { name: 'Heartbeat' })).toHaveClass(/active/);
+  // Six options is past the point where a segmented control fits a phone, so this
+  // one renders as a native <select> (it still previews on change; audio isn't
+  // asserted). Choosing persists the setting.
+  const picker = row.locator('select.set-select');
+  await picker.selectOption('heartbeat');
+  await expect(picker).toHaveValue('heartbeat');
   // 'Off' disables the suspense cue.
-  await row.getByRole('button', { name: 'Off' }).click();
-  await expect(row.getByRole('button', { name: 'Off' })).toHaveClass(/active/);
+  await picker.selectOption('off');
+  await expect(picker).toHaveValue('off');
+  // It survives a reload like every other setting.
+  await page.reload();
+  await page.getByTestId('open-settings').click();
+  await expect(page.locator('.set-row', { hasText: 'Countdown suspense' }).locator('select')).toHaveValue('off');
 });
 
 test('couch setup is not cut off on a short screen (top option reachable, actions pinned)', async ({ page }) => {
