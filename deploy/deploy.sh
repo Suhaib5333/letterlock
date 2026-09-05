@@ -35,10 +35,15 @@ pm2 startOrReload "$REL/deploy/ecosystem.config.js" --only "$API" --update-env >
 pm2 startOrReload "$REL/deploy/ecosystem.config.js" --only "$WEB" --update-env >/dev/null
 pm2 save >/dev/null
 
-echo "== health =="
+# The API binds to the docker bridge, not loopback, so Traefik (a container) can
+# reach it: see deploy/ecosystem.config.js. Health-checking 127.0.0.1 therefore never
+# succeeds, the script exits 1 after 60s, and the deploy's SSH retry loop re-runs the
+# whole release up to 8 times, restarting the API each round while reporting failure.
+HEALTH_HOST="${API_HOST:-172.17.0.1}"
+echo "== health (http://$HEALTH_HOST:$PORT/healthz) =="
 for i in $(seq 1 20); do
   sleep 3
-  if curl -fs "http://127.0.0.1:$PORT/healthz" | grep -q '"db":true'; then
+  if curl -fs "http://$HEALTH_HOST:$PORT/healthz" | grep -q '"db":true'; then
     echo "$API healthy on :$PORT"
     ls -dt "$ROOT"/releases/* | tail -n +6 | xargs -r rm -rf
     pm2 ls | grep letterlock
