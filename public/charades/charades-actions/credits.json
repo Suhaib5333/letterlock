@@ -2,167 +2,299 @@
  {
   "slug": "accountant",
   "prompt": "Accountant",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Hedi Sehr",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Franz-Josef_Sehr_2016-01-24_DSC_3099.JPG"
  },
  {
   "slug": "acrobat",
   "prompt": "Acrobat",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ludovic Péron",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Leosvel_et_Diosmani_-_4.jpg"
  },
  {
   "slug": "applauding",
   "prompt": "Applauding",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Niklas Bildhauer, Germany.",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Applauding_hands.JPG"
  },
  {
   "slug": "archaeologist",
   "prompt": "Archaeologist",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Suffolk Archaeology",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Archaeologist_excavating_at_the_Roman_Barrow_Group_and_Villa,_Rougham,_Suffolk,_March_to_December_2017.jpg"
  },
  {
   "slug": "archery",
   "prompt": "Archery",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Martin Rulsch, Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2018-10-17_Archery_at_2018_Summer_Youth_Olympics_%E2%80%93_Second_Round_%E2%80%93_Section_1_%E2%80%93_Korea_vs._Paraguay_(Martin_Rulsch)_35.jpg"
  },
  {
   "slug": "arm-wrestling",
   "prompt": "Arm wrestling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dan Bennett",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Girls_arm_wrestling_home_alive.jpg"
  },
  {
   "slug": "astronaut",
   "prompt": "Astronaut",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "NASA / Harrison H. Schmitt",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:NASA_Apollo_17_Lunar_Roving_Vehicle.jpg"
  },
  {
   "slug": "astronomer",
   "prompt": "Astronomer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Carl Spitzweg",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Carl_Spitzweg_-_The_Astronomer_(Stargazer)_-_c._1860.jpg"
  },
  {
   "slug": "auctioneer",
   "prompt": "Auctioneer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ebenezer Morgan",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Portrait_of_Thomas_Collins,_auctioneer_(4674342).jpg"
  },
  {
   "slug": "auto-racing",
   "prompt": "Auto racing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Allgemeine Automobil-Zeitung",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Melanie_Khevenh%C3%BCller-Metsch_Rennen.jpg"
  },
  {
   "slug": "badminton",
   "prompt": "Badminton",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Marcus Cyron",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Badminton_at_the_2018_Summer_Youth_Olympics_%E2%80%93_Boys_Quarterfinals_Rumbay-Sen_12.jpg"
  },
  {
   "slug": "baker",
   "prompt": "Baker",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "War Department. The Adjutant General's Office. 3/4/1907-9/18/1947",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:(Vermont)_Baker,_Royal_F_-_16th_Infantry,_Company_H_-_DPLA_-_2ce023023b70aca8537842b7e9e3173b.jpg"
  },
  {
   "slug": "baking",
   "prompt": "Baking",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "waketechcc",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Baking_2_Class-_Melissa_Attanas_Faculty_Spotlight-55.jpg"
  },
  {
   "slug": "barber",
   "prompt": "Barber",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "War Department. The Adjutant General's Office. 3/4/1907-9/18/1947",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:(Vermont)_Barber,_Austin_G_-_1st_Cavalry,_Company_E_-_DPLA_-_29243c2e3cd0c4a711fedd21a33aea50.jpg"
  },
  {
   "slug": "bartender",
   "prompt": "Bartender",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Currier &amp; Ives.",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cash_on_delivery_LCCN90714330.jpg"
  },
  {
   "slug": "baseball",
   "prompt": "Baseball",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown authorUnknown author",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Baseball_team.jpg"
  },
  {
   "slug": "basketball",
   "prompt": "Basketball",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Sandro Halank, Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2023-08-09_Deutschland_gegen_Kanada_(Basketball-L%C3%A4nderspiel)_by_Sandro_Halank%E2%80%93118.jpg"
  },
  {
   "slug": "beekeeper",
   "prompt": "Beekeeper",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Michael Gäbler",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beekeeper_keeping_bees.jpg"
  },
  {
   "slug": "blacksmith",
   "prompt": "Blacksmith",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unsure.",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Blacksmith_working_at_the_Eccleston_village_smithy.jpg"
  },
  {
   "slug": "bobsledding",
   "prompt": "Bobsledding",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Sandro Halank, Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2020-01-19_1st_run_Women%27s_Monobob_(2020_Winter_Youth_Olympics)_by_Sandro_Halank%E2%80%93048.jpg"
  },
  {
   "slug": "bowling",
   "prompt": "Bowling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Air Force Bowling, part of the U.S. Federal Government",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:20160511_High_backswing_in_bowling_-_John_Hughes_-_Armed_Forces_Sports.jpg"
  },
  {
   "slug": "boxing",
   "prompt": "Boxing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Marcus Cyron",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Boxing_at_the_2018_Summer_Youth_Olympics_%E2%80%93_Girls%27_flyweight_Gold_Medal_Bout_228.jpg"
  },
  {
   "slug": "bricklaying",
   "prompt": "Bricklaying",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Martin Hipangwa",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bricklaying_and_construction_learning_grounds_in_Klein_Aub_Special_School_11.jpg"
  },
  {
   "slug": "brushing-a-dog",
   "prompt": "Brushing a dog",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "I See Modern Britain",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dog_having_a_pee.jpg"
  },
  {
   "slug": "builder",
   "prompt": "Builder",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown authorUnknown author",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Medium_cd0321_007_071023_y2005_85_bob_the_builder_set.jpg"
  },
  {
   "slug": "bungee-jumping",
   "prompt": "Bungee jumping",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Pauli-Pirat",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bungee-Jumping_am_Hafenmuseum_Hamburg_(2).jpg"
  },
  {
   "slug": "butcher",
   "prompt": "Butcher",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Thomas Rowlandson",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_Butcher_MET_DP808678.jpg"
  },
  {
   "slug": "canoeing",
   "prompt": "Canoeing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown authorUnknown author",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Untitled_-_Societies_(NBY_2572).jpg"
  },
  {
   "slug": "carpenter",
   "prompt": "Carpenter",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown authorUnknown author",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:-Carpenter_with_Saw,_Hammer,_and_Jointer-_MET_DP700436.jpg"
  },
  {
   "slug": "carpentry",
   "prompt": "Carpentry",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dietmar Rabich",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Banff_National_Park_(AB,_Canada),_Bankhead,_Lower_Bankhead,_Carpentry_--_2022_--_2218.jpg"
  },
  {
   "slug": "carrying-groceries",
   "prompt": "Carrying groceries",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Cayambe",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fogo_S%C3%A3o_Filipe_shop.jpg"
  },
  {
   "slug": "cartographer",
   "prompt": "Cartographer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Zeno",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Carta_de_navegar_-_faksimile_-_no-nb_krt_00669.jpg"
  },
  {
   "slug": "cashier",
   "prompt": "Cashier",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "photo taken by flickr user Young in Panama",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cashier_at_her_register.jpg"
  },
  {
   "slug": "chef",
@@ -176,906 +308,1630 @@
  {
   "slug": "cleaning-windows",
   "prompt": "Cleaning windows",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Acabashi",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Window_cleaning_block_of_flats_Tottenham,_London,_England_1.jpg"
  },
  {
   "slug": "climbing",
   "prompt": "Climbing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Charles J. Sharp",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tree-climbing_lions_(Panthera_leo)_in_sycamore_fig_(Ficus_sycomorus).jpg"
  },
  {
   "slug": "conductor",
   "prompt": "Conductor",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "KelvinJM",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_woman_at_work_,she_is_a_mini_bus_conductor.jpg"
  },
  {
   "slug": "cowboy",
   "prompt": "Cowboy",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "BANET ORISHABA",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:EAST_AFRICA_CLIMATE.jpg"
  },
  {
   "slug": "cricket",
   "prompt": "Cricket",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Basile Morin",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cricket_match_and_Marina_Bay_Sands_Hotel_in_Singapore.jpg"
  },
  {
   "slug": "croquet",
   "prompt": "Croquet",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Robin Drayton",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_game_of_croquet_on_the_recreation_ground,_Sidmouth_-_geograph.org.uk_-_1314243.jpg"
  },
  {
   "slug": "curling",
   "prompt": "Curling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Martin Rulsch, Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2020-01-16_Curling_at_the_2020_Winter_Youth_Olympics_%E2%80%93_Mixed_Team_%E2%80%93_Bronze_Medal_Game_(Martin_Rulsch)_056.jpg"
  },
  {
   "slug": "cycling",
   "prompt": "Cycling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dietmar Rabich",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:D%C3%BClmen,_Kirchspiel,_Karthaus,_Torhaus_--_2015_--_5363.jpg"
  },
  {
   "slug": "dancer",
   "prompt": "Dancer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "TAPAS KUMAR HALDER",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Peacock_Dancer_with_Body_Art_-2.jpg"
  },
  {
   "slug": "darts",
   "prompt": "Darts",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Sven Mandel",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gerwyn_Price_6-3_Simon_Stevenson_-_Gerwyn_Price_-_2019250160252_2019-09-07_PDC_European_Darts_Matchplay_-_0656_-_B70I7026.jpg"
  },
  {
   "slug": "decorator",
   "prompt": "Decorator",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "William Kurtz",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Louis_Comfort_Tiffany_by_William_Kurtz.jpg"
  },
  {
   "slug": "dentist",
   "prompt": "Dentist",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Vladimir Makovsky",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Vladimir_Makovsky_%E2%80%94_At_the_Dentist%27s_(1870).jpg"
  },
  {
   "slug": "detective",
   "prompt": "Detective",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Davide Castro",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Il_Detective_Visco_Gilardi.jpg"
  },
  {
   "slug": "digging",
   "prompt": "Digging",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Artemas Ward",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Digging_edible_bamboo_shoots,_illustration_from_The_Encyclopedia_of_Food_by_Artemas_Ward.jpg"
  },
  {
   "slug": "dishwashing",
   "prompt": "Dishwashing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "NancyHeise talk",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Our_Father%27s_House_Soup_Kitchen_dishwashing-vertical.jpg"
  },
  {
   "slug": "diving",
   "prompt": "Diving",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Basile Morin",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Four_domestic_ducks_simultaneously_diving_in_a_pond.jpg"
  },
  {
   "slug": "doctor",
   "prompt": "Doctor",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "BEUGRE12",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mariatou_Kon%C3%A9_1.jpg"
  },
  {
   "slug": "dog-walking",
   "prompt": "Dog walking",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Marmstrong21",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Couple_walking_dog_at_Buckingham_Fountain.jpg"
  },
  {
   "slug": "drawing",
   "prompt": "Drawing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Alvesgaspar",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fern%C3%A3o_Vaz_Dourado_1571-1.jpg"
  },
  {
   "slug": "dribbling",
   "prompt": "Dribbling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "User.MatthiasKabel",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Harlem_Globetrotters_dribbling_01.jpg"
  },
  {
   "slug": "drilling",
   "prompt": "Drilling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "U.S. Navy photo by Photographers' Mate Airman Sara Bohannan.",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:US_Navy_021106-N-7822B-001_Drilling_a_pilot_hole_in_a_piece_of_wood.jpg"
  },
  {
   "slug": "drumming",
   "prompt": "Drumming",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Jaypro events",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_young_girl_dancing_and_drumming.jpg"
  },
  {
   "slug": "electrician",
   "prompt": "Electrician",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Wilfredor",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Electrician_at_the_Eletrotecnica_Bene_workshop,_Sao_Paulo.jpg"
  },
  {
   "slug": "embroidery",
   "prompt": "Embroidery",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Yann (talk)",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Blue_mural_embroidery,_Udaipur,_Rajasthan,_India.jpg"
  },
  {
   "slug": "emptying-the-trash",
   "prompt": "Emptying the trash",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Cornelius M. Keyes",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:TRASH_BARRELS_ARE_EMPTIED_MECHANICALLY_INTO_TRUCK_BIN,_PART_OF_A_NEW_TRASH_COLLECTION_METHOD_SPONSORED_BY_EPA_-_NARA_-_544083.jpg"
  },
  {
   "slug": "engineer",
   "prompt": "Engineer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "William Skelton",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Portrait_of_Wm._Edwards_Archt_(4672851).jpg"
  },
  {
   "slug": "escaping-a-maze",
   "prompt": "Escaping a maze",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "CGP Grey",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2005-03-30_-_London_-_Crystal_Palace_-_Maze_The_Escape_Gate_4887156183.jpg"
  },
  {
   "slug": "farmer",
   "prompt": "Farmer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "HAMIDOU KAOU 6767",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Un_champ_de_Ma%C3%AFs_dans_la_R%C3%A9gion_de_l%27Ext%C3%AAme-Nord_Cameroun.jpg"
  },
  {
   "slug": "fencing",
   "prompt": "Fencing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Marie-Lan Nguyen",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kovalev_v_Szilagyi_2013_Fencing_WCH_SMS-IN_t194135.jpg"
  },
  {
   "slug": "figure-skating",
   "prompt": "Figure skating",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Sandro Halank, Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2020-01-11_Women%27s_Single_Figure_Skating_Short_Program_(2020_Winter_Youth_Olympics)_by_Sandro_Halank%E2%80%93033.jpg"
  },
  {
   "slug": "firefighter",
   "prompt": "Firefighter",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Staff Sgt. Craig Cisek, U.S. Air Force",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Defense.gov_News_Photo_120723-F-HA794-089_-_A_U.S._Air_Force_firefighter_sprays_water_at_the_fire_of_a_simulated_C-130_Hercules_plane_crash_during_operational_readiness_exercise_Beverly.jpg"
  },
  {
   "slug": "fishing",
   "prompt": "Fishing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Tarotastic",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fishing_2.jpg"
  },
  {
   "slug": "florist",
   "prompt": "Florist",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Nawaf_Th",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Soft_Red_Rose.jpg"
  },
  {
   "slug": "fly-fishing",
   "prompt": "Fly fishing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Qdavis",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fly_fishing_for_brown_trout.jpg"
  },
  {
   "slug": "flying-a-kite",
   "prompt": "Flying a kite",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "published by Ward, Lock, &amp; Tyler of London",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Flying_a_Kite_(1).jpg"
  },
  {
   "slug": "folding-laundry",
   "prompt": "Folding laundry",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Hine, Lewis Wickes; National Child Labor Committee Collection",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:15-year_old_girl_folding_towels_in_Bonanno_Laundry._LOC_nclc.05197.jpg"
  },
  {
   "slug": "fortune-teller",
   "prompt": "Fortune teller",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "François Boucher / Jean-Honoré Fragonard",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Fortune_Teller_MET_DP805468.jpg"
  },
  {
   "slug": "gardening",
   "prompt": "Gardening",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Haoreima",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beautiful_scenery_in_the_Kakching_Garden,_Uyok_Ching_Hill,_Kangleipak_-_Traditional_Meitei_art_of_gardening_(horticulture)_53.jpg"
  },
  {
   "slug": "glassblowing",
   "prompt": "Glassblowing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Mertbiol",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Glassblowing_Workshop,_University_for_the_Creative_Arts_(Farnham_Campus),_Surrey_-_September_2025_-_02.jpg"
  },
  {
   "slug": "goalkeeper",
   "prompt": "Goalkeeper",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Threecharlie",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Justien_Odeurs,_Italy_vs_Belgium_women%27s,_Ferrara_2018-04-10_14.jpg"
  },
  {
   "slug": "golfer",
   "prompt": "Golfer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Michael Stokes",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2022_Curtis_Cup_-_Golfer_on_5th_Tee_(52139279391).jpg"
  },
  {
   "slug": "golfing",
   "prompt": "Golfing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Lilrizz",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Golfer_swing.jpg"
  },
  {
   "slug": "greengrocer",
   "prompt": "Greengrocer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dietmar Rabich",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Winterswijk_(NL),_Wochenmarkt_--_2016_--_4143.jpg"
  },
  {
   "slug": "grilling",
   "prompt": "Grilling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dietmar Rabich",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:D%C3%BClmen,_B%C3%BCrgerfest_2013_--_2013_--_3139.jpg"
  },
  {
   "slug": "gymnastics",
   "prompt": "Gymnastics",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Martin Rulsch, Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2018-10-07_Gymnastics_at_2018_Summer_Youth_Olympics_%E2%80%93_Girls%27_Artistic_Gymnastics_%E2%80%93_Floor_qualification_(Martin_Rulsch)_071.jpg"
  },
  {
   "slug": "hairdresser",
   "prompt": "Hairdresser",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "State Library of South Australia",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/32600408@N06/42424739511"
  },
  {
   "slug": "hammering-a-nail",
   "prompt": "Hammering a nail",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Pearson Scott Foresman",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hammering_a_nail_(line_art)_(PSF_H-420004_(cropped)).png"
  },
  {
   "slug": "hang-gliding",
   "prompt": "Hang gliding",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Airborne88NL",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Deltavlieger_in_glijvlucht.jpg"
  },
  {
   "slug": "harvesting",
   "prompt": "Harvesting",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Vladimir Orlovsky",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Harvest_by_Volodymyr_Orlovsky_1882.jpg"
  },
  {
   "slug": "hiking",
   "prompt": "Hiking",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "marcostetter",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/149556095@N03/34717631833"
  },
  {
   "slug": "hockey",
   "prompt": "Hockey",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Collins, Tudor Washington, 1898-1970, photographer",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hockey_match_(AM_86000-1).jpg"
  },
  {
   "slug": "hopscotch",
   "prompt": "Hopscotch",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Nachoman-au",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Burswood_Park,_Hopscotch.jpg"
  },
  {
   "slug": "horse-riding",
   "prompt": "Horse riding",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "RickyBlair668",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Horse_riding_and_swimming_in_Dar.jpg"
  },
  {
   "slug": "hunter",
   "prompt": "Hunter",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "pasukaru76",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/38451115@N04/14015059297"
  },
  {
   "slug": "hurdling",
   "prompt": "Hurdling",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "Pit1233",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=70207399"
  },
  {
   "slug": "ice-fishing",
   "prompt": "Ice fishing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Robert Taylor from Stirling, ON, Canada",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Oak_Lake_Ice_Fishing_(2153013070).jpg"
  },
  {
   "slug": "illustrator",
   "prompt": "Illustrator",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "StylingTan",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:TANIA_McCARTNEY_AUTHOR_ILLUSTRATOR_April_2023.jpg"
  },
  {
   "slug": "inventor",
   "prompt": "Inventor",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Wood carving by Henri Thiriat",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Marcel_Deprez_1890.jpg"
  },
  {
   "slug": "ironing",
   "prompt": "Ironing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Lomwiko Francis",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_Local_Taylor_ironing_cloth.jpg"
  },
  {
   "slug": "janitor",
   "prompt": "Janitor",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "iMahesh",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Janitor_of_SVN_High_school_sitting_near_the_Classrooms.jpg"
  },
  {
   "slug": "javelin-throw",
   "prompt": "Javelin throw",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Sandro Halank, Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2022-08-21_European_Championships_2022_%E2%80%93_Men%27s_Javelin_Throw_by_Sandro_Halank%E2%80%93016.jpg"
  },
  {
   "slug": "jeweler",
   "prompt": "Jeweler",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Niello Rein",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Brooch_(AM_2005.59.1-5).jpg"
  },
  {
   "slug": "jogging",
   "prompt": "Jogging",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Effectzda Change",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jogging_and_wellness.jpg"
  },
  {
   "slug": "jousting",
   "prompt": "Jousting",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Milliped",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jousting_at_the_Foire_de_Laine_Ch%C3%A2teaudun.jpg"
  },
  {
   "slug": "judge",
   "prompt": "Judge",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Steve Petteway, photographer for the US Supreme Court",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:John_Paul_Stevens,_SCOTUS_photo_portrait.jpg"
  },
  {
   "slug": "juggling",
   "prompt": "Juggling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ursula1111222",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Luca_Pferdmenges_Juggling_with_white_balls.jpg"
  },
  {
   "slug": "karate",
   "prompt": "Karate",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Blackpantherkarate",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Classes_in_cockfosters_._Southgate,_Potters_bar_and_Brookmans_park.jpg"
  },
  {
   "slug": "kayaking",
   "prompt": "Kayaking",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "The Persian Doctor",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Persian_Doctor_Kayaking.jpg"
  },
  {
   "slug": "kickboxing",
   "prompt": "Kickboxing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Loura Conerney from Manchester, England",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:High_kick_block.jpg"
  },
  {
   "slug": "kneading-dough",
   "prompt": "Kneading dough",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "This file was donated to Wikimedia Commons as part of a project by the Metropolitan Museum of Art. See the Image and Data Resources Open Access Policy",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Female_figurine_kneading_dough(%3F)_MET_GR690.jpg"
  },
  {
   "slug": "knight",
   "prompt": "Knight",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "War Department. The Adjutant General's Office. 3/4/1907-9/18/1947",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:(Vermont)_Knight,_Philo_J_-_1st_Cavalry,_Company_I_-_DPLA_-_1f7f99169968b73d0926b0ff7eb6d4d6.jpg"
  },
  {
   "slug": "knitting",
   "prompt": "Knitting",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Li Mei-shu",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Knitting,_by_Li_Mei-shu.jpg"
  },
  {
   "slug": "lawyer",
   "prompt": "Lawyer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "A. MacGregor",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Portrait_of_Watkin_Williams_Esqre.,_Q.C.,_M.P_(4672198).jpg"
  },
  {
   "slug": "librarian",
   "prompt": "Librarian",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown authorUnknown author",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hendrik_Cornelis_Hazewinkel.jpg"
  },
  {
   "slug": "lifeguard",
   "prompt": "Lifeguard",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Alvesgaspar",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lifeguard_August_2010-1.jpg"
  },
  {
   "slug": "limbo-dancing",
   "prompt": "Limbo dancing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Screaming Bertha",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Limbo_fire_dancing.jpg"
  },
  {
   "slug": "locksmith",
   "prompt": "Locksmith",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Jean Frédéric Wentzel (1807-1869).",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jean_Fr%C3%A9d%C3%A9ric_Wentzel-Le_serrurier-Der_Schlosser.jpg"
  },
  {
   "slug": "long-jump",
   "prompt": "Long jump",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Pierre-Yves Beaudouin",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2014_D%C3%A9caNation_-_Long_Jump_27.jpg"
  },
  {
   "slug": "lumberjack",
   "prompt": "Lumberjack",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Joan Blaeu",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Atlas_Van_der_Hagen-KW1049B10_009-DIOECESIS_STAVANGRIENSIS,_%26_partes_aliquot_vincinae.jpeg"
  },
  {
   "slug": "magician",
   "prompt": "Magician",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Asurnipal",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dornbirn-summer_festival_Volkshilfe_Vorarlberg-magician_Mirakuli_(Gerhard_Dutschke)-05ASD.jpg"
  },
  {
   "slug": "mailman",
   "prompt": "Mailman",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Beyond My Ken",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Columbia_University_Mailman_School_of_Public_Health_entrance.jpg"
  },
  {
   "slug": "marathon",
   "prompt": "Marathon",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Petar Milošević",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Human_running_gait_-_terminal_swing_to_heel_strike_(runner_with_Asics_Metaspeed_Edge_Paris_-_2024_Ljubljana_Marathon).jpg"
  },
  {
   "slug": "massage-therapist",
   "prompt": "Massage therapist",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "el ancora service",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:EL_ANCORA_SERVICE_-_panoramio.jpg"
  },
  {
   "slug": "mechanic",
   "prompt": "Mechanic",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Regy05",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mechanic_fixing_suspension_problems.jpg"
  },
  {
   "slug": "milking-a-cow",
   "prompt": "Milking a cow",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Adriaen van de Velde",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Adriaen_van_de_Velde_-_Milking_a_Cow_-_WGA24484.jpg"
  },
  {
   "slug": "miner",
   "prompt": "Miner",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "War Department. The Adjutant General's Office. 3/4/1907-9/18/1947",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:(Vermont)_Miner,_Francis_F_-_16th_Infantry,_Company_F_-_DPLA_-_f5b841d595f044191e9cad120c7165a6.jpg"
  },
  {
   "slug": "mopping",
   "prompt": "Mopping",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Punker1999",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mopping_with_a_cat.jpg"
  },
  {
   "slug": "mountaineer",
   "prompt": "Mountaineer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Mattsjc",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mountaineer_rests_as_he_climbs_Mount_Adams.jpg"
  },
  {
   "slug": "mowing-the-lawn",
   "prompt": "Mowing the lawn",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Halley from Boston",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mowing_the_Lawn-Half-Cut.jpg"
  },
  {
   "slug": "musician",
   "prompt": "Musician",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Manfred Werner - Tsui",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Harri_Stojka_30.08.2008c.jpg"
  },
  {
   "slug": "nailing",
   "prompt": "Nailing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Evan-Amos",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nail-clippers-variety.jpg"
  },
  {
   "slug": "navigator",
   "prompt": "Navigator",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Christian Moeseneder, MIC",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Navigator_fossor01.jpg"
  },
  {
   "slug": "newscaster",
   "prompt": "Newscaster",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "WABC-TV",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Scott_Vincent_Newscaster_WABC-TV.jpg"
  },
  {
   "slug": "nurse",
   "prompt": "Nurse",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Oscar Bernader Bengtsson (b1888)",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:3586_Nurse_in_uniform.jpg"
  },
  {
   "slug": "optician",
   "prompt": "Optician",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Maps.interlude",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Number_of_optician_retail_outlets_per_10,000_people.jpg"
  },
  {
   "slug": "orchestra-conductor",
   "prompt": "Orchestra conductor",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Leirea578",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nathana%C3%ABl_Iselin.png"
  },
  {
   "slug": "origami",
   "prompt": "Origami",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Laitche",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cranes_made_by_Origami_paper.jpg"
  },
  {
   "slug": "paddleboarding",
   "prompt": "Paddleboarding",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Matthew T Rader",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Paddleboarding_at_Playa_Balandra_in_La_Paz,_Mexico.jpg"
  },
  {
   "slug": "painter",
   "prompt": "Painter",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Matti Blume",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Painter,_Rendsburg_(LRM_20200411_122650).jpg"
  },
  {
   "slug": "parasailing",
   "prompt": "Parasailing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Sujohn Das from Seattle, USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Parasailing_008_(2101939420).jpg"
  },
  {
   "slug": "pharmacist",
   "prompt": "Pharmacist",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown authorUnknown author",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Katherine_M_King_PhC.jpg"
  },
  {
   "slug": "photographer",
   "prompt": "Photographer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Basile Morin",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Photographer_taking_a_group_photograph_of_smiling_students_in_front_of_the_Tokyo_station,_Marunouchi,_Japan.jpg"
  },
  {
   "slug": "pilot",
   "prompt": "Pilot",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Don Ramey Logan",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Three_Arch_Bay_Photo_Taken_by_pilot_Don_Ramey_Logan.jpg"
  },
  {
   "slug": "ping-pong",
   "prompt": "Ping pong",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Samuel02609",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mang%C3%A1_ping_pong_de_Taiyo_Matsumoto.jpg"
  },
  {
   "slug": "plowing",
   "prompt": "Plowing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Basile Morin",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Boy_plowing_with_a_tractor_at_sunset_in_Don_Det,_Laos.jpg"
  },
  {
   "slug": "plumber",
   "prompt": "Plumber",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Mattinbgn (talk · contribs)",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Goulburn_Licenced_Sanitary_Plumber_001.JPG"
  },
  {
   "slug": "pole-vault",
   "prompt": "Pole vault",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Isiwal",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Leichtathletik_Gala_Linz_2018_pole_vault_Daubner-6249.jpg"
  },
  {
   "slug": "police-officer",
   "prompt": "Police officer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Daniel Schwen",
+  "license": "CC BY-SA 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:HH_Polizeihauptmeister_MZ.jpg"
  },
  {
   "slug": "polishing-shoes",
   "prompt": "Polishing shoes",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Print made by: Frédéric Bouchot Printed by: Aubert &amp; Cie Published by: Aubert &amp; Cie",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Exercises_du_matin_(BM_1989,0128.74).jpg"
  },
  {
   "slug": "potter",
   "prompt": "Potter",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Tadekwiki",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Potter_boy.jpg"
  },
  {
   "slug": "pottery-wheel",
   "prompt": "Pottery wheel",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Arjit Chowdhury",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Play_with_a_wheel.jpg"
  },
  {
   "slug": "pruning",
   "prompt": "Pruning",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Btonnie",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pruning_avocado_tree.jpg"
  },
  {
   "slug": "quarterback",
   "prompt": "Quarterback",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown authorUnknown author",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jeff_Hostetler_WVU.jpg"
  },
  {
   "slug": "racquetball",
   "prompt": "Racquetball",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Evan Pritchard",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jos%C3%A9e_Grand%27Ma%C3%AEtre_at_2006_World_Racquetball_Championships.jpg"
  },
  {
   "slug": "ranger",
   "prompt": "Ranger",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "iMahesh",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Forest_ranger_walking_through_the_trail_to_Netravati_peak.jpg"
  },
  {
   "slug": "receptionist",
   "prompt": "Receptionist",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "User:Mattes",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Thailand_%E2%80%94_Suvarnabhumi_Airport_(Bureau_de_change_of_Siam_Commercial_Bank)_%E2%80%94_Mattes_2007-01-31.jpg"
  },
  {
   "slug": "referee",
   "prompt": "Referee",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ludovic Péron",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Referee_-_Lausanne_vs_Sion_02_may_2012.jpg"
  },
  {
   "slug": "reporter",
   "prompt": "Reporter",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Zalasem1",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Reporter_Thomas_Ferro_Villechaize_Bein_Sport.jpg"
  },
  {
   "slug": "rock-climbing",
   "prompt": "Rock climbing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Sumita Roy Dutta",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:30th_Rock_climbing_by_pathajatra_Day_4_at_Tilaboni_DSCN3462_09.jpg"
  },
  {
   "slug": "roller-skating",
   "prompt": "Roller skating",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Rosiness220",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bosco_Rehani_Kabwe_Tonny.jpg"
  },
  {
   "slug": "rollerblading",
   "prompt": "Rollerblading",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dennis Mojado",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Inline_skating.jpg"
  },
  {
   "slug": "roofer",
   "prompt": "Roofer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Nassauer27",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Heimatmuseum_Dachdeckerhandwerk_IMG_5388.JPG"
  },
  {
   "slug": "rowing",
   "prompt": "Rowing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Petone (Knitting Mills)",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Vest,_rowing_(AM_1996.75.46-1).jpg"
  },
  {
   "slug": "rugby",
   "prompt": "Rugby",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ian Rob",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rugby_-_Horton_Crescent_-_geograph.org.uk_-_92354.jpg"
  },
  {
   "slug": "running",
   "prompt": "Running",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Giles Laurent",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:039_Juvenile_blue_wildebeest_covered_in_mud_running_in_the_Serengeti_National_Park_Photo_by_Giles_Laurent.jpg"
  },
  {
   "slug": "sailor",
   "prompt": "Sailor",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Rudolph Ackermann / Thomas Rowlandson / George Moutard Woodward",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Sailor_and_Banker_MET_DP872730.jpg"
  },
  {
   "slug": "saluting",
   "prompt": "Saluting",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Daniel Hinton",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:United_States_General_Martin_Dempsey_and_French_General_Pierre_de_Villiers_saluting_(23_April_2014,_cropped).jpg"
  },
  {
   "slug": "scientist",
   "prompt": "Scientist",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Benjamin Couprie",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Solvay_conference_1927_Version2.jpg"
  },
  {
   "slug": "sculpting",
   "prompt": "Sculpting",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Wilfredor",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Street_Craftsman_in_Olinda.jpg"
  },
  {
   "slug": "sculptor",
   "prompt": "Sculptor",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Rama",
+  "license": "CC BY-SA 2.0 fr",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/fr/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Duke_of_Vivonne_mg_8133.jpg"
  },
  {
   "slug": "sewing",
   "prompt": "Sewing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Tadeáš Bednarz",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Woman_sewing_a_face_mask_with_a_Singer_machine_09.jpg"
  },
  {
   "slug": "shepherd",
   "prompt": "Shepherd",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Mallikarjunasj",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Indian_shepherd_in_2020%27s.jpg"
  },
  {
   "slug": "shoveling-snow",
   "prompt": "Shoveling snow",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Bain News Service, publisher",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shoveling_snow,_New_York_LCCN2014680045.jpg"
  },
  {
   "slug": "singer",
   "prompt": "Singer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "THOR",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hagstrom_Guitar_Duo.jpg"
  },
  {
   "slug": "skateboarding",
   "prompt": "Skateboarding",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Steven Pisano",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:New_York_City_Streetscapes_-_Skateboarding_on_Lower_East_Side_09.jpg"
  },
  {
   "slug": "skiing",
   "prompt": "Skiing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Letartean",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Quebec_Sprint_Cross-country_Skiing_World_Cup_2012_(4)_V2.jpg"
  },
  {
   "slug": "skydiving",
   "prompt": "Skydiving",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Raxoye",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kacper_Drobik_Skydiving.jpg"
  },
  {
   "slug": "snorkeling",
   "prompt": "Snorkeling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Deepak-nsk",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Snorkeling_in_Hinagdanan_Cave.jpg"
  },
  {
   "slug": "soldier",
   "prompt": "Soldier",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "GARY L. KIEFFER, USA, CIV",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:FGM-148_Javelin_-_ID_061024-A-0497K-004.JPEG"
  },
  {
   "slug": "squash",
   "prompt": "Squash",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "Evan-Amos",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=16918628"
  },
  {
   "slug": "sumo-wrestling",
   "prompt": "Sumo wrestling",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "themet",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.rawpixel.com/image/9087409/sumo-wrestling-utagawa-kuniteru"
  },
  {
   "slug": "surfing",
   "prompt": "Surfing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dietmar Rabich",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Braunton_(Devon,_UK),_Old_Railway_Station,_Sidings_(Museum_of_British_Surfing)_--_2013_--_00205.jpg"
  },
  {
   "slug": "surgeon",
   "prompt": "Surgeon",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "British School",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Robert_Jones,_apothecary_%26_surgeon,_Denbigh.jpg"
  },
  {
   "slug": "sweeping",
   "prompt": "Sweeping",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Warszawska róg Szerokiej w Tomaszowie Mazowieckim, w województwie łódzkim, PL, EU.",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Street_sweeping_in_Tomasz%C3%B3w_Mazowiecki,_Pope_Jana_Paw%C5%82a_II_Street,_June_2020.jpg"
  },
  {
   "slug": "sweeping-a-chimney",
   "prompt": "Sweeping a chimney",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "saudekjan",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/156515782@N02/51935457741"
  },
  {
   "slug": "table-tennis",
   "prompt": "Table tennis",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Marcus Cyron",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Table_tennis_at_the_2018_Summer_Youth_Olympics_%E2%80%93_Mixed_Final_Women_258.jpg"
  },
  {
   "slug": "tailor",
   "prompt": "Tailor",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "Susanlenox",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/29710534@N05/10572064303"
  },
  {
   "slug": "tap-dancing",
   "prompt": "Tap dancing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Joe Mabel/Century Ballroom",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sugar_Sullivan_%26_Barbara_Billups_02.jpg"
  },
  {
   "slug": "teacher",
   "prompt": "Teacher",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "GlacierNPS",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/43288043@N04/27375763844"
  },
  {
   "slug": "tennis",
   "prompt": "Tennis",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "mpardo.photo",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/130551911@N05/17508784006"
  },
  {
   "slug": "tightrope-walking",
   "prompt": "Tightrope walking",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "themet",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.rawpixel.com/image/7901399/image-person-art-black"
  },
  {
   "slug": "tobogganing",
   "prompt": "Tobogganing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "uwdigitalcollections",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tobogganing_at_University_of_Wisconsin,_Madison,_1929.jpg"
  },
  {
   "slug": "tour-guide",
   "prompt": "Tour guide",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "DimiTalen",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Trail_Ride_tour_guide,_Bryce_Canyon_National_Park,_2005.jpg"
  },
  {
   "slug": "trampolining",
   "prompt": "Trampolining",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Trampqueen at English Wikipedia",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:WAGC_DMT.jpg"
  },
  {
   "slug": "translator",
   "prompt": "Translator",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown Flemish artist",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Translator_addressing_his_master_on_a_road.jpg"
  },
  {
   "slug": "truck-driver",
   "prompt": "Truck driver",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Fun Ho! Toy Company",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Toy_tractor_(AM_1996.165.171-4).jpg"
  },
  {
   "slug": "tying-a-tie",
   "prompt": "Tying a tie",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Tyra Kleen (Swedish, 1874–1951)",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tyra_Kleen_Self-portrait_with_a_Bow_Tie_1901.jpg"
  },
  {
   "slug": "typing",
   "prompt": "Typing",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "cogdogblog",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/37996646802@N01/817669"
  },
  {
   "slug": "umpire",
   "prompt": "Umpire",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ludovic Péron",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Referee_-_Lausanne_vs_Sion_02_may_2012.jpg"
  },
  {
   "slug": "unpacking",
   "prompt": "Unpacking",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Manifest Interactive from Portland, OR, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nvidia_GeForce_GTX_1080_Ti_Founders_Edition_unpacking_(26811931203).jpg"
  },
  {
   "slug": "upholsterer",
   "prompt": "Upholsterer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Wuzyprod",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Senegalese_upholsterer_spinning_wool_by_hand_02.jpg"
  },
  {
   "slug": "vacuuming-the-car",
   "prompt": "Vacuuming the car",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Alf van Beem",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hoover_Car_Vacuum_Cleaner.JPG"
  },
  {
   "slug": "vaulting",
   "prompt": "Vaulting",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Catherina2",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Vlag_Equestrian_vaulting.jpg"
  },
  {
   "slug": "veterinarian",
   "prompt": "Veterinarian",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "U.S. Navy photo by Mass Communication Specialist 3rd Class Kelley E. Barnes",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:070825-N-4238B-052_-_CDR_Elvira_Hall-Robinson,_of_the_USPHS_attached_to_the_MSC_hospital_ship_USNS_Comfort_(T-AH-20),_provides_veterinary_care_at_the_Bueanaventura_Coliseum.jpg"
  },
  {
   "slug": "volleyball",
   "prompt": "Volleyball",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ralf Lotys (Sicherlich)",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2016_DSC_Volleyball_084_Nneka_Onyejekwe.jpg"
  },
  {
   "slug": "voting",
   "prompt": "Voting",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Terri Sewell",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Voting_location_in_Alabama_during_2017_election.jpg"
  },
  {
   "slug": "waiter",
   "prompt": "Waiter",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Steve Evans",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Serving_rice,_Kunming.jpg"
  },
  {
   "slug": "wallpapering",
   "prompt": "Wallpapering",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "GuiGui Les Bons Skeudis from Paris 11ème, France",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2278410706_wallpapering.jpg"
  },
  {
   "slug": "water-skiing",
   "prompt": "Water skiing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Isiwal",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fischlham_Mevisto_Cup_2017_Trickski_Theresa_Schmidberger1-1.jpg"
  },
  {
   "slug": "watering-plants",
   "prompt": "Watering plants",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Jaljog",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Menyiram_Pohon_Lombok.jpg"
  },
  {
   "slug": "waxing-a-car",
   "prompt": "Waxing a car",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Charles Steinhacker",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:VACATIONERS_WAX_THEIR_CAR_AT_THE_%2213-MILE_WOODS%22_CAMPING_AREA_NEAR_ERROL,_CLOSE_TO_THE_HEADWATERS_OF_THE_ANDROSCOGGIN..._-_NARA_-_550649.jpg"
  },
  {
   "slug": "weightlifting",
   "prompt": "Weightlifting",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Sander van Ginkel",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rio_2016_-_Weightlifting_men%27s_69_kg_(29049391600).jpg"
  },
  {
   "slug": "welding",
   "prompt": "Welding",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "M. Marshall",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gary_Plant_Tubular_Steel_Corporation.jpg"
  },
  {
   "slug": "whittling",
   "prompt": "Whittling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown authorUnknown author",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:-Man_Whittling_a_Stick-_MET_DP109605.jpg"
  },
  {
   "slug": "window-washing",
   "prompt": "Window washing",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dietmar Rabich",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hamburg,_HafenCity,_Bebauung_am_Sandtorkai_--_2016_--_3024.jpg"
  },
  {
   "slug": "woodcutting",
   "prompt": "Woodcutting",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Utagawa Kuniyoshi",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Utagawa_Kuniyoshi_108_h%C3%A9roes_Zhang_Shun_bregando_sobre_olas.jpg"
  },
  {
   "slug": "wrestling",
   "prompt": "Wrestling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Pierre-Yves Beaudouin",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lutte_s%C3%A9n%C3%A9galaise_Bercy_2013_-_Mame_Balla-Pape_Mor_L%C3%B4_-_32.jpg"
  },
  {
   "slug": "yarn-spinning",
   "prompt": "Yarn spinning",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Катерина Штанко",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:2007._%D0%9F%D1%80%D1%8F%D0%BB%D0%BA%D0%B0_(%D0%BC%D0%B0%D1%80%D0%BA%D0%B0).jpg"
  },
  {
   "slug": "yodeling",
   "prompt": "Yodeling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "FOTO: Fortepan - ID 191055 Adományozó/Donor: Szalay Zoltán",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ki_mit_tud%3F_1972_Forg%C3%A1cs_G%C3%A1bor_1.jpg"
  },
  {
   "slug": "yoga",
   "prompt": "Yoga",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dr Shabana Sultahana",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Yoga_school_children.jpg"
  },
  {
   "slug": "zookeeper",
   "prompt": "Zookeeper",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Avenue",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Zookeeper_scratching_Galapagos_tortoise.jpg"
  }
 ]

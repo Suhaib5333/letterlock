@@ -776,17 +776,29 @@
  {
   "slug": "jacket",
   "prompt": "Jacket",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Petar Milošević",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tanner_at_work,_Medina_of_Marrakesh.jpg"
  },
  {
   "slug": "jelly",
   "prompt": "Jelly",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dan Harrelson from San Ramon, CA, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jelly_Belly_team_car.jpg"
  },
  {
   "slug": "jump-rope",
   "prompt": "Jump rope",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Koy.angkana",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jump_Rope_Field.jpg"
  },
  {
   "slug": "jumping",
@@ -836,7 +848,11 @@
  {
   "slug": "kicking-a-ball",
   "prompt": "Kicking a ball",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "President (1993-2001 : Clinton). White House Photograph Office. 1/20/1993-1/20/2001",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:President_William_J._Clinton_Kicking_a_Soccer_Ball_-_DPLA_-_37ba2c68327df7d00558e9bf38f4ee51.jpg"
  },
  {
   "slug": "kite",
@@ -1192,12 +1208,20 @@
  {
   "slug": "queen",
   "prompt": "Queen",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Raph_PH",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Queen_And_Adam_Lambert_-_The_O2_-_Tuesday_12th_December_2017_QueenO2121217-40_(25093771707).jpg"
  },
  {
   "slug": "quilt",
   "prompt": "Quilt",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Hiart",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Quilt_by_Kelsay_Buck,_1870_-_1880,_Honolulu_Museum_of_Art,_2528.JPG"
  },
  {
   "slug": "rainbow",
@@ -1670,27 +1694,47 @@
  {
   "slug": "walking",
   "prompt": "Walking",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Office of Congressman Karen Bass",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Karen_Bass_walking_down_hallway_-_12-18-2019.jpg"
  },
  {
   "slug": "wand",
   "prompt": "Wand",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Österreichisch-Ungarische Monarchie, Militärgeographisches Institut",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aufnahmeblatt_4856-3_Puchberg_am_Schneeberg_und_Hohe_Wand.jpg"
  },
  {
   "slug": "washing-hands",
   "prompt": "Washing hands",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Charlie.Smatt",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Washing_hands_thoroughly.jpg"
  },
  {
   "slug": "watch",
   "prompt": "Watch",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Shafin209",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Timesays.jpg"
  },
  {
   "slug": "watermelon",
   "prompt": "Watermelon",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Henry G. Gilbert Nursery and Seed Trade Catalog Collection.; P. Mann &amp; Company.",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:1904_seeds_and_implements_(Page_13)_BHL43932982.jpg"
  },
  {
   "slug": "waving",
@@ -1704,36 +1748,64 @@
  {
   "slug": "wheelbarrow",
   "prompt": "Wheelbarrow",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dietmar Rabich",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Detzem,_Wegekreuz_--_2015_--_7539.jpg"
  },
  {
   "slug": "whistling",
   "prompt": "Whistling",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Meenakshi Sundaram N",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Whistling_Meenu_-_Meenakshi_Sundaram_N_-_World_record_from_India_Kalam%27s_group_world_record.jpg"
  },
  {
   "slug": "windmill",
   "prompt": "Windmill",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Trougnouf",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:De_Molen_(windmill)_and_the_nuclear_power_plant_cooling_tower_in_Doel,_Belgium_(DSCF3859).jpg"
  },
  {
   "slug": "wiping-a-window",
   "prompt": "Wiping a window",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "U.S. Navy photo by Mass Communication Specialist 1st Class Darryl Wood",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:US_Navy_100821-N-9301W-749_Lt._Lance_Ruth,_assigned_to_the_guided-missile_frigate_USS_Klakring_(FFG_42),_paints_window_shutters_as_children_clean_wiping_rags_during_a_joint_community_service_project_with_the_Colombian_national.jpg"
  },
  {
   "slug": "yawning",
   "prompt": "Yawning",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Joseph Ducreux",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Joseph_Ducreux_(French)_-_Self-Portrait,_Yawning_-_Google_Art_Project.jpg"
  },
  {
   "slug": "yo-yo",
   "prompt": "Yo-yo",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Daderot",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:National_Yo-Yo_Museum_-_Chico,_CA_-_DSC03085.JPG"
  },
  {
   "slug": "zipping-a-jacket",
   "prompt": "Zipping a jacket",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Rainster",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jacket_(AM_1999.107.243-5).jpg"
  }
 ]

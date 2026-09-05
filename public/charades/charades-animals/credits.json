@@ -2,147 +2,263 @@
  {
   "slug": "aardvark",
   "prompt": "Aardvark",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Bonolo Nikita Rankaga",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aardvark_(Thakadu).jpg"
  },
  {
   "slug": "albatross",
   "prompt": "Albatross",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "JJ Harrison",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Royal_Albatross_-_east_of_the_Tasman_Peninsula,_Tasmania.jpg"
  },
  {
   "slug": "alligator",
   "prompt": "Alligator",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "State Library and Archives of Florida",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alligator_being_%22put_to_sleep%22_at_the_Ross_Allen_Reptile_Institute,_Silver_Springs,_Florida_(11206742086).jpg"
  },
  {
   "slug": "anaconda",
   "prompt": "Anaconda",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "The Tacoma Times (via ((W|Chronicling America",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Famous_%22Anaconda_Hill%22,_The_%22Richest_Mining_Spot_On_Earth%22.jpg"
  },
  {
   "slug": "angelfish",
   "prompt": "Angelfish",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "mendel",
+  "license": "CC BY-SA 1.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/1.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Freshwater_angelfish_biodome.jpg"
  },
  {
   "slug": "ant",
   "prompt": "Ant",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Mateusxw7",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ant%C3%ADgua-e-barbuda.passaporte.jpg"
  },
  {
   "slug": "anteater",
   "prompt": "Anteater",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Fernando Flores from Caracas, Venezuela",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Giant_anteater_-_Oso_hormiguero_(Myrmecophaga_tridactyla)_(9864451663).jpg"
  },
  {
   "slug": "antelope",
   "prompt": "Antelope",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ding.dong9152",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Antelope_in_bushes.jpg"
  },
  {
   "slug": "aphid",
   "prompt": "Aphid",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Alvesgaspar",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aphid_2007-1.jpg"
  },
  {
   "slug": "armadillo",
   "prompt": "Armadillo",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Special Collections, University of Houston Libraries",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:TatusorGuineanBeast.jpg"
  },
  {
   "slug": "axolotl",
   "prompt": "Axolotl",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Axolotover",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hypomelanistic-axolotl.jpg"
  },
  {
   "slug": "baboon",
   "prompt": "Baboon",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "JonRichfield",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Baboon_faeces_weathered_IMG_6971.jpg"
  },
  {
   "slug": "badger",
   "prompt": "Badger",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Experiment123a",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Golden_Badger_Wisconsin_Film_Festival.jpg"
  },
  {
   "slug": "barracuda",
   "prompt": "Barracuda",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "The original uploader was Aquaimages at English Wikipedia.",
+  "license": "CC BY-SA 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Great_Barracuda_off_the_Netherland_Antilles.jpg"
  },
  {
   "slug": "bat",
   "prompt": "Bat",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Phil Williams",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:University_of_Bath_-_geograph.org.uk_-_144837.jpg"
  },
  {
   "slug": "bear",
   "prompt": "Bear",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Gerlinde Mairhofer",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bear_Erich_-_Bear_Sanctuary_Arbesbach_2.jpg"
  },
  {
   "slug": "beaver",
   "prompt": "Beaver",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "No machine-readable author provided. Cszmurlo assumed (based on copyright claims).",
+  "license": "CC BY 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beaver-Szmurlo.jpg"
  },
  {
   "slug": "bee",
   "prompt": "Bee",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "AdvaitaMakaranda",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bee_sleeping_on_a_flower.jpg"
  },
  {
   "slug": "beetle",
   "prompt": "Beetle",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Bernie",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cetonia_aurata_take_off_composition_05172009.jpg"
  },
  {
   "slug": "bison",
   "prompt": "Bison",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Michael Gäbler",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bison_bonasus_(Linnaeus_1758).jpg"
  },
  {
   "slug": "blue-jay",
   "prompt": "Blue jay",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Rhododendrites",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Blue_jay_in_PP_(30960).jpg"
  },
  {
   "slug": "boar",
   "prompt": "Boar",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Richard Bartz, Munich Makro Freak",
+  "license": "CC BY-SA 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wild_Boar_Habbitat_2.jpg"
  },
  {
   "slug": "bobcat",
   "prompt": "Bobcat",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Len Blumin",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bobcat_stare.jpg"
  },
  {
   "slug": "brachiosaurus",
   "prompt": "Brachiosaurus",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dmitry Bogdanov",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Brachiosaurus_DB.jpg"
  },
  {
   "slug": "buffalo",
   "prompt": "Buffalo",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Peter Riemann",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Buffalo_Project,_Peter_Riemann,_Cornell_1976.jpg"
  },
  {
   "slug": "bulldog",
   "prompt": "Bulldog",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "https://pixabay.com/pt/users/kaz-19203/",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:English_Bulldog_-Dog-220489-1280.jpg"
  },
  {
   "slug": "bullfrog",
   "prompt": "Bullfrog",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Irishlefty24 (Mandy Coriston)",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bullfrog_Peek-a-boo.jpg"
  },
  {
   "slug": "bumblebee",
   "prompt": "Bumblebee",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Alvesgaspar",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bumblebee_October_2007-3a.jpg"
  },
  {
   "slug": "butterfly",
   "prompt": "Butterfly",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "MaheshBaruahwildlife",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Close_wing_position_of_Gonepteryx_amintha_(Blanchard,_1871)_-_Orange_Brimstone_11_WLB.jpg"
  },
  {
   "slug": "camel",
@@ -291,7 +407,11 @@
  {
   "slug": "crocodile",
   "prompt": "Crocodile",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Tomas Castelazo",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Crocodylus_acutus_in_La_Manzanilla.jpg"
  },
  {
   "slug": "cuttlefish",
@@ -818,27 +938,47 @@
  {
   "slug": "ibex",
   "prompt": "Ibex",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "This file was donated to Wikimedia Commons as part of a project by the Metropolitan Museum of Art. See the Image and Data Resources Open Access Policy",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Brick_fragment_with_the_head_of_an_ibex_MET_DP222631.jpg"
  },
  {
   "slug": "ibis",
   "prompt": "Ibis",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Juan Emilio Prades Bel",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Delta_del_Ebro._Ibis_moritos_(Plegadis_falcinellus).jpg"
  },
  {
   "slug": "iguana",
   "prompt": "Iguana",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ianaré Sévi",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Iguana_iguana_male_head.jpg"
  },
  {
   "slug": "impala",
   "prompt": "Impala",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Yathin sk",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Black-faced_impala_from_Etosha_National_Park,_Namibia,_2014.jpg"
  },
  {
   "slug": "inchworm",
   "prompt": "Inchworm",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Hsu Hong Lin from 南投縣集集鎮, 中華民國",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:M13-20140429-036_(28441346874).jpg"
  },
  {
   "slug": "jackal",
@@ -960,686 +1100,1234 @@
  {
   "slug": "labrador",
   "prompt": "Labrador",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Artemas Ward",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Drying_codfish_at_Battle_Harbor,_Labrador,_photo_from_The_Encyclopedia_of_Food_by_Artemas_Ward.jpg"
  },
  {
   "slug": "ladybug",
   "prompt": "Ladybug",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Iamthe.ladybug",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ladybug_i_2022.jpg"
  },
  {
   "slug": "lamb",
   "prompt": "Lamb",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Captain Shrimp Petaling Jaya",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Difference_between_Lamb_or_Mutton.jpg"
  },
  {
   "slug": "lemming",
   "prompt": "Lemming",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "unknown",
+  "license": "CC BY 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lemming.jpg"
  },
  {
   "slug": "lemur",
   "prompt": "Lemur",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Richard Bartz, Munich aka Makro Freak",
+  "license": "CC BY-SA 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Katta_Lemur_catta.jpg"
  },
  {
   "slug": "leopard",
   "prompt": "Leopard",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Colin Hines www.ColinHinesPhotography.com",
+  "license": "CC BY 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Amur_Leopard_Pittsburgh_Zoo.jpg"
  },
  {
   "slug": "lion",
   "prompt": "Lion",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Captain avestar",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nawab_Wajid_Ali_Shah_Zoological_Garden_lion_den.jpg"
  },
  {
   "slug": "lizard",
   "prompt": "Lizard",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "SajjadF",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lizard_-_e.JPG"
  },
  {
   "slug": "llama",
   "prompt": "Llama",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "IanBTravis",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Llamas_at_Laguna_Colorado.jpg"
  },
  {
   "slug": "lobster",
   "prompt": "Lobster",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Jpatokal",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cereal_lobster_at_Jade_Garden,_Sungai_Rengit.jpg"
  },
  {
   "slug": "locust",
   "prompt": "Locust",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Charles J. Sharp",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Garden_locust_(Acanthacris_ruficornis).jpg"
  },
  {
   "slug": "loon",
   "prompt": "Loon",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "P199",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Loon_Bohol_1.JPG"
  },
  {
   "slug": "lynx",
   "prompt": "Lynx",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "J. Smil",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:EB1911_-_European_Lynx.jpg"
  },
  {
   "slug": "macaw",
   "prompt": "Macaw",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Charles J. Sharp",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Red-and-green_macaw_(Ara_chloropterus)_juvenile.JPG"
  },
  {
   "slug": "mackerel",
   "prompt": "Mackerel",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Angela L. Rak",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Smoked_mackerel_sellers_in_Jamestown,_Accra_02.jpg"
  },
  {
   "slug": "manatee",
   "prompt": "Manatee",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Melkov",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Manatee_at_Ocean_Expo_Park.jpg"
  },
  {
   "slug": "mantis",
   "prompt": "Mantis",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Syced",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mantis_at_Institute_for_Nature_Study.jpg"
  },
  {
   "slug": "marmot",
   "prompt": "Marmot",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "S.Mend10",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Marmot_(Pangong_Tso).jpg"
  },
  {
   "slug": "meerkat",
   "prompt": "Meerkat",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Charles J. Sharp",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Meerkat_(Suricata_suricatta)_Tswalu.jpg"
  },
  {
   "slug": "mole",
   "prompt": "Mole",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Beefy SAFC",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Famous_Moles,_Seaham_Hall_Car_Park.jpg"
  },
  {
   "slug": "mongoose",
   "prompt": "Mongoose",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Tisha Mukherjee",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Indian_grey_mongoose_in_Rabindra_Sarobar_June_2024_by_Tisha_Mukherjee_04.jpg"
  },
  {
   "slug": "monkey",
   "prompt": "Monkey",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Charles J. Sharp",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Golden_monkey_(Cercopithecus_kandti)_eating.jpg"
  },
  {
   "slug": "moose",
   "prompt": "Moose",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Brandon Oliver",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Moose_2019.jpg"
  },
  {
   "slug": "mosquito",
   "prompt": "Mosquito",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "E. J. Lewis",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:EB1911_-_Mosquito_-_Fig._1.jpg"
  },
  {
   "slug": "mouse",
   "prompt": "Mouse",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Jjsjsjshhs",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_mouse_in_the_mall.jpg"
  },
  {
   "slug": "mule",
   "prompt": "Mule",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Bureau of Land Management",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Oregon_National_Historic_Trail_in_Wyoming.jpg"
  },
  {
   "slug": "narwhal",
   "prompt": "Narwhal",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown photographer",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Harry_Raven,_zoologist,_shows_how_to_clean_a_narwhal_skull.jpg"
  },
  {
   "slug": "nautilus",
   "prompt": "Nautilus",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Linnaeus, 1758",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Naturalis_Biodiversity_Center_-_ZMA.MOLL.17904_-_Nautilus_pompilius_Linnaeus,_1758_-_Nautilidae_-_Mollusc_shell.jpeg"
  },
  {
   "slug": "newt",
   "prompt": "Newt",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Chris M",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Eastern_Newt.jpg"
  },
  {
   "slug": "nightingale",
   "prompt": "Nightingale",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Christoph Moning",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nightingale_by_Christoph_Moning.jpg"
  },
  {
   "slug": "ocelot",
   "prompt": "Ocelot",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "U.S. Fish & Wildlife Service Southwest Region",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/51896441@N04/9779370965"
  },
  {
   "slug": "octopus",
   "prompt": "Octopus",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Rickard Zerpe",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Octopus_sp._(14217664178).jpg"
  },
  {
   "slug": "okapi",
   "prompt": "Okapi",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "joke devliegher",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/146291533@N02/31819962934"
  },
  {
   "slug": "opossum",
   "prompt": "Opossum",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Cody Pope",
+  "license": "CC BY-SA 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Opossum_2.jpg"
  },
  {
   "slug": "orangutan",
   "prompt": "Orangutan",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ridwan0810",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Orangutan_Kalimantan.jpg"
  },
  {
   "slug": "orca",
   "prompt": "Orca",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "unknown",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Orca_wal_2.jpg"
  },
  {
   "slug": "ostrich",
   "prompt": "Ostrich",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Thomas Fuhrmann",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Masai_Mara_National_Reserve_17_-_common_ostrich_(Struthio_camelus).jpg"
  },
  {
   "slug": "otter",
   "prompt": "Otter",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Mike Baird from Morro Bay, USA (bairdphotos.com)",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sea-otter-morro-bay_13.jpg"
  },
  {
   "slug": "owl",
   "prompt": "Owl",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Vedant Raju Kasambe",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Barn_Owl_Ear_macro.jpg"
  },
  {
   "slug": "ox",
   "prompt": "Ox",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "the paleobear from Lontananza, Loreto, Peru",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Trace_fossils_with_mud_cracks_A_plant_debris_B_worms_C_possible_scorpion_D_E_F_Rhynchosaur_traces_carnian_weston_(38666826544).jpg"
  },
  {
   "slug": "oyster",
   "prompt": "Oyster",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": ".mw-parser-output .messagebox{margin:4px 0;width:auto;border-collapse:collapse;border:2px solid var(--border-color-progressive,#6485d1);background-color:var(--background-color-neutral-subtle,#fbfcff);color:var(--color-base,#202122);box-sizing:border-box;border-inline-start-width:8px}.mw-parser-output .messagebox.mbox-small{font-size:88%;line-height:1.25em}.mw-parser-output .mbox-warning,.mw-parser-output .mbox-speedy{border:2px solid var(--border-color-error,#b22222);background:var(--background-color-error-subtle,#ffdbdb);border-inline-start-width:8px}.mw-parser-output .mbox-serious,.mw-parser-output .mbox-delete,.mw-parser-output .mbox-stop{border:2px solid var(--border-color-error,#b22222);border-inline-start-width:8px}.mw-parser-output .mbox-issue,.mw-parser-output .mbox-content{border:2px solid #f28500;background:var(--background-color-warning-subtle,#ffe);border-inline-start-width:8px}.mw-parser-output .mbox-query,.mw-parser-output .mbox-style{border:2px solid #f4c430;background:var(--background-color-warning-subtle,#ffe);border-inline-start-width:8px}.mw-parser-output .mbox-shit{border:2px solid #960;border-inline-start-width:8px}.mw-parser-output .mbox-license{border:2px solid #88a;border-inline-start-width:initial}.mw-parser-output .mbox-legal{border:2px solid var(--border-color-notice,#666);background:var(--background-color-base,#fff);border-inline-start-width:8px}.mw-parser-output .mbox-honor{border:2px solid #ca3;background:var(--background-color-warning-subtle,#fcf4db);border-inline-start-width:8px}.mw-parser-output .mbox-growth{border:2px solid #8d4;background:var(--background-color-success-subtle,#d5fdf4);border-inline-start-width:8px}.mw-parser-output .mbox-move{border:2px solid #93c;border-inline-start-width:8px}.mw-parser-output .mbox-protection,.mw-parser-output .mbox-message{border:2px solid var(--border-color-base,#aaa);border-inline-start-width:8px}.mw-parser-output .messagebox .mbox-text{border:none;padding:0.25em 0.9em;width:100%}.mw-parser-output .messagebox .mbox-image{border:none;padding-top:2px;padding-bottom:2px;padding-inline-start:0.9em;padding-inline-end:0;text-align:center}.mw-parser-output .messagebox .mbox-imageright{border:none;padding-top:2px;padding-bottom:2px;padding-inline-start:0;padding-inline-end:0.9em;text-align:center}.mw-parser-output .messagebox .mbox-empty-cell{border:none;padding:0;width:1px}.mw-parser-output .messagebox .mbox-invalid-type{text-align:center}@media(min-width:720px){.mw-parser-output .messagebox{margin:4px 10%}.mw-parser-output .messagebox.mbox-small{clear:right;float:right;margin:4px 0 4px 1em;width:238px}}body.skin--responsive .mw-parser-output table.messagebox img{max-width:none!important}Please respect the Creative Commons Attribution-ShareAlike license that this image is released under. You must use the same license if you share this image and include this credit line wherever you use this image: Y.ssk / Wikimedia Commons / CC BY-SA 4.0 While not required, if you use this image outside of the Wikimedia projects, I would appreciate it if you could leave a quick message on my talk page.",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Oyster_shells_on_Whitstable_beach.jpg"
  },
  {
   "slug": "panda",
   "prompt": "Panda",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "Mathias Appel",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/91501748@N07/26251937355"
  },
  {
   "slug": "pangolin",
   "prompt": "Pangolin",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Post of Indonesia",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stamp_of_Indonesia_-_1956_-_Colnect_231773_-_Sunda_Pangolin_Manis_javanica.jpeg"
  },
  {
   "slug": "panther",
   "prompt": "Panther",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "Provenance Online Project",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/58558794@N07/5436259039"
  },
  {
   "slug": "parrot",
   "prompt": "Parrot",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "D Coetzee",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/29507259@N02/3573757194"
  },
  {
   "slug": "peacock",
   "prompt": "Peacock",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "Bernard Spragg",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/88123769@N02/16853387384"
  },
  {
   "slug": "pelican",
   "prompt": "Pelican",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "Bernard Spragg",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/88123769@N02/14245584798"
  },
  {
   "slug": "penguin",
   "prompt": "Penguin",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "Bernard Spragg",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/88123769@N02/12065911556"
  },
  {
   "slug": "pheasant",
   "prompt": "Pheasant",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Mukteshwaraiyya",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kalji_Pheasant.jpg"
  },
  {
   "slug": "pig",
   "prompt": "Pig",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "andymiccone",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/129822560@N05/26722155994"
  },
  {
   "slug": "piranha",
   "prompt": "Piranha",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "André-Philippe D. P.",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Piranha_jaws.jpg"
  },
  {
   "slug": "platypus",
   "prompt": "Platypus",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "CazzJj",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/64249609@N08/24617499510"
  },
  {
   "slug": "polar-bear",
   "prompt": "Polar bear",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "blizzy63",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/45379817@N08/5469689361"
  },
  {
   "slug": "pony",
   "prompt": "Pony",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Albarubescens",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pony_snout,_Lake_Martignano,_Lazio.jpg"
  },
  {
   "slug": "porcupine",
   "prompt": "Porcupine",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "GrandTetonNPS",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/144302732@N07/28258034138"
  },
  {
   "slug": "possum",
   "prompt": "Possum",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Andrew Mercer (www.baldwhiteguy.co.nz)",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Brushtail_Possum_IMG_5005.jpg"
  },
  {
   "slug": "prawn",
   "prompt": "Prawn",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Balaram Mahalder",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Freshwater_prawn_farm2.jpg"
  },
  {
   "slug": "pterodactyl",
   "prompt": "Pterodactyl",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown authorUnknown author",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pterodactyl_depicted_in_1908.jpg"
  },
  {
   "slug": "puffin",
   "prompt": "Puffin",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "ianpreston",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_puffin_facing_away_from_camera.jpg"
  },
  {
   "slug": "pug",
   "prompt": "Pug",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "No machine-readable author provided. Rtamayo~commonswiki assumed (based on copyright claims).",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pug_puppy_001.jpg"
  },
  {
   "slug": "puma",
   "prompt": "Puma",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Silar",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:020240714_151820_Puma.jpg"
  },
  {
   "slug": "quail",
   "prompt": "Quail",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "Joshua Tree National Park",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/115357548@N08/52419057373"
  },
  {
   "slug": "quetzal",
   "prompt": "Quetzal",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "* La Strada Fellini * braunpanther *",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/128932303@N07/18672940715"
  },
  {
   "slug": "quokka",
   "prompt": "Quokka",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "odd.organisms",
+  "license": "Public Domain Mark",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://www.flickr.com/photos/118885097@N06/24414933709"
  },
  {
   "slug": "rabbit",
   "prompt": "Rabbit",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Peter Paul Rubens / Jan Brueghel the Elder",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jan_Brueghel_de_Oude_en_Peter_Paul_Rubens_-_Het_aards_paradijs_met_de_zondeval_van_Adam_en_Eva.jpg"
  },
  {
   "slug": "raccoon",
   "prompt": "Raccoon",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Darkone",
+  "license": "CC BY-SA 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Raccoon_(Procyon_lotor)_2.jpg"
  },
  {
   "slug": "ram",
   "prompt": "Ram",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Okinartz",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ram_on_a_grazing_land_01.jpg"
  },
  {
   "slug": "rat",
   "prompt": "Rat",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Sean Buckley via Poly Haven (https://polyhaven.com/all?a=Sean%20Buckley / https://web.archive.org/web/20230912131747/https://polyhaven.com/all?a=Sean%20Buckley)",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Street_rat_sss_8k_(Sean_Buckley_via_Poly_Haven).png"
  },
  {
   "slug": "rattlesnake",
   "prompt": "Rattlesnake",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "USFWS - Pacific Region",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:USFWS_Rattlesnake_selfie_(19145247782).jpg"
  },
  {
   "slug": "raven",
   "prompt": "Raven",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "DuoDro",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Vares_poseerimias_oksal.jpg"
  },
  {
   "slug": "reindeer",
   "prompt": "Reindeer",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Johan Christian Dahl / Johann Siegwald Dahl",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:%27Reindeer%27_by_Johan_Christian_Dahl,_1850,_Bergen_Kunstmuseum.JPG"
  },
  {
   "slug": "rhino",
   "prompt": "Rhino",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Komencanto, modified by ArtMechanic",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rhinoceros_in_South_Africa_adjusted.jpg"
  },
  {
   "slug": "roadrunner",
   "prompt": "Roadrunner",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "lwolfartist",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Greater_roadrunner_falcon_sp_3.23.25_DSC_3732-topaz-rawdenoise.jpg"
  },
  {
   "slug": "robin",
   "prompt": "Robin",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Roger Heslop",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:American_Robin,_fledgeling.jpg"
  },
  {
   "slug": "rooster",
   "prompt": "Rooster",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Jorge Royan",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_95_year_old_woman_with_her_pet_rooster,_Havana,_Cuba.jpg"
  },
  {
   "slug": "salamander",
   "prompt": "Salamander",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Bozygocreative",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Blogs-content-image1611655388.jpg"
  },
  {
   "slug": "salmon",
   "prompt": "Salmon",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Fishinphoto",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Salmon_tree_Wrangell_Alaska.jpg"
  },
  {
   "slug": "scorpion",
   "prompt": "Scorpion",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Mario Modesto Mata",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Buthus_ibericus.jpg"
  },
  {
   "slug": "sea-lion",
   "prompt": "Sea lion",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Katie Chan",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Southern_sea_lion,_L%27Oceanogr%C3%A0fic_(1).jpg"
  },
  {
   "slug": "seagull",
   "prompt": "Seagull",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Zafer",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Newborn_seagull_03.jpg"
  },
  {
   "slug": "seahorse",
   "prompt": "Seahorse",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Nhobgood Nick Hobgood",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hippocampus_histrix_(Thorny_seahorse).jpg"
  },
  {
   "slug": "seal",
   "prompt": "Seal",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Armael",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seal_(Z%C3%A9nith-2012)-5.JPG"
  },
  {
   "slug": "shark",
   "prompt": "Shark",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Шаэ",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Porco%27spillino_Vol%27ant_%C3%A9.png"
  },
  {
   "slug": "sheep",
   "prompt": "Sheep",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Keith Weller",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Flock_of_sheep.jpg"
  },
  {
   "slug": "skunk",
   "prompt": "Skunk",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "http://www.birdphotos.com",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Striped_Skunk.jpg"
  },
  {
   "slug": "sloth",
   "prompt": "Sloth",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Stefan Laube (Tauchgurke)",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bradypus.jpg"
  },
  {
   "slug": "snail",
   "prompt": "Snail",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "H. Zell",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tectus_triserialis_01.JPG"
  },
  {
   "slug": "snake",
   "prompt": "Snake",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "골사 ( https://onscript.tistory.com )",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:ONScripter_Snake.png"
  },
  {
   "slug": "sparrow",
   "prompt": "Sparrow",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Francesco Veronesi from Italy",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Saxaul_Sparrow_-_Almaty_-_Kazakistan_S4E1781_(22800579836).jpg"
  },
  {
   "slug": "spider",
   "prompt": "Spider",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Guruleninn",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Spider-closeup.jpg"
  },
  {
   "slug": "squid",
   "prompt": "Squid",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Versions111",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Squid_in_Marine_World_Uminonakamichi.png"
  },
  {
   "slug": "squirrel",
   "prompt": "Squirrel",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Charles J. Sharp",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grey_squirrel_(Sciurus_carolinensis)_02.jpg"
  },
  {
   "slug": "starfish",
   "prompt": "Starfish",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Matt Kieffer",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Crown_of_Thorns_Starfish_at_Malapascuas_Island_v._II.jpg"
  },
  {
   "slug": "stegosaurus",
   "prompt": "Stegosaurus",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Nobu Tamura (http://spinops.blogspot.com)",
+  "license": "CC BY 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stegosaurus_BW.jpg"
  },
  {
   "slug": "stingray",
   "prompt": "Stingray",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Matthew T Rader",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stingray_(Myliobatoidei)_in_Cozumel,_Mexico.jpg"
  },
  {
   "slug": "stork",
   "prompt": "Stork",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ankit Suresh",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stork_in_Nepal.jpg"
  },
  {
   "slug": "swan",
   "prompt": "Swan",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Sateessa",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Swan_family_29-05-25.jpg"
  },
  {
   "slug": "swordfish",
   "prompt": "Swordfish",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown authorUnknown author",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:NSRW_Swordfish.jpg"
  },
  {
   "slug": "swordtail",
   "prompt": "Swordtail",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Photo made by User:Sebastian Wallroth",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cleanerfish_cleaning_face_of_a_west_indian_manatee_in_zoo_tierpark_friedrichsfelde_berlin_germany.jpg"
  },
  {
   "slug": "tadpole",
   "prompt": "Tadpole",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Leonhard Lenz",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tadpole_at_a_wetmeadow_next_to_the_Kreuzgraben_1.jpg"
  },
  {
   "slug": "tapir",
   "prompt": "Tapir",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "AnonymousUnknown author",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:EB1911_Alimentary_Canal_Fig._7.%E2%80%94Intestinal_Tract_of_Tapir.jpg"
  },
  {
   "slug": "tarantula",
   "prompt": "Tarantula",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Oneillbeck",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Female_Tarantula_Molt.png"
  },
  {
   "slug": "tarsier",
   "prompt": "Tarsier",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Julan Shirwod Nueva",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tarsier_(Inside_Philippine_National_Museum_of_Natural_History).jpg"
  },
  {
   "slug": "termite",
   "prompt": "Termite",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Coptotermes_formosanus_shiraki_USGov_k8204-7.jpg: Photo by Scott Bauer. derivative work:--&gt; த.உழவன்",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Termite-Formosan_subterranean-soldiers-Tamil_word17.2.jpg"
  },
  {
   "slug": "tiger",
   "prompt": "Tiger",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Davidvraju",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Radio_collared_Tiger_satpura_NP.jpg"
  },
  {
   "slug": "toad",
   "prompt": "Toad",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Big.top.music.man",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Staring_toad.png"
  },
  {
   "slug": "tortoise",
   "prompt": "Tortoise",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "AlvinDulle",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Timeless_Majesty_A_Tortoise%27s_Journey.jpg"
  },
  {
   "slug": "toucan",
   "prompt": "Toucan",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Charles J. Sharp",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grey-breasted_mountain_toucan_(Andigena_hypoglauca)_Caldas.jpg"
  },
  {
   "slug": "triceratops",
   "prompt": "Triceratops",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "John Bell Hatcher and Richard Lull",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Triceratops_prorsus_skull_side_view.jpg"
  },
  {
   "slug": "trout",
   "prompt": "Trout",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Alex D. Foster, Shannon M. Claeson, Peter A. Bisson, John Heimburg",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Effects_of_debris-filled_streams_on_fish_species.png"
  },
  {
   "slug": "tuna",
   "prompt": "Tuna",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Interwikifood",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tuna_Seggoe.jpg"
  },
  {
   "slug": "turkey",
   "prompt": "Turkey",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Mostafameraji",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Metropolitian_Istanbul_-_Landscapes_of_Turkey_12.jpg"
  },
  {
   "slug": "turtle",
   "prompt": "Turtle",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Holly Keepers, United States Fish and Wildlife Service (USFWS)",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Usfws-spotted-turtle-held-hand.jpg"
  },
  {
   "slug": "tyrannosaurus",
   "prompt": "Tyrannosaurus",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Todd Merport",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tyrannosaurus_at_Berkeley.jpg"
  },
  {
   "slug": "uakari",
   "prompt": "Uakari",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "Whaldener Endo",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "https://www.inaturalist.org/photos/206605203"
  },
  {
   "slug": "urchin",
   "prompt": "Urchin",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Nhobgood (talk) Nick Hobgood",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tripneustes_ventricosus_(West_Indian_Sea_Egg-top)_and_Echinometra_viridis_(Reef_Urchin_-_bottom).jpg"
  },
  {
   "slug": "vampire-bat",
   "prompt": "Vampire bat",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Ltshears",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Vampire_Bat_002.jpg"
  },
  {
   "slug": "velociraptor",
   "prompt": "Velociraptor",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Eduard Solà Vázquez",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Velociraptor_skeleton_white_background.jpg"
  },
  {
   "slug": "viper",
   "prompt": "Viper",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Tisha Mukherjee",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Red-tailed_bamboo_pit_viper_in_Sundarbans_National_Park_October_2025_by_Tisha_Mukherjee_03.jpg"
  },
  {
   "slug": "vulture",
   "prompt": "Vulture",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "PhilipRomano",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:GraceEdwards-byPhilipRomano.jpg"
  },
  {
   "slug": "wallaby",
   "prompt": "Wallaby",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Cat Lee Ball",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wallaby_at_Taronga_Zoo,_2016.jpg"
  },
  {
   "slug": "walrus",
   "prompt": "Walrus",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Joel Garlich-Miller, U.S. Fish and Wildlife Service",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pacific_Walrus_-_Bull_(8247646168).jpg"
  },
  {
   "slug": "warthog",
   "prompt": "Warthog",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Giles Laurent",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:027_Common_warthog_in_the_Serengeti_National_Park_Photo_by_Giles_Laurent.jpg"
  },
  {
   "slug": "wasp",
   "prompt": "Wasp",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Jan Ebr",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Scolia_sexmaculata_139746999.jpg"
  },
  {
   "slug": "weasel",
   "prompt": "Weasel",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Unknown authorUnknown author",
+  "license": "Public domain",
+  "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Anna_Lewicka_-_W_Jasnej_Wsi_-_strona_66.jpg"
  },
  {
   "slug": "weevil",
   "prompt": "Weevil",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Siga",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Coniocleonus_nigrosuturatus_pronotum.jpg"
  },
  {
   "slug": "whale",
   "prompt": "Whale",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Entychologist",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beached_Whale.jpg"
  },
  {
   "slug": "wildebeest",
   "prompt": "Wildebeest",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Bernard Gagnon",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Blue_wildebeest_in_Mlilwane_Wildlife_Sanctuary.jpg"
  },
  {
   "slug": "wolf",
   "prompt": "Wolf",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Valkyria1979",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:DIANA_WOLF.png"
  },
  {
   "slug": "wolverine",
   "prompt": "Wolverine",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Luke Rauscher",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hugh_Jackman_aka_Wolverine_figure_at_Madame_Tussauds_London_(33783637622).jpg"
  },
  {
   "slug": "wombat",
   "prompt": "Wombat",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Dietmar Rabich",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wilsons_Promontory_National_Park_(AU),_Tidal_River_(village),_Wombat_--_2019_--_1602.jpg"
  },
  {
   "slug": "woodpecker",
   "prompt": "Woodpecker",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "hedera.baltica from Wrocław, Poland",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Middle_spotted_woodpecker_(40687257821).jpg"
  },
  {
   "slug": "worm",
   "prompt": "Worm",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Paleo Miguel",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Paleoart_reconstruction_of_Annulitubus_fernandesi.png"
  },
  {
   "slug": "wren",
   "prompt": "Wren",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Anthony Kaduck",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Niceforo%27s_Wren.jpg"
  },
  {
   "slug": "yak",
   "prompt": "Yak",
-  "source": "word-only"
+  "source": "openverse",
+  "author": "Bernard Spragg",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceUrl": "http://www.flickr.com/photos/88123769@N02/16793982106"
  },
  {
   "slug": "zebra",
   "prompt": "Zebra",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "Francis Akuka for the Wikimedia Foundation.",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Blue_zebra_illustration.png"
  },
  {
   "slug": "zebu",
   "prompt": "Zebu",
-  "source": "word-only"
+  "source": "wikimedia-commons",
+  "author": "safaritravelplus",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "sourceUrl": "https://commons.wikimedia.org/wiki/File:Zebu_Bull.jpg"
  }
 ]
