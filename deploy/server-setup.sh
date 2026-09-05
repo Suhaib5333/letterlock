@@ -58,25 +58,28 @@ pm2 startup systemd -u root --hp /root >/dev/null 2>&1 || true
 # published through the existing Traefik entry for status.letterlock.raltech.dev, so
 # it never opens another port on a box shared with the other RAL projects. Idempotent:
 # re-running server-setup leaves a healthy container alone.
-echo "== Uptime Kuma =="
-# The Traefik entry for status.letterlock.raltech.dev points at the CONTAINER NAME
-# `letterlock-status` on Traefik's own network (`http://letterlock-status:3001`), so
-# the container must carry that exact name and join that network. It must NOT publish
-# a host port: Traefik reaches it container-to-container.
+echo "== Uptime Kuma (status page) =="
+# Compose, not `docker run`. Every other project on this box is Compose managed, so
+# Hostinger's Docker Manager lists them by project; a plain container carries no
+# Compose labels and is invisible there, which means it cannot be restarted or even
+# noticed when it dies from the panel. deploy/status/docker-compose.yml pins the
+# container name (Traefik routes to the NAME, not a port) and marks the volume and
+# network external so it adopts what already exists instead of duplicating it.
 if command -v docker >/dev/null; then
-  if [ -n "$(docker ps -q -f name=^letterlock-status$)" ]; then
-    echo "already running"
-  else
-    NET=$(docker inspect root-traefik-1 --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}' 2>/dev/null | head -1)
-    NET=${NET:-root_default}
-    docker rm -f letterlock-status >/dev/null 2>&1 || true
+  mkdir -p /opt/letterlock/status
+  if [ -f /opt/letterlock/incoming/status-compose.yml ]; then
+    install -m 644 /opt/letterlock/incoming/status-compose.yml /opt/letterlock/status/docker-compose.yml
+  fi
+  if [ -f /opt/letterlock/status/docker-compose.yml ]; then
     docker volume create letterlock-status >/dev/null 2>&1 || true
-    docker run -d --restart always --name letterlock-status --network "$NET"       -v letterlock-status:/app/data louislam/uptime-kuma:1
-    echo "started on network $NET; open https://status.letterlock.raltech.dev and add:"
+    ( cd /opt/letterlock/status && docker compose up -d )
+    echo "status page up; open https://status.letterlock.raltech.dev and add the monitors:"
     echo "  https://letterlock.raltech.dev/                 HTTP 200"
     echo "  https://api.letterlock.raltech.dev/healthz      keyword \"db\":true"
     echo "  https://api.letterlock.raltech.dev/app-config   HTTP 200"
     echo "  api.letterlock.raltech.dev:443                  TCP (Socket.IO reachability)"
+  else
+    echo "no compose file at /opt/letterlock/status/docker-compose.yml; skipping"
   fi
 else
   echo "docker not installed; skipping (apt-get install docker.io, then re-run)"

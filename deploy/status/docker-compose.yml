@@ -1,0 +1,38 @@
+# Uptime Kuma for Letterlock (LAUNCH_PLAN Phase 7 "Uptime").
+#
+# Why Compose and not `docker run`: every other project on this box is Compose
+# managed, so Hostinger's Docker Manager lists them and this one was invisible in
+# that panel: 29 containers on the box, 28 Compose managed across 13 projects, and
+# `letterlock-status` the single plain `docker run` container with no labels at all.
+# A container you cannot see in the panel is one you cannot restart or notice dying.
+#
+#   cd /opt/letterlock/status && docker compose up -d
+#
+# Two things here are deliberate and must not change:
+#   * container_name is pinned, because Traefik routes status.letterlock.raltech.dev
+#     to the container NAME (`http://letterlock-status:3001`), not to a published port.
+#   * the volume and network are `external`, so this adopts the data and the network
+#     that already exist instead of creating empty duplicates beside them.
+name: letterlock
+
+services:
+  status:
+    image: louislam/uptime-kuma:1
+    container_name: letterlock-status
+    restart: always
+    volumes:
+      - status-data:/app/data
+    networks:
+      - traefik
+    # No ports: Traefik reaches it container to container on its own network, so
+    # nothing is published on the host and nothing is exposed to the internet.
+
+volumes:
+  status-data:
+    external: true
+    name: letterlock-status
+
+networks:
+  traefik:
+    external: true
+    name: root_default
