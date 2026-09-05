@@ -18,11 +18,28 @@ jobs:
     name: Web — typecheck, unit, content gates, e2e
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # tests-e2e/api-server.mjs boots the REAL apps/api against a real database
+    # (playwright.config.ts `webServer`), so this job needs Postgres and the API's
+    # own dependencies, not just the web ones. Without them the suite dies with
+    # "Cannot find module 'pg'" — which passed locally only because a stale
+    # apps/api/node_modules happened to be on disk.
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: ll }
+        ports: ['55432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '22', cache: 'npm' }
+      - uses: oven-sh/setup-bun@v2
+        with: { bun-version: 1.3.11 }
       - run: npm ci
+      - name: Install API deps (the e2e suite boots the real API)
+        working-directory: apps/api
+        run: bun install --frozen-lockfile && bunx prisma generate
 
       - name: Typecheck
         run: npm run typecheck
