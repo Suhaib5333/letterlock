@@ -30,6 +30,11 @@ jobs:
         ports: ['55432:5432']
         options: >-
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # apps/api/prisma.config.ts resolves DATABASE_URL at load time, so even
+      # `prisma generate` needs it. tests-e2e/api-server.mjs creates its own
+      # per-run database from this host.
+      DATABASE_URL: postgresql://postgres:ll@localhost:55432/postgres
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

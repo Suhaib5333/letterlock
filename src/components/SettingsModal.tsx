@@ -56,6 +56,37 @@ function Segment<T extends string>({
   value: T;
   onChange: (v: T) => void;
 }) {
+  // More than four options is the wrong shape for a segmented control: at phone
+  // width the buttons claim their natural widths, wrap four ragged times and push
+  // their own label onto a separate line. The 6-way "Countdown suspense" row cost
+  // 130px of the ~540px settings budget on a 375px screen that way. A native
+  // <select> is one line on every device and still fires onChange, so the
+  // tap-to-preview behaviour is unchanged.
+  if (options.length > 4) {
+    return (
+      <div className="set-row">
+        <div>
+          <div className="set-label">{label}</div>
+          {hint && <div className="set-hint">{hint}</div>}
+        </div>
+        <select
+          className="set-select"
+          aria-label={label}
+          value={value}
+          onChange={(e) => {
+            play('tap');
+            onChange(e.target.value as T);
+          }}
+        >
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
   return (
     <div className="set-row">
       <div>

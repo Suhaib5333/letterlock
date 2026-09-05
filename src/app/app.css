@@ -2870,6 +2870,17 @@
   font-size: var(--t-xs);
   color: var(--text-faint);
 }
+.set-select {
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  padding: 7px 10px;
+  font: inherit;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  max-width: 60%;
+}
 .segment {
   display: inline-flex;
   flex-wrap: wrap;
@@ -2938,6 +2949,20 @@
     padding: 3px 0;
   }
 }
+/* Short PORTRAIT phones. ponytail: the Done button goes, exactly as it already does
+   on landscape phones — the header ✕, the scrim and Escape all close the modal, and
+   it is worth ~55px of the only ~600px there is. Rows tighten by 2px each on top. */
+@media (orientation: portrait) and (max-height: 800px) {
+  .modal-settings > .btn.block {
+    display: none;
+  }
+  .modal-settings .set-row {
+    padding: 2px 0;
+  }
+  .set-grid {
+    gap: var(--s-1) var(--s-3);
+  }
+}
 /* Landscape phones: too short for a column of rows, so each group lays its rows
    out side by side instead. ponytail: the Done button goes (✕ / scrim / Escape
    all close) rather than costing 60px of the only 360px we have. */
@@ -2968,11 +2993,44 @@
     align-self: center;
     margin-bottom: 0;
   }
+  /* Label and control share one line. Stacked, each row cost two lines and the
+     strip overflowed by 66px on a 667x375 phone; side by side it fits with room
+     to spare. Measured, not guessed: see the CSS-injection sweep in round 26. */
   .set-row {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     flex: 0 1 auto;
     border-bottom: none;
-    padding: 2px 0;
+    padding: 1px 0;
+  }
+  .modal.modal-settings {
+    padding: 10px;
+  }
+  .set-grid {
+    gap: 0 14px;
+  }
+  .modal-head {
+    margin-bottom: 0;
+  }
+  .modal-head h2 {
+    font-size: 16px;
+  }
+  .set-group h3 {
+    font-size: 11px;
+  }
+  /* Two classes deep on purpose: the base `.set-legal` rule is defined LATER in this
+     file, so a single-class rule inside this media query loses to it on source order. */
+  .modal-settings .set-legal {
+    font-size: 11px;
+    margin-top: 2px;
+    line-height: 1;
+  }
+  .segment button {
+    padding: 4px 6px;
+  }
+  .set-select {
+    padding: 4px 8px;
   }
   .set-row.row-toggle {
     display: flex;
