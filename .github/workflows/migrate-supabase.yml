@@ -1,0 +1,47 @@
+# LAUNCH_PLAN Phase 2.8: copy every Supabase row into our Postgres on the VPS.
+# Idempotent (ON CONFLICT DO NOTHING), so run it once now and once more at cutover.
+#   gh workflow run migrate-supabase.yml -f target=dev            # rehearsal
+#   gh workflow run migrate-supabase.yml -f target=prod            # cutover evening
+#   gh workflow run migrate-supabase.yml -f target=prod -f dry_run=true   # export only (artifact)
+name: Migrate data from Supabase
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Which VPS database'
+        type: choice
+        options: [dev, prod]
+        default: dev
+      dry_run:
+        description: 'Only export the SQL as an artifact, do not load it'
+        type: boolean
+        default: false
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Export from Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/migrate-supabase/export.mjs migration.sql
+      - uses: actions/upload-artifact@v4
+        with: { name: migration-sql-${{ inputs.target }}, path: migration.sql, retention-days: 7 }
+      - name: Load into ${{ inputs.target }} (retried SSH)
+        if: ${{ !inputs.dry_run }}
+        env:
+          SSHPASS: ${{ secrets.VPS_PASS }}
+          VPS: ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}
+          DB: ${{ inputs.target == 'prod' && 'letterlock' || 'letterlock_dev' }}
+        run: |
+          sudo apt-get update -q && sudo apt-get install -yq sshpass
+          SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=15"
+          retry() { for i in 1 2 3 4 5; do for p in 22 2222; do
+              if [ "$1" = scp ]; then sshpass -e scp -P $p $SSH_OPTS "${@:2}" && return 0; else sshpass -e ssh -p $p $SSH_OPTS "${@:2}" && return 0; fi
+              echo "attempt $i via port $p failed"; done; sleep $((i * 15)); done; return 1; }
+          retry scp migration.sql "$VPS:/opt/letterlock/incoming/migration-$DB.sql"
+          retry ssh "$VPS" "sudo -u postgres psql -v ON_ERROR_STOP=1 -1 -q -d $DB -f /opt/letterlock/incoming/migration-$DB.sql && sudo -u postgres psql -d $DB -Atc \"select 'users '||count(*) from users union all select 'profiles '||count(*) from profiles union all select 'leaderboard '||count(*) from leaderboard union all select 'friendships '||count(*) from friendships union all select 'saved_games '||count(*) from saved_games union all select 'question_progress '||count(*) from question_progress union all select 'custom_packs '||count(*) from custom_packs\" && rm -f /opt/letterlock/incoming/migration-$DB.sql"

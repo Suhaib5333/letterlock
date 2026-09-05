@@ -1,0 +1,138 @@
+# Deploy Letterlock (API + web) to our VPS (LAUNCH_PLAN Phase 2.9, §2c).
+# main -> prod (api.letterlock.raltech.dev, letterlock.raltech.dev)
+# uat  -> dev  (api.dev.letterlock.raltech.dev, dev.letterlock.raltech.dev)
+# Built on the runner, uploaded as one bundle, released by deploy/deploy.sh over a
+# retrying SSH loop (Hostinger drops fresh connections from GitHub runners now and then).
+name: Deploy VPS
+on:
+  push:
+    branches: [main, uat]
+    paths-ignore: ['**.md', 'docs/**', 'android/**', 'ios/**']
+  workflow_dispatch: {}
+concurrency: { group: deploy-vps-${{ github.ref }}, cancel-in-progress: true }
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'npm' }
+      - uses: oven-sh/setup-bun@v2
+        with: { bun-version: 1.3.11 }
+
+      - name: Resolve environment
+        id: env
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "name=prod" >> $GITHUB_OUTPUT
+            echo "api_url=https://api.letterlock.raltech.dev" >> $GITHUB_OUTPUT
+            echo "web_url=https://letterlock.raltech.dev" >> $GITHUB_OUTPUT
+            echo "root=/opt/letterlock" >> $GITHUB_OUTPUT
+          else
+            echo "name=dev" >> $GITHUB_OUTPUT
+            echo "api_url=https://api.dev.letterlock.raltech.dev" >> $GITHUB_OUTPUT
+            echo "web_url=https://dev.letterlock.raltech.dev" >> $GITHUB_OUTPUT
+            echo "root=/opt/letterlock-dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build web
+        env: { VITE_API_URL: "${{ steps.env.outputs.api_url }}" }
+        run: |
+          npm ci
+          npm run build
+          test -f dist/.well-known/assetlinks.json
+
+      - name: Build API
+        working-directory: apps/api
+        env: { DATABASE_URL: "postgresql://ci@localhost:5432/ci" } # config load only
+        run: |
+          bun install --frozen-lockfile
+          bunx prisma generate
+          bun run build
+          test -f dist/main.js
+
+      - name: Assemble bundle
+        run: |
+          mkdir -p bundle/api bundle/web bundle/deploy
+          cp -r apps/api/dist apps/api/prisma apps/api/prisma.config.ts apps/api/package.json apps/api/bun.lock bundle/api/
+          mkdir -p bundle/api/src && cp -r apps/api/src/generated bundle/api/src/generated
+          # production node_modules (+ prisma CLI for migrate deploy on the box)
+          mkdir prod-install && python3 - <<'PY'
+          import json
+          d = json.load(open('apps/api/package.json'))
+          deps = d['dependencies']; deps['prisma'] = d['devDependencies']['prisma']
+          json.dump({'name': 'letterlock-api-runtime', 'private': True, 'dependencies': deps}, open('prod-install/package.json', 'w'))
+          PY
+          ( cd prod-install && bun install --production )
+          cp -r prod-install/node_modules bundle/api/node_modules
+          cp -r dist/. bundle/web/
+          cp -r deploy/. bundle/deploy/
+          tar czf bundle.tgz -C bundle .
+          du -sh bundle.tgz
+
+      - name: Render API .env
+        env:
+          ENV_NAME: ${{ steps.env.outputs.name }}
+          DATABASE_URL: ${{ steps.env.outputs.name == 'prod' && secrets.DATABASE_URL || secrets.DATABASE_URL_DEV }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          MAIL_FROM: ${{ vars.MAIL_FROM || 'Letterlock <no-reply@raltech.dev>' }}
+          MAIL_REPLY_TO: ${{ vars.MAIL_REPLY_TO }}
+          QA_ADMIN_TOKEN: ${{ secrets.QA_ADMIN_TOKEN }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_NATIVE_CLIENT_IDS: ${{ secrets.GOOGLE_NATIVE_CLIENT_IDS }}
+          APPLE_CLIENT_ID: ${{ secrets.APPLE_CLIENT_ID }}
+          REVENUECAT_WEBHOOK_SECRET: ${{ secrets.REVENUECAT_WEBHOOK_SECRET }}
+          CORS_ORIGINS: ${{ vars.CORS_ORIGINS || format('{0},capacitor://localhost,https://localhost,http://localhost', steps.env.outputs.web_url) }}
+          PUBLIC_URL: ${{ steps.env.outputs.api_url }}
+          WEB_URL: ${{ steps.env.outputs.web_url }}
+          ROOT: ${{ steps.env.outputs.root }}
+        run: |
+          [ -n "$DATABASE_URL" ] || { echo "::error ::DATABASE_URL secret missing"; exit 1; }
+          [ -n "$JWT_SECRET" ] || { echo "::error ::JWT_SECRET secret missing"; exit 1; }
+          {
+            echo "NODE_ENV=production"
+            echo "PORT=$([ "$ENV_NAME" = prod ] && echo 3100 || echo 3101)"
+            for k in DATABASE_URL JWT_SECRET RESEND_API_KEY MAIL_FROM MAIL_REPLY_TO QA_ADMIN_TOKEN GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GOOGLE_NATIVE_CLIENT_IDS APPLE_CLIENT_ID REVENUECAT_WEBHOOK_SECRET CORS_ORIGINS PUBLIC_URL WEB_URL; do
+              printf '%s=%s\n' "$k" "${!k}"
+            done
+            echo "BUNDLES_DIR=$ROOT/bundles"
+          } > api.env
+          echo "rendered $(wc -l < api.env) env lines"
+
+      - name: Upload + release (retried SSH)
+        env:
+          SSHPASS: ${{ secrets.VPS_PASS }}
+          VPS: ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}
+          ROOT: ${{ steps.env.outputs.root }}
+          ENV_NAME: ${{ steps.env.outputs.name }}
+        run: |
+          [ -n "$SSHPASS" ] || { echo "::error ::VPS_PASS secret missing"; exit 1; }
+          sudo apt-get update -q && sudo apt-get install -yq sshpass
+          SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=15"
+          retry() { # retry ssh|scp <args...>; port injected per attempt (22 then 2222)
+            for i in 1 2 3 4 5; do
+              for p in 22 2222; do
+                if [ "$1" = scp ]; then sshpass -e scp -P $p $SSH_OPTS "${@:2}" && return 0
+                else sshpass -e ssh -p $p $SSH_OPTS "${@:2}" && return 0; fi
+                echo "attempt $i via port $p failed"
+              done
+              echo "retrying in $((i * 15))s"; sleep $((i * 15))
+            done
+            echo "all attempts failed"; return 1
+          }
+          retry ssh "$VPS" "mkdir -p $ROOT/incoming"
+          retry scp bundle.tgz "$VPS:$ROOT/incoming/bundle.tgz"
+          retry scp api.env "$VPS:$ROOT/incoming/.env"
+          retry scp deploy/deploy.sh "$VPS:$ROOT/incoming/deploy.sh"
+          retry ssh "$VPS" "bash $ROOT/incoming/deploy.sh $ENV_NAME ${{ github.sha }}"
+
+      - name: Smoke test through Traefik
+        env: { API: "${{ steps.env.outputs.api_url }}", WEB: "${{ steps.env.outputs.web_url }}" }
+        run: |
+          # Passes only once the DNS records exist and Let's Encrypt has issued the cert.
+          if curl -fsS --max-time 20 "$API/healthz" | grep -q '"db":true'; then echo "✓ $API/healthz"; else echo "::warning ::$API not reachable yet (DNS / cert pending)"; fi
+          if curl -fsS --max-time 20 -o /dev/null "$WEB/"; then echo "✓ $WEB"; else echo "::warning ::$WEB not reachable yet (DNS / cert pending)"; fi

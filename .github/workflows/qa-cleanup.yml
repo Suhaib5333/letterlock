@@ -1,7 +1,10 @@
-# Deletes specific accounts after QA testing — see the CLAUDE.md testing mandate:
+# Deletes specific accounts after QA testing, per the CLAUDE.md testing mandate:
 # any account created during testing MUST be removed afterwards via this workflow.
 # Manual-only (workflow_dispatch); repo write access required to run it.
 #   gh workflow run qa-cleanup.yml -f targets=some_username,someone@maildrop.cc
+#   gh workflow run qa-cleanup.yml -f targets=... -f target=dev
+# Calls DELETE /admin/users/:target on our API (exact username or email, cascades
+# every owned row) with the x-qa-token header (secret QA_ADMIN_TOKEN, LAUNCH_PLAN §2c).
 name: QA account cleanup
 on:
   workflow_dispatch:
@@ -9,32 +12,29 @@ on:
       targets:
         description: 'Comma-separated usernames and/or emails to DELETE (exact matches only)'
         required: true
+      target:
+        description: 'Which API'
+        type: choice
+        options: [prod, dev]
+        default: prod
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
       - name: Delete listed accounts
         env:
-          SUPABASE_URL: https://lkudntyvngwwlzuciocd.supabase.co
-          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          API: ${{ inputs.target == 'prod' && 'https://api.letterlock.raltech.dev' || 'https://api.dev.letterlock.raltech.dev' }}
+          TOKEN: ${{ secrets.QA_ADMIN_TOKEN }}
           TARGETS: ${{ inputs.targets }}
         run: |
-          set -euo pipefail
-          auth() { curl -sf -H "apikey: $KEY" -H "Authorization: Bearer $KEY" "$@"; }
-          # Small user base — one admin page resolves every email.
-          USERS=$(auth "$SUPABASE_URL/auth/v1/admin/users?page=1&per_page=1000")
+          set -uo pipefail
           IFS=',' read -ra TS <<< "$TARGETS"
           for t in "${TS[@]}"; do
-            t=$(echo "$t" | xargs) # trim
-            [ -z "$t" ] && continue
-            if [[ "$t" == *@* ]]; then
-              id=$(echo "$USERS" | jq -r --arg em "$t" '.users[] | select(.email == $em) | .id')
-            else
-              id=$(auth "$SUPABASE_URL/rest/v1/profiles?username=eq.$t&select=id" | jq -r '.[0].id // empty')
-            fi
-            if [ -z "$id" ]; then echo "NOT FOUND: $t (skipped)"; continue; fi
-            email=$(auth "$SUPABASE_URL/auth/v1/admin/users/$id" | jq -r '.email // "?"')
-            # auth.users cascades to profiles/leaderboard/saved_games/progress/friendships.
-            auth -X DELETE "$SUPABASE_URL/auth/v1/admin/users/$id" > /dev/null
-            echo "DELETED $t ($id, $email)"
+            t=$(echo "$t" | xargs); [ -z "$t" ] && continue
+            code=$(curl -s -o body.json -w '%{http_code}' -X DELETE "$API/admin/users/$(printf %s "$t" | jq -sRr @uri)" -H "x-qa-token: $TOKEN")
+            case "$code" in
+              200) echo "DELETED $t -> $(jq -c '{id,email,username}' body.json)";;
+              404) echo "NOT FOUND: $t (skipped)";;
+              *)   echo "::error ::$t -> HTTP $code $(cat body.json)"; exit 1;;
+            esac
           done

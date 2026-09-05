@@ -1,0 +1,104 @@
+# Traefik dynamic config for Letterlock (LAUNCH_PLAN §2c).
+# Deployed to /root/traefik-dynamic/letterlock.yml by deploy/deploy.sh; Traefik
+# watches that dir and hot-reloads. Entry-point level http->https redirect already
+# exists on the box, so only "websecure" routers are declared. Certs come from the
+# shared "mytlschallenge" TLS-ALPN resolver: the DNS A record must point at this
+# VPS with the Cloudflare proxy OFF (grey cloud) before the first cert is issued.
+#
+# PM2 processes on the host (127.0.0.1 only), reached via host.docker.internal:
+#   prod: api 3100, web 5190      dev: api 3101, web 5191
+# Websocket upgrades (Socket.IO on the api hosts) work with no extra config.
+
+http:
+  routers:
+    letterlock-api-prod:
+      rule: "Host(`api.letterlock.raltech.dev`)"
+      entryPoints: [websecure]
+      service: letterlock-api-prod
+      tls:
+        certResolver: mytlschallenge
+
+    letterlock-web-prod:
+      rule: "Host(`letterlock.raltech.dev`)"
+      entryPoints: [websecure]
+      service: letterlock-web-prod
+      tls:
+        certResolver: mytlschallenge
+
+    # Apple / Google deep-link files must be served as application/json.
+    letterlock-wellknown-prod:
+      rule: "Host(`letterlock.raltech.dev`) && PathPrefix(`/.well-known/`)"
+      entryPoints: [websecure]
+      service: letterlock-web-prod
+      middlewares: [letterlock-json]
+      priority: 100
+      tls:
+        certResolver: mytlschallenge
+
+    letterlock-api-dev:
+      rule: "Host(`api.dev.letterlock.raltech.dev`)"
+      entryPoints: [websecure]
+      service: letterlock-api-dev
+      tls:
+        certResolver: mytlschallenge
+
+    letterlock-web-dev:
+      rule: "Host(`dev.letterlock.raltech.dev`)"
+      entryPoints: [websecure]
+      service: letterlock-web-dev
+      tls:
+        certResolver: mytlschallenge
+
+    letterlock-wellknown-dev:
+      rule: "Host(`dev.letterlock.raltech.dev`) && PathPrefix(`/.well-known/`)"
+      entryPoints: [websecure]
+      service: letterlock-web-dev
+      middlewares: [letterlock-json]
+      priority: 100
+      tls:
+        certResolver: mytlschallenge
+
+    # Uptime Kuma (Phase 7), Docker container on the shared root_default network.
+    letterlock-status:
+      rule: "Host(`status.letterlock.raltech.dev`)"
+      entryPoints: [websecure]
+      service: letterlock-status
+      tls:
+        certResolver: mytlschallenge
+
+  middlewares:
+    letterlock-json:
+      headers:
+        customResponseHeaders:
+          Content-Type: "application/json"
+
+  services:
+    letterlock-api-prod:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:3100"
+        passHostHeader: true
+
+    letterlock-web-prod:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:5190"
+        passHostHeader: true
+
+    letterlock-api-dev:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:3101"
+        passHostHeader: true
+
+    letterlock-web-dev:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:5191"
+        passHostHeader: true
+
+    letterlock-status:
+      loadBalancer:
+        servers:
+          - url: "http://letterlock-status:3001"
+        passHostHeader: true
