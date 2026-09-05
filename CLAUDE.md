@@ -1319,3 +1319,107 @@ re-passes `scripts/checkpack.mjs`.
 - ✅ Re-verified after the sweep: **987 unit/content tests**, full Playwright e2e,
   **noscroll ALL CLEAR** (17 devices × every screen), `scripts/leaks.mjs` zero leaks repo-wide,
   strict typecheck and production build clean.
+
+---
+
+## 🚦 Working rules (Suhaib, 2026-09-05) — READ EVERY SESSION
+
+1. **Never stall waiting on Suhaib.** If something needs him (an account, a payment,
+   a DNS record, a store form, an API token), write it down in the **Blocked on Suhaib**
+   list below with the exact steps, then **carry on with everything else that is not
+   blocked**. He does his items in one batch at the end. Do not ask permission to keep
+   working, and do not park a whole phase because one step inside it needs him.
+2. **Keep this file updated as you go**, not only at the end of a task. After each
+   milestone, append what changed, what is verified, and what moved to or off the
+   blocked list. The next session reads this file first, so it is the handover.
+3. **Session-budget discipline.** Prefer few, cheap, targeted commands over broad
+   sweeps; do not fan out subagents unless the task genuinely needs them; run long
+   suites in the background rather than re-reading large files.
+
+### 🚧 Blocked on Suhaib (living list — keep it current)
+
+| # | What | Exact steps | Blocks |
+|---|---|---|---|
+| B1 | **Cloudflare DNS records** for the VPS backend | In Cloudflare → `raltech.dev` → DNS, add 4 **A** records to `72.62.16.1`, all **DNS only (grey cloud, NOT proxied)** — Traefik uses a TLS-ALPN challenge and the orange cloud breaks it: `api.letterlock`, `api.dev.letterlock`, `dev.letterlock`, `status.letterlock`. Leave `letterlock.raltech.dev` alone (Cloudflare Pages). | Phase 2 cutover going live. The API itself is already deployed and `online` under PM2 (`letterlock-api-dev`, `letterlock-web-dev`). |
+| B2 | Cloudflare API token has **no DNS permission** | Optional alternative to B1: create a token with Zone → DNS → Edit on `raltech.dev`, add it as GitHub secret `CLOUDFLARE_DNS_TOKEN`, and the records can be created from CI instead. | Automating B1 |
+| B3 | Phase 0 paperwork | D-U-N-S, Apple Developer ($99/yr, Organization), Google Play Console ($25, Organization + merchant), AdMob, RevenueCat, Google OAuth consent screen. See LAUNCH_PLAN §3 Phase 0. | Phases 4, 5, 6 going live (the code for them is already written) |
+| B4 | `VITE_APPLE_SERVICES_ID` | Apple Developer → Identifiers → Services IDs; return URL `https://letterlock.raltech.dev/auth/callback`. Empty today, which correctly hides the web Sign-in-with-Apple button. | Apple 4.8 compliance at submission |
+| B5 | **AdMob real ad unit IDs** | `src/lib/adUnits.ts`, `android/app/src/main/res/values/strings.xml`, `ios/App/App/Info.plist` all still carry Google's **public test IDs** (`ca-app-pub-3940256099942544/...`). Shipping those to a store shows test ads and earns nothing. Replace after the AdMob account exists (app IDs + banner/interstitial/rewarded per platform). | Real ad revenue (the ad CODE works today against the test IDs) |
+| B6 | **RevenueCat public keys** | Set `VITE_REVENUECAT_IOS_KEY` and `VITE_REVENUECAT_ANDROID_KEY` (RevenueCat → Project → API keys, the *public* SDK keys). Empty today, so the Remove Ads purchase path is inert. | Phase 5 Remove Ads working on a device |
+| B7 | **Apple Team ID in the deep-link file** | `public/.well-known/apple-app-site-association` has the literal `TEAMID`. Replace with the 10-character Team ID (App Store Connect → Membership). | iOS Universal Links (`/join/CODE` opening the app) |
+| B8 | **Play app-signing SHA-256** | `public/.well-known/assetlinks.json` has a `TODO:REPLACE:...` fingerprint. Copy it from Play Console → Setup → App signing. | Android App Links (`/join/CODE` opening the app) |
+| B9 | **Off-box backup remote** | `deploy/backup.sh` already runs nightly with a 14-day rotation AND a restore check, but the off-box copy only happens when an rclone remote named `letterlock-backup` exists. On the VPS: `rclone config` against Backblaze B2 or S3, name it `letterlock-backup`, set 30-day bucket retention. | "Losing the VPS = losing everything" risk in LAUNCH_PLAN §13 |
+| B10 | **`app-ads.txt` real line** | `public/app-ads.txt` is a placeholder; AdMob gives the exact line once the account exists. | AdMob monetisation of the apps |
+
+## II.3v Round-24: launch-phase batch committed and the suite made green again (2026-09-05)
+
+The tree held ~1,000 uncommitted files spanning LAUNCH_PLAN Phases 1b-8. Verified and
+committed as `86f0e3a`, then the e2e suite was run and every failure fixed.
+
+- ✅ **Committed the batch**: mobile rehaul (`src/app/mobile.css`, fullscreen + extra-skip
+  controls, motion budget, wake lock, room-code pad, self-hosted fonts), charades images with
+  `credits.json` + review pages, the **Supabase→our-API cutover** (`src/lib/api.ts`,
+  `src/lib/supabase.ts` deleted), Android TV (`src/tv.css`, `lib/spatialNav.ts`), OTA
+  (`lib/ota.ts` + `ota-release.yml`), AdMob policy/units, entitlements + Remove Ads, the
+  install prompt and web-ads scaffolding, store listing copy and screenshot tooling.
+- ✅ **Verified**: strict typecheck clean on BOTH the web app and `apps/api`; **1044 unit
+  tests**; production build clean.
+- 🐛 **Four real bugs the e2e suite caught (9 failures → 0):**
+  1. `.env.production` now bakes a real `VITE_API_URL` into the build, which silently killed
+     the `?__apiurl=` test seam, so the maintenance banner, the version gate and the store
+     sheet could not be exercised at all. `apiBase()` now prefers the seam (`seam || env`) —
+     safe because `devSeams` only resolves it on localhost/`.local`.
+  2. `.mode-card` equal height on phones relied on a magic `min-height: 196px` floor, which
+     works only while every description stays under it. One description wrapped to a third
+     line and the cards differed by exactly one line (19.5px). Fixed structurally: on narrow
+     portrait each `.mode-card-desc` **reserves three lines**, so wrap differences cannot
+     desynchronise the stack.
+  3. **TV/remote:** `PRIMARY` in `spatialNav.ts` listed `.btn-primary` before
+     `.ll-hex.claimable`, so when the host pad unmounted after an award the remote's focus
+     landed on whatever plain button the game screen rendered instead of the board. The board
+     now outranks a generic primary button (`.ll-hex.claimable` exists only on the board).
+  4. **TV/remote:** the flow test walked past the **pie-rule swap prompt**, which legitimately
+     takes focus after the first claim. It is now driven with the remote (focus → `pie-swap`,
+     arrow to `pie-dismiss`, Enter) and the roll-back to the board is asserted.
+- 🧠 **Finding worth keeping:** assertions that sample focus immediately after a component
+  unmounts are wrong by construction — `AnimatePresence` keeps the exiting node focused for
+  the length of its exit animation. Poll for the focus target (`expect.poll` on
+  `active(page)`), never read it once.
+- 🚧 **Phase 2 is code-complete and DEPLOYED but not reachable**: `letterlock-api-dev` and
+  `letterlock-web-dev` are `online` under PM2 on the VPS, and the deploy log warns
+  "not reachable yet (DNS / cert pending)". `api.letterlock.raltech.dev` has **no DNS record
+  at all**, and the `CLOUDFLARE_API_TOKEN` in GitHub can read the zone but the DNS API returns
+  `Authentication error`, so CI cannot create it either. See **B1/B2** in the blocked list.
+- ✅ **Verified after the fixes**: **1044 unit tests**, **224 Playwright e2e passed / 0 failed**
+  (1 known-flaky charades-QR test, green on retry), **`scripts/noscroll.mjs` ALL CLEAR**
+  (17 devices × every screen), `scripts/leaks.mjs` zero leaks, **183 packs / 40,158 questions**,
+  strict typecheck clean on web + API, production build clean.
+- ✅ **Store screenshots now real** (`scripts/storeshots.mjs`, Phase 6): the script clicked
+  through with **testids that do not exist** (`play`, `start-game`, `open-category-menu`) and
+  its `getByRole` fallbacks silently no-op'd, so every run stopped on **mode-select** and
+  shipped a picture of the wrong screen as `3-board.png`, with the categories and question
+  shots missing entirely. Now it waits for each screen to mount before clicking on
+  (`play-button` → `mode-select` → `mode-couch` → `start-match` → `game-screen`), seeds the
+  same `letterlock.unlockall` seam the e2e suite uses so a fresh profile does not stall behind
+  the tutorial, and picks a hex with `.ll-hex.claimable`. Output: **4 screens × 5 device
+  profiles + the 1024×500 Play feature graphic**, spot-checked visually (iPhone 6.9" board is
+  a correct 1320×2868).
+- ⚠️ **Known and NOT fixed: the settings-fits-one-screen gate fails on 6 small viewports.**
+  `node scripts/checksettings.mjs` → iphone-se 113px over, galaxy-s8 132, iphone-12mini 92,
+  phone-landscape 80, se-landscape 63, iphone-landscape 50. The modal keeps its
+  `overflow-y: auto` safety net, so it is usable, just not scroll-free. **Fixed here:** the
+  multi-column rule was gated on `@media (max-height: 880px)`, so a 1440×900 desktop sat 20px
+  the wrong side of the cutoff, fell back to the single-column phone layout and overflowed;
+  the rule is now `@media (min-width: 900px)` with `auto-fit` columns, which is the right
+  question to ask (width decides whether columns fit, height never did).
+  **Two fixes were tried and reverted, do not repeat them:**
+  (a) making every `.segment` a full-width 3-up grid — a 2- or 3-option segment then pushes
+  its own label onto a second line, costing ~26px across five rows, and the total got *worse*
+  (113 → 239 on iphone-se);
+  (b) restricting that grid to many-option segments via `.segment:has(button:nth-child(5))` —
+  no effect in portrait and it made the landscape strip layout worse (80 → 124).
+  **Where the height actually goes on a 375×667 phone** (measured, total 543px): the 6-option
+  "Countdown suspense" row is **130px on its own**, because at 311px wide the segment spans the
+  full row and forces its label onto a separate line; the other rows are 51-55px each. The real
+  fix is a design decision, not more CSS: give that one preference a compact control (or move
+  it under the Music toggle). ~113px must come off for iphone-se to pass.

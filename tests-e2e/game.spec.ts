@@ -933,9 +933,11 @@ test('online host join URL targets the controller view', async ({ page }) => {
   await page.getByTestId('mode-online').click();
   await page.getByTestId('start-match').click(); // Online: Setup → Create room
   await expect(page.getByTestId('lobby-host')).toBeVisible();
-  // The advertised join link must include view=controller or the QR loads the
-  // full app (Home) instead of the phone controller.
-  await expect(page.locator('.lobby-qr-hint code')).toContainText('view=controller');
+  // The advertised join link must be the canonical /join/CODE path (Phase 1:
+  // Universal Links / App Links match paths reliably, query strings do not).
+  // main.tsx rewrites it to ?room=CODE&view=controller on load, which the
+  // store-readiness spec covers, so the QR still opens the phone controller.
+  await expect(page.locator('.lobby-qr-hint code')).toContainText(/\/join\/[A-Z0-9]{6}$/);
 });
 
 test('settings modal closes on Escape', async ({ page }) => {

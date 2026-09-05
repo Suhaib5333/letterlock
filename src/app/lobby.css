@@ -1089,15 +1089,33 @@ html[data-motion='reduced'] .auto-award-count { animation: none; }
    half-card scroll clipping. align-items:start already lets them fit content. */
 @media (orientation: portrait) and (max-width: 460px) {
   .mode-card {
-    /* Shared floor so the stacked cards are pixel-equal on phones (kept above the
-       natural content height of the tightened copy). */
-    min-height: 196px;
+    /* No min-height floor here: mobile.css sets the 44px touch-target floor later
+       in the cascade and would win anyway. Equal heights come from reserving the
+       same number of text lines below, which holds however the copy wraps. */
     padding: 14px 16px;
     gap: 4px;
   }
+  .mode-card-tag {
+    line-height: 1.5;
+    /* Party Mode's tag ("Phones as controllers · room code") wraps to two lines
+       while the other two fit one. Reserve both lines everywhere. */
+    min-height: calc(2 * 1.5 * 13px);
+  }
   .mode-card-emoji { font-size: 32px; }
   .mode-card-name { font-size: 1.25rem; }
-  .mode-card-desc { font-size: 14px; line-height: 1.4; }
+  .mode-card-desc {
+    font-size: 14px;
+    line-height: 1.4;
+    /* Every description RESERVES the same three lines, so the stacked cards stay
+       pixel-equal even when one string wraps shorter than another. The
+       `min-height` floor on .mode-card alone could not do this: it equalises only
+       while every card's natural height stays under the floor, and the moment one
+       description needed a third line the cards differed by exactly one line.
+       ponytail: 3 lines is enough down to 360px; below that a 4-line wrap would
+       break equality again — reserve 4 lines (or shorten the copy) if we ever
+       support a narrower phone. */
+    min-height: calc(3 * 1.4 * 14px);
+  }
 }
 
 /* Short landscape phones: compact Mode Select so the nudge + 3 cards fit one

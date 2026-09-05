@@ -134,8 +134,24 @@ test('remote only: home -> category -> mode -> setup -> board -> question -> awa
   await expectRing(page);
   await page.keyboard.press('Enter');
   await expect(page.locator(`.ll-hex[data-cell="${down.cell}"][data-owner="${award.testid!.slice(-1)}"]`)).toHaveCount(1);
-  // The pad unmounted; focus rolls back onto the board instead of being lost.
-  expect((await expectRing(page)).role).toBe('gridcell');
+  // The pad unmounts (with an exit animation, so poll rather than sample once) and
+  // focus rolls back onto the board instead of being lost.
+  // The first claim raises the pie-rule prompt (§2.4 swap sides). It is a real
+  // decision, so on a TV it must take the remote's focus — and dismissing it must
+  // hand focus back to the board rather than leaving the remote nowhere.
+  await expect(page.getByTestId('pie-banner')).toBeVisible();
+  // Focus rolls over once the host pad finishes its exit animation, so poll.
+  await expect
+    .poll(async () => (await active(page))?.testid ?? null, { timeout: 5000 })
+    .toBe('pie-swap');
+  await expectRing(page);
+  await pressUntil(page, 'ArrowRight', (a) => a.testid === 'pie-dismiss', 6);
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('pie-banner')).toHaveCount(0);
+  await expect
+    .poll(async () => (await active(page))?.role ?? null, { timeout: 5000 })
+    .toBe('gridcell');
+  await expectRing(page);
 
   // Back opens the exit confirm (never a dead end), confirm -> Home.
   await page.keyboard.press('Escape');

@@ -55,8 +55,12 @@ const PRIMARY = [
   '[data-testid="start-match"]:not([disabled])',
   '[data-testid="play-button"]',
   '[data-testid="mode-couch"]',
-  '.btn-primary:not([disabled])',
+  // The board outranks a generic .btn-primary: `.ll-hex.claimable` exists only on
+  // the game screen, and there the board IS the primary control. Ordered the other
+  // way round, awarding a hex unmounted the host pad and dropped the remote's focus
+  // onto whatever plain button the game header happened to render.
   '.ll-hex.claimable',
+  '.btn-primary:not([disabled])',
   '.mode-card:not([disabled])',
 ];
 

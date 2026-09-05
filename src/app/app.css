@@ -2888,14 +2888,18 @@
   font-weight: 600;
   font-size: var(--t-sm);
 }
-/* Short viewports (landscape phones, small laptops): widen and column up so
-   everything stays on one screen instead of scrolling inside the modal. */
-@media (max-height: 880px) and (min-width: 900px) {
+/* Anything with real width columns up so everything stays on one screen instead
+   of scrolling inside the modal. This used to be gated on `max-height: 880px`,
+   which meant a 1440x900 desktop sat 20px the wrong side of the cutoff, got the
+   single-column phone layout and overflowed. Width is what decides whether
+   columns fit; height never was the right question. `auto-fit` so a fourth group
+   (Remove Ads, when the store is available) flows instead of stretching the modal. */
+@media (min-width: 900px) {
   .modal.modal-settings {
     width: min(1040px, 96vw);
   }
   .set-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   }
 }
 /* Narrow screens can't go multi-column, so trim instead: drop the hints, let a

@@ -36,8 +36,11 @@ const TIMEOUT_MS = 5000;
 /** API base URL: VITE_API_URL, or the local-only `?__apiurl=` test seam. */
 export function apiBase(): string | null {
   const env = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+  // ponytail: the seam wins over the env value. It only resolves on local dev/test
+  // hosts (devSeams allowlist), so this cannot redirect a real user's API calls,
+  // and without it a production build's baked-in VITE_API_URL makes the seam dead.
   const seam = devSeamValue('__apiurl');
-  const base = env || seam;
+  const base = seam || env;
   return base ? base.replace(/\/+$/, '') : null;
 }
 

@@ -23,34 +23,39 @@ for (const [name, d] of Object.entries(DEVICES)) {
   mkdirSync(dir, { recursive: true });
   const ctx = await browser.newContext({ viewport: { width: d.w, height: d.h }, deviceScaleFactor: d.scale, isMobile: d.w < 900, hasTouch: d.w < 900 });
   const page = await ctx.newPage();
+  // Same seam the e2e suite uses: every pack unlocked and the FTUE already seen,
+  // so the capture never stalls behind the tutorial on a fresh profile.
+  await page.addInitScript(() => {
+    localStorage.setItem('letterlock.unlockall', '1');
+    localStorage.setItem('letterlock.tutorialSeen', '1');
+  });
   const shot = (n, label) => page.screenshot({ path: `${dir}/${n}-${label}.png` });
   await page.goto(`${BASE}/?__nofunnel=1${name === 'android-tv' ? '&tv=1' : ''}`);
   await page.waitForLoadState('networkidle');
   await shot(1, 'home');
-  const cat = page.getByTestId('open-category-menu').or(page.getByRole('button', { name: /category/i })).first();
+  const cat = page.getByTestId('open-categories').first();
   if (await cat.count()) {
     await cat.click();
     await page.waitForTimeout(400);
     await shot(2, 'categories');
     await page.keyboard.press('Escape');
   }
-  // Start a couch game on the default pack via the existing e2e-friendly path.
-  const play = page.getByTestId('play').or(page.getByRole('button', { name: /^play/i })).first();
-  if (await play.count()) {
-    await play.click();
-    const couch = page.getByTestId('mode-couch').or(page.getByRole('button', { name: /couch/i })).first();
-    if (await couch.count()) await couch.click();
-    const start = page.getByTestId('start-game').or(page.getByRole('button', { name: /start/i })).first();
-    if (await start.count()) await start.click();
-    await page.waitForTimeout(600);
-    await shot(3, 'board');
-    const hex = page.locator('[role=gridcell]:not([aria-disabled=true])').nth(12);
-    if (await hex.count()) {
-      await hex.click();
-      await page.waitForTimeout(500);
-      await shot(4, 'question');
-    }
-  }
+  // Start a couch game on the default pack. Each step waits for the NEXT screen to
+  // mount before clicking on: firing straight through left every capture sitting on
+  // mode-select, so "3-board.png" was a picture of the wrong screen.
+  await page.getByTestId('play-button').click();
+  await page.getByTestId('mode-select').waitFor({ timeout: 10000 });
+  await page.getByTestId('mode-couch').click();
+  await page.getByTestId('start-match').waitFor({ timeout: 10000 });
+  await page.getByTestId('start-match').click();
+  await page.getByTestId('game-screen').waitFor({ timeout: 15000 });
+  await page.waitForTimeout(700);
+  await shot(3, 'board');
+  const hex = page.locator('.ll-hex.claimable').nth(12);
+  await hex.click();
+  await page.getByTestId('question-card').waitFor({ timeout: 10000 });
+  await page.waitForTimeout(600);
+  await shot(4, 'question');
   await ctx.close();
   console.log(`${name}: done`);
 }

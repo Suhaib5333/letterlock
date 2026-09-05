@@ -115,6 +115,8 @@ const errorMessage = (e: unknown, fallback: string): string =>
   e instanceof ApiError ? e.message : e instanceof Error ? e.message : fallback;
 
 const AuthCtx = createContext<AuthState | null>(null);
+import { setAdsRemovedFromProfile } from './entitlements';
+
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -133,11 +135,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(res.user);
     setProfile(res.profile);
     setCheckedUserId(res.user.id);
+    // LAUNCH_PLAN §8: Remove Ads follows the LOGIN, not just the store account,
+    // so a purchase made on one platform hides ads everywhere the user signs in.
+    // apply()/reset() are the only two places a profile appears or disappears
+    // (sign-in, /auth/me rehydrate, refreshProfile, sign-out), so wiring both
+    // here is the whole story — and reset() clearing it stops a buyer's
+    // entitlement leaking to the next person on a shared browser.
+    setAdsRemovedFromProfile(res.profile);
   };
   const reset = () => {
     setUser(null);
     setProfile(null);
     setCheckedUserId(null);
+    setAdsRemovedFromProfile(null);
   };
 
   // Bootstrap: exchange a Google one-time code, else rehydrate from the stored
