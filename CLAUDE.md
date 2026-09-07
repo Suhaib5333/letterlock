@@ -1376,7 +1376,13 @@ is root-owned, and `-f` makes postgres open the file itself. Piping with `<` let
 root shell open it and postgres read stdin. That bug would otherwise have surfaced on
 cutover evening against the real database.
 
-### ⛔ ORDERING RULE: do NOT push `main` before B1 (DNS) is done
+### ✅ RESOLVED 2026-09-07: the ordering rule below is HISTORY, B1 and B1b are done
+
+> Kept for the reasoning, not as a live constraint. The DNS records exist, `main` is the tip
+> (5 ahead of `uat`), the apex serves from the VPS and every row is migrated. `main` pushes and
+> `workflow_dispatch` workflows are both normal again.
+
+### ⛔ (historic) ORDERING RULE: do NOT push `main` before B1 (DNS) is done
 
 `main` → prod: `deploy-vps.yml` releases the API and `deploy.yml` publishes the web build
 to the LIVE `letterlock.raltech.dev`. That build has `VITE_API_URL=https://api.letterlock.raltech.dev`
@@ -1393,10 +1399,10 @@ any ref).
 
 | # | What | Exact steps | Blocks |
 |---|---|---|---|
-| B1 | **Cloudflare DNS records** for the VPS backend | In Cloudflare → `raltech.dev` → DNS, add 4 **A** records to `72.62.16.1`, all **DNS only (grey cloud, NOT proxied)** — Traefik uses a TLS-ALPN challenge and the orange cloud breaks it: `api.letterlock`, `api.dev.letterlock`, `dev.letterlock`, `status.letterlock`. Leave `letterlock.raltech.dev` alone **for now** — see B1b for the apex, which moves LAST. | Phase 2 cutover going live. The API itself is already deployed and `online` under PM2 (`letterlock-api-dev`, `letterlock-web-dev`). |
-| B1b | **Repoint `letterlock.raltech.dev` to the VPS — LAST, and only after B1** | Correcting an earlier instruction of mine: the apex is not "leave it alone" forever. Traefik already routes `Host(letterlock.raltech.dev)` to `letterlock-web-prod`, so the plan serves the WEB from the VPS too and Cloudflare Pages is superseded. Order matters: **(1)** add the four B1 records; **(2)** push `main`, which deploys the API and web to the VPS prod slots; **(3)** verify without touching DNS — `curl -sk -H 'Host: letterlock.raltech.dev' https://72.62.16.1/` and `curl https://api.letterlock.raltech.dev/healthz` → `{"db":true}`; **(4)** only then change the apex `letterlock.raltech.dev` record to `A 72.62.16.1`, **DNS only (grey cloud)** so the TLS-ALPN challenge can issue its certificate. Doing step 4 before step 2 takes the live site down. | The live site moving off Cloudflare Pages |
-| B2 | Cloudflare API token has **no DNS permission** | Optional alternative to B1: create a token with Zone → DNS → Edit on `raltech.dev`, add it as GitHub secret `CLOUDFLARE_DNS_TOKEN`, and the records can be created from CI instead. | Automating B1 |
-| B3 | Phase 0 paperwork | D-U-N-S, Apple Developer ($99/yr, Organization), Google Play Console ($25, Organization + merchant), AdMob, RevenueCat, Google OAuth consent screen. See LAUNCH_PLAN §3 Phase 0. | Phases 4, 5, 6 going live (the code for them is already written) |
+| ~~B1~~ | ✅ **DONE 2026-09-05, re-verified 2026-09-07.** Cloudflare DNS records for the VPS backend | All four (`api.letterlock`, `api.dev.letterlock`, `dev.letterlock`, `status.letterlock`) resolve to `72.62.16.1`, grey cloud, with real certificates. `api.letterlock.raltech.dev/healthz` and `api.dev...` both return `{"ok":true,"db":true}`. | Nothing |
+| ~~B1b~~ | ✅ **DONE 2026-09-05, fully verified 2026-09-07.** Apex repointed to the VPS | `letterlock.raltech.dev` resolves to `72.62.16.1` and serves the VPS build with `VITE_API_URL=https://api.letterlock.raltech.dev` baked in. Migration verified against live counts: **users 23, profiles 13, leaderboard 219, friendships 4, saved_games 5, question_progress 143**, matching Supabase exactly. `/leaderboard/all` and `/ranks` return real players. The CI gate ran before the deploy (web + API jobs both green, run 33995706126). Rollback is still a 2-minute CNAME back to `letterlock-174.pages.dev`. | Nothing |
+| ~~B2~~ | ✅ **MOOT.** Cloudflare API token DNS permission | The records were added by hand and B1/B1b are finished, so a DNS-capable token is no longer worth creating. | Nothing |
+| B3 | Phase 0 paperwork (IN PROGRESS) | ✅ **Company Apple Account created + verified 2026-09-07** (browser-only, never signed into a phone's iCloud; whichever account enrols permanently owns the listing). ✅ **D-U-N-S requested 2026-09-07** via Apple's fast-tracked lookup, ~5 business days (D&B direct is up to 30). ⏳ Still open: Google Play Console ($25, Organization + merchant), AdMob, RevenueCat, Google OAuth consent screen, reserve the name in App Store Connect, and the $99/yr Apple Developer Organization enrolment once the D-U-N-S lands. See LAUNCH_PLAN §3 Phase 0. | Phases 4, 5, 6 going live (the code for them is already written) |
 | B4 | `VITE_APPLE_SERVICES_ID` | Apple Developer → Identifiers → Services IDs; return URL `https://letterlock.raltech.dev/auth/callback`. Empty today, which correctly hides the web Sign-in-with-Apple button. | Apple 4.8 compliance at submission |
 | B5 | **AdMob real ad unit IDs** | `src/lib/adUnits.ts`, `android/app/src/main/res/values/strings.xml`, `ios/App/App/Info.plist` all still carry Google's **public test IDs** (`ca-app-pub-3940256099942544/...`). Shipping those to a store shows test ads and earns nothing. Replace after the AdMob account exists (app IDs + banner/interstitial/rewarded per platform). | Real ad revenue (the ad CODE works today against the test IDs) |
 | B6 | **RevenueCat public keys** | Set `VITE_REVENUECAT_IOS_KEY` and `VITE_REVENUECAT_ANDROID_KEY` (RevenueCat → Project → API keys, the *public* SDK keys). Empty today, so the Remove Ads purchase path is inert. | Phase 5 Remove Ads working on a device |
@@ -1619,3 +1625,36 @@ Every one of these is from a mistake made that evening, several of them user-vis
     failed every `main` push) and the reminder email path. All read correct. All were broken.
 11. **Use Context7 for library and tool behaviour** instead of inferring it from symptoms.
     The Traefik answer in point 9 came from the docs in one lookup, after a lot of guessing.
+
+## II.3z Round-28: cutover re-verified, and the Apple Account blocker cleared (2026-09-07)
+
+- ✅ **B1 + B1b confirmed finished, with evidence rather than a tick.** All four backend names
+  and the apex resolve to `72.62.16.1` (grey cloud); `api` and `api.dev` both return
+  `{"ok":true,"db":true}`; the live bundle has `VITE_API_URL=https://api.letterlock.raltech.dev`
+  baked in and the only remaining `supabase` strings are two entries in the logos pack. The
+  migrated data serves for real: `/leaderboard/all` and `/ranks` return actual players, and the
+  row counts match Supabase exactly (users 23, profiles 13, leaderboard 219, friendships 4,
+  saved_games 5, question_progress 143). Per rule 3 the deploy run was opened, not just its
+  tick: run 33995706126 ran **three** jobs, the web gate, the API gate and the deploy.
+- ✅ **B2 is moot** (records added by hand, so no DNS token is needed).
+- ✅ **B3 unblocked and started.** The company Apple Account is created and verified, and the
+  D-U-N-S is requested through Apple's fast-tracked lookup (~5 business days, versus up to 30
+  going direct to D&B).
+- 🧵 **The finding worth keeping: Apple's "cannot be created at this time" and
+  "verification codes can't be sent to this phone number" are one anti-abuse throttle, not an
+  outage.** Apple's own status JSON feeds
+  (`apple.com/support/systemstatus/data/system_status_en_US.js` and the `/developer/` twin,
+  which are parseable where the HTML status pages are JS-rendered and useless to a fetch)
+  showed **zero** consumer events and only two unrelated developer events. What actually works:
+  **stop retrying**, because each attempt extends the cooldown; create the account from an
+  **iPhone's App Store** (profile icon, Sign Out, Create New Apple ID) rather than the web form,
+  on **mobile data** so the IP changes; confirm the country code is right, since a wrong one
+  produces this exact error; and fall back to Apple Support chat, which creates accounts
+  manually. Note also that `secure6.store.apple.com/us-smb/shop/signIn` is the **US Small
+  Business Store**, not the developer signup, and that the D-U-N-S lookup at
+  `developer.apple.com/enroll/duns-lookup/` is hard gated behind sign-in (403 to
+  `idmsa.apple.com`).
+- 📝 Two smaller corrections: the D&B pages quoted first both 404, the live ones are
+  `dnb.com/en-us/smb/duns/get-a-duns.html` and a free `.../duns-lookup.html` worth running
+  before requesting a new number; and the API route is `/leaderboard/all`, not
+  `/leaderboard/global`, which returns an empty page because it treats `global` as a pack id.
