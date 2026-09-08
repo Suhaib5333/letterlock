@@ -1408,7 +1408,7 @@ any ref).
 | B6 | **RevenueCat public keys** | Set `VITE_REVENUECAT_IOS_KEY` and `VITE_REVENUECAT_ANDROID_KEY` (RevenueCat → Project → API keys, the *public* SDK keys). Empty today, so the Remove Ads purchase path is inert. | Phase 5 Remove Ads working on a device |
 | B7 | **Apple Team ID in the deep-link file** | `public/.well-known/apple-app-site-association` has the literal `TEAMID`. Replace with the 10-character Team ID (App Store Connect → Membership). | iOS Universal Links (`/join/CODE` opening the app) |
 | B8 | **Play app-signing SHA-256** | `public/.well-known/assetlinks.json` has a `TODO:REPLACE:...` fingerprint. Copy it from Play Console → Setup → App signing. | Android App Links (`/join/CODE` opening the app) |
-| B9 | **Off-box backup remote** | `deploy/backup.sh` already runs nightly with a 14-day rotation AND a restore check, but the off-box copy only happens when an rclone remote named `letterlock-backup` exists. On the VPS: `rclone config` against Backblaze B2 or S3, name it `letterlock-backup`, set 30-day bucket retention. | "Losing the VPS = losing everything" risk in LAUNCH_PLAN §13 |
+| ~~B9~~ | ✅ **DONE 2026-09-08.** Off-box backups live | Backblaze B2 bucket `letterlock-backups`, rclone remote `letterlock-backup` on the VPS (key in `infra/b2-creds`, git-ignored, never a CI secret), lifecycle set via `rclone backend lifecycle` to hide at 30 days and delete 1 day later, so it is a rolling 30 days off-box and 14 days local. First run: `restore check ok (15 tables)` + `off-box copy ok`, 3 objects in the bucket. `.github/workflows/backup-watch.yml` emails Suhaib on day 1, 7 and 31 (and on any failed check inside that window), then stops. | Nothing |
 | B10 | **`app-ads.txt` real line** | `public/app-ads.txt` is a placeholder; AdMob gives the exact line once the account exists. | AdMob monetisation of the apps |
 | B11 | **Pixabay API key (optional, 1 min, free)** | `scripts/genimages.mjs` works keyless (Wikimedia Commons + Openverse) but Pixabay is tried first when `PIXABAY_KEY` is set and gives better, more on-topic photos for abstract charades prompts. Get one at https://pixabay.com/api/docs/ and re-run `RETRY_MISSING=1 node scripts/genimages.mjs`. | Image QUALITY only, not coverage |
 | B12 | **Human review of the charades images** | LAUNCH_PLAN Phase 1c says "nothing ships unreviewed". Open `docs/charades-review/index.html` (contact sheets, 20 per page), and for anything unsuitable add its slug to `public/charades/<packId>/reject.txt` (`<slug>` to refetch, `<slug> !` to force word-only), then re-run the script. | Shipping user-facing images in a family game |
@@ -1583,6 +1583,41 @@ Prompted by Suhaib asking, twice, whether everything really was done. It was not
   work.** The Android Gradle setup, the API test database, the Playwright `pg` resolution, the
   store-screenshot script and the OTA workflow all read correct and were all broken. The only
   thing that found them was running them.
+
+## II.4a Round-29: off-box backups, and the restore check that never once passed (2026-09-08)
+
+- ✅ **B9 closed.** Backblaze B2 (`letterlock-backups`) + an rclone remote named exactly
+  `letterlock-backup` on the VPS, which is the literal string `deploy/backup.sh` greps for. The
+  B2 application key lives in `infra/b2-creds` only, git-ignored like `vps-creds` and `db-creds`,
+  and deliberately **not** a GitHub secret: the monitoring workflow SSHes to the VPS and reads the
+  state there, so the key never leaves the one machine that needs it.
+- 🐛 **The nightly restore check had NEVER passed, in the script's whole life.** The log
+  shows `NOTICE: database "letterlock_restorecheck" does not exist, skipping` every night and no
+  `restore check ok` line, because `pg_restore` runs as `postgres`, `/opt/letterlock` is `0700
+  root`, and postgres cannot traverse into it to open the dump: `Permission denied`. Written as
+  `pg_restore ... && echo ok`, a failure prints **nothing at all**, so it looked fine. This is the
+  identical bug the Supabase migration rehearsal hit five times, already written down in this file
+  ("piping with `<` lets the root shell open it and postgres read stdin"), and it was sitting in
+  `backup.sh` the whole time. Fixed the same way, plus the check now counts tables (`>= 10`) and
+  **prints a loud `RESTORE CHECK FAILED` line** instead of silence. First run after the fix:
+  `restore check ok (15 tables)`.
+- 🧠 **The finding: `cmd && echo "ok"` is not a check, it is a check that can only ever
+  succeed loudly and fail silently.** Anything that verifies something must say so when it fails,
+  or nobody learns it stopped working. Same shape as rule 6 about green CI ticks.
+- 💡 **Backblaze's UI radio buttons are the wrong tool for dated backups.** "Keep only the
+  last version" and "Keep prior versions for N days" both prune *versions of one filename*, and
+  every nightly dump has a new dated name, so neither would ever delete anything and the bucket
+  would grow forever. What works is a custom rule on age:
+  `rclone backend lifecycle letterlock-backup:letterlock-backups -o daysFromUploadingToHiding=30
+  -o daysFromHidingToDeleting=1`, which sets it in one command with no UI at all.
+- 🐛 **`infra/put.py` (SFTP) fails on this box** with `FileNotFoundError: No such file` for
+  every remote path, `/tmp` included, while `infra/vps.py` works fine. Worked around by piping
+  `base64 -w0` through `vps.py` and confirming with `md5sum` on both ends, which still honours the
+  "never push raw file content through a shell command line" rule because base64 is
+  shell-inert. Root cause not chased.
+- ✅ **`codemagic.yaml` is now covered by the CI YAML parse gate**, which only globbed
+  `.github/workflows/*.yml` and `deploy/**/*.yml`. A parse error in it would have surfaced on the
+  first store build, exactly how `ota-release.yml` hid a duplicate key for weeks.
 
 ## 🛠️ Working rules learned the hard way (2026-09-05 cutover night)
 

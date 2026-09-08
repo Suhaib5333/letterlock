@@ -571,6 +571,7 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 - **Apple TV**: no web view, no Capacitor. Not planned. AirPlay mirroring covers it.
 
 ## 17. 📝 Change log for this plan
+- 2026-09-08 (B9 done): off-box backups are live. Backblaze B2 `letterlock-backups` + the rclone remote `letterlock-backup` on the VPS, a 30-day age-based lifecycle rule, and `.github/workflows/backup-watch.yml` reporting by email on day 1, 7 and 31. Closing it exposed a real bug: the nightly restore check had **never passed**, because `pg_restore` runs as `postgres` and could not read a dump under `0700 root` (`cmd && echo ok` failed silently). Fixed, and the check now fails loudly. This clears the "losing the VPS = losing everything" risk in §13.
 - 2026-09-08: **Phase 6b widened at Suhaib's request.** The web → app funnel was mobile-only (a dismissible bottom sheet plus Safari's Smart App Banner). It now also requires **permanent App Store and Google Play download badges visible to every website visitor, desktop included**, on Home and in the footer, using the official badge art and `utm_source=web`, gated by the existing `app-config.storeLinks` switch so they appear by themselves once both stores approve. B1/B1b (DNS + apex cutover) verified complete; B3 in progress (company Apple Account created and verified, D-U-N-S requested).
 
 - 2026-09-03: created after the research sweep. No code changed yet. Awaiting decisions D1-D13 (recommendations given).

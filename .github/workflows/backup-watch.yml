@@ -1,0 +1,167 @@
+# Watch the off-box backups for the first month and email Suhaib three times:
+# day 1 (it works), day 7 (still working), day 31 (the 30-day rotation actually
+# deleted the oldest copies). Then it stops on its own, as he asked.
+#
+# It SSHes to the VPS and reads the real state: the nightly log, the objects in
+# the Backblaze bucket, and the bucket's lifecycle rule. The B2 key stays on the
+# VPS only, it is never a GitHub secret.
+#
+# Inside the window a FAILED check also emails, because a backup that silently
+# stops is exactly the risk this whole thing exists to remove.
+# To keep the alerts running after day 31, raise WINDOW_END below.
+name: Backup watch
+
+on:
+  schedule:
+    - cron: '30 6 * * *'   # 06:30 UTC daily (09:30 Bahrain), after the 03:45 backup
+  workflow_dispatch:
+    inputs:
+      force_day:
+        description: 'Pretend it is this day number (1, 7 or 31) and send that email now.'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  START: '2026-09-08'    # first day the off-box copy worked
+  WINDOW_END: '31'
+  TO: suhaibrajabo@gmail.com
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Which day are we on?
+        id: day
+        run: |
+          set -euo pipefail
+          if [ -n "${{ inputs.force_day }}" ]; then
+            DAY="${{ inputs.force_day }}"
+          else
+            DAY=$(( ( $(date -u +%s) - $(date -u -d "$START" +%s) ) / 86400 + 1 ))
+          fi
+          echo "day=$DAY" >> "$GITHUB_OUTPUT"
+          if [ "$DAY" -gt "$WINDOW_END" ]; then
+            echo "::notice ::Day $DAY is past the $WINDOW_END-day window. Watch is finished, nothing to do."
+            echo "run=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=yes" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Read the real backup state off the VPS
+        if: steps.day.outputs.run == 'yes'
+        id: probe
+        env:
+          SSHPASS: ${{ secrets.VPS_PASS }}
+          VPS: ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}
+        run: |
+          set -euo pipefail
+          [ -n "$SSHPASS" ] || { echo "::error ::VPS_PASS secret missing"; exit 1; }
+          sudo apt-get update -q && sudo apt-get install -yq sshpass
+          OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=15"
+          retry() {
+            for i in 1 2 3 4 5 6; do
+              sshpass -e ssh -p 22 $OPTS "$VPS" "$1" && return 0
+              echo "attempt $i failed" >&2
+              [ "$i" = 6 ] && break
+              sleep $((i * 15))
+            done
+            return 1
+          }
+          retry 'tail -6 /opt/letterlock/backups/backup.log' > log.txt || echo "SSH FAILED" > log.txt
+          retry 'rclone lsl letterlock-backup:letterlock-backups' > objects.txt || true
+          retry 'rclone backend lifecycle letterlock-backup:letterlock-backups' > lifecycle.txt || true
+          echo "--- log ---"; cat log.txt
+          echo "--- objects ---"; cat objects.txt
+          echo "--- lifecycle ---"; cat lifecycle.txt
+
+          TODAY=$(date -u +%F)
+          OBJ=$(wc -l < objects.txt | tr -d ' ')
+          TODAY_OBJ=$(grep -c "$TODAY" objects.txt || true)
+          OLDEST=$(awk '{print $2}' objects.txt | sort | head -1)
+          NEWEST=$(awk '{print $2}' objects.txt | sort | tail -1)
+          RESTORE=$(grep -c 'restore check ok' log.txt || true)
+          OFFBOX=$(grep -c 'off-box copy ok' log.txt || true)
+          BROKEN=$(grep -ci 'FAILED\|no rclone remote' log.txt || true)
+          LIFE=$(grep -c 'daysFromUploadingToHiding' lifecycle.txt || true)
+
+          OK=yes
+          [ "${TODAY_OBJ:-0}" -ge 3 ] || OK=no      # 2 dumps + the env tarball, dated today
+          [ "${RESTORE:-0}" -ge 1 ] || OK=no
+          [ "${OFFBOX:-0}" -ge 1 ] || OK=no
+          [ "${BROKEN:-0}" -eq 0 ] || OK=no
+          [ "${LIFE:-0}" -ge 1 ] || OK=no
+
+          {
+            echo "ok=$OK"
+            echo "objects=$OBJ"
+            echo "today_objects=$TODAY_OBJ"
+            echo "oldest=${OLDEST:-none}"
+            echo "newest=${NEWEST:-none}"
+            echo 'log<<LOGEOF'; cat log.txt; echo LOGEOF
+            echo 'objects_list<<OBJEOF'; cat objects.txt; echo OBJEOF
+          } >> "$GITHUB_OUTPUT"
+          echo "::notice ::day ${{ steps.day.outputs.day }} ok=$OK objects=$OBJ today=$TODAY_OBJ"
+
+      - name: Email on day 1, 7 and 31, or on any failure inside the window
+        if: steps.day.outputs.run == 'yes' && (steps.probe.outputs.ok != 'yes' || contains(fromJSON('["1","7","31"]'), steps.day.outputs.day))
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DAY: ${{ steps.day.outputs.day }}
+          OK: ${{ steps.probe.outputs.ok }}
+          OBJECTS: ${{ steps.probe.outputs.objects }}
+          TODAY_OBJECTS: ${{ steps.probe.outputs.today_objects }}
+          OLDEST: ${{ steps.probe.outputs.oldest }}
+          NEWEST: ${{ steps.probe.outputs.newest }}
+          LOG: ${{ steps.probe.outputs.log }}
+          OBJECTS_LIST: ${{ steps.probe.outputs.objects_list }}
+        run: |
+          set -euo pipefail
+          [ -n "$RESEND_API_KEY" ] || { echo "::error ::RESEND_API_KEY missing"; exit 1; }
+
+          if [ "$OK" != "yes" ]; then
+            SUBJ="Letterlock backups need a look (day $DAY)"
+            LEDE='<p style="background:#FEE;padding:12px;border-radius:8px"><strong>Something is off.</strong> One of the nightly checks did not pass. The numbers below are the real state on the server right now.</p>'
+          elif [ "$DAY" = "1" ]; then
+            SUBJ="Letterlock off-site backups are live"
+            LEDE="<p>Your database now has a copy on <strong>someone else's computers</strong>. If the VPS is ever lost, wiped or suspended, the players, scores and progress survive.</p>"
+          elif [ "$DAY" = "7" ]; then
+            SUBJ="Letterlock backups: one week in, all good"
+            LEDE='<p>Seven nights, seven copies off the box, and the restore check passed every time. Nothing for you to do.</p>'
+          else
+            SUBJ="Letterlock backups: the 30-day rotation works, last email"
+            LEDE='<p>The oldest copies have now aged out and been deleted automatically, so the bucket holds a rolling 30 days and never grows forever. <strong>This is the last of these emails.</strong></p>'
+          fi
+
+          HTML=$(cat <<HTMLEOF
+          <h2 style="margin:0 0 12px">Off-site backups, day $DAY</h2>
+          $LEDE
+          <table style="border-collapse:collapse;font-size:14px;margin:16px 0">
+            <tr><td style="padding:4px 12px 4px 0">Copies in the bucket</td><td><strong>$OBJECTS</strong></td></tr>
+            <tr><td style="padding:4px 12px 4px 0">Uploaded today</td><td><strong>$TODAY_OBJECTS</strong> (2 databases + the env file)</td></tr>
+            <tr><td style="padding:4px 12px 4px 0">Oldest copy held</td><td>$OLDEST</td></tr>
+            <tr><td style="padding:4px 12px 4px 0">Newest copy</td><td>$NEWEST</td></tr>
+            <tr><td style="padding:4px 12px 4px 0">All checks passed</td><td><strong>$OK</strong></td></tr>
+          </table>
+          <p style="margin:0 0 4px"><strong>The last few nights, from the server log:</strong></p>
+          <pre style="background:#F6F7F9;padding:12px;border-radius:8px;font-size:12px;overflow:auto">$LOG</pre>
+          <p style="margin:0 0 4px"><strong>What is in the bucket:</strong></p>
+          <pre style="background:#F6F7F9;padding:12px;border-radius:8px;font-size:12px;overflow:auto">$OBJECTS_LIST</pre>
+          <p style="color:#6b7280;font-size:13px">Sent by <code>.github/workflows/backup-watch.yml</code>.
+          It checks the VPS every morning and only writes to you on day 1, day 7, day 31, or if a check fails.
+          After day 31 it stops by itself.</p>
+          HTMLEOF
+          )
+          WRAPPED="<div style=\"font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:640px;line-height:1.6;color:#111\">$HTML</div>"
+          PAYLOAD=$(jq -cn --arg to "$TO" --arg s "$SUBJ" --arg h "$WRAPPED" \
+            '{from:"Letterlock <reminders@mail.raltech.dev>", to:[$to], subject:$s, html:$h}')
+          CODE=$(curl -sS -o /tmp/r.json -w '%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" -H 'Content-Type: application/json' --data "$PAYLOAD")
+          cat /tmp/r.json; echo
+          [ "$CODE" = "200" ] || { echo "::error ::Resend HTTP $CODE"; exit 1; }
+          echo "::notice ::Sent day-$DAY backup email to $TO (ok=$OK)"

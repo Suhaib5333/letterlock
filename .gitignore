@@ -60,3 +60,4 @@ infra/dev-gate-creds
 infra/dev-gate-hashes.txt
 infra/google-creds
 infra/browser-state.json
+infra/b2-creds
