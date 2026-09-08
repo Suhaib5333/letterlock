@@ -92,6 +92,46 @@ workflows:
           - RAL team
         submit_to_app_store: false
 
+  # Proves the iOS project actually compiles BEFORE any Apple money is spent.
+  # No signing, no App Store Connect integration, simulator slice only, so it
+  # needs nothing from the blocked list (LAUNCH_PLAN B13, B3). Run it by hand
+  # from the Codemagic UI, or push an `ios-smoke-*` tag.
+  ios-smoke:
+    name: iOS compile smoke (unsigned)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      xcode: 26.0
+      node: 22
+      vars:
+        XCODE_PROJECT: ios/App/App.xcodeproj
+        XCODE_SCHEME: App
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'ios-smoke-*'
+          include: true
+      cancel_previous_builds: true
+    scripts:
+      - *web_build
+      - name: Add the iOS platform if this checkout has none (cannot run on Windows)
+        script: |
+          if [ ! -d ios/App ]; then npx cap add ios; fi
+      - name: Sync web bundle + plugins into ios/
+        script: npx cap sync ios
+      - name: CocoaPods (only if a Podfile exists; Capacitor 8 uses Swift Package Manager)
+        script: |
+          if [ -f ios/App/Podfile ]; then (cd ios/App && pod install); fi
+      - name: Resolve Swift packages
+        script: |
+          xcodebuild -resolvePackageDependencies -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME"
+      - name: Build for the simulator, unsigned
+        script: |
+          xcodebuild             -project "$XCODE_PROJECT"             -scheme "$XCODE_SCHEME"             -configuration Debug             -sdk iphonesimulator             -destination 'generic/platform=iOS Simulator'             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO             build
+    artifacts:
+      - /tmp/xcodebuild_logs/*.log
+
   android-release:
     name: Android Play internal
     max_build_duration: 60

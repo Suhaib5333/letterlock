@@ -74,7 +74,7 @@ jobs:
           Strict.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, no_dupes)
 
           bad = 0
-          for f in sorted(glob.glob('.github/workflows/*.yml') + glob.glob('deploy/**/*.yml', recursive=True)):
+          for f in sorted(glob.glob('.github/workflows/*.yml') + glob.glob('deploy/**/*.yml', recursive=True) + ['codemagic.yaml']):
               try:
                   yaml.load(open(f, encoding='utf-8'), Strict)
                   print('ok', f)
