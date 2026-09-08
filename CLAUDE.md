@@ -1631,6 +1631,43 @@ Prompted by Suhaib asking, twice, whether everything really was done. It was not
   `.github/workflows/*.yml` and `deploy/**/*.yml`. A parse error in it would have surfaced on the
   first store build, exactly how `ota-release.yml` hid a duplicate key for weeks.
 
+## II.4b Round-30: CI from 30 minutes to 4, and the two reasons it was slow (2026-09-09)
+
+Suhaib asked for a much faster pipeline without giving up any coverage. Measuring first
+turned up **two separate causes**, only one of which was the tests.
+
+- 🐛 **Cause 1, the suite was single-threaded.** Per-step timings showed the first
+  **100 seconds** of the one web job covered install, both config gates, typecheck, unit
+  tests, the leak gate, audit and the build, and **everything after that** was Playwright
+  running with `workers: 1`. Trimming steps would have saved seconds; parallelism saved the
+  half hour. `ci.yml` is now five jobs that start together: **e2e sharded 10 ways**
+  (`--shard`), the **device matrix sharded 4 ways**, the static gates, the API suite, and a
+  4-second job that asks whether the push contains any code at all.
+- 🐛 **Cause 2, and the bigger one: the runs were QUEUED, not slow.**
+  `deploy-vps.yml` uses `cancel-in-progress: false` on purpose, so a live release is never
+  interrupted. The cost was that five pushes in one evening ran five complete test-and-deploy
+  cycles back to back, and the one that mattered started last. At one point a run sat
+  `pending` with zero jobs while an older run's deploy step held the group. Fixed with a
+  **`fresh` job**: if this run is no longer the tip of the branch it stops in ~7 seconds, so
+  the queue drains, and a release already running is still never cancelled.
+- 📏 **Measured, not estimated** (three runs, `gh api .../jobs` timings):
+  one serial job **14 min** → 8 e2e shards **9.9 min** (the device matrix, freed from its
+  queue, was then the longest job on its own at **471s**) → 10 e2e + 4 matrix shards:
+  **gate 4.1 min, whole run including deploy 6.0 min**, all 19 jobs green.
+- ✅ **Nothing was given up.** The same 115 tests across the same two projects, the same
+  two retries, the same 17 viewports, the same typecheck / unit / leak / YAML / Traefik gates
+  and the same API suite on a real Postgres. `scripts/noscroll.mjs` gained `SHARD=i/n`, which
+  takes every n-th viewport: every device is still checked exactly once (verified by printing
+  the split), and interleaving rather than slicing contiguously mixes phones, tablets and TVs
+  so the shards finish together. 17 concurrent jobs, under GitHub's 20 limit, so nothing
+  silently re-queues.
+- 💡 A docs-only push (nothing outside `*.md` and `docs/`) skips e2e and the device
+  matrix. Anything that cannot be diffed, a new branch, a force push, a shallow clone, fails
+  **safe** to the full suite.
+- 🧠 **The finding: measure before optimising, then measure again, because fixing the
+  bottleneck creates a new one.** Sharding e2e made the device matrix the long pole, and it
+  had been invisible for months behind the queue.
+
 ## 🛠️ Working rules learned the hard way (2026-09-05 cutover night)
 
 Every one of these is from a mistake made that evening, several of them user-visible.
