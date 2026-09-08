@@ -73,7 +73,7 @@ jobs:
             done
             return 1
           }
-          retry 'tail -6 /opt/letterlock/backups/backup.log' > log.txt || echo "SSH FAILED" > log.txt
+          retry 'tail -8 /opt/letterlock/backups/backup.log' > log.txt || echo "SSH FAILED" > log.txt
           retry 'rclone lsl letterlock-backup:letterlock-backups' > objects.txt || true
           retry 'rclone backend lifecycle letterlock-backup:letterlock-backups' > lifecycle.txt || true
           echo "--- log ---"; cat log.txt
@@ -85,9 +85,12 @@ jobs:
           TODAY_OBJ=$(grep -c "$TODAY" objects.txt || true)
           OLDEST=$(awk '{print $2}' objects.txt | sort | head -1)
           NEWEST=$(awk '{print $2}' objects.txt | sort | tail -1)
-          RESTORE=$(grep -c 'restore check ok' log.txt || true)
-          OFFBOX=$(grep -c 'off-box copy ok' log.txt || true)
-          BROKEN=$(grep -ci 'FAILED\|no rclone remote' log.txt || true)
+          # Only judge TODAY's lines. The tail still carries the nights before the
+          # remote existed, and grepping the whole tail read those as a failure.
+          grep "^$TODAY " log.txt > today.txt || true
+          RESTORE=$(grep -c 'restore check ok' today.txt || true)
+          OFFBOX=$(grep -c 'off-box copy ok' today.txt || true)
+          BROKEN=$(grep -ci 'FAILED\|no rclone remote' today.txt || true)
           LIFE=$(grep -c 'daysFromUploadingToHiding' lifecycle.txt || true)
 
           OK=yes
