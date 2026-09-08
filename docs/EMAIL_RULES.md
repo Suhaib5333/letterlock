@@ -38,11 +38,33 @@ most of the same job, but the filter is the version that cannot drift.
 
 ---
 
+## 1b. ⚠️ The finding from round two: for a notification, send NO HTML at all
+
+Adding a plain-text part beside the HTML was not enough. The next email still landed in
+Promotions. Two reasons, and both matter:
+
+1. **Any HTML part at all is a promotional signal for this kind of mail.** A styled `<div>`, a
+   `<table>` of figures and a `<pre>` block read as a template even with zero images. A
+   `text/plain`-only message has nothing to classify as a template.
+2. **Gmail learns per sender, per recipient.** Once a few messages from an address have been
+   filed under Promotions, later ones inherit that, whatever the new message looks like. No
+   sender-side change can undo it. **Only the recipient can**, by moving one message to Primary
+   or setting the filter in §1.
+
+So the rule for anything whose job is to *tell you something*, as opposed to a product email a
+user expects to look designed:
+
+> **Send `text` only. Omit `html` entirely.**
+
+`backup-watch.yml` and the Supabase reminder are now text-only. The OTP mail keeps its HTML,
+deliberately: it is a product email, its HTML is already minimal with no images and no links,
+and iOS and Gmail read the code out of the HTML `<title>` for auto-fill.
+
 ## 2. 🔒 Sender rules, mandatory for every Resend send in this repo
 
 | # | Rule | Why |
 |---|---|---|
-| 1 | **Always send a `text` part alongside `html`** | HTML-only is one of the strongest "this is a template blast" signals. A `multipart/alternative` message reads as person-to-person. This is the single biggest lever we control |
+| 1 | **Always send a `text` part. For notification mail, send text ONLY, no `html`** | HTML-only is one of the strongest "this is a template blast" signals. A `multipart/alternative` message reads as person-to-person. This is the single biggest lever we control |
 | 2 | **Set a unique `X-Entity-Ref-ID` header per message** | Stops Gmail collapsing repeat notifications into one bulk thread, and marks the mail as entity-specific rather than a campaign |
 | 3 | **Set a real `reply_to` that a human reads** | A sender nobody can answer looks like a broadcast |
 | 4 | **Use `/emails`, never `/broadcasts`** | `/broadcasts` is Resend's marketing pipe and carries marketing headers by design. Everything we send is transactional |
@@ -59,20 +81,24 @@ most of the same job, but the filter is the version that cannot drift.
 
 ```jsonc
 {
-  "from": "Letterlock ops <ops@mail.raltech.dev>",
+  "from": "Letterlock server <ops@mail.raltech.dev>",
   "to": ["…"],
   "subject": "specific, factual, no marketing words",
-  "html": "<div>…minimal, no images, few links…</div>",
-  "text": "the same content as plain text",          // rule 1
-  "reply_to": "a mailbox a human reads",              // rule 3
-  "headers": { "X-Entity-Ref-ID": "<uuid per send>" } // rule 2
+  "text": "the whole message, as plain text",         // rule 1: NO html field
+  "reply_to": "a mailbox a human reads",               // rule 3
+  "headers": { "X-Entity-Ref-ID": "<uuid per send>" }  // rule 2
 }
 ```
 
-In the workflows the text part is derived from the HTML rather than written twice:
+The workflows build that text with a heredoc and then strip the YAML block indent, so the mail
+is not one long indented blob:
 
 ```bash
-TEXT=$(printf %s "$HTML" | sed -e 's/<[^>]*>/ /g' -e 's/&nbsp;/ /g' -e 's/&amp;/and/g' -e 's/  */ /g')
+TEXT=$(cat <<TEXTEOF
+          …lines…
+TEXTEOF
+)
+TEXT=$(printf %s "$TEXT" | sed -e 's/^          //')
 ```
 
 `apps/api/src/mail/mail.service.ts` (the OTP mail) already followed all of this before this doc
@@ -84,7 +110,7 @@ players cannot sign in.
 
 ## 3. 🚫 Never do these
 
-- Ship an HTML-only email with no `text` part
+- Ship an HTML-only email with no `text` part, or add an `html` part to a notification email
 - Add a logo, hero image, product image or social icons
 - Add `List-Unsubscribe` to transactional mail
 - Turn on open or click tracking for a transactional domain
@@ -98,6 +124,10 @@ players cannot sign in.
 
 ## 4. Change log
 
+- **2026-09-08 (round two):** a text part alongside the HTML was NOT enough, the next email still
+  landed in Promotions. `backup-watch.yml` and the Supabase reminder are now **text-only** (no `html`
+  field at all) and send as `Letterlock server`. Added §1b: any HTML part is a signal for
+  notification mail, and Gmail's per-sender history cannot be undone from the sending side.
 - **2026-09-08:** written after the day-1 backup email landed in Promotions. All three workflow
   senders gained a `text` part, a unique `X-Entity-Ref-ID`, a real `reply_to`, and moved from
   `reminders@mail.raltech.dev` to `ops@mail.raltech.dev`. The API's OTP mail already complied.

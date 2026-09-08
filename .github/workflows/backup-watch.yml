@@ -127,45 +127,51 @@ jobs:
           set -euo pipefail
           [ -n "$RESEND_API_KEY" ] || { echo "::error ::RESEND_API_KEY missing"; exit 1; }
 
+          # TEXT-ONLY, deliberately. An HTML part is what makes Gmail file a
+          # notification under Promotions; a plain-text mail with no markup, no
+          # images and no links reads as person-to-person. See docs/EMAIL_RULES.md.
           if [ "$OK" != "yes" ]; then
             SUBJ="Letterlock backups need a look (day $DAY)"
-            LEDE='<p style="background:#FEE;padding:12px;border-radius:8px"><strong>Something is off.</strong> One of the nightly checks did not pass. The numbers below are the real state on the server right now.</p>'
+            LEDE="Something is off. One of the nightly checks did not pass. The numbers below are the real state on the server right now."
           elif [ "$DAY" = "1" ]; then
             SUBJ="Letterlock off-site backups are live"
-            LEDE="<p>Your database now has a copy on <strong>someone else's computers</strong>. If the VPS is ever lost, wiped or suspended, the players, scores and progress survive.</p>"
+            LEDE="Your database now has a copy on someone else's computers. If the VPS is ever lost, wiped or suspended, the players, scores and progress survive."
           elif [ "$DAY" = "7" ]; then
             SUBJ="Letterlock backups: one week in, all good"
-            LEDE='<p>Seven nights, seven copies off the box, and the restore check passed every time. Nothing for you to do.</p>'
+            LEDE="Seven nights, seven copies off the box, and the restore check passed every time. Nothing for you to do."
           else
             SUBJ="Letterlock backups: the 30-day rotation works, last email"
-            LEDE='<p>The oldest copies have now aged out and been deleted automatically, so the bucket holds a rolling 30 days and never grows forever. <strong>This is the last of these emails.</strong></p>'
+            LEDE="The oldest copies have now aged out and been deleted automatically, so the bucket holds a rolling 30 days and never grows forever. This is the last of these emails."
           fi
 
-          HTML=$(cat <<HTMLEOF
-          <h2 style="margin:0 0 12px">Off-site backups, day $DAY</h2>
+          TEXT=$(cat <<TEXTEOF
+          Off-site backups, day $DAY
+
           $LEDE
-          <table style="border-collapse:collapse;font-size:14px;margin:16px 0">
-            <tr><td style="padding:4px 12px 4px 0">Copies in the bucket</td><td><strong>$OBJECTS</strong></td></tr>
-            <tr><td style="padding:4px 12px 4px 0">Uploaded today</td><td><strong>$TODAY_OBJECTS</strong> (2 databases + the env file)</td></tr>
-            <tr><td style="padding:4px 12px 4px 0">Oldest copy held</td><td>$OLDEST</td></tr>
-            <tr><td style="padding:4px 12px 4px 0">Newest copy</td><td>$NEWEST</td></tr>
-            <tr><td style="padding:4px 12px 4px 0">All checks passed</td><td><strong>$OK</strong></td></tr>
-          </table>
-          <p style="margin:0 0 4px"><strong>The last few nights, from the server log:</strong></p>
-          <pre style="background:#F6F7F9;padding:12px;border-radius:8px;font-size:12px;overflow:auto">$LOG</pre>
-          <p style="margin:0 0 4px"><strong>What is in the bucket:</strong></p>
-          <pre style="background:#F6F7F9;padding:12px;border-radius:8px;font-size:12px;overflow:auto">$OBJECTS_LIST</pre>
-          <p style="color:#6b7280;font-size:13px">Sent by <code>.github/workflows/backup-watch.yml</code>.
-          It checks the VPS every morning and only writes to you on day 1, day 7, day 31, or if a check fails.
-          After day 31 it stops by itself.</p>
-          HTMLEOF
+
+          Copies in the bucket:   $OBJECTS
+          Uploaded today:         $TODAY_OBJECTS  (2 databases + the env file)
+          Oldest copy held:       $OLDEST
+          Newest copy:            $NEWEST
+          All checks passed:      $OK
+
+          The last few nights, from the server log:
+
+          $LOG
+
+          What is in the bucket:
+
+          $OBJECTS_LIST
+
+          Sent by .github/workflows/backup-watch.yml. It checks the VPS every
+          morning and only writes to you on day 1, day 7, day 31, or if a check
+          fails. After day 31 it stops by itself.
+          TEXTEOF
           )
-          WRAPPED="<div style=\"font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:640px;line-height:1.6;color:#111\">$HTML</div>"
-          # A plain-text alternative, a real reply_to and a unique X-Entity-Ref-ID are
-          # what keep Gmail out of the Promotions tab. See docs/EMAIL_RULES.md.
-          TEXT=$(printf %s "$HTML" | sed -e 's/<[^>]*>/ /g' -e 's/&nbsp;/ /g' -e 's/&rarr;/->/g' -e 's/&amp;/and/g' -e 's/  */ /g')
-          PAYLOAD=$(jq -cn --arg to "$TO" --arg s "$SUBJ" --arg h "$WRAPPED" --arg t "$TEXT" --arg r "$(uuidgen)" \
-            '{from:"Letterlock ops <ops@mail.raltech.dev>", to:[$to], subject:$s, html:$h, text:$t,
+          # strip the YAML block indent so the mail is not one big indented blob
+          TEXT=$(printf %s "$TEXT" | sed -e 's/^          //')
+          PAYLOAD=$(jq -cn --arg to "$TO" --arg s "$SUBJ" --arg t "$TEXT" --arg r "$(uuidgen)" \
+            '{from:"Letterlock server <ops@mail.raltech.dev>", to:[$to], subject:$s, text:$t,
               reply_to:"suhaibrajabo@gmail.com", headers:{"X-Entity-Ref-ID":$r}}')
           CODE=$(curl -sS -o /tmp/r.json -w '%{http_code}' -X POST https://api.resend.com/emails \
             -H "Authorization: Bearer $RESEND_API_KEY" -H 'Content-Type: application/json' --data "$PAYLOAD")

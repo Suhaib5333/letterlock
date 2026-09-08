@@ -87,9 +87,9 @@ jobs:
           # what keep Gmail out of the Promotions tab. See docs/EMAIL_RULES.md.
           TEXT=$(printf %s "$HTML" | sed -e 's/<[^>]*>/ /g' -e 's/&nbsp;/ /g' -e 's/&rarr;/->/g' -e 's/&amp;/and/g' -e 's/  */ /g')
           BODY=$(jq -cn --arg to "$TO" --arg html "$HTML" --arg d "$DAYS" --arg t "$TEXT" --arg r "$(uuidgen)" \
-            '{from:"Letterlock ops <ops@mail.raltech.dev>", to:[$to],
+            '{from:"Letterlock server <ops@mail.raltech.dev>", to:[$to],
               subject:("Delete the Supabase project? (" + $d + " days on the VPS)"),
-              html:$html, text:$t, reply_to:"suhaibrajabo@gmail.com",
+              text:$t, reply_to:"suhaibrajabo@gmail.com",
               headers:{"X-Entity-Ref-ID":$r}}')
           CODE=$(curl -sS -o /tmp/resend.json -w '%{http_code}' -X POST https://api.resend.com/emails \
             -H "Authorization: Bearer $RESEND_API_KEY" -H 'Content-Type: application/json' --data "$BODY")
