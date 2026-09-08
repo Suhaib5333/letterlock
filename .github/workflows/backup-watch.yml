@@ -85,19 +85,19 @@ jobs:
           TODAY_OBJ=$(grep -c "$TODAY" objects.txt || true)
           OLDEST=$(awk '{print $2}' objects.txt | sort | head -1)
           NEWEST=$(awk '{print $2}' objects.txt | sort | tail -1)
-          # Only judge TODAY's lines. The tail still carries the nights before the
-          # remote existed, and grepping the whole tail read those as a failure.
-          grep "^$TODAY " log.txt > today.txt || true
-          RESTORE=$(grep -c 'restore check ok' today.txt || true)
-          OFFBOX=$(grep -c 'off-box copy ok' today.txt || true)
-          BROKEN=$(grep -ci 'FAILED\|no rclone remote' today.txt || true)
+          # Judge only TODAY, and only the LAST verdict of the day. The tail still
+          # carries the nights before the remote existed, and a re-run appends a
+          # second verdict for the same date, so counting matches is wrong twice over.
+          LAST_RESTORE=$(grep "^$TODAY " log.txt | grep -E 'restore check ok|RESTORE CHECK FAILED' | tail -1)
+          LAST_OFFBOX=$(grep "^$TODAY " log.txt | grep -E 'off-box copy ok|no rclone remote' | tail -1)
           LIFE=$(grep -c 'daysFromUploadingToHiding' lifecycle.txt || true)
+          echo "last restore verdict: ${LAST_RESTORE:-none}"
+          echo "last off-box verdict: ${LAST_OFFBOX:-none}"
 
           OK=yes
           [ "${TODAY_OBJ:-0}" -ge 3 ] || OK=no      # 2 dumps + the env tarball, dated today
-          [ "${RESTORE:-0}" -ge 1 ] || OK=no
-          [ "${OFFBOX:-0}" -ge 1 ] || OK=no
-          [ "${BROKEN:-0}" -eq 0 ] || OK=no
+          case "$LAST_RESTORE" in *'restore check ok'*) ;; *) OK=no ;; esac
+          case "$LAST_OFFBOX"  in *'off-box copy ok'*) ;; *) OK=no ;; esac
           [ "${LIFE:-0}" -ge 1 ] || OK=no
 
           {
