@@ -8,14 +8,15 @@
 # gate, audit and the build, and EVERYTHING after that was the Playwright suite running
 # with `workers: 1`. So the fix is not micro-optimising the fast half, it is running the
 # slow half in parallel:
-#   * e2e is sharded across 8 runners with `--shard`, the same 115 tests x 2 projects,
+#   * e2e is sharded across 10 runners with `--shard`, the same 115 tests x 2 projects,
 #     just spread out. No test is skipped and retries are unchanged.
-#   * the device matrix and the static gates are their own jobs, so nothing queues
-#     behind e2e any more.
+#   * the device matrix is 4 jobs sharded by viewport, and the static gates are their
+#     own job, so nothing queues behind e2e any more.
 #   * a docs-only push (no file outside *.md and docs/) skips e2e and the device matrix,
 #     because markdown cannot change what those assert. Touch one line of code and the
 #     full suite is back.
-# Wall clock: ~30 min -> about 6, and ~2 for a docs-only change.
+# Measured: one serial job 14 min -> 8 shards 8 min (the device matrix was then the
+# long pole at 7.9) -> this layout, about 4 min, and ~1 for a docs-only change.
 name: CI
 
 on:
@@ -166,7 +167,7 @@ jobs:
   # The whole suite, same tests, spread over 8 runners. Was the entire runtime of this
   # workflow; now it is roughly the length of its slowest shard.
   e2e:
-    name: e2e ${{ matrix.shard }}/8
+    name: e2e ${{ matrix.shard }}/10
     needs: scope
     if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-latest
@@ -174,7 +175,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     # tests-e2e/api-server.mjs boots the REAL apps/api against a real database
     # (playwright.config.ts `webServer`), so this job needs Postgres and the API's
     # own dependencies, not just the web ones. Without them the suite dies with
@@ -209,7 +210,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
       - name: Playwright e2e (shard ${{ matrix.shard }})
-        run: npx playwright test --reporter=line --shard=${{ matrix.shard }}/8
+        run: npx playwright test --reporter=line --shard=${{ matrix.shard }}/10
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -217,13 +218,21 @@ jobs:
           path: test-results/
           retention-days: 7
 
-  # 17 viewports x every screen. Used to queue behind the e2e suite for no reason.
+  # 17 viewports x every screen. It used to queue behind the e2e suite for no reason,
+  # and once that was fixed it became the longest job in the workflow at 7.9 minutes,
+  # so it is sharded by viewport too. Each device is still checked, exactly once:
+  # `SHARD=i/n` in scripts/noscroll.mjs takes every n-th entry, which also spreads
+  # phones, tablets and TVs evenly so the shards finish together.
   noscroll:
-    name: Device matrix — nothing scrolls or clips
+    name: Device matrix ${{ matrix.shard }}/4
     needs: scope
     if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -237,7 +246,9 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Build
         run: npm run build
-      - name: Device matrix
+      - name: Device matrix (shard ${{ matrix.shard }})
+        env:
+          SHARD: ${{ matrix.shard }}/4
         run: |
           npx vite preview --port 4173 &
           for i in $(seq 30); do curl -sf http://localhost:4173/ >/dev/null && break; sleep 2; done

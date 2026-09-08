@@ -67,9 +67,20 @@ async function overflow(page) {
 const SCALE = process.env.SCALE; // 'large' | 'xlarge'
 const PACK = process.env.PACK; // pack testid e.g. 'flags-easy'
 
+// SHARD=i/n runs only every n-th viewport, so CI can spread the 17 devices over
+// several runners. Unset means all of them, which is what a local run wants.
+const SHARD = process.env.SHARD;
+const TARGETS = (() => {
+  if (!SHARD) return VIEWPORTS;
+  const [i, n] = SHARD.split('/').map(Number);
+  if (!(i >= 1 && n >= 1 && i <= n)) throw new Error(`bad SHARD ${SHARD}, expected i/n`);
+  return VIEWPORTS.filter((_, k) => k % n === i - 1);
+})();
+if (SHARD) console.log(`shard ${SHARD}: ${TARGETS.map((v) => v.name).join(', ')}`);
+
 const browser = await chromium.launch();
 let problems = 0;
-for (const vp of VIEWPORTS) {
+for (const vp of TARGETS) {
   const ctx = await browser.newContext({ viewport: { width: vp.w, height: vp.h }, deviceScaleFactor: 1 });
   // Unlock all gated content so the checker can reach 5×5/7×7/bo5/hard packs.
   await ctx.addInitScript(() => localStorage.setItem('letterlock.unlockall', '1'));
