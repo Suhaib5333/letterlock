@@ -16,13 +16,45 @@ on:
 concurrency: { group: "deploy-vps-${{ github.ref }}", cancel-in-progress: false }
 
 jobs:
+  # Is this run still the tip of the branch? Because the group above QUEUES rather than
+  # cancels, five pushes in a row used to mean five full test-and-deploy runs one after
+  # another, and the last one you actually cared about started half an hour late. A
+  # superseded run has nothing useful to ship (the newer run deploys the same files plus
+  # more), so it ends here in about fifteen seconds and lets the queue drain. This gives
+  # the speed that `cancel-in-progress: true` would give, WITHOUT its risk: a release
+  # already running is never interrupted.
+  fresh:
+    name: Still the newest commit?
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      go: ${{ steps.tip.outputs.go }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - id: tip
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin "${{ github.ref_name }}"
+          TIP=$(git rev-parse FETCH_HEAD)
+          if [ "$TIP" = "${{ github.sha }}" ]; then
+            echo "::notice ::${GITHUB_SHA::7} is the tip, continuing."
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice ::Superseded by ${TIP::7}, stopping so the newer run can go."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # Nothing reaches the VPS unless the suites pass. Before this gate existed a green
   # tick on this workflow only meant the deploy script finished.
   test:
+    needs: fresh
+    if: needs.fresh.outputs.go == 'true'
     uses: ./.github/workflows/ci.yml
 
   deploy:
-    needs: test
+    needs: [fresh, test]
+    if: needs.fresh.outputs.go == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
