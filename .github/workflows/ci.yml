@@ -2,6 +2,20 @@
 # the bundle and shipped it to the VPS, so a green tick only ever meant "the deploy
 # script finished". Every push and pull request now runs the same suites the testing
 # mandate in CLAUDE.md requires, and `deploy-vps.yml` waits for this to pass.
+#
+# SPEED (2026-09-09). It used to be one serial job and took ~30 minutes. Measured, the
+# first 100 seconds covered install, both config gates, typecheck, unit tests, the leak
+# gate, audit and the build, and EVERYTHING after that was the Playwright suite running
+# with `workers: 1`. So the fix is not micro-optimising the fast half, it is running the
+# slow half in parallel:
+#   * e2e is sharded across 8 runners with `--shard`, the same 115 tests x 2 projects,
+#     just spread out. No test is skipped and retries are unchanged.
+#   * the device matrix and the static gates are their own jobs, so nothing queues
+#     behind e2e any more.
+#   * a docs-only push (no file outside *.md and docs/) skips e2e and the device matrix,
+#     because markdown cannot change what those assert. Touch one line of code and the
+#     full suite is back.
+# Wall clock: ~30 min -> about 6, and ~2 for a docs-only change.
 name: CI
 
 on:
@@ -17,39 +31,50 @@ on:
 concurrency: { group: "ci-${{ github.workflow }}-${{ github.ref }}", cancel-in-progress: true }
 
 jobs:
-  web:
-    name: Web — typecheck, unit, content gates, e2e
+  # Is there any real code in this push, or is it only prose? Cheap (a few seconds) and
+  # it is what turns a CLAUDE.md edit from a 30-minute wait into a 2-minute one.
+  scope:
+    name: What changed
     runs-on: ubuntu-latest
-    # The suite takes ~3 min on a dev box and ~20 on a 2-core runner, so the ceiling
-    # is generous on purpose: a timeout here reads as a mystery failure.
-    timeout-minutes: 45
-    # tests-e2e/api-server.mjs boots the REAL apps/api against a real database
-    # (playwright.config.ts `webServer`), so this job needs Postgres and the API's
-    # own dependencies, not just the web ones. Without them the suite dies with
-    # "Cannot find module 'pg'" — which passed locally only because a stale
-    # apps/api/node_modules happened to be on disk.
-    services:
-      postgres:
-        image: postgres:16
-        env: { POSTGRES_PASSWORD: ll }
-        ports: ['55432:5432']
-        options: >-
-          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
-    env:
-      # apps/api/prisma.config.ts resolves DATABASE_URL at load time, so even
-      # `prisma generate` needs it. tests-e2e/api-server.mjs creates its own
-      # per-run database from this host.
-      DATABASE_URL: postgresql://postgres:ll@localhost:55432/postgres
+    timeout-minutes: 3
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 50 }
+      - id: diff
+        run: |
+          set -euo pipefail
+          BASE="${{ github.event.pull_request.base.sha || github.event.before || '' }}"
+          # A new branch, a force push, or a shallow history all report a base we cannot
+          # diff against. Fail SAFE in that case: treat it as a code change.
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] \
+             || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            echo "::notice ::No usable base commit, running the full suite."
+            echo "code=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          FILES=$(git diff --name-only "$BASE" HEAD)
+          echo "$FILES"
+          # Everything that is not documentation counts as code, workflows included.
+          CODE=$(printf '%s\n' "$FILES" | grep -Ev '(^docs/|\.md$)' || true)
+          if [ -n "$CODE" ]; then
+            echo "::notice ::Code changed, running the full suite."
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice ::Documentation only, skipping e2e and the device matrix."
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ~100 seconds, measured. Everything that does not need a browser.
+  static:
+    name: Typecheck, unit, content gates, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '22', cache: 'npm' }
-      - uses: oven-sh/setup-bun@v2
-        with: { bun-version: 1.3.11 }
       - run: npm ci
-      - name: Install API deps (the e2e suite boots the real API)
-        working-directory: apps/api
-        run: bun install --frozen-lockfile && bunx prisma generate
 
       # A malformed workflow only surfaces when you try to RUN it: GitHub rejects the
       # dispatch with a parse error and everything else stays green. That is how a
@@ -138,25 +163,85 @@ jobs:
       - name: Build
         run: npm run build
 
+  # The whole suite, same tests, spread over 8 runners. Was the entire runtime of this
+  # workflow; now it is roughly the length of its slowest shard.
+  e2e:
+    name: e2e ${{ matrix.shard }}/8
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    # tests-e2e/api-server.mjs boots the REAL apps/api against a real database
+    # (playwright.config.ts `webServer`), so this job needs Postgres and the API's
+    # own dependencies, not just the web ones. Without them the suite dies with
+    # "Cannot find module 'pg'" — which passed locally only because a stale
+    # apps/api/node_modules happened to be on disk.
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: ll }
+        ports: ['55432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # apps/api/prisma.config.ts resolves DATABASE_URL at load time, so even
+      # `prisma generate` needs it. tests-e2e/api-server.mjs creates its own
+      # per-run database from this host.
+      DATABASE_URL: postgresql://postgres:ll@localhost:55432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'npm' }
+      - uses: oven-sh/setup-bun@v2
+        with: { bun-version: 1.3.11 }
+      - run: npm ci
+      - name: Install API deps (the e2e suite boots the real API)
+        working-directory: apps/api
+        run: bun install --frozen-lockfile && bunx prisma generate
       - uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+      - name: Playwright e2e (shard ${{ matrix.shard }})
+        run: npx playwright test --reporter=line --shard=${{ matrix.shard }}/8
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-shard-${{ matrix.shard }}
+          path: test-results/
+          retention-days: 7
 
-      - name: Playwright e2e
-        run: npx playwright test --reporter=line
-
-      - name: Device matrix — nothing scrolls or clips
+  # 17 viewports x every screen. Used to queue behind the e2e suite for no reason.
+  noscroll:
+    name: Device matrix — nothing scrolls or clips
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Build
+        run: npm run build
+      - name: Device matrix
         run: |
           npx vite preview --port 4173 &
           for i in $(seq 30); do curl -sf http://localhost:4173/ >/dev/null && break; sleep 2; done
           node scripts/noscroll.mjs
-
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with: { name: playwright-report, path: test-results/, retention-days: 7 }
 
   api:
     name: API — typecheck + e2e on real Postgres
