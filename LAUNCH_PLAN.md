@@ -315,6 +315,7 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 |---|---|
 | iOS Safari | `<meta name="apple-itunes-app" content="app-id=<id>, app-argument=https://letterlock.raltech.dev/join/CODE">`: Safari's native Smart App Banner, free, and it deep-links into the same room. |
 | Everyone else on a phone browser | A dismissible bottom sheet on **Home** only: "Play Letterlock in the app" with the official App Store and Google Play badges (used per their brand guidelines), shown only on mobile browsers (not inside the apps, not on desktop, not on TV), remembered for 14 days after dismissal, never blocking the game. Links carry `utm_source=web` so the stores show where installs come from. |
+| **Store badges for everyone (Suhaib, 2026-09-08)** | Not just the mobile sheet: once both apps are live, **every visitor to `letterlock.raltech.dev` sees a permanent "Download on the App Store" + "Get it on Google Play" badge pair**, on desktop too. Placed on **Home** under the play buttons and repeated in the footer, real official badge SVGs at their required minimum sizes and clear space, `utm_source=web`, `rel="noopener"`, alt text naming the store. Driven by the same `app-config.storeLinks` switch, so it self-appears the day the second store approves and stays hidden inside the apps and on TV. |
 | Switch | `app-config.storeLinks` from the API: empty until both apps are live, so nothing shows before launch. |
 | Rule | Never mention prices or "cheaper than the app" anywhere (Apple 3.1.3). The popup promotes the app, nothing else. |
 
@@ -570,6 +571,7 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 - **Apple TV**: no web view, no Capacitor. Not planned. AirPlay mirroring covers it.
 
 ## 17. 📝 Change log for this plan
+- 2026-09-08: **Phase 6b widened at Suhaib's request.** The web → app funnel was mobile-only (a dismissible bottom sheet plus Safari's Smart App Banner). It now also requires **permanent App Store and Google Play download badges visible to every website visitor, desktop included**, on Home and in the footer, using the official badge art and `utm_source=web`, gated by the existing `app-config.storeLinks` switch so they appear by themselves once both stores approve. B1/B1b (DNS + apex cutover) verified complete; B3 in progress (company Apple Account created and verified, D-U-N-S requested).
 
 - 2026-09-03: created after the research sweep. No code changed yet. Awaiting decisions D1-D13 (recommendations given).
 - 2026-09-03 (later): Suhaib confirmed "we will migrate off Supabase": added §2b (what off-Supabase means, no Supabase account after cutover) + D14 (open-source stack self-run vs. custom backend). Readable artifact rebuilt as a tabbed page; HTML + PDF generator committed under `docs/launch-plan/`.
