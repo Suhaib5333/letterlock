@@ -537,6 +537,18 @@ store build), the store-blocker list (account deletion, privacy/terms, Sign in w
 phase plan with ETAs, costs, and the open decisions D1-D13. **Read it before touching any of
 those topics, and update its change log when you do.**
 
+## 📧 Sending email: see `docs/EMAIL_RULES.md`
+
+Every Resend send in this repo (the API's OTP mail plus the three notifier workflows) must carry a
+plain-`text` part beside the HTML, a unique `X-Entity-Ref-ID`, and a real `reply_to`, must go through
+`/emails` and never `/broadcasts`, must carry no images, few links and no `List-Unsubscribe`, and must
+come from an ops-style address (`ops@`, never `reminders@`/`news@`/`promo@`). Written 2026-09-08 after
+the day-1 backup email landed in Gmail's **Promotions** tab: HTML-only with no text part is one of the
+strongest promotional signals there is. Gmail's tab choice is a classifier with no header that can force
+Primary, so the only deterministic fix is a recipient-side Gmail filter (`Categorise as: Primary`).
+**Read that doc before touching anything that sends mail, and never "improve" the OTP email with a logo
+or a footer** , an OTP in Promotions means players cannot sign in.
+
 ## 🧩 Repo conventions for the new project (set these up day one)
 - Mirror this file as `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`. Keep it a **living document**.
 - Commit messages: **no AI attribution** (Suhaib-authored only).
