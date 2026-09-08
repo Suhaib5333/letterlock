@@ -56,7 +56,7 @@ user expects to look designed:
 
 > **Send `text` only. Omit `html` entirely.**
 
-`backup-watch.yml` and the Supabase reminder are now text-only. The OTP mail keeps its HTML,
+`notify.yml`, `backup-watch.yml` and the Supabase reminder are all text-only now. The OTP mail keeps its HTML,
 deliberately: it is a product email, its HTML is already minimal with no images and no links,
 and iOS and Gmail read the code out of the HTML `<title>` for auto-fill.
 
@@ -125,7 +125,7 @@ players cannot sign in.
 ## 4. Change log
 
 - **2026-09-08 (round two):** a text part alongside the HTML was NOT enough, the next email still
-  landed in Promotions. `backup-watch.yml` and the Supabase reminder are now **text-only** (no `html`
+  landed in Promotions. All three senders (`notify.yml`, `backup-watch.yml`, the Supabase reminder) are now **text-only** (no `html`
   field at all) and send as `Letterlock server`. Added §1b: any HTML part is a signal for
   notification mail, and Gmail's per-sender history cannot be undone from the sending side.
 - **2026-09-08:** written after the day-1 backup email landed in Promotions. All three workflow
