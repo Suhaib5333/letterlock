@@ -1706,6 +1706,15 @@ old generative moods (calm / blocky / warm / dream) are **deleted**, not layered
   tremolo rate changing 5.2 Hz → 5.8 Hz, which is exactly `quizroom` handing over to
   `lounge`. That identifies WHICH piece is playing, so it also proves the old moods are gone
   from the bundle and not merely from the source. 0 console errors over the whole session.
+- 📚 `TECH.md` §1.3 and `DEFERRED.md` §4 now describe the new engine instead of the old moods.
+- ✅ Verified end to end: **1071 unit/content tests**, **225 Playwright e2e passed / 3 skipped**
+  (the TV-remote specs are mobile-skipped by design), **noscroll ALL CLEAR** (17 devices ×
+  every screen), strict typecheck and production build clean. Deploy run 34510126860 was
+  opened per rule 3, not trusted from its tick: **19 jobs, all green** — the static gates, 10
+  e2e shards, 4 device-matrix shards, the API suite on a real Postgres, then the deploy. The
+  live bundle carries the new score (233.08 Hz Bb3 present) and **zero** occurrences of the old
+  moods' unique frequencies (311.13, 622.25), and the production site was tapped in a real
+  browser: `quizroom` playing, 0 console errors.
 
 ## 🛠️ Working rules learned the hard way (2026-09-05 cutover night)
 
