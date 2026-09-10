@@ -11,9 +11,10 @@
  * build ships no audio file at all: nothing to license, no royalties, no PRO
  * registration, no revenue share, and nothing for a store review to flag.
  *
- * Style: calm instrumental quiz-show "thinking music" — vibraphone over gentle
- * jazz harmony with a soft walking bass. Unhurried on purpose; it sits under the
- * UI, never on top of it.
+ * Style: calm instrumental quiz-show "thinking music" — soft sine tones that swell
+ * rather than strike, over gentle jazz harmony and a quiet walking bass. Slow,
+ * sparse and deliberately unremarkable: it sits under the UI, never on top of it.
+ * No vibrato and no tremolo anywhere, by request.
  */
 
 export interface Chord {
@@ -34,10 +35,12 @@ export interface Piece {
   /** ms per beat. */
   beat: number;
   wave: OscillatorType;
-  /** Note attack in seconds — 0.01 reads as a struck vibraphone, 0.3 as a pad. */
+  /**
+   * Note attack in seconds. Kept slow (~0.07) on purpose: a fast attack reads as a
+   * struck mallet, which Suhaib heard as "too strong and crazy" (2026-09-10). A
+   * gentle swell on a plain sine is the calm, collected version.
+   */
   attack: number;
-  /** Vibraphone shimmer on the lead, in Hz (0 = off). */
-  tremolo: number;
   /** 0..1 chance of a stacked diatonic third under a lead note. */
   harmony: number;
   /** Sustained root+fifth drone beneath everything (0 = none). */
@@ -75,7 +78,7 @@ export const PIECES: Piece[] = [
       [8, 2], [6, 1], [7, 1], //    Fmaj7:G  E  F
       [9, 4], //                    Dm7:  A ———
     ],
-    beat: 500, wave: 'triangle', attack: 0.012, tremolo: 5.2, harmony: 0.45, padGain: 0.035,
+    beat: 720, wave: 'sine', attack: 0.07, harmony: 0.2, padGain: 0.03,
   },
   {
     // Sparser and slower — the "still thinking" one. Long notes, lots of room.
@@ -97,7 +100,7 @@ export const PIECES: Piece[] = [
       [8, 2], [7, 2], //         Dm7:   D  C
       [6, 2], [4, 2], //         G7:    B  G
     ],
-    beat: 620, wave: 'sine', attack: 0.02, tremolo: 4.4, harmony: 0.3, padGain: 0.045,
+    beat: 820, wave: 'sine', attack: 0.09, harmony: 0.14, padGain: 0.035,
   },
   {
     // Warm lounge electric-piano feel: maj7 colours, a gentle downward drift.
@@ -119,7 +122,7 @@ export const PIECES: Piece[] = [
       [5, 2], [7, 2], //          Am7:   E  G
       [4, 4], //                  D7:    D ———
     ],
-    beat: 540, wave: 'triangle', attack: 0.014, tremolo: 5.8, harmony: 0.5, padGain: 0.03,
+    beat: 760, wave: 'sine', attack: 0.08, harmony: 0.18, padGain: 0.028,
   },
   {
     // A touch brighter for the between-games lift — still calm, still background.
@@ -141,6 +144,6 @@ export const PIECES: Piece[] = [
       [3, 2], [4, 2], //          Gmaj7: G  A
       [2, 2], [0, 2], //          A7:    F# D
     ],
-    beat: 520, wave: 'sine', attack: 0.01, tremolo: 6.2, harmony: 0.4, padGain: 0.03,
+    beat: 700, wave: 'sine', attack: 0.06, harmony: 0.16, padGain: 0.028,
   },
 ];

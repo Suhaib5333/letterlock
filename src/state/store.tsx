@@ -11,11 +11,11 @@ import {
 import { canPieSwap, replay, undoLast } from '../core/engine';
 import type { GameEvent, GameLog } from '../core/events';
 import { gamesNeededFor, type GameState, type TeamConfig, type TeamId } from '../core/models';
-import { allQuestionIds, allQuestions, type Question, type QuestionPack } from '../core/packs';
-import { mulberry32 } from '../core/rng';
+import { allQuestionIds, allQuestions, type QuestionPack } from '../core/packs';
 import { newMatch, startGameEvent, type NewMatchOptions } from '../core/match';
 import { DEFAULT_PACK_ID, packById } from '../content';
 import { registerScreenHooks, setMatchActive } from '../lib/native';
+import { chooseQuestion, skippedIds } from './chooseQuestion';
 import { markServed, usedSet } from './progress';
 import {
   clearSave,
@@ -78,7 +78,7 @@ const EMPTY_UI: UiState = {
 
 const DEFAULT_SETUP: SetupForm = {
   colorA: 'blue',
-  colorB: 'amber',
+  colorB: 'orange',
   mode: 'bo3',
   size: 5,
   topology: 'hex',
@@ -140,57 +140,6 @@ function optsFromSetup(setup: SetupForm, seed: number): NewMatchOptions {
     pieRuleEnabled: setup.pieRule,
     biasOutHard: true,
   };
-}
-
-/**
- * Pick the question to serve for a cell.
- * - Honours the cross-game no-repeat cycle (unseen-first; {@link usedSet}).
- * - For letterless packs (`hideBoardLetters`) tiles are NOT pinned to a letter —
- *   any tile draws from the WHOLE pack, fully randomized.
- * - `repeated` is true when every candidate has already been served this cycle
- *   (a forced repeat) so the UI can flag it.
- */
-function chooseQuestion(
-  opts: NewMatchOptions,
-  game: GameState,
-  cell: number,
-): { question: Question; letter: string; repeated: boolean } {
-  const pack = opts.pack as QuestionPack;
-  const global = !!pack.hideBoardLetters;
-
-  // Candidate pool: whole pack for letterless packs, else this cell's letter.
-  let letter = game.letters[cell];
-  let pool: Question[] = global ? allQuestions(pack) : pack.letters[letter] ?? [];
-  if (pool.length === 0) pool = allQuestions(pack); // wildcard fallback
-
-  // Ids already served — this game (avoid same-game dupes) + persistent cycle.
-  const gameUsed = new Set<string>();
-  if (global) {
-    for (const ids of Object.values(game.usedQuestions)) for (const id of ids) gameUsed.add(id);
-  } else {
-    for (const id of game.usedQuestions[letter] ?? []) gameUsed.add(id);
-  }
-  const pers = usedSet(pack.id);
-
-  const seed = (opts.seed + cell * 131 + game.moveCount * 977 + gameUsed.size * 7919) >>> 0;
-  const rng = mulberry32(seed);
-
-  const unseen = pool.filter((q) => !pers.has(q.id) && !gameUsed.has(q.id));
-  let chosen: Question;
-  let repeated: boolean;
-  if (unseen.length > 0) {
-    chosen = unseen[Math.floor(rng() * unseen.length)];
-    repeated = false;
-  } else {
-    const fresh = pool.filter((q) => !gameUsed.has(q.id));
-    const fallback = fresh.length > 0 ? fresh : pool;
-    chosen = fallback[Math.floor(rng() * fallback.length)];
-    repeated = true;
-  }
-  // Event letter: for letterless packs use the answer's own first letter so the
-  // move log + usedQuestions stay consistent; otherwise the board cell's letter.
-  if (global) letter = chosen.a.trim()[0]?.toUpperCase() || 'A';
-  return { question: chosen, letter, repeated };
 }
 
 function applyAndAdvance(state: StoreState, events: GameEvent[]): StoreState {
@@ -259,7 +208,13 @@ function reducer(state: StoreState, action: Action): StoreState {
     case 'PICK_CELL': {
       if (!state.opts || state.game.status !== 'playing') return state;
       if (state.game.owners[action.cell] !== null) return state; // only neutral hexes
-      const { question, letter, repeated } = chooseQuestion(state.opts, state.game, action.cell);
+      const { question, letter, repeated } = chooseQuestion(
+        state.opts,
+        state.game,
+        action.cell,
+        usedSet((state.opts.pack as QuestionPack).id),
+        skippedIds(state.log),
+      );
       const ev: GameEvent = {
         type: 'QuestionServed',
         cell: action.cell,
@@ -311,7 +266,13 @@ function reducer(state: StoreState, action: Action): StoreState {
       };
       const log1 = [...state.log, skip];
       const g1 = replay(log1);
-      const { question, letter, repeated } = chooseQuestion(state.opts, g1, cell);
+      const { question, letter, repeated } = chooseQuestion(
+        state.opts,
+        g1,
+        cell,
+        usedSet((state.opts.pack as QuestionPack).id),
+        skippedIds(log1), // includes the one just skipped, so it cannot come back
+      );
       const serve: GameEvent = { type: 'QuestionServed', cell, letter, questionId: question.id };
       const log2 = [...log1, serve];
       return {
@@ -345,7 +306,13 @@ function reducer(state: StoreState, action: Action): StoreState {
       };
       const log1 = [...state.log, skip];
       const g1 = replay(log1);
-      const { question, letter, repeated } = chooseQuestion(state.opts, g1, cell);
+      const { question, letter, repeated } = chooseQuestion(
+        state.opts,
+        g1,
+        cell,
+        usedSet((state.opts.pack as QuestionPack).id),
+        skippedIds(log1), // includes the one just skipped, so it cannot come back
+      );
       const serve: GameEvent = { type: 'QuestionServed', cell, letter, questionId: question.id };
       const log2 = [...log1, serve];
       return {

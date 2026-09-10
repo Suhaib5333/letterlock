@@ -13,7 +13,7 @@ import type { QuestionPack } from './packs';
 
 const TEAMS: Record<TeamId, TeamConfig> = {
   A: { id: 'A', name: 'Blue', colorId: 'blue' },
-  B: { id: 'B', name: 'Amber', colorId: 'amber' },
+  B: { id: 'B', name: 'Orange', colorId: 'orange' },
 };
 
 const PACK: QuestionPack = {

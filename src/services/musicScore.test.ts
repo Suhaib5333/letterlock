@@ -55,9 +55,13 @@ describe('soundtrack score', () => {
       });
 
       it('stays calm and in the background', () => {
-        expect(p.beat).toBeGreaterThanOrEqual(460); // no faster than ~130bpm
-        expect(p.beat).toBeLessThanOrEqual(700);
-        expect(p.attack).toBeLessThan(0.05); // struck, not swelling — vibraphone
+        expect(p.beat).toBeGreaterThanOrEqual(650); // no faster than ~92bpm
+        expect(p.beat).toBeLessThanOrEqual(900);
+        expect(p.wave).toBe('sine'); // no bright triangle harmonics
+        // A swell, never a strike: a fast attack is what read as "strong and crazy".
+        expect(p.attack).toBeGreaterThanOrEqual(0.05);
+        expect(p.attack).toBeLessThanOrEqual(0.15);
+        expect(p.harmony).toBeLessThanOrEqual(0.25); // sparse, not a chord wall
         expect(p.padGain).toBeLessThanOrEqual(0.05);
         expect(p.melody.filter(([d]) => d >= 0).length).toBeGreaterThanOrEqual(12); // a real phrase
       });

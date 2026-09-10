@@ -14,7 +14,7 @@ test.beforeEach(async ({ page }) => {
 
 const CONTROLLER = (code: string, name: string) => `/?room=${code}&view=controller&name=${name}`;
 
-/** Host an online room, join two players, assign Blue (Team A = picker) + Amber
+/** Host an online room, join two players, assign Blue (Team A = picker) + Orange
  *  (Team B), start, and serve the first question. Returns the picker/other pages
  *  resolved by which one actually landed on the Blue team. */
 async function setupTwoPlayerQuestion(browser: Browser): Promise<{
@@ -48,12 +48,12 @@ async function setupTwoPlayerQuestion(browser: Browser): Promise<{
   const unassigned = host.locator('.lobby-unassigned li');
   await unassigned.first().locator('button', { hasText: 'Blue' }).click();
   await expect(unassigned).toHaveCount(1);
-  await unassigned.first().locator('button', { hasText: 'Amber' }).click();
+  await unassigned.first().locator('button', { hasText: 'Orange' }).click();
   await expect(unassigned).toHaveCount(0);
 
   // Resolve which page is the picker (Blue = Team A picks first).
-  await expect(p1.getByTestId('controller-team')).toHaveText(/Blue|Amber/, { timeout: 35000 });
-  await expect(p2.getByTestId('controller-team')).toHaveText(/Blue|Amber/, { timeout: 35000 });
+  await expect(p1.getByTestId('controller-team')).toHaveText(/Blue|Orange/, { timeout: 35000 });
+  await expect(p2.getByTestId('controller-team')).toHaveText(/Blue|Orange/, { timeout: 35000 });
   const p1Team = await p1.getByTestId('controller-team').innerText();
   const picker = /Blue/i.test(p1Team) ? p1 : p2;
   const other = picker === p1 ? p2 : p1;

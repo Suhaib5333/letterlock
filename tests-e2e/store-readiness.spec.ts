@@ -155,15 +155,18 @@ test('store sheet stays hidden when app-config has no store links', async ({ pag
   await expect(page.getByTestId('store-sheet')).toHaveCount(0);
 });
 
-test('Fandoms cards carry the unofficial caption and the D11 renames', async ({ page }) => {
+test('Fandoms cards carry the unofficial caption', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('open-categories').click();
   await page.getByTestId('cat-chip-fandoms').click();
   const notes = page.getByTestId('cat-card-note');
+  // The disclaimer is the part that has to hold: Suhaib asked for the pack to be
+  // called Harry Potter in-app (2026-09-10), so D11's rename is dropped and the
+  // "unofficial, not affiliated" label plus keeping franchise names OUT of store
+  // metadata are what keep the distance.
   await expect(notes.first()).toHaveText('Unofficial fan trivia, not affiliated');
-  await expect(page.getByTestId('pack-fandom-harry-potter')).toContainText('Wizarding School Trivia');
+  await expect(page.getByTestId('pack-fandom-harry-potter')).toContainText('Harry Potter');
   await expect(page.getByTestId('pack-fandom-pokemon')).toContainText('Pocket Monsters Trivia');
-  await expect(page.getByTestId('category-body')).not.toContainText('Harry Potter');
 });
 
 test('Logos cards carry the trademark caption', async ({ page }) => {

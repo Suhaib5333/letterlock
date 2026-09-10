@@ -27,7 +27,7 @@ async function joinPlayer(browser: Browser, code: string): Promise<{ player: Pag
   return { player, ctx };
 }
 
-async function assignAndStart(host: Page, team: 'Blue' | 'Amber') {
+async function assignAndStart(host: Page, team: 'Blue' | 'Orange') {
   await expect(host.getByTestId('lobby-count')).toContainText('1 connected', { timeout: 35000 });
   await host.locator('.lobby-unassigned button', { hasText: team }).first().click();
   await host.getByTestId('lobby-start').click();
@@ -145,10 +145,10 @@ test('reconnect: team assignment persists across a refresh', async ({ browser })
   const { host, code, ctx: hc } = await openHost(browser);
   const { player, ctx: pc } = await joinPlayer(browser, code);
   await expect(host.getByTestId('lobby-count')).toContainText('1 connected', { timeout: 35000 });
-  await host.locator('.lobby-unassigned button', { hasText: 'Amber' }).first().click();
-  await expect(player.getByTestId('controller-team')).toHaveText(/Amber/i, { timeout: 35000 });
+  await host.locator('.lobby-unassigned button', { hasText: 'Orange' }).first().click();
+  await expect(player.getByTestId('controller-team')).toHaveText(/Orange/i, { timeout: 35000 });
   await player.reload();
-  await expect(player.getByTestId('controller-team')).toHaveText(/Amber/i, { timeout: 35000 });
+  await expect(player.getByTestId('controller-team')).toHaveText(/Orange/i, { timeout: 35000 });
   await pc.close();
   await hc.close();
 });

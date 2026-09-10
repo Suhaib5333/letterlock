@@ -8,12 +8,12 @@
 
 | Metric | Value | Updated |
 |---|---|---|
-| Packs shipped | **182** | 2026-08-27 |
-| Questions shipped | **40,159** | 2026-08-27 |
+| Packs shipped | **193** | 2026-09-10 |
+| Questions shipped | **42,745** | 2026-09-10 |
 | Arabic packs | 51 | 2026-08-27 |
-| Packs fact-audited | **158** (every pack added since 2026-08-20, plus the 55 earlier) | 2026-08-27 |
+| Packs fact-audited | **168** (every pack added since 2026-08-20, plus the 55 earlier) | 2026-09-10 |
 | Target for this programme | 60 new packs (30 EN + 30 AR) | |
-| Done toward target | 51 | |
+| Done toward target | 61 | |
 | Left toward target | **see viability finding below** | |
 
 `node scripts/packstats.mjs` prints the live per-group counts, the total, and any
@@ -134,6 +134,31 @@ i.e. the topic is out of answers. Two packs were **written and then deleted** fo
 Skew hard, do not spread evenly — this is how the existing arFood (228) is built:
 ب/م ≈ 18-21 · ك/س/ش/ت/ف/ح/ق ≈ 10-16 · most others 5-9 · ث/ذ/ض/ظ ≈ 2-3.
 Even spreading (8 per letter) always lands ~180 and then needs two top-up rounds.
+
+### ✅ Wave 7 (2026-09-10) — 10 English packs shipped
+
+Books & Authors 267, Classical Music 249, Chemistry & Elements 252, Plants & Trees 234,
+Philosophy & Thinkers 292, World Leaders & Politics 271, Basketball 282, Tennis 246,
+World Religions 251, Detectives & Crime Fiction 243. **2,587 questions; every pack was
+gate-clean on its FIRST checkpack run** (215+ questions, 0 duplicate answers, 0 misfiled
+letters, 0 leaks), which is what the "agent self-verifies before it may report" rule buys.
+
+- 🔎 **Topic choice came from what was MISSING, not from what is popular.** A search for
+  the top pub-quiz categories returns general knowledge, movies, music, geography, science,
+  food, history and sport, and all eight were already shipped. The gap was the classic
+  second tier, plus two specific sports (only generic Sports and Football existed).
+- 📐 **Width again decided the shortlist.** Each of the ten was picked because its proper
+  nouns span the alphabet: author surnames, composer surnames, element names, plant names,
+  isms and thinkers, leaders' surnames, player surnames, festivals and texts, detectives.
+  Three packs honestly reported dropping X (and crime fiction dropped X/Y/Z) rather than
+  padding a letter with invented filler, which is the correct trade.
+- 🕊️ **World Religions was briefed as the most sensitive pack in the wave:** descriptive
+  and respectful only, all major traditions covered evenly, nothing comparative, ranked,
+  sectarian or political. The auditor was told to flag disrespect as a defect, not a style
+  note.
+- 🏀 **The sports packs were briefed against this repo's worst-ever pack** (round 21's
+  cycling file, 9 wrong palmares stats): if a number is not certain, write an identifying
+  clue instead of a statistic. Both authors reported doing exactly that.
 
 ### ⏳ Not started (deliberately, with reasons)
 

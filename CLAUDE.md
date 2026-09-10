@@ -1716,6 +1716,58 @@ old generative moods (calm / blocky / warm / dream) are **deleted**, not layered
   moods' unique frequencies (311.13, 622.25), and the production site was tapped in a real
   browser: `quizroom` playing, 0 console errors.
 
+## II.4d Round-32: 10 new packs, plain team colours, calmer music, and the skip that repeated (2026-09-10)
+
+- ✅ **10 new English packs, 2,587 questions, every one gate-clean on its FIRST run.**
+  Books & Authors 267, Philosophy & Thinkers 292, Basketball 282, World Leaders & Politics 271,
+  Chemistry & Elements 252, World Religions 251, Classical Music 249, Tennis 246, Detectives &
+  Crime Fiction 243, Plants & Trees 234. Repo total: **193 packs, 42,745 questions.** Topic
+  choice came from what was MISSING, not from what is popular: a search for the top pub-quiz
+  categories returns general knowledge, movies, music, geography, science, food, history and
+  sport, and all eight were already shipped, so the wave took the classic second tier plus the
+  two obvious sports gaps (only generic Sports and Football existed). `groupOf` learned
+  `^basketball|^tennis` → Sports and `^classical` → Music.
+- 🕵️ **Fact-audited by two separate Sonnet agents before anything shipped, and they read far
+  past the 16-question sample** (roughly the full A-Z spread of each file). Result: **one real
+  error in 2,587 questions** , Wes Unseld's 1969 rookie-MVP season was credited to the
+  *Washington* Bullets, but the franchise was the *Baltimore* Bullets until 1974. Fixed. One
+  borderline flagged rather than edited (a Husserl clue that blended *Cartesian Meditations*
+  with the separate "rigorous science" essay) was tightened by hand afterwards.
+- 🎨 **Team colours are plain colours now** (`src/state/palette.ts`, Suhaib's call): Blue,
+  Orange, Green, Purple, Pink, Yellow, replacing Blue / Amber / Teal / Violet / Sky / Rose.
+  The old set contained **two blues (Blue and Sky) with Teal sitting between them**, so two
+  teams could pick near-identical colours, and the names read as paint chips. A `LEGACY_IDS`
+  map carries old stored picks forward (`amber→orange`, `teal→green`, `violet→purple`,
+  `rose→pink`, `sky→yellow`); `sky` deliberately does NOT map to Blue, or a returning player
+  whose teams were Blue vs Sky would end up with both teams the same colour. Default pairing
+  is still Okabe-Ito Blue vs Orange, and the board still encodes ownership with a pattern.
+- ⚡ **The Harry Potter pack is called "Harry Potter" again.** LAUNCH_PLAN D11 had renamed it
+  to *Wizarding School Trivia*; Suhaib asked for the real name and the decision table now
+  records the revision. The mitigations that carry the weight stay: the "Unofficial fan
+  trivia, not affiliated" caption on every Fandoms card, and franchise names never appearing
+  in store metadata. The Pokemon pack keeps its descriptive title.
+- 🎵 **The soundtrack was too strong, so it is now genuinely background.** The wobble was a
+  tremolo LFO running on every note at 30% depth; it is deleted. Both triangle-wave pieces
+  became sines, attacks went from a 10-20 ms strike to a 60-90 ms swell, tempos slowed ~40%
+  (500-620 → 700-820 ms per beat), stacked thirds dropped from up to 50% of notes to 14-20%,
+  the lead peak went 0.16 → 0.10, the master menu level 0.13 → 0.09, and cross-fades stretched
+  to 5-6 s. The guard test now encodes "calm" as an invariant: sine only, attack inside the
+  0.05-0.15 swell band, no faster than ~92 bpm, harmony ≤ 0.25.
+- 🐛 **The skip bug, and it was a real one.** Once a pack ran out of unseen questions, pressing
+  **Skip served the same question again, forever**. Two causes, both in the chooser: (a) the
+  RNG seed was built from `moveCount` and the used-set size, and a skip changes NEITHER, since
+  the engine records `QuestionSkipped` for an id `QuestionServed` had already recorded, so the
+  identical seed drew the identical index; (b) the forced-repeat branch fell back to the whole
+  pool without excluding the question being skipped, which bites hardest on a letterless pack
+  smaller than one game (melodies has 23). Fixed by extracting the chooser into a PURE module,
+  `src/state/chooseQuestion.ts`, that takes the persistent used-set and an `avoid` set: a
+  skipped id is off the table for the rest of the game, and `avoid.size` feeds the seed, so it
+  is the one input that always changes on a skip. `chooseQuestion.test.ts` drives skip after
+  skip; **3 of its 6 cases were verified RED against the old logic and green on the fix.**
+- 🧠 **The finding worth keeping: a deterministic seed is a bug when the action's whole purpose
+  is to change the result.** "Give me a different question" cannot be seeded on inputs that a
+  skip leaves untouched. Any future "reroll" needs the reroll count in its seed.
+
 ## 🛠️ Working rules learned the hard way (2026-09-05 cutover night)
 
 Every one of these is from a mistake made that evening, several of them user-visible.

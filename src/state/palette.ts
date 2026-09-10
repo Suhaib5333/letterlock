@@ -1,7 +1,18 @@
 /**
- * Team color palette. Curated to stay distinguishable for colorblind players
- * (Okabe-Ito inspired) — no red/green pairing. Each entry carries the shades the
- * UI + board need, applied at runtime as CSS variables.
+ * Team color palette. Six plainly-named colors, one per region of the color wheel,
+ * so any two picks look obviously different across a room: Blue, Orange, Green,
+ * Purple, Pink, Yellow.
+ *
+ * Rewritten 2026-09-10 at Suhaib's request. The old set had Blue AND Sky (two
+ * blues) plus Teal sitting between them, and named things Amber / Violet / Rose,
+ * which read as paint swatches rather than team names. Nothing here is a shade of
+ * anything else now, and every name is a color a child would name.
+ *
+ * Accessibility is unchanged in substance: the DEFAULT pairing is still the
+ * Okabe-Ito-style Blue vs Orange, the safest pair across all types of color
+ * blindness, and ownership on the board is always encoded by a per-team PATTERN
+ * (dots vs diamonds) as well as by color, so a player who deliberately picks
+ * Green against Orange can still read the board.
  */
 export interface TeamColor {
   id: string;
@@ -14,16 +25,32 @@ export interface TeamColor {
 }
 
 export const TEAM_COLORS: TeamColor[] = [
-  { id: 'blue', name: 'Blue', base: '#0a84ff', light: '#3aa0ff', deep: '#0a5bbd', glow: '#38bdf8', stroke: '#7cc4ff' },
-  { id: 'amber', name: 'Amber', base: '#ff9f0a', light: '#ffb43a', deep: '#d97b00', glow: '#ffcb47', stroke: '#ffd27a' },
-  { id: 'teal', name: 'Teal', base: '#12b5a6', light: '#2dd4bf', deep: '#0c8a7f', glow: '#5eead4', stroke: '#9af0e4' },
-  { id: 'violet', name: 'Violet', base: '#9b6bff', light: '#b794ff', deep: '#7338e0', glow: '#c9b6ff', stroke: '#d8c8ff' },
-  { id: 'sky', name: 'Sky', base: '#56b4e9', light: '#7cc6f0', deep: '#2e8fc8', glow: '#a8dcff', stroke: '#c4e8ff' },
-  { id: 'rose', name: 'Rose', base: '#f0609a', light: '#f582ad', deep: '#c43b73', glow: '#ffa6c8', stroke: '#ffc4dc' },
+  { id: 'blue', name: 'Blue', base: '#0a84ff', light: '#4d9bff', deep: '#0a58bd', glow: '#38bdf8', stroke: '#93c8ff' },
+  { id: 'orange', name: 'Orange', base: '#ff7a1a', light: '#ff9647', deep: '#c24d00', glow: '#ffab5e', stroke: '#ffc79a' },
+  { id: 'green', name: 'Green', base: '#23c552', light: '#4bd873', deep: '#12873a', glow: '#6ee88b', stroke: '#a7f0bc' },
+  { id: 'purple', name: 'Purple', base: '#9b4dff', light: '#b478ff', deep: '#6b21d6', glow: '#c9a0ff', stroke: '#dcc4ff' },
+  { id: 'pink', name: 'Pink', base: '#ff4d94', light: '#ff74ac', deep: '#c9166b', glow: '#ff8fbe', stroke: '#ffbdd8' },
+  { id: 'yellow', name: 'Yellow', base: '#f2c200', light: '#ffd633', deep: '#a87f00', glow: '#ffe066', stroke: '#ffeb9e' },
 ];
 
+/**
+ * Colors saved by an older build. Without this, a returning player's stored pick
+ * (or a saved mid-match game) would fall back to Blue and both teams could end up
+ * the same color. `sky` maps to Yellow rather than Blue for exactly that reason:
+ * it used to be the second blue, and the point of the rewrite is that no two
+ * choices look alike.
+ */
+const LEGACY_IDS: Record<string, string> = {
+  amber: 'orange',
+  teal: 'green',
+  violet: 'purple',
+  rose: 'pink',
+  sky: 'yellow',
+};
+
 export function colorById(id: string): TeamColor {
-  return TEAM_COLORS.find((c) => c.id === id) ?? TEAM_COLORS[0];
+  const wanted = LEGACY_IDS[id] ?? id;
+  return TEAM_COLORS.find((c) => c.id === wanted) ?? TEAM_COLORS[0];
 }
 
 /** Push the two teams' colors into CSS variables on the document root. */

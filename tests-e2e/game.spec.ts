@@ -40,15 +40,15 @@ test('home → setup → board renders with both teams', async ({ page }) => {
   await expect(page.getByTestId('open-categories')).toBeVisible();
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-couch').click();
-  await page.getByTestId('swatch-a-teal').click();
-  await page.getByTestId('swatch-b-rose').click();
+  await page.getByTestId('swatch-a-green').click();
+  await page.getByTestId('swatch-b-pink').click();
   // team name follows the chosen colour (not typable)
-  await expect(page.getByTestId('team-a-name')).toHaveText('Teal');
-  await expect(page.getByTestId('team-b-name')).toHaveText('Rose');
+  await expect(page.getByTestId('team-a-name')).toHaveText('Green');
+  await expect(page.getByTestId('team-b-name')).toHaveText('Pink');
   await page.getByTestId('start-match').click();
   await expect(page.getByTestId('game-screen')).toBeVisible();
-  await expect(page.getByTestId('team-panel-A')).toContainText('Teal');
-  await expect(page.getByTestId('team-panel-B')).toContainText('Rose');
+  await expect(page.getByTestId('team-panel-A')).toContainText('Green');
+  await expect(page.getByTestId('team-panel-B')).toContainText('Pink');
   await expect(page.locator('.ll-board')).toBeVisible();
 });
 
@@ -185,15 +185,15 @@ test('teams can pick colors and it carries into the match', async ({ page }) => 
   await page.goto('/');
   await page.getByTestId('play-button').click();
   await page.getByTestId('mode-couch').click();
-  await page.getByTestId('swatch-a-teal').click();
-  await page.getByTestId('swatch-b-violet').click();
+  await page.getByTestId('swatch-a-green').click();
+  await page.getByTestId('swatch-b-purple').click();
   await page.getByTestId('start-match').click();
   await expect(page.getByTestId('game-screen')).toBeVisible();
-  // CSS var reflects the chosen team-A color (teal #12b5a6).
+  // CSS var reflects the chosen team-A color (Green #23c552 in the palette).
   const ta = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue('--ta').trim(),
   );
-  expect(ta.toLowerCase()).toBe('#12b5a6');
+  expect(ta.toLowerCase()).toBe('#23c552');
 });
 
 test('flags pack hides board letters (no first-letter hint) and shows a flag', async ({ page }) => {
@@ -583,7 +583,7 @@ test('no pie-swap offer (and no blank-screen crash) when the opponent steals the
 test('manual switch-turn flips the active team', async ({ page }) => {
   await startMatch(page, { size: 5, mode: 'single' });
   const banner = page.getByTestId('turn-banner');
-  const first = (await banner.innerText()).includes('Blue') ? 'Blue' : 'Amber';
+  const first = (await banner.innerText()).includes('Blue') ? 'Blue' : 'Orange';
   await page.getByTestId('switch-turn').click();
   await expect(banner).not.toContainText(first);
 });
@@ -1103,7 +1103,7 @@ test('category: can switch tier of an already-selected category (hard → medium
 
 // Helper: host a room, return { host, player, code, ctxs } with one player joined
 // onto a given team and the match started + a question served.
-async function hostWithPlayerInQuestion(browser: import('@playwright/test').Browser, teamBtn: 'Blue' | 'Amber') {
+async function hostWithPlayerInQuestion(browser: import('@playwright/test').Browser, teamBtn: 'Blue' | 'Orange') {
   const hostCtx = await browser.newContext();
   const host = await hostCtx.newPage();
   await host.goto('/');
@@ -1128,10 +1128,10 @@ async function hostWithPlayerInQuestion(browser: import('@playwright/test').Brow
 
 test('online: the non-picking team is locked until the picker window closes', async ({ browser }) => {
   test.setTimeout(60000);
-  // Team A picks first; put the player on Amber (Team B). In the sequential
-  // Party-Mode flow the other team answers AFTER the picker, so Amber must be
+  // Team A picks first; put the player on Orange (Team B). In the sequential
+  // Party-Mode flow the other team answers AFTER the picker, so Orange must be
   // locked (no input) while the picker's window is open.
-  const { player, hostCtx, playerCtx } = await hostWithPlayerInQuestion(browser, 'Amber');
+  const { player, hostCtx, playerCtx } = await hostWithPlayerInQuestion(browser, 'Orange');
   await expect(player.getByTestId('controller-locked')).toBeVisible({ timeout: 10000 });
   await expect(player.getByTestId('controller-input')).toHaveCount(0);
   await playerCtx.close();

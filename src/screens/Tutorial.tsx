@@ -30,7 +30,7 @@ const STEPS = [
   },
   {
     title: 'Build a chain across the board',
-    body: 'Blue connects LEFT ↔ RIGHT. Amber connects TOP ↕ BOTTOM. The board is a perfectly fair rhombus — both directions cross the same number of hexes.',
+    body: 'Blue connects LEFT ↔ RIGHT. Orange connects TOP ↕ BOTTOM. The board is a perfectly fair rhombus — both directions cross the same number of hexes.',
   },
   {
     title: 'Block to win',

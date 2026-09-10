@@ -2,7 +2,7 @@ import type { RawPack } from '../core/packs';
 
 export const fandomHarryPotterPack: RawPack = {
   id: 'fandom-harry-potter',
-  name: 'Wizarding School Trivia',
+  name: 'Harry Potter',
   description: 'Spells, houses, creatures and castle lore from the seven books and eight films.',
   locale: 'en',
   difficulty: 'medium',

@@ -318,7 +318,7 @@ let barIdx = 0;
 
 function targetVolume(): number {
   if (ducked) return 0.0001;
-  return musicContext === 'game' ? 0.05 : 0.13; // quieter during a match
+  return musicContext === 'game' ? 0.04 : 0.09; // quieter during a match
 }
 
 function rampMusic(to: number, seconds: number) {
@@ -330,35 +330,24 @@ function rampMusic(to: number, seconds: number) {
 }
 
 /**
- * One struck note: fast attack + long exponential decay = vibraphone/e-piano,
- * with an optional tremolo LFO for the shimmer that timbre is known for.
+ * One soft note: a gentle swell to peak over `attack`, then a long exponential
+ * decay. Deliberately plain (a bare sine, no vibrato, no tremolo) so the music
+ * stays background and never draws attention to itself.
  */
-function softNote(freq: number, dur: number, peak: number, opts: { wave?: OscillatorType; attack?: number; tremolo?: number } = {}) {
+function softNote(freq: number, dur: number, peak: number, opts: { wave?: OscillatorType; attack?: number } = {}) {
   if (!ctx || !musicGain) return;
   const t = ctx.currentTime + 0.02;
-  const attack = opts.attack ?? piece.attack;
   const osc = ctx.createOscillator();
   const g = ctx.createGain();
   osc.type = opts.wave ?? piece.wave;
   osc.frequency.value = freq;
   g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(peak, t + attack);
+  g.gain.exponentialRampToValueAtTime(peak, t + (opts.attack ?? piece.attack));
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   osc.connect(g);
   g.connect(musicGain);
   osc.start(t);
   osc.stop(t + dur + 0.1);
-  const trem = opts.tremolo ?? 0;
-  if (trem > 0) {
-    const lfo = ctx.createOscillator();
-    const depth = ctx.createGain();
-    lfo.frequency.value = trem;
-    depth.gain.value = peak * 0.3;
-    lfo.connect(depth);
-    depth.connect(g.gain);
-    lfo.start(t);
-    lfo.stop(t + dur + 0.1);
-  }
 }
 
 function stopPad() {
@@ -397,10 +386,10 @@ function scheduleNotes() {
   const durSec = (beats * piece.beat) / 1000;
   if (deg >= 0) {
     const freq = piece.scale[Math.min(deg, piece.scale.length - 1)];
-    softNote(freq, durSec * 0.92 + 0.6, 0.16, { tremolo: piece.tremolo });
-    // a stacked diatonic third, for the two-mallet vibraphone warmth
+    softNote(freq, durSec * 0.9 + 0.9, 0.1);
+    // an occasional stacked diatonic third, for warmth
     if (Math.random() < piece.harmony && deg + 2 < piece.scale.length) {
-      softNote(piece.scale[deg + 2], durSec * 0.9 + 0.5, 0.055, { tremolo: piece.tremolo });
+      softNote(piece.scale[deg + 2], durSec * 0.9 + 0.8, 0.035);
     }
   }
   noteTimer = setTimeout(scheduleNotes, beats * piece.beat);
@@ -412,7 +401,7 @@ function scheduleBass() {
   const chord = piece.chords[barIdx % piece.chords.length];
   barIdx++;
   const bar = 4 * piece.beat;
-  const note = (idx: number) => softNote(piece.scale[idx] / 2, (2 * piece.beat) / 1000 + 0.4, 0.09, { wave: 'sine', attack: 0.03 });
+  const note = (idx: number) => softNote(piece.scale[idx] / 2, (2 * piece.beat) / 1000 + 0.6, 0.06, { wave: 'sine', attack: 0.12 });
   note(chord.root);
   setTimeout(() => musicOn && note(chord.fifth), bar / 2);
   bassTimer = setTimeout(scheduleBass, bar);
@@ -421,7 +410,7 @@ function scheduleBass() {
 /** Cross-fade to another piece (loops forever, so the soundtrack keeps moving). */
 function rotatePiece(initial = false) {
   if (!ctx || !musicOn) return;
-  const fade = initial ? 4 : 3;
+  const fade = initial ? 6 : 5;
   if (!initial) rampMusic(0.0001, fade); // fade current out
   const apply = () => {
     if (!musicOn) return;

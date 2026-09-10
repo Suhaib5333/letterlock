@@ -8,7 +8,7 @@
  * tunes, tempos, chords and timbres are identical by construction. Only the
  * SYNTH is re-implemented here (WebAudio nodes don't exist in node), following
  * the same envelope maths: an exponential ramp to peak over `attack`, then an
- * exponential decay to silence over the note, plus the tremolo LFO.
+ * exponential decay to silence over the note.
  * ponytail: ~60 lines of duplicated DSP buys an audible check; the score, which
  * is the part that actually defines the music, is shared, not copied.
  * Output is peak-normalised for listening; in the app it sits far quieter.
@@ -18,7 +18,7 @@ import { join } from 'node:path';
 import { PIECES, type Piece } from '../src/services/musicScore';
 
 const SR = 24000;
-const SECONDS_PER_PIECE = 24;
+const SECONDS_PER_PIECE = 30; // the slower pieces need longer to show a phrase
 const CROSSFADE = 2;
 const out = process.argv[2] || 'music-preview';
 mkdirSync(out, { recursive: true });
@@ -45,7 +45,7 @@ function env(t: number, attack: number, dur: number, peak: number): number {
   return peak * (floor / peak) ** ((t - attack) / (dur - attack));
 }
 
-function addNote(buf: Float32Array, at: number, freq: number, dur: number, peak: number, wave: string, attack: number, tremolo: number) {
+function addNote(buf: Float32Array, at: number, freq: number, dur: number, peak: number, wave: string, attack: number) {
   const start = Math.floor(at * SR);
   const n = Math.floor((dur + 0.1) * SR);
   const w = 2 * Math.PI * freq / SR;
@@ -53,9 +53,7 @@ function addNote(buf: Float32Array, at: number, freq: number, dur: number, peak:
     const idx = start + i;
     if (idx < 0 || idx >= buf.length) continue;
     const t = i / SR;
-    let a = env(t, attack, dur, peak);
-    if (tremolo > 0) a += Math.sin(2 * Math.PI * tremolo * t) * peak * 0.3 * (a / peak); // LFO on the note gain
-    buf[idx] += wavef(wave, w * i, freq) * a;
+    buf[idx] += wavef(wave, w * i, freq) * env(t, attack, dur, peak);
   }
 }
 
@@ -70,9 +68,9 @@ function renderPiece(p: Piece, seconds: number): Float32Array {
     const dur = beats * beat;
     if (deg >= 0) {
       const d = Math.min(deg, p.scale.length - 1);
-      addNote(buf, t, p.scale[d], dur * 0.92 + 0.6, 0.16, p.wave, p.attack, p.tremolo);
+      addNote(buf, t, p.scale[d], dur * 0.9 + 0.9, 0.1, p.wave, p.attack);
       if (rnd() < p.harmony && d + 2 < p.scale.length) {
-        addNote(buf, t, p.scale[d + 2], dur * 0.9 + 0.5, 0.055, p.wave, p.attack, p.tremolo);
+        addNote(buf, t, p.scale[d + 2], dur * 0.9 + 0.8, 0.035, p.wave, p.attack);
       }
     }
     t += dur;
@@ -82,8 +80,8 @@ function renderPiece(p: Piece, seconds: number): Float32Array {
   const bar = 4 * beat;
   for (let b = 0; b * bar < seconds; b++) {
     const c = p.chords[b % p.chords.length];
-    addNote(buf, b * bar, p.scale[c.root] / 2, 2 * beat + 0.4, 0.09, 'sine', 0.03, 0);
-    addNote(buf, b * bar + bar / 2, p.scale[c.fifth] / 2, 2 * beat + 0.4, 0.09, 'sine', 0.03, 0);
+    addNote(buf, b * bar, p.scale[c.root] / 2, 2 * beat + 0.6, 0.06, 'sine', 0.12);
+    addNote(buf, b * bar + bar / 2, p.scale[c.fifth] / 2, 2 * beat + 0.6, 0.06, 'sine', 0.12);
   }
 
   // pad: sustained root + fifth drone

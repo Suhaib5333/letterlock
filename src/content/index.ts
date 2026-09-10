@@ -270,6 +270,16 @@ import { arJobsPack } from './arJobs';
 import { arTravelPack } from './arTravel';
 import { arHomePack } from './arHome';
 import { arClimatePack } from './arClimate';
+import { basketballPack } from './basketball';
+import { booksAuthorsPack } from './booksAuthors';
+import { chemistryPack } from './chemistry';
+import { classicalMusicPack } from './classicalMusic';
+import { crimeFictionPack } from './crimeFiction';
+import { philosophyPack } from './philosophy';
+import { plantsTreesPack } from './plantsTrees';
+import { tennisPack } from './tennis';
+import { worldLeadersPack } from './worldLeaders';
+import { worldReligionsPack } from './worldReligions';
 // AUTO-REGISTER-IMPORTS (scripts/autoregister.mjs inserts new pack imports above this line)
 
 /**
@@ -443,10 +453,10 @@ export function groupOf(id: string): PackGroup {
   if (/^football/.test(id)) return 'Sports';
   if (/^flags|^maps/.test(id)) return 'Flags';
   if (/^logos/.test(id)) return 'Logos & Brands';
-  if (/^sports/.test(id)) return 'Sports';
+  if (/^sports|^basketball|^tennis/.test(id)) return 'Sports';
   if (/^charades/.test(id)) return 'Charades';
   if (/^sitcoms|clips|^movies-tv|^movies/.test(id)) return 'Movies & TV';
-  if (/^music|^melodies|^songs/.test(id)) return 'Music';
+  if (/^music|^melodies|^songs|^classical/.test(id)) return 'Music';
   if (/^bahrain|^saudi|^uae|^gulf/.test(id)) return 'Regional';
   return 'Trivia & Knowledge';
 }
@@ -611,6 +621,16 @@ export const PACKS: QuestionPack[] = [
   arTravelPack,
   arHomePack,
   arClimatePack,
+  basketballPack,
+  booksAuthorsPack,
+  chemistryPack,
+  classicalMusicPack,
+  crimeFictionPack,
+  philosophyPack,
+  plantsTreesPack,
+  tennisPack,
+  worldLeadersPack,
+  worldReligionsPack,
   // AUTO-REGISTER-PACKS (scripts/autoregister.mjs inserts new pack entries above this line)
   // Round-13: new themed packs.
   mythologyPack,
