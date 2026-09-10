@@ -5,6 +5,7 @@
  * (browser autoplay rule). Every sound has a captioned/visual counterpart in UI.
  */
 import { nativeHaptic } from '../lib/native';
+import { PIECES, type Piece } from './musicScore';
 type SoundName =
   | 'tap'
   | 'pick'
@@ -296,77 +297,24 @@ export function stopSuspense() {
 }
 
 /* ============================================================
-   Ambient music — ORIGINAL generative pieces (homages to mellow, nostalgic
-   game-menu vibes; NOT any copyrighted track). Several "moods" rotate in a
-   random sequence, each fading in/out so the soundtrack keeps changing. It runs
-   quieter during a match, and ducks fully when a question clip plays.
+   Soundtrack — calm instrumental quiz-show "thinking music", SYNTHESIZED live
+   from our own compositions in `musicScore.ts` (vibraphone lead, soft walking
+   bass, faint pad). No audio file, no sample, no third-party track: fully
+   royalty-free by construction. The pieces rotate with a cross-fade, run
+   quieter during a match, and duck fully when a question clip plays.
    ============================================================ */
-interface Mood {
-  name: string;
-  scale: number[]; // frequencies (Hz), index 0 = lowest
-  wave: OscillatorType;
-  beat: number; // ms per beat (tempo)
-  harmony: number; // 0..1 chance of a stacked third
-  pad: boolean; // sustained low drone
-  bass: number[]; // bass note indices (one per bar) — gives a real chord progression
-  // The MELODY: an ORIGINAL composed phrase as [scaleDegree, beats] pairs
-  // (degree -1 = rest). Played in order and looped, so the music is a real
-  // recurring tune — not random noodling — while staying copyright-free.
-  melody: [number, number][];
-}
-
-// Original melodies — composed here, in the spirit of mellow game-menu music
-// (nostalgic, sparse, gentle). NOT transcriptions of any copyrighted track.
-const MOODS: Mood[] = [
-  {
-    name: 'calm', // the signature piece — flowing major pentatonic
-    scale: [196.0, 261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25],
-    wave: 'triangle', beat: 460, harmony: 0.5, pad: true, bass: [1, 4, 5, 1],
-    melody: [
-      [4, 1], [6, 1], [7, 2], [6, 1], [4, 1], [5, 2], [4, 1], [3, 1], [2, 2], [-1, 1],
-      [3, 1], [4, 1], [6, 2], [5, 1], [4, 1], [3, 2], [2, 1], [1, 1], [2, 4],
-    ],
-  },
-  {
-    name: 'blocky', // sparse, airy, minecrafty — wide leaps, lots of space
-    scale: [220.0, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25, 783.99],
-    wave: 'sine', beat: 540, harmony: 0.25, pad: true, bass: [1, 5, 6, 4],
-    melody: [
-      [5, 2], [7, 2], [6, 4], [4, 2], [5, 2], [7, 4], [-1, 2],
-      [6, 2], [5, 2], [4, 2], [2, 2], [3, 6], [-1, 2],
-    ],
-  },
-  {
-    name: 'warm', // reflective, lydian colour
-    scale: [196.0, 293.66, 329.63, 369.99, 440.0, 493.88, 554.37, 659.25],
-    wave: 'triangle', beat: 420, harmony: 0.55, pad: true, bass: [1, 3, 4, 2],
-    melody: [
-      [4, 2], [5, 1], [4, 1], [3, 2], [4, 1], [6, 1], [5, 3], [-1, 1],
-      [3, 1], [4, 1], [5, 2], [6, 1], [5, 1], [4, 2], [2, 1], [3, 3],
-    ],
-  },
-  {
-    name: 'dream', // wistful minor pentatonic
-    scale: [174.61, 261.63, 311.13, 349.23, 392.0, 466.16, 523.25, 622.25],
-    wave: 'sine', beat: 500, harmony: 0.45, pad: true, bass: [1, 6, 4, 5],
-    melody: [
-      [4, 2], [5, 1], [6, 1], [5, 2], [3, 2], [4, 1], [2, 1], [3, 4], [-1, 1],
-      [2, 1], [3, 1], [4, 2], [6, 2], [5, 1], [4, 1], [2, 4],
-    ],
-  },
-];
 
 let musicGain: GainNode | null = null;
 let padOsc: OscillatorNode[] = [];
 let musicOn = false;
 let ducked = false;
 let musicContext: 'menu' | 'game' = 'menu';
-let mood: Mood = MOODS[0];
+let piece: Piece = PIECES[0];
 let noteTimer: ReturnType<typeof setTimeout> | null = null;
-let moodTimer: ReturnType<typeof setTimeout> | null = null;
+let pieceTimer: ReturnType<typeof setTimeout> | null = null;
 let bassTimer: ReturnType<typeof setTimeout> | null = null;
 let melodyIdx = 0;
-let bassIdx = 0;
+let barIdx = 0;
 
 function targetVolume(): number {
   if (ducked) return 0.0001;
@@ -381,20 +329,36 @@ function rampMusic(to: number, seconds: number) {
   musicGain.gain.linearRampToValueAtTime(Math.max(to, 0.0001), now + seconds);
 }
 
-function softNote(freq: number, dur: number, peak: number) {
+/**
+ * One struck note: fast attack + long exponential decay = vibraphone/e-piano,
+ * with an optional tremolo LFO for the shimmer that timbre is known for.
+ */
+function softNote(freq: number, dur: number, peak: number, opts: { wave?: OscillatorType; attack?: number; tremolo?: number } = {}) {
   if (!ctx || !musicGain) return;
   const t = ctx.currentTime + 0.02;
+  const attack = opts.attack ?? piece.attack;
   const osc = ctx.createOscillator();
   const g = ctx.createGain();
-  osc.type = mood.wave;
+  osc.type = opts.wave ?? piece.wave;
   osc.frequency.value = freq;
   g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(peak, t + 0.4);
+  g.gain.exponentialRampToValueAtTime(peak, t + attack);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   osc.connect(g);
   g.connect(musicGain);
   osc.start(t);
   osc.stop(t + dur + 0.1);
+  const trem = opts.tremolo ?? 0;
+  if (trem > 0) {
+    const lfo = ctx.createOscillator();
+    const depth = ctx.createGain();
+    lfo.frequency.value = trem;
+    depth.gain.value = peak * 0.3;
+    lfo.connect(depth);
+    depth.connect(g.gain);
+    lfo.start(t);
+    lfo.stop(t + dur + 0.1);
+  }
 }
 
 function stopPad() {
@@ -410,14 +374,14 @@ function stopPad() {
 
 function startPad() {
   stopPad();
-  if (!ctx || !musicGain || !mood.pad) return;
-  const root = mood.scale[0] / 2;
+  if (!ctx || !musicGain || piece.padGain <= 0) return;
+  const root = piece.scale[0] / 2;
   [root, root * 1.5].forEach((f) => {
     const o = ctx!.createOscillator();
     const g = ctx!.createGain();
     o.type = 'sine';
     o.frequency.value = f;
-    g.gain.value = 0.05;
+    g.gain.value = piece.padGain;
     o.connect(g);
     g.connect(musicGain!);
     o.start();
@@ -428,49 +392,53 @@ function startPad() {
 /** Walk the composed melody one note at a time, looping — a real recurring tune. */
 function scheduleNotes() {
   if (!ctx || !musicOn) return;
-  const [deg, beats] = mood.melody[melodyIdx % mood.melody.length];
+  const [deg, beats] = piece.melody[melodyIdx % piece.melody.length];
   melodyIdx++;
-  const durSec = (beats * mood.beat) / 1000;
+  const durSec = (beats * piece.beat) / 1000;
   if (deg >= 0) {
-    const freq = mood.scale[Math.min(deg, mood.scale.length - 1)];
-    softNote(freq, durSec * 0.92 + 0.3, 0.16);
-    // a gentle stacked third for warmth
-    if (Math.random() < mood.harmony && deg + 2 < mood.scale.length) {
-      softNote(mood.scale[deg + 2], durSec * 0.9 + 0.3, 0.06);
+    const freq = piece.scale[Math.min(deg, piece.scale.length - 1)];
+    softNote(freq, durSec * 0.92 + 0.6, 0.16, { tremolo: piece.tremolo });
+    // a stacked diatonic third, for the two-mallet vibraphone warmth
+    if (Math.random() < piece.harmony && deg + 2 < piece.scale.length) {
+      softNote(piece.scale[deg + 2], durSec * 0.9 + 0.5, 0.055, { tremolo: piece.tremolo });
     }
   }
-  noteTimer = setTimeout(scheduleNotes, beats * mood.beat);
+  noteTimer = setTimeout(scheduleNotes, beats * piece.beat);
 }
 
-/** A slow bass note per bar, cycling the mood's chord roots — gives a progression. */
+/** A soft walking bass: chord root on beat 1, its fifth on beat 3, bar by bar. */
 function scheduleBass() {
   if (!ctx || !musicOn) return;
-  const deg = mood.bass[bassIdx % mood.bass.length];
-  bassIdx++;
-  const freq = mood.scale[Math.min(deg, mood.scale.length - 1)] / 2; // an octave below
-  softNote(freq, (4 * mood.beat) / 1000 + 0.5, 0.08);
-  bassTimer = setTimeout(scheduleBass, 4 * mood.beat); // ~one bar
+  const chord = piece.chords[barIdx % piece.chords.length];
+  barIdx++;
+  const bar = 4 * piece.beat;
+  const note = (idx: number) => softNote(piece.scale[idx] / 2, (2 * piece.beat) / 1000 + 0.4, 0.09, { wave: 'sine', attack: 0.03 });
+  note(chord.root);
+  setTimeout(() => musicOn && note(chord.fifth), bar / 2);
+  bassTimer = setTimeout(scheduleBass, bar);
 }
 
-/** Switch to a new random mood with a gentle cross-fade (loops forever). */
-function rotateMood(initial = false) {
+/** Cross-fade to another piece (loops forever, so the soundtrack keeps moving). */
+function rotatePiece(initial = false) {
   if (!ctx || !musicOn) return;
   const fade = initial ? 4 : 3;
   if (!initial) rampMusic(0.0001, fade); // fade current out
   const apply = () => {
     if (!musicOn) return;
-    let next = mood;
-    while (next === mood && MOODS.length > 1) next = MOODS[Math.floor(Math.random() * MOODS.length)];
-    mood = next;
+    if (!initial) {
+      let next = piece;
+      while (next === piece && PIECES.length > 1) next = PIECES[Math.floor(Math.random() * PIECES.length)];
+      piece = next;
+    }
     melodyIdx = 0; // restart the tune from the top of its phrase
-    bassIdx = 0;
+    barIdx = 0;
     startPad();
     rampMusic(targetVolume(), fade);
   };
   if (initial) apply();
   else setTimeout(apply, fade * 1000);
-  // each "track" lasts 30–50s, then rotate again
-  moodTimer = setTimeout(rotateMood, (initial ? 0 : fade * 1000) + 30000 + Math.random() * 20000);
+  // each piece plays for 40–60s, then rotate again
+  pieceTimer = setTimeout(rotatePiece, (initial ? 0 : fade * 1000) + 40000 + Math.random() * 20000);
 }
 
 export function startMusic() {
@@ -480,10 +448,10 @@ export function startMusic() {
   musicGain.connect(ctx.destination);
   musicOn = true;
   if (ctx.state === 'suspended') ctx.resume();
-  mood = MOODS[Math.floor(Math.random() * MOODS.length)];
+  piece = PIECES[0]; // always open on the signature piece; rotation randomises after
   melodyIdx = 0;
-  bassIdx = 0;
-  rotateMood(true);
+  barIdx = 0;
+  rotatePiece(true);
   scheduleNotes();
   scheduleBass();
 }
@@ -491,9 +459,9 @@ export function startMusic() {
 export function stopMusic() {
   musicOn = false;
   if (noteTimer) clearTimeout(noteTimer);
-  if (moodTimer) clearTimeout(moodTimer);
+  if (pieceTimer) clearTimeout(pieceTimer);
   if (bassTimer) clearTimeout(bassTimer);
-  noteTimer = moodTimer = bassTimer = null;
+  noteTimer = pieceTimer = bassTimer = null;
   stopPad();
   if (ctx && musicGain) {
     rampMusic(0.0001, 1.6);

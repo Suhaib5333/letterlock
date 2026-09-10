@@ -1668,6 +1668,45 @@ turned up **two separate causes**, only one of which was the tests.
   bottleneck creates a new one.** Sharding e2e made the device matrix the long pole, and it
   had been invisible for months behind the queue.
 
+## II.4c Round-31: a new soundtrack, and how you verify music (2026-09-10)
+
+Suhaib asked for the home-screen music to be replaced entirely: calm instrumental
+quiz-show "thinking music", and unambiguously royalty-free for the store builds. The four
+old generative moods (calm / blocky / warm / dream) are **deleted**, not layered over.
+
+- ✅ **Four original pieces, composed here** (`src/services/musicScore.ts`): a vibraphone
+  lead (fast attack, long exponential decay, a tremolo LFO for the shimmer) over gentle jazz
+  harmony with a soft walking bass, root on beat 1 and the fifth on beat 3.
+  **quizroom** (F, Gm7-C7-Fmaj7-Dm7, the signature home piece and now always the one that
+  opens), **thinktime** (C, I-vi-ii-V, slower and sparser), **lounge** (G, maj7 colours),
+  **spotlight** (D, I-vi-IV-V, a touch brighter). They cross-fade every 40-60s and still run
+  quieter in a match and duck under a question clip.
+- ⚖️ **The royalty question, settled by construction:** the app SYNTHESIZES these with Web
+  Audio, so the build ships no audio file at all. Nothing is sampled, transcribed or
+  arranged — not the Jeopardy! think cue, not any recording. A chord progression and a
+  walking bass are generic devices; copyright attaches to a specific melody, and these
+  melodies are ours. So there is no licence, no PRO registration, no revenue share and
+  nothing for a store review to flag.
+- 🧠 **The finding: you cannot assert "it sounds good", so build the thing a human can
+  play.** The score is DATA in its own module, imported by BOTH the app and
+  `scripts/rendermusic.ts` (`npx vite-node scripts/rendermusic.ts <dir>`), which renders each
+  piece plus a cross-faded medley to WAV. Only the ~60 lines of synth are duplicated (node has
+  no WebAudio), and they follow the same envelope maths, so a preview can never drift from
+  what ships. The renderer also fails loudly on a clipping or near-silent piece.
+- 🐛 **The score guard test earned its keep on its first run.** `musicScore.test.ts` asserts
+  the invariants that would otherwise be a wrong note nobody traces to a data table: every
+  melody index in range, the bass walking to a real fifth (4 diatonic steps), the tune's
+  beat count a multiple of the progression so the melody cannot drift off the harmony, and no
+  avoid-4th on a downbeat. It immediately failed twice — an A over Em7 in `lounge` and an E
+  over Bm7 in `spotlight`, both the 11th on the strongest beat of the bar — and both melodies
+  were fixed to chord tones.
+- 🔬 **Live proof, not "the module imports":** in the running app, tapping
+  `AudioContext.prototype.createOscillator` and reading back the frequencies showed F-major
+  notes with an 87.3 Hz pad and a G→D walking bass, then a cross-fade into G-major with the
+  tremolo rate changing 5.2 Hz → 5.8 Hz, which is exactly `quizroom` handing over to
+  `lounge`. That identifies WHICH piece is playing, so it also proves the old moods are gone
+  from the bundle and not merely from the source. 0 console errors over the whole session.
+
 ## 🛠️ Working rules learned the hard way (2026-09-05 cutover night)
 
 Every one of these is from a mistake made that evening, several of them user-visible.

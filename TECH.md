@@ -30,8 +30,10 @@ this + `AGENTS.md` (workflow) + `CLAUDE.md` (master plan & build log) and you kn
 
 ### 1.3 Browser APIs used directly (NO library — deliberate, to stay dependency-light)
 - **Web Audio API** — `services/audio.ts` synthesizes ALL sound: layered SFX (claim/steal/block/
-  win/tick/whomp/select/swap/undo/whoosh/sparkle) + 4 generative looping music moods (composed
-  melody + bass + pad). No audio files bundled for SFX/music (copyright-free, tiny).
+  win/tick/whomp/select/swap/undo/whoosh/sparkle) + the 4-piece soundtrack (`services/musicScore.ts`
+  → vibraphone lead with a tremolo LFO, walking bass, faint pad). Every piece is our own composition,
+  synthesized live, so NO audio file is bundled for SFX/music: royalty-free by construction, and
+  `npx vite-node scripts/rendermusic.ts <dir>` renders the pieces to WAV so a human can listen.
 - **`<audio>` / `<video controls>`** elements — TV clips (iTunes `.m4v`) and song previews (iTunes
   `.m4a`). Native controls give **safe fullscreen** (raw footage, no title overlay). *(YouTube embeds
   were removed — see §3 / §8 — because an iframe always leaks the title/thumbnail/end-screen and

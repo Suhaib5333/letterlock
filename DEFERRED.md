@@ -106,9 +106,10 @@ e2e tests. To expand: add shows to `scripts/genmovies.mjs` and re-run.
 **Why it's blocked:** Minecraft's soundtrack (C418) and other commercial tracks are
 copyrighted and can't be bundled.
 
-**What ships instead:** the music engine now plays **original, composed, looping melodies**
-(four moods: calm / blocky / warm / dream) with a bass progression and pad — real *tunes*, not
-random notes, in that mellow nostalgic vibe — fully copyright-free. To use real licensed tracks,
+**What ships instead:** the music engine plays **original, composed, looping melodies** —
+since round 31, four calm instrumental quiz-show pieces (quizroom / thinktime / lounge /
+spotlight): a vibraphone lead over gentle jazz harmony (ii-V-I, I-vi-ii-V) with a soft walking
+bass. Real *tunes*, ours, synthesized live, so there is nothing to license and no royalty. To use real licensed tracks,
 drop CC0/CC-BY `.mp3`/`.ogg` files into `public/music/` and wire them in `services/audio.ts`
 (a file-playback path can sit alongside the generative one).
 
