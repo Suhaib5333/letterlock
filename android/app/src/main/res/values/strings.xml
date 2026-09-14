@@ -4,6 +4,6 @@
     <string name="title_activity_main">Letterlock</string>
     <string name="package_name">dev.raltech.letterlock</string>
     <string name="custom_url_scheme">dev.raltech.letterlock</string>
-    <!-- TODO(Suhaib): real AdMob APP id (AdMob console > Apps > App settings). This is Google's public TEST app id. -->
-    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+    <!-- Real AdMob APP id, app "Letterlock: Party Quiz" (Android), set 2026-09-14. -->
+    <string name="admob_app_id">ca-app-pub-7138183978612183~2806227311</string>
 </resources>

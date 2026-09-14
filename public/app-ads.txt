@@ -1,4 +1,7 @@
-# Letterlock app-ads.txt (AdMob authorized sellers for the iOS / Android apps).
-# Placeholder until the AdMob account exists: AdMob supplies the exact line under
-# AdMob > Apps > app-ads.txt. It will look like the line below (pub id differs).
-# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+# Letterlock app-ads.txt: who is authorised to sell ads in our iOS / Android apps.
+# Crawled by ad buyers from the developer website listed on each store page, so this
+# file must stay reachable at https://letterlock.raltech.dev/app-ads.txt
+# Publisher: RAL SOFTWARE SERVICES, AdMob pub-7138183978612183 (added 2026-09-14).
+# f08c47fec0942fa0 is Google's certification-authority id and is the same for every
+# AdMob publisher. Verify against AdMob > Settings > app-ads.txt if it ever changes.
+google.com, pub-7138183978612183, DIRECT, f08c47fec0942fa0

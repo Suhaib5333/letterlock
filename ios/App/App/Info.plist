@@ -25,7 +25,7 @@
 	<!-- AdMob (LAUNCH_PLAN Phase 4). TODO(Suhaib): replace Google's public TEST iOS app id with the real
 	     one from the AdMob console before the first TestFlight build. Unit ids are build-time env (VITE_ADMOB_*_IOS). -->
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-7138183978612183~9998708668</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Letterlock is free thanks to ads. Allowing tracking lets the ads suit you better; if you decline you still get the whole game, with generic ads.</string>
 	<!-- SKAdNetworkItems: Google's published list (developers.google.com/admob/ios/ios14), fetched 2026-09-05. -->
