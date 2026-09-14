@@ -148,8 +148,8 @@ Phases 1 and 2 can run in parallel. Phase 0 is paperwork you start today because
 
 | Step | Who | Notes | ETA |
 |---|---|---|---|
-| Get a **D-U-N-S number** for RAL (free, Dun & Bradstreet) | Suhaib | Needed for Organization accounts on both stores | 5-10 business days |
-| **Apple Developer Program** ($99/yr) as Organization | Suhaib | Then sign the Paid Apps Agreement, add bank + W-8BEN tax form. Bahrain bank acceptance is unverified; if rejected, a bank in another country is accepted. | 1-3 days after D-U-N-S |
+| ~~Get a **D-U-N-S number** for RAL~~ | Suhaib | ✅ **DONE 2026-09-13: `561683753`**, entity **RAL SOFTWARE SERVICES**, Bahrain. **Usable from 2026-09-21** (D&B needs 7 days to propagate). Full record + the entity-name mismatch against D2 in `docs/ACCOUNTS.md`. | done |
+| **Apple Developer Program** ($99/yr) as Organization | Suhaib | ⏳ **Start 2026-09-21**, not before: Apple's D-U-N-S lookup cannot find a record D&B has not propagated. Then sign the Paid Apps Agreement, add bank + W-8BEN tax form. Bahrain bank acceptance is unverified; if rejected, a bank in another country is accepted. | 1-3 days after 2026-09-21 |
 | **Google Play Console** ($25 once) as Organization + **Play merchant account** | Suhaib | Bahrain is officially supported for both developer and merchant registration. Payout in USD by wire. | 1-2 days |
 | **AdMob account** | Suhaib | Bahrain supported. Payout $100 threshold, wire. Apps are approved only after they are live in a store. | 1 day, approval later |
 | **RevenueCat account** | Suhaib or me | Free under $2,500/month revenue. | 10 min |
@@ -571,6 +571,7 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 - **Apple TV**: no web view, no Capacitor. Not planned. AirPlay mirroring covers it.
 
 ## 17. 📝 Change log for this plan
+- 2026-09-13: **D-U-N-S number issued: `561683753`** (request 102122-10923080, submitted 07 Sep). Legal entity on the record is **RAL SOFTWARE SERVICES**, Al Mazrowiah, Bahrain, **not** "RAL Technologies" as D2 assumed, and both stores display the D-U-N-S entity name as the public developer name, so that is what the listings will read unless the D&B record is updated first. D&B says the number is usable **from 2026-09-21**, so Apple enrolment starts then. New `docs/ACCOUNTS.md` holds the company identity and every store identifier the build still needs (the B4-B10 placeholder list), deliberately committed rather than gitignored because none of it is secret and the team needs it.
 - 2026-09-08 (B9 done): off-box backups are live. Backblaze B2 `letterlock-backups` + the rclone remote `letterlock-backup` on the VPS, a 30-day age-based lifecycle rule, and `.github/workflows/backup-watch.yml` reporting by email on day 1, 7 and 31. Closing it exposed a real bug: the nightly restore check had **never passed**, because `pg_restore` runs as `postgres` and could not read a dump under `0700 root` (`cmd && echo ok` failed silently). Fixed, and the check now fails loudly. This clears the "losing the VPS = losing everything" risk in §13.
 - 2026-09-08: **Phase 6b widened at Suhaib's request.** The web → app funnel was mobile-only (a dismissible bottom sheet plus Safari's Smart App Banner). It now also requires **permanent App Store and Google Play download badges visible to every website visitor, desktop included**, on Home and in the footer, using the official badge art and `utm_source=web`, gated by the existing `app-config.storeLinks` switch so they appear by themselves once both stores approve. B1/B1b (DNS + apex cutover) verified complete; B3 in progress (company Apple Account created and verified, D-U-N-S requested).
 
