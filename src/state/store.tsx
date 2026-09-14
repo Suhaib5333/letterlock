@@ -72,6 +72,7 @@ const EMPTY_UI: UiState = {
   blockHint: false,
   pulse: 0,
   skipsUsed: 0,
+  bonusSkips: 0,
   autoSkips: 0,
   repeated: false,
 };
@@ -164,7 +165,8 @@ function applyAndAdvance(state: StoreState, events: GameEvent[]): StoreState {
   };
 }
 
-function reducer(state: StoreState, action: Action): StoreState {
+// Exported for the reducer tests (store.test.ts). Nothing else imports it.
+export function reducer(state: StoreState, action: Action): StoreState {
   switch (action.type) {
     case 'SET_SCREEN':
       return { ...state, screen: action.screen };
@@ -233,6 +235,7 @@ function reducer(state: StoreState, action: Action): StoreState {
           served: { question, letter, cell: action.cell },
           answerRevealed: false,
           skipsUsed: 0, // a fresh pick resets the skip allowance + timer
+          bonusSkips: 0, // and the one rewarded-ad extra skip
           autoSkips: 0, // and the auto-advance (unreachable-media) counter
           repeated,
         },
@@ -244,8 +247,13 @@ function reducer(state: StoreState, action: Action): StoreState {
 
     case 'GRANT_SKIP': {
       // Rewarded ad watched (lib/ads.ts): refund ONE skip on the current pick.
-      if (!state.ui.served || state.ui.skipsUsed === 0) return state;
-      return { ...state, ui: { ...state.ui, skipsUsed: state.ui.skipsUsed - 1 } };
+      // ONE per pick. Without the cap the button returns as soon as the refunded
+      // skip is spent, so a player could chain rewarded ads indefinitely.
+      if (!state.ui.served || state.ui.skipsUsed === 0 || state.ui.bonusSkips >= 1) return state;
+      return {
+        ...state,
+        ui: { ...state.ui, skipsUsed: state.ui.skipsUsed - 1, bonusSkips: state.ui.bonusSkips + 1 },
+      };
     }
 
     case 'SKIP_QUESTION': {
@@ -375,6 +383,7 @@ function reducer(state: StoreState, action: Action): StoreState {
               // must not refund the skip already spent on it, nor re-arm the
               // broken-media auto-skip loop guard.
               skipsUsed: state.ui.skipsUsed,
+              bonusSkips: state.ui.bonusSkips,
               autoSkips: state.ui.autoSkips,
               pulse: state.ui.pulse + 1,
             },

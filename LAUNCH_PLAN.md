@@ -336,6 +336,34 @@ mirroring from an iPhone/iPad and Chromecast from Android/Chrome already work fo
 
 ---
 
+### Phase 7b: Analytics and admin reporting (Suhaib, 2026-09-14, required before "fully live", ~3 dev days)
+
+Suhaib's ask: **he must be able to see how the money side is actually behaving**, from our own
+admin page, not only from AdMob's dashboard. AdMob reports impressions and revenue but knows
+nothing about the game, so it cannot answer "how often does a rewarded skip actually get watched
+to the end", "which packs make people quit", or "did Remove Ads change how long people play".
+
+**Scope agreed so far (the exact report list is still open, D17):**
+
+| Area | What we count | Why |
+|---|---|---|
+| Ads served | Interstitials shown, banners shown, per platform, per day | Sanity-check AdMob's own numbers and catch a placement that stopped firing |
+| Rewarded skips | Offered / started / **completed** / reward granted | The completion rate is the real health metric; a low one means the offer is badly placed |
+| Extra skip usage | How often the one-per-pick bonus is taken, and on which packs | A pack whose questions get skipped is a content problem, not an ad problem |
+| Remove Ads | Purchases, restores, refunds, and revenue per platform | The revenue line that matters most (§7) |
+| Play sessions | Games started / finished, mode, board size, pack, average length | Context for every number above |
+| Retention | D1 / D7 / D30, guest vs signed-in | Already flagged as the biggest risk in §9 of `CLAUDE.md` and never actually measured |
+
+**How it gets built (no new vendor):** the events go to our own API and our own Postgres, the
+same box everything else runs on, with an `/admin` page reading aggregate SQL. No Google
+Analytics, no third-party SDK: another tracker means another consent disclosure on both stores
+and another privacy-label entry, for data we can already store ourselves. Events carry a user id
+only for signed-in players and are otherwise anonymous; nothing here changes the privacy policy
+beyond a line saying we count in-app events.
+
+**Open, to decide together (D17):** the full report list, whether anything needs to be real-time
+rather than daily, and how long raw events are kept before they are rolled up.
+
 ### Phase 8: Web ads, the very last step (D12, ~2 dev days + AdSense approval)
 
 Runs only after the apps are live, AdMob is approved, and `app-ads.txt` / `ads.txt` sit on the domain. Plain-words explanation of how web ads differ from app ads is in §6b.
@@ -509,8 +537,9 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 | 6 Submission | 2 + waiting | week 10-13 | all above; TV track review |
 | 6b Web → app popup | 0.5 | after both approvals | Phase 6 |
 | 7 Ops | 2 | week 2 onward (backups first) | Phase 2 |
+| 7b Analytics + admin reporting | 3 | before "fully live" | Phase 2, Phase 4 |
 | 8 Web ads (AdSense H5) | 2 + approval | after launch, the last step | Phases 4, 6 |
-| **Total** | **~52 dev days** | **~12-14 weeks to store launch**, web ads after | |
+| **Total** | **~55 dev days** | **~12-14 weeks to store launch**, web ads after | |
 
 ---
 
@@ -571,6 +600,7 @@ Pre-submission polish checklist (native feel): splash + icon, styled status bar,
 - **Apple TV**: no web view, no Capacitor. Not planned. AirPlay mirroring covers it.
 
 ## 17. 📝 Change log for this plan
+- 2026-09-14 (evening): **AdMob is complete.** Publisher `pub-7138183978612183`, both app ids and all six ad unit ids created and wired in, plus the real `app-ads.txt` line. B5 and B10 are closed and every AdMob placeholder is gone from the codebase; a production build now resolves real units (verified in the bundle). The **rewarded extra skip is capped at one per pick** at Suhaib's request: previously the button returned as soon as the refunded skip was spent, so a player could chain rewarded ads indefinitely, which is both bad play and the repetitive rewarded traffic AdMob treats as invalid. Added **Phase 7b: analytics and admin reporting**, which Suhaib requires before calling the launch fully live, and **D17** for the report list still to be agreed.
 - 2026-09-14 (later): **D2 revised to RAL SOFTWARE SERVICES.** The Bahrain CR carries that name, so the D-U-N-S record is correct and no D&B update is possible or needed; the store listings will show it as the developer. Also confirmed against Google's own docs that **Play Console organization accounts require a D-U-N-S too**, so Play signup is gated on the same 2026-09-21 propagation date as Apple, not open today as previously written. What is genuinely unblocked today is AdMob, RevenueCat, Sentry, the charades image review, and, thanks to the Mac, running iOS on a real iPhone with a free Apple Account.
 - 2026-09-14: **Suhaib has a Mac.** The plan assumed no Mac (that assumption is why Codemagic and the `ios-smoke` workflow exist), so Phase 3 now names local Xcode as the primary iOS path and Codemagic as the reproducible CI path. The useful consequence: a **free** Apple Account can sign a 7-day development build onto a real iPhone, so the app can be fully exercised on device before the $99 membership exists on 21 Sep, and the first signed build is then a known quantity. Also added `.github/workflows/duns-reminder.yml`, a self-terminating cron that emails Suhaib on 21 Sep (and once more on the 24th) when the D-U-N-S becomes usable.
 - 2026-09-13: **D-U-N-S number issued: `561683753`** (request 102122-10923080, submitted 07 Sep). Legal entity on the record is **RAL SOFTWARE SERVICES**, Al Mazrowiah, Bahrain, **not** "RAL Technologies" as D2 assumed, and both stores display the D-U-N-S entity name as the public developer name, so that is what the listings will read unless the D&B record is updated first. D&B says the number is usable **from 2026-09-21**, so Apple enrolment starts then. New `docs/ACCOUNTS.md` holds the company identity and every store identifier the build still needs (the B4-B10 placeholder list), deliberately committed rather than gitignored because none of it is secret and the team needs it.

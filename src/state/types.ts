@@ -69,6 +69,13 @@ export interface UiState {
   blockHint: boolean; // a recent claim cut the opponent's near-complete path
   pulse: number; // monotonically increasing tick to retrigger effects
   skipsUsed: number; // skips taken on the current pick (max 1 — plan §3.2)
+  /**
+   * Rewarded-ad extra skips taken on the current pick. Capped at ONE: without a
+   * cap the button reappears the moment the refunded skip is spent, so a player
+   * could watch ads back to back forever, which is both bad play and the kind of
+   * repetitive rewarded traffic AdMob treats as invalid.
+   */
+  bonusSkips: number;
   autoSkips: number; // questions auto-advanced past on this pick (unreachable media)
   repeated: boolean; // the served question is a forced repeat (whole pack cycled)
 }

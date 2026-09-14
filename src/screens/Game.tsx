@@ -522,7 +522,7 @@ export function Game() {
                       setStealResume((n) => n + 1);
                     }}
                   />
-                  <ExtraSkipButton show={ui.skipsUsed >= (hasClip ? 12 : 1)} />
+                  <ExtraSkipButton show={ui.skipsUsed >= (hasClip ? 12 : 1) && ui.bonusSkips === 0} />
                 </div>
                 {showOnlineAnswers && (
                   <div className="online-answers" data-testid="online-answers">

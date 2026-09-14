@@ -49,7 +49,7 @@ Fill each row in as the account is created. `—` means it does not exist yet.
 | Apple Developer Program ($99/yr, Organization) | ⏳ Blocked until 2026-09-21 | Team ID: `—` | B3, B7 |
 | Google Play Console ($25, Organization) | ⏳ **Blocked until 2026-09-21**: Google requires a D-U-N-S for organization accounts and validates it against D&B | Developer ID: `—` | B3 |
 | Google Play merchant account | ⏳ Not started | — | B3 |
-| AdMob | 🔄 Created 2026-09-14, apps added, **ad units still to create** | Publisher ID: **`pub-7138183978612183`** | B5 (units) |
+| AdMob | ✅ Complete 2026-09-14: 2 apps, 6 ad units, app-ads.txt | Publisher ID: **`pub-7138183978612183`** | — |
 | RevenueCat | ⏳ Not started | Project ID: `—` | B3, B6 |
 | Google Cloud OAuth (consent screen) | 🔄 Client exists, consent screen unverified | Client ID is in `.env.production` | B3 |
 | Codemagic (CI for iOS) | ⏳ Not started, now optional | Suhaib has a Mac (2026-09-14), so iOS can be built locally in Xcode | B13 |
@@ -72,7 +72,12 @@ Every row below is a placeholder in tracked code today. When the value arrives, 
 | Play **app-signing SHA-256** | `—` (literal `TODO:REPLACE:...`) | `public/.well-known/assetlinks.json` | B8 |
 | AdMob app ID (Android) | ✅ **`ca-app-pub-7138183978612183~2806227311`** | `android/app/src/main/res/values/strings.xml` | done |
 | AdMob app ID (iOS) | ✅ **`ca-app-pub-7138183978612183~9998708668`** | `ios/App/App/Info.plist` | done |
-| AdMob unit IDs (banner / interstitial / rewarded × 2 platforms) | `—` (Google test IDs today) | 6 env vars, see `src/lib/adUnits.ts` header | B5 |
+| AdMob unit: Android banner | ✅ `ca-app-pub-7138183978612183/5264869696` | `VITE_ADMOB_BANNER_ANDROID` | done |
+| AdMob unit: Android interstitial | ✅ `ca-app-pub-7138183978612183/6388222989` | `VITE_ADMOB_INTERSTITIAL_ANDROID` | done |
+| AdMob unit: Android rewarded | ✅ `ca-app-pub-7138183978612183/2448977972` | `VITE_ADMOB_REWARDED_ANDROID` | done |
+| AdMob unit: iOS banner | ✅ `ca-app-pub-7138183978612183/5815921071` | `VITE_ADMOB_BANNER_IOS` | done |
+| AdMob unit: iOS interstitial | ✅ `ca-app-pub-7138183978612183/9887028028` | `VITE_ADMOB_INTERSTITIAL_IOS` | done |
+| AdMob unit: iOS rewarded | ✅ `ca-app-pub-7138183978612183/1984487278` | `VITE_ADMOB_REWARDED_IOS` | done |
 | `app-ads.txt` line | ✅ `google.com, pub-7138183978612183, DIRECT, f08c47fec0942fa0` | `public/app-ads.txt` | done |
 | RevenueCat **public** iOS key | `—` | `VITE_REVENUECAT_IOS_KEY` env | B6 |
 | RevenueCat **public** Android key | `—` | `VITE_REVENUECAT_ANDROID_KEY` env | B6 |
@@ -83,9 +88,8 @@ Every row below is a placeholder in tracked code today. When the value arrives, 
 
 ## 4. Change log
 
-- **2026-09-14** (later still) — AdMob account live. Both app IDs and the real `app-ads.txt` line are
-  wired into the native projects and recorded above. The **6 ad unit IDs are still outstanding**; until
-  all three exist for a platform, a production build shows **no ads at all** rather than test ads.
+- **2026-09-14** (later still) — AdMob **complete**: 2 apps, all 6 ad units, the real `app-ads.txt` line.
+  Every AdMob placeholder in the codebase is gone. B5 and B10 are closed.
 - **2026-09-14** (later) — Naming resolved: the CR says RAL SOFTWARE SERVICES, so that is the developer name
   on both stores and D2 is revised. Confirmed Play org accounts also need the D-U-N-S, so Play waits for
   2026-09-21 as well.
