@@ -27,17 +27,15 @@
 | D&B resolution | New Record Created using 3rd parties | |
 | **Usable from** | **2026-09-21** | D&B: "You may start using your number in 7 days." Apple's D-U-N-S lookup will not find it before D&B propagates the record. |
 
-### ⚠️ Naming note, read before enrolling
+### ✅ Naming: RESOLVED 2026-09-14, the public developer name is RAL SOFTWARE SERVICES
 
-`LAUNCH_PLAN.md` D2 says the developer account is "Organization: **RAL Technologies**".
-The D-U-N-S record says **RAL SOFTWARE SERVICES**, and **Apple and Google both display the
-legal entity name attached to the D-U-N-S** as the seller/developer name on the listing.
+`LAUNCH_PLAN.md` D2 originally said "Organization: RAL Technologies". It is not the legal name. The Bahrain
+commercial registration reads **RAL SOFTWARE SERVICES**, which is why D&B issued the record under it, so there is
+nothing to correct: D&B only accepts a name your legal documents prove, and Apple requires the entity name to match
+those documents anyway.
 
-So the store pages will read **RAL SOFTWARE SERVICES** unless the D&B record is changed
-first (free, via D&B's update form, and it adds another wait). The app name itself
-(`Letterlock: Party Quiz`, D1) is unaffected. **Decision needed from Suhaib:** accept
-`RAL SOFTWARE SERVICES` as the public developer name, or update the D&B record before
-enrolling. Accepting it costs nothing and unblocks enrolment on 2026-09-21.
+**Both store listings will therefore show `RAL SOFTWARE SERVICES` as the developer.** The app name
+(`Letterlock: Party Quiz`, D1) is unaffected, and that is the name players actually read. D2 is updated to match.
 
 ---
 
@@ -49,7 +47,7 @@ Fill each row in as the account is created. `—` means it does not exist yet.
 |---|---|---|---|
 | Apple Account (company) | ✅ Created + verified 2026-09-07 | Browser-only, never signed into a phone's iCloud | — |
 | Apple Developer Program ($99/yr, Organization) | ⏳ Blocked until 2026-09-21 | Team ID: `—` | B3, B7 |
-| Google Play Console ($25, Organization) | ⏳ Not started | Developer ID: `—` | B3 |
+| Google Play Console ($25, Organization) | ⏳ **Blocked until 2026-09-21**: Google requires a D-U-N-S for organization accounts and validates it against D&B | Developer ID: `—` | B3 |
 | Google Play merchant account | ⏳ Not started | — | B3 |
 | AdMob | ⏳ Not started | Publisher ID: `—` | B3, B5, B10 |
 | RevenueCat | ⏳ Not started | Project ID: `—` | B3, B6 |
@@ -85,6 +83,9 @@ Every row below is a placeholder in tracked code today. When the value arrives, 
 
 ## 4. Change log
 
+- **2026-09-14** (later) — Naming resolved: the CR says RAL SOFTWARE SERVICES, so that is the developer name
+  on both stores and D2 is revised. Confirmed Play org accounts also need the D-U-N-S, so Play waits for
+  2026-09-21 as well.
 - **2026-09-14** — Suhaib has a **Mac**, so iOS can be built and run locally in Xcode; a free Apple
   Account signs a 7-day build onto a real iPhone before the paid membership exists. Codemagic is now
   optional. Added `.github/workflows/duns-reminder.yml`, which emails the reminder on 21 Sep.

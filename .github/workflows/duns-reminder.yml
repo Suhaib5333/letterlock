@@ -88,20 +88,14 @@ jobs:
           2. Sign the Paid Apps Agreement, then add the bank details and the
              W-8BEN tax form in App Store Connect.
           3. Reserve the app name: Letterlock: Party Quiz
+          4. Google Play Console, 25 USD once, as an Organization. This also
+             needs the D-U-N-S, which is why it waited for today too.
 
-          One decision first
+          The developer name on both listings will be RAL SOFTWARE SERVICES.
+          That is what the Bahrain CR says, so it is settled, nothing to change.
 
-          The name on the D-U-N-S record is RAL SOFTWARE SERVICES, not RAL
-          Technologies. Apple and Google both print the D-U-N-S entity name as
-          the public developer name on the store listing, so that is what
-          players will see under the app. Changing it means updating the D&B
-          record before you enrol, which takes up to five more business days
-          and needs two supporting documents. Accepting it costs nothing and
-          you can start today.
+          Still open, and none of these need Apple or the D-U-N-S
 
-          Still open, and none of it needs Apple
-
-          - Google Play Console, 25 USD once, as an Organization
           - AdMob account
           - RevenueCat account
           - Sentry project, free
