@@ -1334,6 +1334,61 @@ re-passes `scripts/checkpack.mjs`.
 
 ---
 
+## II.4e Round-33: the D-U-N-S landed, AdMob went live, and the rewarded skip got a cap (2026-09-14)
+
+A paperwork-and-wiring day rather than a build day, but it closed three blocked items and found
+two wrong assumptions in the plan.
+
+- ✅ **D-U-N-S `561683753` issued** (request 102122-10923080, submitted 07 Sep). D&B says it is
+  usable **from 2026-09-21**, so Apple enrolment is parked until then; retrying earlier only fails,
+  because Apple's lookup queries a record D&B has not propagated.
+- 🏷️ **The developer name is `RAL SOFTWARE SERVICES`, and D2 was wrong.** The plan said
+  "Organization: RAL Technologies", which is not the legal name. The Bahrain CR carries RAL SOFTWARE
+  SERVICES, which is why D&B issued the record under it, and both stores print the D-U-N-S entity name
+  as the public developer name. Nothing to correct: D&B only accepts a name your legal documents prove,
+  and Apple requires the entity to match those documents anyway.
+- ❌ **A correction to my own advice: Play Console organization accounts also require a D-U-N-S**,
+  validated against D&B, so Play is gated on the same 21 September date as Apple. I had listed it as
+  open today. What is genuinely unblocked before then is AdMob, RevenueCat, Sentry, the charades image
+  review, and iOS on a real device.
+- 🖥️ **Suhaib has a Mac**, which the whole plan had assumed he did not. That assumption is the
+  entire reason `codemagic.yaml` and its `ios-smoke` workflow exist. Local Xcode is now the primary iOS
+  path, and a **free** Apple Account signs a 7-day build onto a real iPhone, so the app can be exercised
+  on device before the $99 membership exists rather than the first signed build being the first time iOS
+  has ever run.
+- ✅ **AdMob complete (B5 + B10 closed).** Publisher `pub-7138183978612183`, two apps, six ad units,
+  and the real `app-ads.txt` line, all wired into `.env.production`, `strings.xml` and `Info.plist`, and
+  recorded in the new **`docs/ACCOUNTS.md`**. Proved rather than assumed: the built bundle contains the
+  real unit ids and **not one Google test id**.
+- 📁 **`docs/ACCOUNTS.md` is new and deliberately tracked, not gitignored.** The repo is private and
+  none of it is secret: a D-U-N-S, a Team ID and an app-signing fingerprint are printed on public store
+  listings or served from `.well-known/` on the open web. The file states that boundary at the top and
+  keeps passwords, API secrets and `.p8` files where they already live, in gitignored `infra/*-creds`.
+  It also carries every identifier the build is still waiting on, with the file each placeholder sits in.
+- 🎬 **The rewarded extra skip is capped at ONE per pick.** `GRANT_SKIP` only refunded a skip, so the
+  button reappeared the instant the refunded skip was spent and a player could sit on one hex watching
+  rewarded ads back to back. That is bad play and it is also the repetitive rewarded traffic AdMob treats
+  as invalid. **Worth stating: this is per PICK, not per served question**, which is what Suhaib asked for
+  literally. Per question re-opens the same chain, because every ad hands you a new question that would
+  carry its own fresh bonus. `src/state/store.test.ts` covers refund, refusal and the no-skip-taken case.
+- 📈 **Analytics is now LAUNCH_PLAN Phase 7b**, required before Suhaib calls the launch fully live:
+  ads served, rewarded offered/started/**completed**, extra-skip usage per pack, Remove Ads
+  purchases/restores/refunds, sessions, and D1/D7/D30. Our own API and Postgres with an `/admin` page,
+  no third-party tracker, because another SDK means another consent disclosure and another privacy label
+  for data we already store. The exact report list is left open as **D17**.
+- 📬 **`.github/workflows/duns-reminder.yml`**: a self-terminating cron that emails Suhaib on 21 Sep
+  and once more on the 24th, then stops. Same send path as `backup-watch.yml`, so plain text only with a
+  unique `X-Entity-Ref-ID` and a real `reply_to` per `docs/EMAIL_RULES.md`. Dispatched as a dry run and
+  verified live: `6 day(s) until the D-U-N-S is usable (2026-09-21). Nothing to send.`
+- 💳 **B15 opened: the AdMob payments profile, and it is 50% by design.** Address and Organization
+  profile are done; the W-8BEN-E tax form is still to submit; the **bank fields cannot be filled at all**
+  until payable earnings reach the threshold, when Google posts an address PIN. The banner says apps in
+  review stay unreviewed, and AdMob only reviews an app once it is live in a store, so nothing before
+  store launch is blocked by it.
+- ✅ Verified this round: **1129 unit/content tests**, and the CI gate opened per rule 3 rather than
+  trusted from its tick — run 34876855148 ran **19 jobs, all green**: static gates, the API suite on a
+  real Postgres, 10 e2e shards and 4 device-matrix shards. `app-ads.txt` confirmed live on the real domain.
+
 ## 🚦 Working rules (Suhaib, 2026-09-05) — READ EVERY SESSION
 
 1. **Never stall waiting on Suhaib.** If something needs him (an account, a payment,
@@ -1416,16 +1471,17 @@ any ref).
 | ~~B2~~ | ✅ **MOOT.** Cloudflare API token DNS permission | The records were added by hand and B1/B1b are finished, so a DNS-capable token is no longer worth creating. | Nothing |
 | B3 | Phase 0 paperwork (IN PROGRESS) | ✅ **Company Apple Account created + verified 2026-09-07** (browser-only, never signed into a phone's iCloud; whichever account enrols permanently owns the listing). ✅ **D-U-N-S ISSUED 2026-09-13: `561683753`** (entity **RAL SOFTWARE SERVICES**, Bahrain), **usable from 2026-09-21** - D&B needs 7 days to propagate, so Apple's lookup will not find it before then. Note the entity name is not "RAL Technologies", and the stores show the D-U-N-S entity name as the public developer name. Full record + every outstanding store identifier: `docs/ACCOUNTS.md`. ⏳ Still open: Google Play Console ($25, Organization + merchant), AdMob, RevenueCat, Google OAuth consent screen, reserve the name in App Store Connect, and the $99/yr Apple Developer Organization enrolment once the D-U-N-S lands. See LAUNCH_PLAN §3 Phase 0. | Phases 4, 5, 6 going live (the code for them is already written) |
 | B4 | `VITE_APPLE_SERVICES_ID` | Apple Developer → Identifiers → Services IDs; return URL `https://letterlock.raltech.dev/auth/callback`. Empty today, which correctly hides the web Sign-in-with-Apple button. | Apple 4.8 compliance at submission |
-| B5 | **AdMob real ad unit IDs** | `src/lib/adUnits.ts`, `android/app/src/main/res/values/strings.xml`, `ios/App/App/Info.plist` all still carry Google's **public test IDs** (`ca-app-pub-3940256099942544/...`). Shipping those to a store shows test ads and earns nothing. Replace after the AdMob account exists (app IDs + banner/interstitial/rewarded per platform). | Real ad revenue (the ad CODE works today against the test IDs) |
+| ~~B5~~ | ✅ **DONE 2026-09-14. AdMob ad setup complete.** Publisher `pub-7138183978612183`. App ids `~2806227311` (Android, `strings.xml`) and `~9998708668` (iOS, `Info.plist`); all six unit ids in `.env.production` as `VITE_ADMOB_*`. Verified in the built bundle: real ids present, **no Google test id survives**. Every id is recorded in `docs/ACCOUNTS.md`. | Nothing |
 | B6 | **RevenueCat public keys** | Set `VITE_REVENUECAT_IOS_KEY` and `VITE_REVENUECAT_ANDROID_KEY` (RevenueCat → Project → API keys, the *public* SDK keys). Empty today, so the Remove Ads purchase path is inert. | Phase 5 Remove Ads working on a device |
 | B7 | **Apple Team ID in the deep-link file** | `public/.well-known/apple-app-site-association` has the literal `TEAMID`. Replace with the 10-character Team ID (App Store Connect → Membership). | iOS Universal Links (`/join/CODE` opening the app) |
 | B8 | **Play app-signing SHA-256** | `public/.well-known/assetlinks.json` has a `TODO:REPLACE:...` fingerprint. Copy it from Play Console → Setup → App signing. | Android App Links (`/join/CODE` opening the app) |
 | ~~B9~~ | ✅ **DONE 2026-09-08.** Off-box backups live | Backblaze B2 bucket `letterlock-backups`, rclone remote `letterlock-backup` on the VPS (key in `infra/b2-creds`, git-ignored, never a CI secret), lifecycle set via `rclone backend lifecycle` to hide at 30 days and delete 1 day later, so it is a rolling 30 days off-box and 14 days local. First run: `restore check ok (15 tables)` + `off-box copy ok`, 3 objects in the bucket. `.github/workflows/backup-watch.yml` emails Suhaib on day 1, 7 and 31 (and on any failed check inside that window), then stops. | Nothing |
-| B10 | **`app-ads.txt` real line** | `public/app-ads.txt` is a placeholder; AdMob gives the exact line once the account exists. | AdMob monetisation of the apps |
+| ~~B10~~ | ✅ **DONE 2026-09-14.** `public/app-ads.txt` carries the real line `google.com, pub-7138183978612183, DIRECT, f08c47fec0942fa0` and is live at `https://letterlock.raltech.dev/app-ads.txt`. | Nothing |
 | B11 | **Pixabay API key (optional, 1 min, free)** | `scripts/genimages.mjs` works keyless (Wikimedia Commons + Openverse) but Pixabay is tried first when `PIXABAY_KEY` is set and gives better, more on-topic photos for abstract charades prompts. Get one at https://pixabay.com/api/docs/ and re-run `RETRY_MISSING=1 node scripts/genimages.mjs`. | Image QUALITY only, not coverage |
 | B12 | **Human review of the charades images** | LAUNCH_PLAN Phase 1c says "nothing ships unreviewed". Open `docs/charades-review/index.html` (contact sheets, 20 per page), and for anything unsuitable add its slug to `public/charades/<packId>/reject.txt` (`<slug>` to refetch, `<slug> !` to force word-only), then re-run the script. | Shipping user-facing images in a family game |
 | B13 | **The iOS build has never been run** | 🖥️ **2026-09-14: Suhaib has a Mac**, which changes this entirely. The fastest proof is now LOCAL, not CI: `npm ci && npm run build && npx cap sync ios && npx cap open ios`, pick a personal team in Xcode, Run. A **free** Apple Account signs a 7-day build onto a real iPhone, so the whole app can be exercised on device BEFORE the $99 membership exists. Codemagic stays useful for reproducible signed store builds but is no longer the only path. Previously recorded: ✅ **Unblocked without the D-U-N-S 2026-09-08:** `codemagic.yaml` gained an **`ios-smoke`** workflow (unsigned, simulator slice, no App Store Connect integration), so the Xcode 26 + Capacitor 8 SPM chain can be proven TODAY on Codemagic's free tier with no Apple membership. Sign up at codemagic.io with GitHub, connect the repo, run `ios-smoke` by hand (or push an `ios-smoke-*` tag). A signed TestFlight build still needs the paid account. `codemagic.yaml` is now covered by the CI YAML parse gate. | First store build (signed only) |
 | B14 | **Sentry DSN** | Crash reporting is wired and inert: create a free Sentry project (JavaScript → React), copy the DSN, set `VITE_SENTRY_DSN` in `.env.production` and as a GitHub Actions variable. Until then a crash still logs to the console, and the 453 KB Sentry chunk is never even fetched (dynamic import). | Seeing white-screen crashes in the wild |
+| B15 | **AdMob payments profile (50%, parked until we earn)** | Address + Organization profile done 2026-09-14. Still to submit: **US tax info, the W-8BEN-E entity form** (Payments → Settings → Manage settings → United States tax info; Bahrain has no US treaty, claim no benefit). The **bank/wire fields cannot be filled yet at all**: Google hides them until payable earnings reach the threshold, then posts an address PIN. So this sits at 50% by design. The banner says "apps in review remain unreviewed", and AdMob only reviews an app once it is live in a store, so nothing before store launch is blocked. Steps in `docs/ACCOUNTS.md` §3b. | First AdMob payout, and AdMob app review after store launch |
 
 ## II.3v Round-24: launch-phase batch committed and the suite made green again (2026-09-05)
 

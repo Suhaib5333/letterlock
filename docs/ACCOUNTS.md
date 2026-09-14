@@ -49,7 +49,7 @@ Fill each row in as the account is created. `—` means it does not exist yet.
 | Apple Developer Program ($99/yr, Organization) | ⏳ Blocked until 2026-09-21 | Team ID: `—` | B3, B7 |
 | Google Play Console ($25, Organization) | ⏳ **Blocked until 2026-09-21**: Google requires a D-U-N-S for organization accounts and validates it against D&B | Developer ID: `—` | B3 |
 | Google Play merchant account | ⏳ Not started | — | B3 |
-| AdMob | 🔄 Ad setup complete (2 apps, 6 units, app-ads.txt). **Payments profile incomplete** — Google can withhold ad serving until it is done | Publisher ID: **`pub-7138183978612183`** | B15 |
+| AdMob | ✅ Ad setup complete (2 apps, 6 units, app-ads.txt). Payments profile **~50%, parked until we earn** | Publisher ID: **`pub-7138183978612183`** | B15 |
 | RevenueCat | ⏳ Not started | Project ID: `—` | B3, B6 |
 | Google Cloud OAuth (consent screen) | 🔄 Client exists, consent screen unverified | Client ID is in `.env.production` | B3 |
 | Codemagic (CI for iOS) | ⏳ Not started, now optional | Suhaib has a Mac (2026-09-14), so iOS can be built locally in Xcode | B13 |
@@ -88,22 +88,29 @@ Every row below is a placeholder in tracked code today. When the value arrives, 
 
 ## 3b. ⚠️ B15: AdMob payments profile (open)
 
-AdMob shows "payment setup incomplete". This is not cosmetic: Google states that ad units may
-not serve while payment information is missing, so it has to be finished before launch, not
-after the first payout.
+AdMob shows "payment setup incomplete". The exact banner reads *"Any apps in review will remain
+unreviewed until you add your payment information"*, and AdMob only reviews an app once it is live
+in a store, so **nothing before store launch is blocked by this**. Park it at ~50% until we are live
+and actually earning. (An earlier note here claimed it could stop ad units serving; the banner Google
+actually shows is the app-review one.)
+
+**Why it will not ask for bank details yet:** Google hides the bank and wire fields until payable
+earnings reach the threshold. On a zero-earning account there is nothing to attach an account to, so
+the only thing that can be submitted today is the tax form. That is not a misconfiguration.
 
 | Step | What to enter | Watch out for |
 |---|---|---|
-| 1. Payments profile | Account type **Organization**, name **RAL SOFTWARE SERVICES**, address from the CR | The name must match the bank account **exactly**, and it cannot be changed freely later |
+| ~~1. Payments profile~~ | ✅ **Done 2026-09-14**: Organization, RAL SOFTWARE SERVICES, CR address | The name must match the bank account **exactly** when that is added later |
 | 2. Tax info | Google collects US tax info from every publisher. A Bahraini company files a **W-8BEN-E** (the entity form, not the individual W-8BEN) | Bahrain has no US tax treaty, so claim no treaty benefit; AdMob revenue earned outside the US is not withheld |
-| 3. Payment method | **Wire transfer**, USD account, IBAN + SWIFT/BIC | Account holder name must equal the profile name |
+| 3. Payment method | ⏳ **Cannot be entered yet** — the fields appear once earnings reach the threshold. Then: wire transfer, USD, IBAN + SWIFT/BIC | Account holder name must equal the profile name |
 | 4. Verification | Google may ask for the CR certificate, and posts an address PIN once earnings reach $10 | The PIN arrives by post and can take weeks, so trigger it early |
 | 5. Threshold | $100, paid around the 21st of the following month | |
 
 ## 4. Change log
 
-- **2026-09-14** (evening) — AdMob reports **payment setup incomplete**, logged as **B15** with the steps in §3b.
-  Google can stop ad units serving while it is unfinished, so it is a launch blocker, not a payout chore.
+- **2026-09-14** (end of day) — B15 parked at **50%**: profile and address done, W-8BEN-E still to submit, and
+  the bank fields are hidden by Google until we have earnings. It gates the first payout and AdMob's own app
+  review after store launch, nothing before that.
 - **2026-09-14** (later still) — AdMob ad setup **complete**: 2 apps, all 6 ad units, the real `app-ads.txt` line.
   Every AdMob placeholder in the codebase is gone. B5 and B10 are closed.
 - **2026-09-14** (later) — Naming resolved: the CR says RAL SOFTWARE SERVICES, so that is the developer name
