@@ -54,7 +54,7 @@ Fill each row in as the account is created. `—` means it does not exist yet.
 | AdMob | ⏳ Not started | Publisher ID: `—` | B3, B5, B10 |
 | RevenueCat | ⏳ Not started | Project ID: `—` | B3, B6 |
 | Google Cloud OAuth (consent screen) | 🔄 Client exists, consent screen unverified | Client ID is in `.env.production` | B3 |
-| Codemagic (CI for iOS) | ⏳ Not started | — | B13 |
+| Codemagic (CI for iOS) | ⏳ Not started, now optional | Suhaib has a Mac (2026-09-14), so iOS can be built locally in Xcode | B13 |
 | Sentry | ⏳ Not started | DSN: `—` | B14 |
 | Backblaze B2 (backups) | ✅ Live 2026-09-08 | Bucket `letterlock-backups`; key in gitignored `infra/b2-creds` | — |
 
@@ -85,5 +85,8 @@ Every row below is a placeholder in tracked code today. When the value arrives, 
 
 ## 4. Change log
 
+- **2026-09-14** — Suhaib has a **Mac**, so iOS can be built and run locally in Xcode; a free Apple
+  Account signs a 7-day build onto a real iPhone before the paid membership exists. Codemagic is now
+  optional. Added `.github/workflows/duns-reminder.yml`, which emails the reminder on 21 Sep.
 - **2026-09-13** — D-U-N-S `561683753` issued for RAL SOFTWARE SERVICES (Bahrain), usable
   from 2026-09-21. File created. Flagged the entity-name mismatch against D2.

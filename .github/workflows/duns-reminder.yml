@@ -1,0 +1,126 @@
+# One-shot reminder: the D-U-N-S number goes live and Apple enrolment can start.
+#
+# D&B issued 561683753 on 2026-09-13 and said "you may start using your number in
+# 7 days", so Apple's lookup cannot find it before 2026-09-21. This workflow waits
+# until that date and emails Suhaib, then nudges once more three days later in case
+# the first mail was missed, then stops by itself. Nothing to clean up: after
+# TARGET+3 every run ends in a few seconds with a notice.
+#
+# Same send path as backup-watch.yml: Resend, plain text only, unique
+# X-Entity-Ref-ID, real reply_to, ops@ from address. See docs/EMAIL_RULES.md, an
+# HTML part is the single strongest signal that lands mail in Gmail's Promotions.
+name: D-U-N-S reminder
+
+on:
+  schedule:
+    - cron: '30 5 * * *'   # 05:30 UTC = 08:30 Bahrain
+  workflow_dispatch:
+    inputs:
+      send_now:
+        description: 'Send the reminder immediately, ignoring the date (for testing).'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  TARGET: '2026-09-21'                 # first day the D-U-N-S is usable
+  NUDGE_DAY: '4'                       # second and final mail on TARGET+3
+  TO: suhaibrajabo@gmail.com
+  DUNS: '561683753'
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Is it time?
+        id: when
+        run: |
+          set -euo pipefail
+          DAY=$(( ( $(date -u +%s) - $(date -u -d "$TARGET" +%s) ) / 86400 + 1 ))
+          echo "day=$DAY" >> "$GITHUB_OUTPUT"
+          if [ "${{ inputs.send_now }}" = "true" ]; then
+            echo "send=yes" >> "$GITHUB_OUTPUT"
+          elif [ "$DAY" = "1" ] || [ "$DAY" = "$NUDGE_DAY" ]; then
+            echo "send=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "send=no" >> "$GITHUB_OUTPUT"
+            if [ "$DAY" -lt 1 ]; then
+              echo "::notice ::$(( 1 - DAY )) day(s) until the D-U-N-S is usable ($TARGET). Nothing to send."
+            else
+              echo "::notice ::Day $DAY, past the reminder window. This workflow is finished and can be deleted."
+            fi
+          fi
+
+      - name: Email the reminder
+        if: steps.when.outputs.send == 'yes'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DAY: ${{ steps.when.outputs.day }}
+        run: |
+          set -euo pipefail
+          [ -n "$RESEND_API_KEY" ] || { echo "::error ::RESEND_API_KEY missing"; exit 1; }
+
+          if [ "$DAY" = "1" ]; then
+            SUBJ="Your D-U-N-S number is live today, Apple enrolment can start"
+            LEDE="Today is the day D&B said the number becomes usable. Apple's lookup should now find it."
+          else
+            SUBJ="Reminder: Apple Developer enrolment is unblocked"
+            LEDE="Following up on the mail from three days ago, in case it got buried. Nothing else in the launch is waiting on anything but this."
+          fi
+
+          TEXT=$(cat <<TEXTEOF
+          $LEDE
+
+          D-U-N-S number:  $DUNS
+          Legal entity:    RAL SOFTWARE SERVICES, Al Mazrowiah, Bahrain
+          Issued:          13 September 2026
+          Usable from:     21 September 2026
+
+          What to do now
+
+          1. Enrol in the Apple Developer Program, 99 USD a year, as an
+             Organization, at developer.apple.com/programs/enroll/
+             Use the company Apple Account created on 7 September. Whichever
+             account enrols permanently owns the app listing.
+          2. Sign the Paid Apps Agreement, then add the bank details and the
+             W-8BEN tax form in App Store Connect.
+          3. Reserve the app name: Letterlock: Party Quiz
+
+          One decision first
+
+          The name on the D-U-N-S record is RAL SOFTWARE SERVICES, not RAL
+          Technologies. Apple and Google both print the D-U-N-S entity name as
+          the public developer name on the store listing, so that is what
+          players will see under the app. Changing it means updating the D&B
+          record before you enrol, which takes up to five more business days
+          and needs two supporting documents. Accepting it costs nothing and
+          you can start today.
+
+          Still open, and none of it needs Apple
+
+          - Google Play Console, 25 USD once, as an Organization
+          - AdMob account
+          - RevenueCat account
+          - Sentry project, free
+          - Codemagic signup, free, so the iOS build can be proven
+          - Review the charades images in docs/charades-review/index.html
+
+          The full picture is in docs/ACCOUNTS.md and LAUNCH_PLAN.md in the
+          letterlock repo.
+
+          Sent by .github/workflows/duns-reminder.yml. It sends this once today,
+          once more in three days, then stops by itself.
+          TEXTEOF
+          )
+          TEXT=$(printf %s "$TEXT" | sed -e 's/^          //')
+          PAYLOAD=$(jq -cn --arg to "$TO" --arg s "$SUBJ" --arg t "$TEXT" --arg r "$(uuidgen)" \
+            '{from:"Letterlock server <ops@mail.raltech.dev>", to:[$to], subject:$s, text:$t,
+              reply_to:"suhaibrajabo@gmail.com", headers:{"X-Entity-Ref-ID":$r}}')
+          CODE=$(curl -sS -o /tmp/r.json -w '%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" -H 'Content-Type: application/json' --data "$PAYLOAD")
+          cat /tmp/r.json; echo
+          [ "$CODE" = "200" ] || { echo "::error ::Resend HTTP $CODE"; exit 1; }
+          echo "::notice ::Sent the day-$DAY D-U-N-S reminder to $TO"
