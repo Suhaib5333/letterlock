@@ -239,8 +239,14 @@ B9 (off-box backups: Backblaze B2 `letterlock-backups` via rclone, key in gitign
 and never a CI secret, rolling 30 days off-box + 14 local, `backup-watch.yml` emails day 1/7/31).
 Detail in `HISTORY.md` and `docs/ACCOUNTS.md`.
 
+> ⚠️ **B7 and B8 are NOT quick wins.** A Team ID only exists once the $99 Apple
+> enrolment completes, and the Play app-signing SHA-256 only exists once an app is
+> created in Play Console. Both therefore sit behind B3 and the 21 September
+> D-U-N-S date, not behind five minutes of copy-paste.
+
 | # | What | Exact steps | Blocks |
 |---|---|---|---|
+| B16 | **AdSense review** (waiting, nothing to do) | Applied 2026-09-15 18:37 for the site **`raltech.dev`** (AdSense only accepts root domains; the subdomain is covered by it). Google says a few days, up to 2-4 weeks. Everything it checks is already live and verified in a real browser: the tag on `letterlock.raltech.dev`, the ownership meta tag on both hosts, `raltech.dev/ads.txt` with the `subdomain=` directive, and NO ad script on the root site. While waiting: never click our own ads (same publisher id as AdMob, so it risks both), and do not edit either `ads.txt`. If it is rejected, the email names the reason. | Phase 8 web ads serving |
 | B3 | **Phase 0 paperwork** (in progress) | ✅ Company Apple Account created + verified 2026-09-07 (browser-only, never signed into a phone's iCloud; whichever account enrols permanently owns the listing). ✅ D-U-N-S `561683753` (`RAL SOFTWARE SERVICES`, Bahrain), **usable from 2026-09-21**. ⏳ Still open: Google Play Console ($25, Organization + merchant), RevenueCat, the Google OAuth consent screen, reserving the name in App Store Connect, and the $99/yr Apple Developer Organization enrolment once the D-U-N-S is live. LAUNCH_PLAN §3 Phase 0; every outstanding identifier is in `docs/ACCOUNTS.md`. | Phases 4, 5, 6 going live (the code is already written) |
 | B4 | **`VITE_APPLE_SERVICES_ID`** | Apple Developer → Identifiers → Services IDs; return URL `https://letterlock.raltech.dev/auth/callback`. Empty today, which correctly hides the web Sign-in-with-Apple button. | Apple 4.8 compliance at submission |
 | B6 | **RevenueCat public keys** | Set `VITE_REVENUECAT_IOS_KEY` and `VITE_REVENUECAT_ANDROID_KEY` (RevenueCat → Project → API keys, the *public* SDK keys). Empty today, so the Remove Ads purchase path is inert. | Phase 5 Remove Ads working on a device |
