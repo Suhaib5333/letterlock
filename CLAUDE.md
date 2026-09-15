@@ -248,6 +248,21 @@ Detail in `HISTORY.md` and `docs/ACCOUNTS.md`.
 |---|---|---|---|
 | B16 | **AdSense review** (waiting, nothing to do) | Applied 2026-09-15 18:37 for the site **`raltech.dev`** (AdSense only accepts root domains; the subdomain is covered by it). Google says a few days, up to 2-4 weeks. Everything it checks is already live and verified in a real browser: the tag on `letterlock.raltech.dev`, the ownership meta tag on both hosts, `raltech.dev/ads.txt` with the `subdomain=` directive, and NO ad script on the root site. While waiting: never click our own ads (same publisher id as AdMob, so it risks both), and do not edit either `ads.txt`. If it is rejected, the email names the reason. | Phase 8 web ads serving |
 | B17 | **H5 Games Ads application** (waits on B16) | Confirmed 2026-09-15: H5 Games Ads is a **by-application** product, separate from the site review, and the form requires an already-approved AdSense account. So the order is B16 approves → apply at https://developers.google.com/ad-placement/docs/signup → Google reviews and emails next steps → only THEN does `adBreak()` serve. Nothing to do until the B16 email lands. **Auto ads stays OFF**: the Ad Placement API is independent of it, and Auto ads would inject display banners into a full-screen no-scroll board and break the layout the device-matrix tests enforce. | `adBreak()` actually serving on web |
+> 📌 **Confirmed 2026-09-15, two findings that shape the launch timeline:**
+> ① **Play's 12-tester / 14-day closed-testing rule does NOT apply to us.** It hits personal
+> accounts created after 2023-11-13; **Organization accounts verified with a D-U-N-S are exempt
+> entirely.** That saves a fortnight, so B3 must be completed as **Organization**, never Personal,
+> and the choice is painful to change afterwards.
+> ② **The D-U-N-S date is the start of the clock, not the end.** After 21 Sep the chain is: apply
+> (1 hr) → **Apple verifies the entity, days to ~2 weeks, sometimes by phone call to the number on
+> the D-U-N-S record** → Google verifies the org (days) → store setup, which unblocks B4/B7/B8 at
+> once (1 day) → signed builds (0.5 day) → review (Apple 1-3 days, Play first app up to 7, plus a
+> separate Android TV track review). Realistic live date: **mid-to-late October**.
+> The RevenueCat **In-App Purchase .p8 key is REQUIRED**, not optional, because
+> `@revenuecat/purchases-capacitor` 13.5.0 runs StoreKit 2; it comes from App Store Connect →
+> Users and Access → Integrations → In-App Purchase, downloads once, and is a secret for
+> gitignored `infra/`, never a commit or a chat paste.
+
 | B3 | **Phase 0 paperwork** (in progress) | ✅ Company Apple Account created + verified 2026-09-07 (browser-only, never signed into a phone's iCloud; whichever account enrols permanently owns the listing). ✅ D-U-N-S `561683753` (`RAL SOFTWARE SERVICES`, Bahrain), **usable from 2026-09-21**. ⏳ Still open: Google Play Console ($25, Organization + merchant), RevenueCat, the Google OAuth consent screen, reserving the name in App Store Connect, and the $99/yr Apple Developer Organization enrolment once the D-U-N-S is live. LAUNCH_PLAN §3 Phase 0; every outstanding identifier is in `docs/ACCOUNTS.md`. | Phases 4, 5, 6 going live (the code is already written) |
 | B4 | **`VITE_APPLE_SERVICES_ID`** | Apple Developer → Identifiers → Services IDs; return URL `https://letterlock.raltech.dev/auth/callback`. Empty today, which correctly hides the web Sign-in-with-Apple button. | Apple 4.8 compliance at submission |
 | B6 | **RevenueCat public keys** | Set `VITE_REVENUECAT_IOS_KEY` and `VITE_REVENUECAT_ANDROID_KEY` (RevenueCat → Project → API keys, the *public* SDK keys). Empty today, so the Remove Ads purchase path is inert. | Phase 5 Remove Ads working on a device |
