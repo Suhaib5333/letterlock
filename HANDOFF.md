@@ -6,7 +6,8 @@
 >
 > **Companion docs (read these too):** `TECH.md` = the exhaustive "everything" reference (every
 > technology, decision, media source + how it's fetched/verified, and a full change log);
-> `AGENTS.md` = the standing workflow + verification toolchain; `CLAUDE.md` = master plan + dated
+> `AGENTS.md` = the standing workflow + verification toolchain; `CLAUDE.md` = standing rules + blocked list (the plan is
+> `LETTERLOCK_MASTER_PLAN.md`, the build log is `HISTORY.md`) + dated
 > build log (PART II rounds 1–9); `QUESTION_AUTHORING.md` = content rules; `DEFERRED.md` = blocked
 > work. If anything below conflicts with `TECH.md`/`CLAUDE.md`, those are newer — trust them.
 
@@ -142,7 +143,7 @@ public/flags/ bundled flag SVGs.  public/clips/ synth melody WAVs.
 scripts/ noscroll.mjs (layout checker), checkmedia.mjs (media reachability), audit.mjs/measure.mjs/diag.mjs/verify_*.mjs (Playwright visual checks),
          genmovies.mjs (iTunes TV clips), gensongs.mjs (iTunes songs), genmelodies_itunes.mjs (iTunes themes), genlogos.mjs, genflags.mjs, genclips.mjs (content generators)
 tests-e2e/ game.spec.ts (Playwright, 18 tests × desktop+mobile = 36)
-TECH.md  ⭐ everything reference   CLAUDE.md  master plan + build log   AGENTS.md  workflow   QUESTION_AUTHORING.md   DEFERRED.md   README.md
+TECH.md  ⭐ everything reference   CLAUDE.md  standing rules + blocked list   LETTERLOCK_MASTER_PLAN.md  the plan §0-18   HISTORY.md  build log (rounds 1-32)   AGENTS.md  workflow   QUESTION_AUTHORING.md   DEFERRED.md   README.md
 ```
 
 ---
@@ -246,7 +247,7 @@ is placed under the letter its **answer's first letter** dictates (A–Z). Conse
 
 - **Web (React) instead of Flutter** (the original `CLAUDE.md` plan specified Flutter): chosen so
   the SVG/DOM UI is Playwright-inspectable and deployable as a PWA today. The pure `src/core/` is a
-  1:1 spec to port to Dart if ever needed. Documented in `CLAUDE.md` PART II.
+  1:1 spec to port to Dart if ever needed. Documented in `CLAUDE.md` II.0.
 - **External media dependencies (need internet):** logos = `cdn.simpleicons.org`; songs, melodies
   (partly), TV clips = iTunes preview CDN; charades = loremflickr (degrade gracefully on error).
   Flags are **bundled locally** in `/public/flags` (flagcdn is blocked on some networks); synth

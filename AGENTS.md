@@ -3,14 +3,16 @@
 **Read this first.** It captures how this repo actually works, the tools we use, how/when
 to use them, and the standing rules — so you don't need fresh instructions each session.
 Companion docs: `TECH.md` (the "everything" reference — every technology, decision, media source &
-change log), `CLAUDE.md` (full plan + build log), `QUESTION_AUTHORING.md` (content rules),
+change log), `CLAUDE.md` (standing rules, blocked list, latest round), `LETTERLOCK_MASTER_PLAN.md` (the
+full plan §0-18), `HISTORY.md` (the round-by-round build log, rounds 1-32),
+`QUESTION_AUTHORING.md` (content rules),
 `DEFERRED.md` (blocked work + what unblocks it), `HANDOFF.md` (quick orientation).
 **`LAUNCH_PLAN.md`** = the App Store / Play Store launch plan (Capacitor, VPS migration, ads, Remove-Ads purchase, copyright verdicts): read it before any store/monetization/VPS work.
 
 ---
 
 ## 1. What this is (stack & deploy reality)
-- **React 18 + TypeScript + Vite** SPA (NOT Flutter — see `CLAUDE.md` PART II for why). Pure
+- **React 18 + TypeScript + Vite** SPA (NOT Flutter — see `CLAUDE.md` II.0 for why). Pure
   rules engine in `src/core/` (zero React), UI in `src/components` + `src/screens`, state in
   `src/state` (useReducer + context), content in `src/content`, styles in `src/app/app.css`.
 - **Deploy = Cloudflare Pages, auto-deploy on push to `main`.** There is **no VPS step**.
