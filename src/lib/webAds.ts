@@ -1,5 +1,6 @@
 import { adsRemoved } from './entitlements';
 import { isNative, isTV } from './platform';
+import { devSeamsEnabled } from './devSeams';
 
 /**
  * Web ads (LAUNCH_PLAN Phase 8, D12): Google AdSense "H5 Games Ads", the Ad
@@ -31,9 +32,17 @@ function client(): string {
 
 let loaded = false;
 
-/** True when the AdSense H5 tag may be used on this page (build + platform, before the user flags). */
+/**
+ * True when the AdSense H5 tag may be used on this page (build + platform,
+ * before the user flags).
+ *
+ * `!devSeamsEnabled()` keeps the tag off localhost and the Playwright/device-matrix
+ * hosts. That is not just test hygiene: AdSense only serves on the approved domain,
+ * so loading pagead2 on a preview host buys nothing and pulls a slow third-party
+ * script into every e2e run — which is exactly what broke four e2e shards once.
+ */
 export function webAdsConfigured(): boolean {
-  return !!client() && !isNative && typeof document !== 'undefined' && !isTV();
+  return !!client() && !isNative && typeof document !== 'undefined' && !isTV() && !devSeamsEnabled();
 }
 
 export function initWebAds(): void {
