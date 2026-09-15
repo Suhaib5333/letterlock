@@ -1,4 +1,9 @@
-# Letterlock ads.txt (web ads via Google AdSense H5 Games Ads, LAUNCH_PLAN Phase 8).
-# Placeholder until AdSense is approved: AdSense supplies the exact line under
-# AdSense > Sites > ads.txt. It will look like the line below (pub id differs).
-# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+# Letterlock ads.txt: who is authorised to sell ads on this WEBSITE.
+# (app-ads.txt next to it covers the iOS / Android apps; they are separate files.)
+# Must stay reachable at https://letterlock.raltech.dev/ads.txt
+#
+# AdMob and AdSense share ONE publisher id per Google account, so this is the same
+# pub- number as app-ads.txt. Confirm it against AdSense > Sites > ads.txt before
+# trusting it; f08c47fec0942fa0 is Google's certification-authority id and is the
+# same for every Google publisher.
+google.com, pub-7138183978612183, DIRECT, f08c47fec0942fa0
