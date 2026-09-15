@@ -19,6 +19,7 @@ import { ProgressModule } from './progress/progress.module';
 import { PacksModule } from './packs/packs.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { AdminModule } from './admin/admin.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { AppConfigModule } from './config/app-config.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { RealtimeModule } from './realtime/realtime.module';
@@ -54,6 +55,7 @@ if (!existsSync(bundlesDir)) {
     PacksModule,
     RoomsModule,
     AdminModule,
+    AnalyticsModule,
     AppConfigModule,
     WebhooksModule,
     RealtimeModule,

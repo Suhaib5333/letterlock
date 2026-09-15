@@ -3,6 +3,7 @@ import { adBreakForReward, rewardAdAvailable } from '../lib/ads';
 import { useAdsRemoved } from '../lib/entitlements';
 import { play } from '../services/audio';
 import { useStore } from '../state/store';
+import { track } from '../lib/track';
 
 /**
  * "Watch an ad for an extra skip" (LAUNCH_PLAN D4, rewarded placement). Shown
@@ -11,7 +12,7 @@ import { useStore } from '../state/store';
  * owned. The reward is a `GRANT_SKIP` (one skip refunded on the current pick).
  */
 export function ExtraSkipButton({ show }: { show: boolean }) {
-  const { dispatch } = useStore();
+  const { state, dispatch } = useStore();
   const removed = useAdsRemoved();
   const [busy, setBusy] = useState(false);
   if (!show || removed || !rewardAdAvailable()) return null;
@@ -24,7 +25,10 @@ export function ExtraSkipButton({ show }: { show: boolean }) {
         play('tap');
         setBusy(true);
         try {
-          await adBreakForReward(() => dispatch({ type: 'GRANT_SKIP' }));
+          await adBreakForReward(() => {
+            track('extra_skip_used', { packId: state.setup.packId ?? null });
+            dispatch({ type: 'GRANT_SKIP' });
+          });
         } finally {
           setBusy(false);
         }

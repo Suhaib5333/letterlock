@@ -4,6 +4,7 @@ import { type AdUnits, resolveAdUnits } from './adUnits';
 import { adsRemoved, useAdsRemoved } from './entitlements';
 import { isNative, isTV, platform } from './platform';
 import { initWebAds, webAdBreakNext, webAdBreakReward, webRewardAvailable } from './webAds';
+import { track } from './track';
 
 /**
  * Ads (LAUNCH_PLAN Phase 4, D4). One entry point for both platforms:
@@ -228,6 +229,7 @@ export async function adBreakBetweenGames(): Promise<void> {
   lastInterstitialAt = Date.now();
   try {
     await mod.AdMob.showInterstitial();
+    track('ad_served', { format: 'interstitial' });
   } catch {
     /* failed to show: the cap still applies so we do not retry in a loop */
   } finally {
@@ -255,8 +257,10 @@ export async function adBreakForReward(onReward: () => void): Promise<void> {
   }
   if (!mod || !units || !adsEnabled()) return;
   const { AdMob, RewardAdPluginEvents } = mod;
+  track('reward_offered');
   if (!rewardedReady) await prepareRewarded();
   if (!rewardedReady) return;
+  track('reward_started');
   rewardedReady = false;
   await new Promise<void>((resolve) => {
     const handles: Promise<{ remove: () => Promise<void> }>[] = [];
@@ -270,7 +274,7 @@ export async function adBreakForReward(onReward: () => void): Promise<void> {
     };
     // A rewarded video is at most ~60 s; the timeout only guards a lost event.
     const timer = setTimeout(finish, 3 * 60_000);
-    handles.push(AdMob.addListener(RewardAdPluginEvents.Rewarded, () => onReward()));
+    handles.push(AdMob.addListener(RewardAdPluginEvents.Rewarded, () => { track('reward_completed'); onReward(); }));
     handles.push(AdMob.addListener(RewardAdPluginEvents.Dismissed, finish));
     handles.push(AdMob.addListener(RewardAdPluginEvents.FailedToShow, finish));
     AdMob.showRewardVideoAd().catch(finish);

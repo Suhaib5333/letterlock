@@ -1,6 +1,7 @@
 import type { CustomerInfo, PurchasesPackage } from '@revenuecat/purchases-capacitor';
 import { adsRemoved, setAdsRemoved } from './entitlements';
 import { isNative, platform } from './platform';
+import { track } from './track';
 
 /**
  * Remove Ads purchase (LAUNCH_PLAN Phase 5, §7, §8) through RevenueCat.
@@ -116,9 +117,13 @@ export async function buyRemoveAds(): Promise<PurchaseOutcome> {
   try {
     const { customerInfo } = await mod.Purchases.purchasePackage({ aPackage: offer.pkg });
     applyCustomerInfo(customerInfo);
-    return adsRemoved() ? 'purchased' : 'failed';
+    const outcome = adsRemoved() ? 'purchased' : 'failed';
+    track('purchase', { product: 'remove_ads', outcome });
+    return outcome;
   } catch (e) {
-    return userCancelled(e) ? 'cancelled' : 'failed';
+    const outcome = userCancelled(e) ? 'cancelled' : 'failed';
+    track('purchase', { product: 'remove_ads', outcome });
+    return outcome;
   }
 }
 
@@ -129,6 +134,7 @@ export async function restorePurchases(): Promise<boolean> {
   try {
     const { customerInfo } = await mod.Purchases.restorePurchases();
     applyCustomerInfo(customerInfo);
+    track('purchase_restored', { granted: adsRemoved() });
     return adsRemoved();
   } catch {
     return false;

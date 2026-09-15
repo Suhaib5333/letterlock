@@ -18,6 +18,7 @@ import './app/lobby.css';
 import './app/admin.css';
 import './app/mobile.css';
 import './tv.css';
+import { track } from './lib/track';
 
 // TV / remote control (LAUNCH_PLAN Phase 3b): arrows move focus, Back closes the
 // top-most dialog; the 10-foot styles in tv.css apply only under html.tv-mode.
@@ -88,3 +89,5 @@ if (isNative) {
 } else {
   boot();
 }
+
+track('session_start');

@@ -277,15 +277,14 @@ is placed under the letter its **answer's first letter** dictates (A–Z). Conse
      SUCCESS tokens, so the failure was swallowed → looked like a silent refresh. `lib/auth.tsx`
      now captures the hash at module load, surfaces it in the auth dialog, and scrubs the URL.
      Covered by `tests-e2e/oauth-error.spec.ts` (watched failing on old code first).
-   - *Backend (NOT fixed here — needs dashboard/creds):* the exchange itself is failing. The
-     `/auth/v1/authorize?provider=google` endpoint DOES 302 to Google with a real client_id, so the
-     provider is enabled; the failure is at the callback code-exchange. Check, in order:
-     (a) Google Cloud console OAuth client "Authorized redirect URIs" includes
-     `https://lkudntyvngwwlzuciocd.supabase.co/auth/v1/callback`;
-     (b) the Client Secret in Supabase → Auth → Providers → Google matches the current Google secret;
-     (c) the OAuth consent screen is **Published**, not stuck in "Testing" (test-mode blocks
-     non-allowlisted Google accounts). Read the exact error via Management API auth_logs:
-     `GET /v1/projects/lkudntyvngwwlzuciocd/analytics/endpoints/logs` with SUPABASE_ACCESS_TOKEN.
+   - *Backend: superseded.* Those steps debugged the retired Supabase project
+     (`lkudntyvngwwlzuciocd`). We moved off Supabase onto our own API on 2026-09-07, so
+     Google sign-in is now our `/auth/google` route and any future failure is debugged
+     against the VPS API logs, not a Supabase dashboard.
+7. **Phase 7b analytics (2026-09-15):** `POST /events` ingests batched client events and
+   `GET /admin/analytics` reports counts, daily actives and D1/D7/D30. Client emitter is
+   `src/lib/track.ts`. Still open: the `/admin` UI page for the report (D17 decides the
+   exact report list).
 
 ## 10. Conventions checklist before every push
 - [ ] `npx tsc -b` clean

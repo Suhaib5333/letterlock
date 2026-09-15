@@ -108,6 +108,31 @@ round starts.
 - 💳 **B15 opened** — the AdMob payments profile, 50% by design; see the blocked list.
 - ✅ Verified this round: **1129 unit/content tests**, and the CI gate opened per rule 3 rather than trusted from its tick — run 34876855148 ran **19 jobs, all green**: static gates, the API suite on a real Postgres, 10 e2e shards and 4 device-matrix shards. `app-ads.txt` confirmed live on the real domain.
 
+
+### Round 34 — Phase 7b analytics shipped, the doc split committed (2026-09-15)
+
+- 📉 **CLAUDE.md 154.1k → 22.2k chars.** The build log moved verbatim to `HISTORY.md`; the
+  trim existed on disk but had never been committed, which is why every reader still saw
+  154.1k. Verified lossless: all 107 headings survive, and every closed-blocker detail was
+  found again in `HISTORY.md` / `LAUNCH_PLAN.md` / `docs/ACCOUNTS.md`.
+- ✅ **Phase 3b (TV) was already done** and this file's board was wrong to call it open:
+  `AndroidManifest.xml` carries leanback + `android:required="false"` touchscreen,
+  `src/lib/spatialNav.ts` (268 lines) drives D-pad focus, `tests-e2e/tv-mode.spec.ts` covers it.
+- 📈 **Phase 7b analytics built** — our own, no third-party SDK, so no extra consent
+  disclosure and no extra store privacy label. `apps/api/src/analytics/analytics.module.ts`
+  is one file: `POST /events` (public, batched, max 50, anon install id, optional user id)
+  and `GET /admin/analytics?days=N` returning per-name counts, daily actives and D1/D7/D30
+  retention off each install's first-seen day. Prisma model `Event` is deliberately
+  **FK-free** so QA cleanup and account deletion never rewrite history; migration
+  `0002_events`. Client emitter `src/lib/track.ts` buffers 5s and flushes with `keepalive`
+  on `pagehide`, and is a no-op when `VITE_API_URL` is unset. Instrumented: `session_start`,
+  `ad_served`, `reward_offered` / `reward_started` / `reward_completed`, `extra_skip_used`
+  (with `packId`), `purchase`, `purchase_restored`.
+- ⏳ **What 7b still lacks:** the `/admin` UI page for the report. The endpoint is the data;
+  D17 still decides the exact report list, so building the page first would be guesswork.
+- 🧾 `HANDOFF.md` §9 item 6's backend half was superseded — it debugged the retired Supabase
+  project, which we left on 2026-09-07.
+
 ---
 
 # 🚦 Working rules (Suhaib, 2026-09-05) — READ EVERY SESSION

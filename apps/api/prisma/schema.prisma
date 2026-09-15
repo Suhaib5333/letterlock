@@ -225,3 +225,20 @@ model AppConfig {
 
   @@map("app_config")
 }
+
+/// Phase 7b analytics. Deliberately FK-free: events outlive the account they
+/// came from, so QA cleanup / account deletion never rewrites history.
+/// ponytail: one wide table, no per-metric tables. Add a rollup only if a
+/// report gets slow enough to measure.
+model Event {
+  id     BigInt   @id @default(autoincrement())
+  name   String   @db.VarChar(40)
+  at     DateTime @default(now()) @map("at") @db.Timestamptz(6)
+  anonId String   @map("anon_id") @db.VarChar(40)
+  userId String?  @map("user_id") @db.Uuid
+  props  Json     @default("{}")
+
+  @@index([name, at])
+  @@index([anonId, at])
+  @@map("events")
+}
