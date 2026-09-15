@@ -210,6 +210,26 @@ Every one is from a mistake made that evening, several of them user-visible.
 > cutover procedure (what "off Supabase" actually required) and the historic "do NOT push `main`
 > before the DNS exists" ordering rule are kept verbatim in `HISTORY.md`.
 
+## 🔧 Open dev work (mine — NOT blocked on Suhaib, keep it current)
+
+Everything in the product is built except these. Audited 2026-09-15 against `LAUNCH_PLAN.md`
+phase by phase, so this is the complete list, not a sample.
+
+| # | What | Why it is not done | Phase | ETA |
+|---|---|---|---|---|
+| D-a | **TV on-screen number pad for the room code** | Phase 3b asks for a remote-friendly alternative to the system on-screen keyboard. A remote-only player CAN join today (the TV keyboard opens on focus), so this is comfort, not a blocker. | 3b | 0.5d |
+| D-b | **`/admin` analytics UI page** | The `GET /admin/analytics` endpoint is live and is the data. **D17 has not decided the report list**, so building the page first is guesswork. | 7b | 1d |
+| D-c | **TV 1920×1080 store screenshots** | `scripts/storeshots.mjs` exists but has no TV profile. Only needed at submission, and the Play account does not exist yet (B3). | 6 | 0.5d |
+| D-d | **Web → app funnel popup** | Deliberately gated: it can only switch on after BOTH stores approve, or it points players at links that 404. | 6b | 0.5d |
+| D-e | **Web ads (AdSense H5)** | Deliberately last: AdSense wants the finished, live site, and a rejection is easier to fix once. | 8 | 2d + approval |
+| D-f | **Deeper factual pass on Genius (Extreme) / Hard / `*Extra2` packs** | Mechanically tested and leak-guarded, but not 100% human-fact-checked. Must be Opus per `CONTENT_QUEUE.md` — a cheap model already cost a million tokens here once. | content | 2d |
+| D-g | **`HANDOFF.md` §7 inventory is stale** | It stops at rounds 8-9 and predates accounts, online play, ads, purchases and the VPS backend. | doc | 15m |
+
+Nothing else is outstanding: accounts, friends, leaderboard, XP/prestige, online rooms, saves,
+OTA, crash reporting, AdMob, Remove Ads, entitlements, admin panel, pack editor, backups,
+privacy/terms pages, account deletion, deep-link files, analytics ingest + report, and the
+Android/iOS Capacitor projects are all built and covered by CI.
+
 ## 🚧 Blocked on Suhaib (living list — keep it current)
 
 ✅ **Closed:** B1 + B1b (Cloudflare DNS for the VPS backend, and the apex repointed to it — verified
