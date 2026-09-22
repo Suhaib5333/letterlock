@@ -73,9 +73,16 @@ jobs:
             done
             return 1
           }
-          retry 'tail -8 /opt/letterlock/backups/backup.log' > log.txt || echo "SSH FAILED" > log.txt
-          retry 'rclone lsl letterlock-backup:letterlock-backups' > objects.txt || true
-          retry 'rclone backend lifecycle letterlock-backup:letterlock-backups' > lifecycle.txt || true
+          # If the box is unreachable, stop retrying after the first probe: three full
+          # retry loops overran the 15-minute job timeout on 2026-09-22, so the job was
+          # cancelled before the alert step and an outage produced NO email.
+          : > objects.txt; : > lifecycle.txt
+          if retry 'tail -8 /opt/letterlock/backups/backup.log' > log.txt; then
+            retry 'rclone lsl letterlock-backup:letterlock-backups' > objects.txt || true
+            retry 'rclone backend lifecycle letterlock-backup:letterlock-backups' > lifecycle.txt || true
+          else
+            echo "SSH FAILED: the VPS was unreachable from GitHub for ~7 minutes" > log.txt
+          fi
           echo "--- log ---"; cat log.txt
           echo "--- objects ---"; cat objects.txt
           echo "--- lifecycle ---"; cat lifecycle.txt
