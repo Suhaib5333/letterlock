@@ -101,7 +101,7 @@ the only thing that can be submitted today is the tax form. That is not a miscon
 | Step | What to enter | Watch out for |
 |---|---|---|
 | ~~1. Payments profile~~ | ✅ **Done 2026-09-14**: Organization, RAL SOFTWARE SERVICES, CR address | The name must match the bank account **exactly** when that is added later |
-| 2. Tax info | Google collects US tax info from every publisher. A Bahraini company files a **W-8BEN-E** (the entity form, not the individual W-8BEN) | Bahrain has no US tax treaty, so claim no treaty benefit; AdMob revenue earned outside the US is not withheld |
+| 2. Tax info | Google collects US tax info from every publisher. RAL SOFTWARE SERVICES is a **sole proprietorship** (confirmed by Suhaib 2026-09-24), which US tax law does not treat as a separate entity, so file the individual **W-8BEN** in Suhaib's own name, not the entity W-8BEN-E | Bahrain has no US tax treaty, so claim no treaty benefit; AdMob revenue earned outside the US is not withheld |
 | 3. Payment method | ⏳ **Cannot be entered yet** — the fields appear once earnings reach the threshold. Then: wire transfer, USD, IBAN + SWIFT/BIC | Account holder name must equal the profile name |
 | 4. Verification | Google may ask for the CR certificate, and posts an address PIN once earnings reach $10 | The PIN arrives by post and can take weeks, so trigger it early |
 | 5. Threshold | $100, paid around the 21st of the following month | |
